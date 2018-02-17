@@ -217,6 +217,7 @@ class daeComputeStackGraph(object):
         rvalue = []
         value  = []
         for item in computeStackItems:
+            print(item)
             if item.opCode == eOP_Constant:
                 label = '%.6e' % item.value
                 child = self._addNode(label, color='darkorchid', fontcolor='darkorchid')
@@ -259,18 +260,25 @@ class daeComputeStackGraph(object):
                 self.graph.add_edge(child, l_node, color = 'gray50')
                 self.graph.add_edge(child, r_node, color = 'gray50')
 
+            elif item.opCode == eOP_DegreeOfFreedom:
+                if hasattr(item, 'variableName') and item.variableName != '':
+                    label = '%s(overallIndex=%d, dofIndex=%d)' % (item.variableName, item.overallIndex, item.blockIndex)
+                else:
+                    label = 'var(overallIndex=%d, dofIndex=%d)' % (item.overallIndex, item.blockIndex)
+                child = self._addNode(label, color='blue', fontcolor='blue')
+
             elif item.opCode == eOP_Variable:
                 if hasattr(item, 'variableName') and item.variableName != '':
-                    label = '%s(oi=%d,bi=%d)' % (item.variableName, item.overallIndex, item.blockIndex)
+                    label = '%s(overallIndex=%d, blockIndex=%d)' % (item.variableName, item.overallIndex, item.blockIndex)
                 else:
-                    label = 'var(oi=%d,bi=%d)' % (item.overallIndex, item.blockIndex)
+                    label = 'var(overallIndex=%d, blockIndex=%d)' % (item.overallIndex, item.blockIndex)
                 child = self._addNode(label, color='blue', fontcolor='blue')
 
             elif item.opCode == eOP_TimeDerivative:
                 if hasattr(item, 'variableName') and item.variableName != '':
-                    label = 'dt(%s){oi=%d,bi=%d}' % (item.variableName, item.overallIndex, item.blockIndex)
+                    label = 'dt(%s){overallIndex=%d, blockIndex=%d}' % (item.variableName, item.overallIndex, item.blockIndex)
                 else:
-                    label = 'dt{oi=%d,bi=%d}' % (item.overallIndex, item.blockIndex)
+                    label = 'dt{overallIndex=%d, blockIndex=%d}' % (item.overallIndex, item.blockIndex)
                 child = self._addNode(label, color='red', fontcolor='red')
                     
             else:

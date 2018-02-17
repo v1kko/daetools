@@ -329,7 +329,7 @@ def run(**kwargs):
     fontsize = 14
     fontsize_legend = 11
     fig = plt.figure(figsize=(10,4), facecolor='white')
-    fig.canvas.set_window_title('The Normalised global errors and the Orders of accuracy (Nelems = %s)' % Nxs.tolist())
+    fig.canvas.set_window_title('The Normalised global errors and the Orders of accuracy (Nelems = %s) (cv_10)' % Nxs.tolist())
     
     ax = plt.subplot(121)
     plt.figure(1, facecolor='white')

@@ -2,6 +2,7 @@
 #include "coreimpl.h"
 #include "../IDAS_DAESolver/dae_array_matrix.h"
 #include <omp.h>
+#include "compute_stack_kernels_openmp.h"
 
 namespace dae
 {
@@ -22,18 +23,18 @@ daeBlock::daeBlock(void)
     m_nTotalNumberOfVariables           = 0;
     m_nCurrentVariableIndexForJacobianEvaluation = ULONG_MAX;
 
+    m_nNuberOfResidualsCalls            = 0;
+    m_nNuberOfJacobianCalls             = 0;
+    m_nNuberOfSensitivityResidualsCalls = 0;
     m_dTotalTimeForResiduals            = 0;
     m_dTotalTimeForJacobian             = 0;
     m_dTotalTimeForSensitivityResiduals = 0;
 
-    daeConfig& cfg = daeGetConfig();
-
-    m_bUseOpenMP      = cfg.GetBoolean("daetools.core.equations.parallelEvaluation", false);
-    m_omp_num_threads = cfg.GetInteger("daetools.core.equations.numThreads", 0);
-    if(m_omp_num_threads > 0)
-        omp_set_num_threads(m_omp_num_threads);
+    m_omp_num_threads = 0;
+    m_computeStackEvaluator = NULL; //CreateComputeStackEvaluator();
 
 /*
+    daeConfig& cfg = daeGetConfig();
     m_omp_schedule           = cfg.GetString ("daetools.core.equations.schedule",         "default");
     m_omp_shedule_chunk_size = cfg.GetInteger("daetools.core.equations.scheduleChunkSize", 0);
     // If the schedule in the config file is 'default' then it is left to the implementation default
@@ -57,6 +58,8 @@ daeBlock::daeBlock(void)
 
 daeBlock::~daeBlock(void)
 {
+    // External library should delete the object.
+    m_computeStackEvaluator = NULL;
 }
 
 void daeBlock::Open(io::xmlTag_t* pTag)
@@ -67,6 +70,20 @@ void daeBlock::Open(io::xmlTag_t* pTag)
 void daeBlock::Save(io::xmlTag_t* pTag) const
 {
     io::daeSerializable::Save(pTag);
+}
+
+void daeBlock::SetComputeStackEvaluator(adComputeStackEvaluator_t* computeStackEvaluator)
+{
+    if(computeStackEvaluator)
+    {
+        m_pDataProxy->SetEvaluationMode(eComputeStack_External);
+        m_computeStackEvaluator = computeStackEvaluator;
+    }
+}
+
+adComputeStackEvaluator_t* daeBlock::GetComputeStackEvaluator()
+{
+    return m_computeStackEvaluator;
 }
 
 void daeBlock::CalculateConditions(real_t				dTime,
@@ -102,6 +119,9 @@ void daeBlock::CalculateResiduals(real_t			dTime,
                                   daeArray<real_t>& arrResiduals,
                                   daeArray<real_t>& arrTimeDerivatives)
 {
+    m_nNuberOfResidualsCalls++;
+    double startTime = omp_get_wtime();
+
     if(m_pDataProxy->PrintInfo())
         m_pDataProxy->LogMessage(string("Calculate residuals at time ") + toStringFormatted(dTime, -1, 15) + string("..."), 0);
 
@@ -112,43 +132,75 @@ void daeBlock::CalculateResiduals(real_t			dTime,
     SetResidualArray(&arrResiduals);
     SetInverseTimeStep(0.0);
 
-    if(m_pDataProxy->GetEvaluationMode() == eUseComputeStack)
-    {
-        computestack::daeComputeStackEvaluationContext_t EC;
-        EC.equationCalculationMode                       = eCalculate;
-        EC.currentParameterIndexForSensitivityEvaluation = -1;
-        EC.currentVariableIndexForJacobianEvaluation     = -1;
-        EC.numberOfVariables                             = m_nNumberOfEquations;
-        EC.valuesStackSize  = 5;
-        EC.lvaluesStackSize = 20;
-        EC.rvaluesStackSize = 5;
-        EC.currentTime     = dTime;
-        EC.inverseTimeStep = 0; // Should not be needed here. Double check...
+    // Update equations if necessary (in general, applicable only to FE equations)
+    daeModel* pTopLevelModel = dynamic_cast<daeModel*>(m_pDataProxy->GetTopLevelModel());
+    pTopLevelModel->UpdateEquations();
 
+    // Calls PyEval_InitThreads and PyEval_SaveThread in the constructor, and PyEval_RestoreThread in the destructor
+    boost::shared_ptr<daeAllowThreads_t> _allowThreads_ = pTopLevelModel->CreateAllowThreads();
+
+    if(m_pDataProxy->GetEvaluationMode() == eComputeStack_OpenMP ||
+       m_pDataProxy->GetEvaluationMode() == eComputeStack_External)
+    {
         const std::vector<real_t>& arrDOFs = m_pDataProxy->GetAssignedVarsValues();
 
-        const adComputeStackItem_t* computeStacks            = &m_arrAllComputeStacks[0];
-        const uint32_t*             activeEquationSetIndexes = &m_arrActiveEquationSetIndexes[0];
+        adComputeStackItem_t* computeStacks            = &m_arrAllComputeStacks[0];
+        uint32_t*             activeEquationSetIndexes = &m_arrActiveEquationSetIndexes[0];
 
-        const real_t* dofs            = (arrDOFs.size() > 0 ? &arrDOFs[0] : NULL);
-        const real_t* values          = arrValues.Data();
-        const real_t* timeDerivatives = arrTimeDerivatives.Data();
-              real_t* residuals       = arrResiduals.Data();
+        real_t* dofs            = (arrDOFs.size() > 0 ? const_cast<real_t*>(&arrDOFs[0]) : NULL);
+        real_t* values          = arrValues.Data();
+        real_t* timeDerivatives = arrTimeDerivatives.Data();
+        real_t* residuals       = arrResiduals.Data();
 
-        #pragma omp parallel for firstprivate(EC) if(m_bUseOpenMP)
-        for(uint32_t ei = 0; ei < m_nNumberOfEquations; ei++)
+        computestack::daeComputeStackEvaluationContext_t EC;
+        EC.equationCalculationMode                       = eCalculate;
+        EC.sensitivityParameterIndex                     = -1;
+        EC.jacobianIndex                                 = -1;
+        EC.numberOfVariables                             = m_nNumberOfEquations;
+        EC.numberOfEquations                             = m_nNumberOfEquations; // Always total number (multi-device evaluators will adjust it if required)
+        EC.numberOfDOFs                                  = arrDOFs.size();
+        EC.numberOfComputeStackItems                     = m_arrAllComputeStacks.size();
+        EC.numberOfJacobianItems                         = 0;
+        EC.valuesStackSize                               = 5;
+        EC.lvaluesStackSize                              = 20;
+        EC.rvaluesStackSize                              = 5;
+        EC.currentTime                                   = dTime;
+        EC.inverseTimeStep                               = 0; // Should not be needed here. Double check...
+        EC.startEquationIndex                            = 0; // Always 0 (multi-device evaluators will adjust it if required)
+        EC.startJacobianIndex                            = 0; // Always 0 (multi-device evaluators will adjust it if required)
+
+        if(m_pDataProxy->GetEvaluationMode() == eComputeStack_OpenMP)
         {
-            calculate_cs_residual(computeStacks,
-                                  ei,
-                                  activeEquationSetIndexes,
-                                  EC,
-                                  dofs,
-                                  values,
-                                  timeDerivatives,
-                                  residuals);
+            // Sequential run can be achieved by setting numThreads to 1.
+            if(m_omp_num_threads > 0)
+                omp_set_num_threads(m_omp_num_threads);
+
+            #pragma omp parallel for firstprivate(EC)
+            for(uint32_t ei = 0; ei < m_nNumberOfEquations; ei++)
+            {
+                openmp_evaluator::EvaluateResiduals(computeStacks,
+                                                    ei,
+                                                    activeEquationSetIndexes,
+                                                    EC,
+                                                    dofs,
+                                                    values,
+                                                    timeDerivatives,
+                                                    residuals);
+            }
+        }
+        else if(m_pDataProxy->GetEvaluationMode() == eComputeStack_External)
+        {
+            if(!m_computeStackEvaluator)
+                daeDeclareAndThrowException(exInvalidPointer);
+
+            m_computeStackEvaluator->EvaluateResiduals(EC,
+                                                       dofs,
+                                                       values,
+                                                       timeDerivatives,
+                                                       residuals);
         }
     }
-    else
+    else if(m_pDataProxy->GetEvaluationMode() == eEvaluationTree_OpenMP)
     {
         daeExecutionContext EC;
         EC.m_pBlock						= this;
@@ -157,44 +209,28 @@ void daeBlock::CalculateResiduals(real_t			dTime,
         EC.m_pEquationExecutionInfo		= NULL;
         EC.m_eEquationCalculationMode	= eCalculate;
 
-        daeModel* pTopLevelModel = dynamic_cast<daeModel*>(m_pDataProxy->GetTopLevelModel());
-
-        // Update equations if necessary (in general, applicable only to FE equations)
-        pTopLevelModel->UpdateEquations(&EC);
-
-    // Commented out because of a seg. fault (can't find the reason).
-    //    double startTime, endTime;
-    //    bool bPrintInfo = m_pDataProxy->PrintInfo();
-    //    if(bPrintInfo)
-    //    {
-    //        startTime = dae::GetTimeInSeconds();
-    //    }
-
         if(m_ptrarrEquationExecutionInfos_ActiveSet.empty())
             daeDeclareAndThrowException(exInvalidCall);
 
-        // Calls PyEval_InitThreads and PyEval_SaveThread in the constructor, and PyEval_RestoreThread in the destructor
-        boost::shared_ptr<daeAllowThreads_t> _allowThreads_ = pTopLevelModel->CreateAllowThreads();
-        //std::cout << typeid(*_allowThreads_).name() << std::endl;
-
-        // OpenMP version
         // m_ptrarrEquationExecutionInfos_ActiveSet should be previously updated with the currently active equation set.
-        #pragma omp parallel for firstprivate(EC) if (m_bUseOpenMP)
+        // Sequential run can be achieved by setting numThreads to 1.
+        if(m_omp_num_threads > 0)
+            omp_set_num_threads(m_omp_num_threads);
+
+        #pragma omp parallel for firstprivate(EC)
         for(int i = 0; i < m_ptrarrEquationExecutionInfos_ActiveSet.size(); i++)
         {
             daeEquationExecutionInfo* pEquationExecutionInfo = m_ptrarrEquationExecutionInfos_ActiveSet[i];
             pEquationExecutionInfo->Residual(EC);
         }
     }
+    else
+    {
+        daeDeclareAndThrowException(exNotImplemented);
+    }
 
-// Commented out because of a seg. fault (can't find the reason).
-//    if(bPrintInfo)
-//    {
-//        endTime = dae::GetTimeInSeconds();
-//        m_dTotalTimeForResiduals += (endTime - startTime);
-//        m_pDataProxy->LogMessage(string("Total time for the current residuals evaluation = ") + toStringFormatted(endTime - startTime, -1, 10) + string("s"), 0);
-//        m_pDataProxy->LogMessage(string("Cumulative time for all residuals evaluations = ") + toStringFormatted(m_dTotalTimeForResiduals, -1, 10) + string("s"), 0);
-//    }
+    double endTime = omp_get_wtime();
+    m_dTotalTimeForResiduals += (endTime - startTime);
 }
 
 static void setJacobianMatrixItem(void* matrix, uint32_t row, uint32_t col, real_t value)
@@ -212,6 +248,9 @@ void daeBlock::CalculateJacobian(real_t				dTime,
                                  daeMatrix<real_t>&	matJacobian,
                                  real_t				dInverseTimeStep)
 {
+    m_nNuberOfJacobianCalls++;
+    double startTime = omp_get_wtime();
+
     if(m_pDataProxy->PrintInfo())
         m_pDataProxy->LogMessage(string("Calculate Jacobian at time ") + toStringFormatted(dTime, -1, 15) + string("..."), 0);
 
@@ -223,99 +262,218 @@ void daeBlock::CalculateJacobian(real_t				dTime,
     SetJacobianMatrix(&matJacobian);
     SetInverseTimeStep(dInverseTimeStep);
 
-    if(m_pDataProxy->GetEvaluationMode() == eUseComputeStack)
-    {
-        computestack::daeComputeStackEvaluationContext_t EC;
-        EC.equationCalculationMode                       = eCalculateJacobian;
-        EC.currentParameterIndexForSensitivityEvaluation = -1;
-        EC.currentVariableIndexForJacobianEvaluation     = -1;
-        EC.numberOfVariables                             = m_nNumberOfEquations;
-        EC.valuesStackSize  = 5;
-        EC.lvaluesStackSize = 20;
-        EC.rvaluesStackSize = 5;
-        EC.currentTime     = dTime;
-        EC.inverseTimeStep = dInverseTimeStep;
+    // Update equations if necessary (in general, applicable only to FE equations)
+    daeModel* pTopLevelModel = dynamic_cast<daeModel*>(m_pDataProxy->GetTopLevelModel());
+    pTopLevelModel->UpdateEquations();
 
+    // Calls PyEval_InitThreads and PyEval_SaveThread in the constructor, and PyEval_RestoreThread in the destructor
+    boost::shared_ptr<daeAllowThreads_t> _allowThreads_ = pTopLevelModel->CreateAllowThreads();
+
+    if(m_pDataProxy->GetEvaluationMode() == eComputeStack_OpenMP ||
+       m_pDataProxy->GetEvaluationMode() == eComputeStack_External)
+    {
         const std::vector<real_t>& arrDOFs = m_pDataProxy->GetAssignedVarsValues();
 
-        const adComputeStackItem_t*   computeStacks             = &m_arrAllComputeStacks[0];
-        const uint32_t*               activeEquationSetIndexes  = &m_arrActiveEquationSetIndexes[0];
-        const adJacobianMatrixItem_t* computeStackJacobianItems = &m_arrComputeStackJacobianItems[0];
-        uint32_t                      noJacobianItems           = m_arrComputeStackJacobianItems.size();
+        adComputeStackItem_t*   computeStacks             = &m_arrAllComputeStacks[0];
+        uint32_t*               activeEquationSetIndexes  = &m_arrActiveEquationSetIndexes[0];
+        adJacobianMatrixItem_t* computeStackJacobianItems = &m_arrComputeStackJacobianItems[0];
+        uint32_t                noJacobianItems           = m_arrComputeStackJacobianItems.size();
 
-        const real_t* dofs            = (arrDOFs.size() > 0 ? &arrDOFs[0] : NULL);
-        const real_t* values          = arrValues.Data();
-        const real_t* timeDerivatives = arrTimeDerivatives.Data();
+        real_t* dofs            = (arrDOFs.size() > 0 ? const_cast<real_t*>(&arrDOFs[0]) : NULL);
+        real_t* values          = arrValues.Data();
+        real_t* timeDerivatives = arrTimeDerivatives.Data();
 
         daeDenseMatrix*            dense_mat = dynamic_cast< daeDenseMatrix*>(&matJacobian);
         daeCSRMatrix<real_t, int>* crs_mat   = dynamic_cast< daeCSRMatrix<real_t, int>* >(&matJacobian);
-        if(dense_mat)
+
+        computestack::daeComputeStackEvaluationContext_t EC;
+        EC.equationCalculationMode                       = eCalculateJacobian;
+        EC.sensitivityParameterIndex                     = -1;
+        EC.jacobianIndex                                 = -1;
+        EC.numberOfVariables                             = m_nNumberOfEquations;
+        EC.numberOfEquations                             = m_nNumberOfEquations; // Always total number (multi-device evaluators will adjust it if required)
+        EC.numberOfDOFs                                  = arrDOFs.size();
+        EC.numberOfComputeStackItems                     = m_arrAllComputeStacks.size();
+        EC.numberOfJacobianItems                         = noJacobianItems;
+        EC.valuesStackSize                               = 5;
+        EC.lvaluesStackSize                              = 20;
+        EC.rvaluesStackSize                              = 5;
+        EC.currentTime                                   = dTime;
+        EC.inverseTimeStep                               = dInverseTimeStep;
+        EC.startEquationIndex                            = 0; // Always 0 (multi-device evaluators will adjust it if required)
+        EC.startJacobianIndex                            = 0; // Always 0 (multi-device evaluators will adjust it if required)
+
+        if(m_pDataProxy->GetEvaluationMode() == eComputeStack_OpenMP)
         {
-            // IDA solver uses the column wise data
-            if(dense_mat->data_access != eColumnWise)
-                daeDeclareAndThrowException(exInvalidCall);
+            m_jacobian.resize(noJacobianItems);
 
-            real_t** jacobian = dense_mat->data;
+            // Sequential run can be achieved by setting numThreads to 1.
+            if(m_omp_num_threads > 0)
+                omp_set_num_threads(m_omp_num_threads);
 
-            #pragma omp parallel for firstprivate(EC) if(m_bUseOpenMP)
+            #pragma omp parallel for firstprivate(EC)
             for(uint32_t ji = 0; ji < noJacobianItems; ji++)
             {
-                calculate_cs_jacobian_dns(computeStacks,
-                                          ji,
-                                          activeEquationSetIndexes,
-                                          computeStackJacobianItems,
-                                          EC,
-                                          dofs,
-                                          values,
-                                          timeDerivatives,
-                                          jacobian);
+                openmp_evaluator::EvaluateJacobian(computeStacks,
+                                                   ji,
+                                                   activeEquationSetIndexes,
+                                                   computeStackJacobianItems,
+                                                   EC,
+                                                   dofs,
+                                                   values,
+                                                   timeDerivatives,
+                                                   m_jacobian.data());
             }
+
+            // Evaluated Jacobian values need to be copied to the Jacobian matrix.
+            for(size_t ji = 0; ji < noJacobianItems; ji++)
+            {
+                const adJacobianMatrixItem_t& jacobianItem = m_arrComputeStackJacobianItems[ji];
+                matJacobian.SetItem(jacobianItem.equationIndex, jacobianItem.blockIndex, m_jacobian[ji]);
+            }
+
+        /*
+            if(dense_mat)
+            {
+                // IDA solver uses the column wise data
+                if(dense_mat->data_access != eColumnWise)
+                    daeDeclareAndThrowException(exInvalidCall);
+
+                real_t** jacobian = dense_mat->data;
+
+                // Sequential run can be achieved by setting numThreads to 1.
+                if(m_omp_num_threads > 0)
+                    omp_set_num_threads(m_omp_num_threads);
+
+                #pragma omp parallel for firstprivate(EC)
+                for(uint32_t ji = 0; ji < noJacobianItems; ji++)
+                {
+                    calculate_cs_jacobian_dns(computeStacks,
+                                              ji,
+                                              activeEquationSetIndexes,
+                                              computeStackJacobianItems,
+                                              EC,
+                                              dofs,
+                                              values,
+                                              timeDerivatives,
+                                              jacobian);
+                }
+            }
+            else if(crs_mat)
+            {
+                int* IA   = crs_mat->IA;
+                int* JA   = crs_mat->JA;
+                real_t* A = crs_mat->A;
+
+                // Sequential run can be achieved by setting numThreads to 1.
+                if(m_omp_num_threads > 0)
+                    omp_set_num_threads(m_omp_num_threads);
+
+                #pragma omp parallel for firstprivate(EC)
+                for(uint32_t ji = 0; ji < noJacobianItems; ji++)
+                {
+                    calculate_cs_jacobian_csr(computeStacks,
+                                              ji,
+                                              activeEquationSetIndexes,
+                                              computeStackJacobianItems,
+                                              EC,
+                                              dofs,
+                                              values,
+                                              timeDerivatives,
+                                              IA,
+                                              JA,
+                                              A);
+                }
+            }
+            else
+            {
+                // For daeEpetraCSRMatrix and other no-CSR matrix storage types.
+                computestack::jacobian_fn jac_fn = &setJacobianMatrixItem;
+                void*                     matrix = (void*)&matJacobian;
+
+                // Sequential run can be achieved by setting numThreads to 1.
+                if(m_omp_num_threads > 0)
+                    omp_set_num_threads(m_omp_num_threads);
+
+                #pragma omp parallel for firstprivate(EC)
+                for(uint32_t ji = 0; ji < noJacobianItems; ji++)
+                {
+                    calculate_cs_jacobian_gen(computeStacks,
+                                              ji,
+                                              activeEquationSetIndexes,
+                                              computeStackJacobianItems,
+                                              EC,
+                                              dofs,
+                                              values,
+                                              timeDerivatives,
+                                              matrix,
+                                              jac_fn);
+                }
+            }
+        */
         }
-        else if(crs_mat)
+        else if(m_pDataProxy->GetEvaluationMode() == eComputeStack_External)
         {
-            int* IA   = crs_mat->IA;
-            int* JA   = crs_mat->JA;
-            real_t* A = crs_mat->A;
+            if(!m_computeStackEvaluator)
+                daeDeclareAndThrowException(exInvalidPointer);
 
-            #pragma omp parallel for firstprivate(EC) if(m_bUseOpenMP)
-            for(uint32_t ji = 0; ji < noJacobianItems; ji++)
-            {
-                calculate_cs_jacobian_csr(computeStacks,
-                                          ji,
-                                          activeEquationSetIndexes,
-                                          computeStackJacobianItems,
-                                          EC,
-                                          dofs,
-                                          values,
-                                          timeDerivatives,
-                                          IA,
-                                          JA,
-                                          A);
-            }
-        }
-        else
-        {
-            // For daeEpetraCSRMatrix and other no-CSR matrix storage types.
-            computestack::jacobian_fn jac_fn = &setJacobianMatrixItem;
-            void*                     matrix = (void*)&matJacobian;
+            m_jacobian.resize(noJacobianItems);
 
-            #pragma omp parallel for firstprivate(EC) if(m_bUseOpenMP)
-            for(uint32_t ji = 0; ji < noJacobianItems; ji++)
+            m_computeStackEvaluator->EvaluateJacobian(EC,
+                                                      dofs,
+                                                      values,
+                                                      timeDerivatives,
+                                                      m_jacobian.data());
+
+            // Evaluated Jacobian values need to be copied to the Jacobian matrix.
+            for(size_t ji = 0; ji < noJacobianItems; ji++)
             {
-                calculate_cs_jacobian_gen(computeStacks,
-                                          ji,
-                                          activeEquationSetIndexes,
-                                          computeStackJacobianItems,
-                                          EC,
-                                          dofs,
-                                          values,
-                                          timeDerivatives,
-                                          matrix,
-                                          jac_fn);
+                const adJacobianMatrixItem_t& jacobianItem = m_arrComputeStackJacobianItems[ji];
+                matJacobian.SetItem(jacobianItem.equationIndex, jacobianItem.blockIndex, m_jacobian[ji]);
             }
+
+/*
+            if(crs_mat)
+            {
+                int* IA   = crs_mat->IA;
+                int* JA   = crs_mat->JA;
+                real_t* A = crs_mat->A;
+
+                m_computeStackEvaluator->calculate_cs_jacobian_csr(EC,
+                                                                   dofs,
+                                                                   values,
+                                                                   timeDerivatives,
+                                                                   IA,
+                                                                   JA,
+                                                                   A);
+                for(size_t ji = 0; ji < EC.numberOfJacobianItems; ji++)
+                {
+                    const adJacobianMatrixItem_t& jacobianItem = m_arrComputeStackJacobianItems[ji];
+                    if(fabs(A[ji] - m_jacobian[ji]) > 1e-13)
+                        printf("A[%d] = J(%d,%d) = %.12f (%.12f)\n", ji, jacobianItem.equationIndex, jacobianItem.blockIndex, A[ji], m_jacobian[ji]);
+                }
+                //for(size_t ji = 0; ji < EC.numberOfJacobianItems; ji++)
+                //{
+                //    adJacobianMatrixItem_t& jacobianItem = m_arrComputeStackJacobianItems[ji];
+                //    //crs_mat->SetItem(jacobianItem.equationIndex, jacobianItem.blockIndex, m_jacobian[ji]);
+                //    if(fabs(m_jacobian[ji] - A[ji]) > 1e-12)
+                //        printf("A[%d]     = J(%d,%d) = %.12f (%.12f)\n", ji, jacobianItem.equationIndex, jacobianItem.blockIndex, A[ji], m_jacobian[ji]);
+                //    //printf("A[%d]     = J(%d,%d) = %.12f\n", ji, jacobianItem.equationIndex, jacobianItem.blockIndex, A[ji]);
+                //    //printf("Acalc[%d] = J(%d,%d) = %.12f\n", ji, jacobianItem.equationIndex, jacobianItem.blockIndex, m_jacobian[ji]);
+                //    //crs_mat->Print();
+                //}
+            }
+            else
+            {
+                daeDeclareException(exInvalidCall);
+                e << "Jacobian evaluation using extern compute stacks evaluators is available "
+                  << "only for sparse matrix LA solvers using CSR matrix storage (except Trilinos solvers).";
+                throw e;
+            }
+*/
         }
     }
-    else
+    else if(m_pDataProxy->GetEvaluationMode() == eEvaluationTree_OpenMP)
     {
         daeExecutionContext EC;
         EC.m_pBlock						= this;
@@ -324,28 +482,15 @@ void daeBlock::CalculateJacobian(real_t				dTime,
         EC.m_pEquationExecutionInfo		= NULL;
         EC.m_eEquationCalculationMode	= eCalculateJacobian;
 
-        daeModel* pTopLevelModel = dynamic_cast<daeModel*>(m_pDataProxy->GetTopLevelModel());
-
-        // Update equations if necessary (in general, applicable only to FE equations)
-        pTopLevelModel->UpdateEquations(&EC);
-
-    // Commented out because of a seg. fault (can't find the reason).
-    //    double startTime, endTime;
-    //    bool bPrintInfo = m_pDataProxy->PrintInfo();
-    //    if(bPrintInfo)
-    //    {
-    //        startTime = dae::GetTimeInSeconds();
-    //    }
-
         if(m_ptrarrEquationExecutionInfos_ActiveSet.empty())
             daeDeclareAndThrowException(exInvalidCall);
 
-        // Calls PyEval_InitThreads and PyEval_SaveThread in the constructor, and PyEval_RestoreThread in the destructor
-        boost::shared_ptr<daeAllowThreads_t> _allowThreads_ = pTopLevelModel->CreateAllowThreads();
-
-        // OpenMP version
         // m_ptrarrEquationExecutionInfos_ActiveSet should be previously updated with the currently active equation set.
-        #pragma omp parallel for firstprivate(EC) if (m_bUseOpenMP)
+        // Sequential run can be achieved by setting numThreads to 1.
+        if(m_omp_num_threads > 0)
+            omp_set_num_threads(m_omp_num_threads);
+
+        #pragma omp parallel for firstprivate(EC)
         for(int i = 0; i < m_ptrarrEquationExecutionInfos_ActiveSet.size(); i++)
         {
             //std::cout << "  thread id " << omp_get_thread_num() << " calculating Jacobian for equation " << i << std::endl;
@@ -353,15 +498,13 @@ void daeBlock::CalculateJacobian(real_t				dTime,
             pEquationExecutionInfo->Jacobian(EC);
         }
     }
+    else
+    {
+        daeDeclareAndThrowException(exNotImplemented);
+    }
 
-// Commented out because of a seg. fault (can't find the reason).
-//    if(bPrintInfo)
-//    {
-//        endTime = dae::GetTimeInSeconds();
-//        m_dTotalTimeForJacobian += (endTime - startTime);
-//        m_pDataProxy->LogMessage(string("Total time for the current Jacobian evaluation = ") + toStringFormatted(endTime - startTime, -1, 10) + string("s"), 0);
-//        m_pDataProxy->LogMessage(string("Cumulative time for all Jacobian evaluations = ") + toStringFormatted(m_dTotalTimeForJacobian, -1, 10) + string("s"), 0);
-//    }
+    double endTime = omp_get_wtime();
+    m_dTotalTimeForJacobian += (endTime - startTime);
 }
 
 // For dynamic models
@@ -373,6 +516,9 @@ void daeBlock::CalculateSensitivityResiduals(real_t						dTime,
                                              daeMatrix<real_t>&			matSTimeDerivatives,
                                              daeMatrix<real_t>&			matSResiduals)
 {
+    m_nNuberOfSensitivityResidualsCalls++;
+    double startTime = omp_get_wtime();
+
     if(m_pDataProxy->PrintInfo())
         m_pDataProxy->LogMessage(string("Calculate sensitivity residuals at time ") + toStringFormatted(dTime, -1, 15) + string("..."), 0);
 
@@ -385,57 +531,91 @@ void daeBlock::CalculateSensitivityResiduals(real_t						dTime,
                                          &matSTimeDerivatives,
                                          &matSResiduals);
 
-    if(m_pDataProxy->GetEvaluationMode() == eUseComputeStack)
-    {
-        computestack::daeComputeStackEvaluationContext_t EC;
-        EC.equationCalculationMode                       = eCalculateSensitivityResiduals;
-        EC.currentParameterIndexForSensitivityEvaluation = -1;
-        EC.currentVariableIndexForJacobianEvaluation     = -1;
-        EC.numberOfVariables                             = m_nNumberOfEquations;
-        EC.valuesStackSize  = 5;
-        EC.lvaluesStackSize = 20;
-        EC.rvaluesStackSize = 5;
-        EC.currentTime     = dTime;
-        EC.inverseTimeStep = 0; // Should not be needed here. Double check...
+    // Update equations if necessary (in general, applicable only to FE equations)
+    daeModel* pTopLevelModel = dynamic_cast<daeModel*>(m_pDataProxy->GetTopLevelModel());
+    pTopLevelModel->UpdateEquations();
 
+    // Calls PyEval_InitThreads and PyEval_SaveThread in the constructor, and PyEval_RestoreThread in the destructor
+    boost::shared_ptr<daeAllowThreads_t> _allowThreads_ = pTopLevelModel->CreateAllowThreads();
+
+    if(m_pDataProxy->GetEvaluationMode() == eComputeStack_OpenMP ||
+       m_pDataProxy->GetEvaluationMode() == eComputeStack_External)
+    {
         const std::vector<real_t>& arrDOFs = m_pDataProxy->GetAssignedVarsValues();
 
-        const adComputeStackItem_t* computeStacks            = &m_arrAllComputeStacks[0];
-        const uint32_t*             activeEquationSetIndexes = &m_arrActiveEquationSetIndexes[0];
+        adComputeStackItem_t* computeStacks            = &m_arrAllComputeStacks[0];
+        uint32_t*             activeEquationSetIndexes = &m_arrActiveEquationSetIndexes[0];
 
-        const real_t* dofs            = (arrDOFs.size() > 0 ? &arrDOFs[0] : NULL);
-        const real_t* values          = arrValues.Data();
-        const real_t* timeDerivatives = arrTimeDerivatives.Data();
+        real_t* dofs            = (arrDOFs.size() > 0 ? const_cast<real_t*>(&arrDOFs[0]) : NULL);
+        real_t* values          = arrValues.Data();
+        real_t* timeDerivatives = arrTimeDerivatives.Data();
 
         daeDenseMatrix* sens_res_mat = dynamic_cast< daeDenseMatrix*>(&matSResiduals);
         if(!sens_res_mat)
             daeDeclareAndThrowException(exInvalidPointer);
 
+        computestack::daeComputeStackEvaluationContext_t EC;
+        EC.equationCalculationMode                       = eCalculateSensitivityResiduals;
+        EC.sensitivityParameterIndex                     = -1;
+        EC.jacobianIndex                                 = -1;
+        EC.numberOfVariables                             = m_nNumberOfEquations;
+        EC.numberOfEquations                             = m_nNumberOfEquations; // Always total number (multi-device evaluators will adjust it if required)
+        EC.numberOfDOFs                                  = arrDOFs.size();
+        EC.numberOfComputeStackItems                     = m_arrAllComputeStacks.size();
+        EC.numberOfJacobianItems                         = 0;
+        EC.valuesStackSize                               = 5;
+        EC.lvaluesStackSize                              = 20;
+        EC.rvaluesStackSize                              = 5;
+        EC.currentTime                                   = dTime;
+        EC.inverseTimeStep                               = 0; // Should not be needed here. Double check...
+        EC.startEquationIndex                            = 0; // Always 0 (multi-device evaluators will adjust it if required)
+        EC.startJacobianIndex                            = 0; // Always 0 (multi-device evaluators will adjust it if required)
+
         for(size_t p = 0; p < narrParameterIndexes.size(); p++)
         {
-            const real_t* svalues    = matSValues.GetRow(p);
-            const real_t* sdvalues   = matSTimeDerivatives.GetRow(p);
-                  real_t* sresiduals = matSResiduals.GetRow(p);
+            real_t* svalues    = matSValues.GetRow(p);
+            real_t* sdvalues   = matSTimeDerivatives.GetRow(p);
+            real_t* sresiduals = matSResiduals.GetRow(p);
 
-            EC.currentParameterIndexForSensitivityEvaluation = narrParameterIndexes[p];
+            EC.sensitivityParameterIndex = narrParameterIndexes[p];
 
-            #pragma omp parallel for firstprivate(EC) if(m_bUseOpenMP)
-            for(uint32_t ei = 0; ei < m_nNumberOfEquations; ei++)
+            if(m_pDataProxy->GetEvaluationMode() == eComputeStack_OpenMP)
             {
-                calculate_cs_sens_residual(computeStacks,
-                                           ei,
-                                           activeEquationSetIndexes,
-                                           EC,
-                                           dofs,
-                                           values,
-                                           timeDerivatives,
-                                           svalues,
-                                           sdvalues,
-                                           sresiduals);
+                // Sequential run can be achieved by setting numThreads to 1.
+                if(m_omp_num_threads > 0)
+                    omp_set_num_threads(m_omp_num_threads);
+
+                #pragma omp parallel for firstprivate(EC)
+                for(uint32_t ei = 0; ei < m_nNumberOfEquations; ei++)
+                {
+                    openmp_evaluator::EvaluateSensitivityResiduals(computeStacks,
+                                                                   ei,
+                                                                   activeEquationSetIndexes,
+                                                                   EC,
+                                                                   dofs,
+                                                                   values,
+                                                                   timeDerivatives,
+                                                                   svalues,
+                                                                   sdvalues,
+                                                                   sresiduals);
+                }
+            }
+            else if(m_pDataProxy->GetEvaluationMode() == eComputeStack_External)
+            {
+                if(!m_computeStackEvaluator)
+                    daeDeclareAndThrowException(exInvalidPointer);
+
+                m_computeStackEvaluator->EvaluateSensitivityResiduals(EC,
+                                                                      dofs,
+                                                                      values,
+                                                                      timeDerivatives,
+                                                                      svalues,
+                                                                      sdvalues,
+                                                                      sresiduals);
             }
         }
     }
-    else
+    else if(m_pDataProxy->GetEvaluationMode() == eEvaluationTree_OpenMP)
     {
         daeExecutionContext EC;
         EC.m_pBlock						= this;
@@ -444,25 +624,12 @@ void daeBlock::CalculateSensitivityResiduals(real_t						dTime,
         EC.m_pEquationExecutionInfo		= NULL;
         EC.m_eEquationCalculationMode	= eCalculateSensitivityResiduals;
 
-        daeModel* pTopLevelModel = dynamic_cast<daeModel*>(m_pDataProxy->GetTopLevelModel());
-
-        // Update equations if necessary (in general, applicable only to FE equations)
-        pTopLevelModel->UpdateEquations(&EC);
-
-    // Commented out because of a seg. fault (can't find the reason).
-    //    double startTime, endTime;
-    //    bool bPrintInfo = m_pDataProxy->PrintInfo();
-    //    if(bPrintInfo)
-    //    {
-    //        startTime = dae::GetTimeInSeconds();
-    //    }
-
-        // Calls PyEval_InitThreads and PyEval_SaveThread in the constructor, and PyEval_RestoreThread in the destructor
-        boost::shared_ptr<daeAllowThreads_t> _allowThreads_ = pTopLevelModel->CreateAllowThreads();
-
-        // OpenMP version
         // m_ptrarrEquationExecutionInfos_ActiveSet should be previously updated with the currently active equation set.
-        #pragma omp parallel for firstprivate(EC) if (m_bUseOpenMP)
+        // Sequential run can be achieved by setting numThreads to 1.
+        if(m_omp_num_threads > 0)
+            omp_set_num_threads(m_omp_num_threads);
+
+        #pragma omp parallel for firstprivate(EC)
         for(int i = 0; i < m_ptrarrEquationExecutionInfos_ActiveSet.size(); i++)
         {
 
@@ -470,17 +637,15 @@ void daeBlock::CalculateSensitivityResiduals(real_t						dTime,
             pEquationExecutionInfo->SensitivityResiduals(EC, narrParameterIndexes);
         }
     }
+    else
+    {
+        daeDeclareAndThrowException(exNotImplemented);
+    }
 
     m_pDataProxy->ResetSensitivityMatrixes();
 
-// Commented out because of a seg. fault (can't find the reason).
-//    if(bPrintInfo)
-//    {
-//        endTime = dae::GetTimeInSeconds();
-//        m_dTotalTimeForSensitivityResiduals += (endTime - startTime);
-//        m_pDataProxy->LogMessage(string("Total time for the current sensitivity residuals evaluation = ") + toStringFormatted(endTime - startTime, -1, 10) + string("s"), 0);
-//        m_pDataProxy->LogMessage(string("Cumulative time for all sensitivity residuals evaluations = ") + toStringFormatted(m_dTotalTimeForSensitivityResiduals, -1, 10) + string("s"), 0);
-//    }
+    double endTime = omp_get_wtime();
+    m_dTotalTimeForSensitivityResiduals += (endTime - startTime);
 }
 
 // For steady-state models (not used anymore)
@@ -750,6 +915,18 @@ void daeBlock::Initialize(void)
         throw e;
     }
 
+    // Load evaluation options
+    daeConfig& cfg = daeGetConfig();
+    m_omp_num_threads = 0;
+    if(m_pDataProxy->GetEvaluationMode() == eEvaluationTree_OpenMP)
+    {
+        m_omp_num_threads = cfg.GetInteger("daetools.core.equations.evaluationTree_OpenMP.numThreads", 0);
+    }
+    else if(m_pDataProxy->GetEvaluationMode() == eComputeStack_OpenMP)
+    {
+        m_omp_num_threads = cfg.GetInteger("daetools.core.equations.computeStack_OpenMP.numThreads", 0);
+    }
+
 // First BuildExpressions in the top level model and its children
     daeModel* pModel = dynamic_cast<daeModel*>(m_pDataProxy->GetTopLevelModel());
     if(!pModel)
@@ -850,7 +1027,7 @@ daeeDiscontinuityType daeBlock::ExecuteOnConditionActions(void)
     return eResult;
 }
 
-void daeBlock::RebuildActiveEquationSetAndRootExpressions()
+void daeBlock::RebuildActiveEquationSetAndRootExpressions(bool bCalculateSensitivities)
 {
 // 1. (Re-)build the root expressions.
     m_mapExpressionInfos.clear();
@@ -884,7 +1061,8 @@ void daeBlock::RebuildActiveEquationSetAndRootExpressions()
     }
 
 // 3. (Re-)build the jacobian items for the active equation set.
-    if(m_pDataProxy->GetEvaluationMode() == eUseComputeStack)
+    if(m_pDataProxy->GetEvaluationMode() == eComputeStack_OpenMP ||
+       m_pDataProxy->GetEvaluationMode() == eComputeStack_External)
     {
         m_arrComputeStackJacobianItems.clear();
         m_arrActiveEquationSetIndexes.clear();
@@ -914,6 +1092,27 @@ void daeBlock::RebuildActiveEquationSetAndRootExpressions()
             }
         }
 
+        if(m_pDataProxy->GetEvaluationMode() == eComputeStack_External)
+        {
+            if(!m_computeStackEvaluator)
+                daeDeclareAndThrowException(exInvalidPointer);
+
+            adComputeStackItem_t*   computeStacks             = &m_arrAllComputeStacks[0];
+            uint32_t*               activeEquationSetIndexes  = &m_arrActiveEquationSetIndexes[0];
+            adJacobianMatrixItem_t* computeStackJacobianItems = &m_arrComputeStackJacobianItems[0];
+
+            m_computeStackEvaluator->Initialize(bCalculateSensitivities,
+                                                m_nNumberOfEquations,
+                                                m_nNumberOfEquations,
+                                                m_pDataProxy->GetAssignedVarsValues().size(),
+                                                m_arrAllComputeStacks.size(),
+                                                m_arrComputeStackJacobianItems.size(),
+                                                m_arrComputeStackJacobianItems.size(),
+                                                computeStacks,
+                                                activeEquationSetIndexes,
+                                                computeStackJacobianItems);
+
+        }
         //printf("m_arrAllComputeStacks          = %d\n", m_arrAllComputeStacks.size());
         //printf("m_arrActiveEquationSetIndexes  = %d\n", m_arrActiveEquationSetIndexes.size());
         //printf("m_arrComputeStackJacobianItems = %d\n", m_arrComputeStackJacobianItems.size());

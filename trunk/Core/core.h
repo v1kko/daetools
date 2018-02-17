@@ -882,7 +882,7 @@ public:
 
     virtual bool	              CheckForDiscontinuities(void) = 0;
     virtual daeeDiscontinuityType ExecuteOnConditionActions(void) = 0;
-    virtual void	              RebuildActiveEquationSetAndRootExpressions(void) = 0;
+    virtual void	              RebuildActiveEquationSetAndRootExpressions(bool bCalculateSensitivities) = 0;
 
     virtual void	CalcNonZeroElements(int& NNZ) = 0;
     virtual void	FillSparseMatrix(daeSparseMatrix<real_t>* pMatrix) = 0;

@@ -127,7 +127,7 @@ void daeModel::Clone(const daeModel& rObject)
     }
 }
 
-void daeModel::UpdateEquations(const daeExecutionContext* pExecutionContext)
+void daeModel::UpdateEquations()
 {
 // Default implementation does nothing (just propagates call to child models and model arrays)
     size_t i;
@@ -136,14 +136,14 @@ void daeModel::UpdateEquations(const daeExecutionContext* pExecutionContext)
     for(i = 0; i < m_ptrarrComponents.size(); i++)
     {
         daeModel* pModel = m_ptrarrComponents[i];
-        pModel->UpdateEquations(pExecutionContext);
+        pModel->UpdateEquations();
     }
 
 // Finally, create port connection equations for each modelarray
     for(i = 0; i < m_ptrarrComponentArrays.size(); i++)
     {
         daeModelArray* pModelArray = m_ptrarrComponentArrays[i];
-        pModelArray->UpdateEquations(pExecutionContext);
+        pModelArray->UpdateEquations();
     }
 }
 
@@ -3527,23 +3527,24 @@ void daeModel::PopulateBlockIndexes(daeBlock* pBlock)
     }
 
 // Now, create compute stack, if requested.
-// First estimate size for the big vector with all compute stacks and then creeate it.
-    uint32_t noItems = 0;
-    for(size_t i = 0; i < m_ptrarrEEIfromModels.size(); i++)
+    if(m_pDataProxy->GetEvaluationMode() == eComputeStack_OpenMP ||
+       m_pDataProxy->GetEvaluationMode() == eComputeStack_External)
     {
-        pEquationExec = m_ptrarrEEIfromModels[i];
-        // Get compute stack size
-        noItems += adNode::GetComputeStackSize(pEquationExec->m_EquationEvaluationNode.get());
-    }
-    for(size_t i = 0; i < m_ptrarrAllSTNs.size(); i++)
-    {
-        pSTN = m_ptrarrAllSTNs[i];
-        // Get compute stack size
-        noItems += pSTN->GetComputeStackSize();
-    }
+        // First estimate size for the big vector with all compute stacks and then create it.
+        uint32_t noItems = 0;
+        for(size_t i = 0; i < m_ptrarrEEIfromModels.size(); i++)
+        {
+            pEquationExec = m_ptrarrEEIfromModels[i];
+            // Get compute stack size
+            noItems += adNode::GetComputeStackSize(pEquationExec->m_EquationEvaluationNode.get());
+        }
+        for(size_t i = 0; i < m_ptrarrAllSTNs.size(); i++)
+        {
+            pSTN = m_ptrarrAllSTNs[i];
+            // Get compute stack size
+            noItems += pSTN->GetComputeStackSize();
+        }
 
-    if(m_pDataProxy->GetEvaluationMode() == eUseComputeStack)
-    {
         // Reserve and allocate memory for the estimated number of items to avoid frequent memory reallocation.
         pBlock->m_arrAllComputeStacks.reserve(noItems);
 
@@ -4662,6 +4663,11 @@ const std::vector<daeModelArray*>& daeModel::ModelArrays() const
     return m_ptrarrComponentArrays;
 }
 
+const std::vector<adComputeStackItem_t>& daeModel::GetComputeStack() const
+{
+    daeBlock* pBlock = m_pDataProxy->GetBlock();
+    return pBlock->m_arrAllComputeStacks;
+}
 
 void daeModel::GetSTNs(vector<daeSTN_t*>& ptrarrSTNs)
 {

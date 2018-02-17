@@ -88,8 +88,9 @@ enum daeeResultType
 
 enum daeeEvaluationMode
 {
-    eUseEvaluationTree = 0,
-    eUseComputeStack
+    eEvaluationTree_OpenMP = 0,
+    eComputeStack_OpenMP,
+    eComputeStack_External
 };
 
 /******************************************************************
@@ -455,7 +456,7 @@ public:
     std::string GetName(void) const;
 
     const std::map< size_t, std::pair<size_t, adNodePtr> >& GetJacobianExpressions() const;
-    const std::vector<adComputeStackItem_t>& GetComputeStack() const;
+    std::vector<adComputeStackItem_t> GetComputeStack() const;
     uint8_t GetComputeStack_max_valueSize() const;
     uint8_t GetComputeStack_max_lvalueSize() const;
     uint8_t GetComputeStack_max_rvalueSize() const;
@@ -668,11 +669,14 @@ public:
         m_bResetLAMatrixAfterDiscontinuity = cfg.GetBoolean("daetools.core.resetLAMatrixAfterDiscontinuity", true);
         m_bPrintInfo                       = cfg.GetBoolean("daetools.core.printInfo", false);
         m_bCheckForInfinite                = cfg.GetBoolean("daetools.core.checkForInfiniteNumbers", false);
-        std::string evaluationMode         = cfg.GetString("daetools.core.equations.evaluationMode", "useEvaluationTree");
-        if(evaluationMode == "useComputeStack")
-            m_eEvaluationMode = eUseComputeStack;
+
+        std::string evaluationMode = cfg.GetString("daetools.core.equations.evaluationMode", "evaluationTree_OpenMP");
+        if(evaluationMode == "computeStack_OpenMP")
+            m_eEvaluationMode = eComputeStack_OpenMP;
+        else if(evaluationMode == "evaluationTree_OpenMP")
+            m_eEvaluationMode = eEvaluationTree_OpenMP;
         else
-            m_eEvaluationMode = eUseEvaluationTree;
+            m_eEvaluationMode = eComputeStack_External;
     }
 
 
@@ -1630,7 +1634,7 @@ public:
 
     virtual void	SetBlockData(daeArray<real_t>& arrValues, daeArray<real_t>& arrTimeDerivatives);
     virtual void	CreateIndexMappings(real_t* pdValues, real_t* pdTimeDerivatives);
-    virtual void	RebuildActiveEquationSetAndRootExpressions(void);
+    virtual void	RebuildActiveEquationSetAndRootExpressions(bool bCalculateSensitivities);
 
     virtual real_t	GetTime(void) const;
     virtual void	SetTime(real_t time);
@@ -1682,6 +1686,9 @@ public:
     // first - index in block;   second - index in core
     std::map<size_t, size_t>& GetVariableIndexesMap(void);
 
+    adComputeStackEvaluator_t* GetComputeStackEvaluator();
+    void SetComputeStackEvaluator(adComputeStackEvaluator_t* computeStackEvaluator);
+
 public:
 // Used internally by the block during calculation of Residuals/Jacobian/Hesian
     void				SetValuesArray(daeArray<real_t>* pValues);
@@ -1723,6 +1730,8 @@ public:
     std::vector<adComputeStackItem_t>   m_arrAllComputeStacks;
     std::vector<adJacobianMatrixItem_t> m_arrComputeStackJacobianItems;
     std::vector<uint32_t>               m_arrActiveEquationSetIndexes;
+    std::vector<real_t>                 m_jacobian;
+
 
     // Contains STNs from all models; they may contain nested STNs/IFs.
     // It can be used to colect currently active equations in STNs/IFs.
@@ -1736,10 +1745,11 @@ public:
 
     size_t	m_nCurrentVariableIndexForJacobianEvaluation;
 
-    bool        m_bUseOpenMP;
-    int         m_omp_num_threads;
-    std::string m_omp_schedule;
-    int         m_omp_shedule_chunk_size;
+    adComputeStackEvaluator_t* m_computeStackEvaluator;
+
+    int           m_omp_num_threads;
+    //std::string m_omp_schedule;
+    //int         m_omp_shedule_chunk_size;
 
 // Given by a solver during Residual/Jacobian calculation
     real_t				m_dCurrentTime;
@@ -1748,6 +1758,10 @@ public:
     daeArray<real_t>*	m_parrTimeDerivatives;
     daeArray<real_t>*	m_parrResidual;
     daeMatrix<real_t>*	m_pmatJacobian;
+
+    size_t m_nNuberOfResidualsCalls;
+    size_t m_nNuberOfJacobianCalls;
+    size_t m_nNuberOfSensitivityResidualsCalls;
 
     double m_dTotalTimeForResiduals;
     double m_dTotalTimeForJacobian;
@@ -2847,7 +2861,7 @@ public:
     virtual void        InitializeStage6(daeBlock_t* pBlock);
 
     virtual void	CleanUpSetupData(void);
-    virtual void    UpdateEquations(const daeExecutionContext* pExecutionContext);
+    virtual void    UpdateEquations();
 
     virtual void	SaveModelReport(const string& strFileName) const;
     virtual void	SaveRuntimeModelReport(const string& strFileName) const;
@@ -2973,6 +2987,8 @@ public:
     const std::vector<daeEventPortConnection*>& EventPortConnections() const;
     const std::vector<daePortArray*>& PortArrays() const;
     const std::vector<daeModelArray*>& ModelArrays() const;
+
+    const std::vector<adComputeStackItem_t>& GetComputeStack() const;
 
 // Overridables
 public:
@@ -3204,7 +3220,7 @@ protected:
     virtual void ExecuteOnConditionActions(void)                                                                                    = 0;
     virtual void CreateOverallIndex_BlockIndex_VariableNameMap(std::map<size_t, std::pair<size_t, string> >& mapOverallIndex_BlockIndex_VariableName,
                                                                const std::map<size_t, size_t>& mapOverallIndex_BlockIndex)          = 0;
-    virtual void UpdateEquations(const daeExecutionContext* pExecutionContext)                                                      = 0;
+    virtual void UpdateEquations()                                     = 0;
     virtual void PropagateDomain(daeDomain& propagatedDomain)          = 0;
     virtual void PropagateParameter(daeParameter& propagatedParameter) = 0;
 
@@ -3696,7 +3712,7 @@ public:
 public:
     void DeclareEquations(void);
     void DeclareEquationsForWeakForm(void);
-    void UpdateEquations(const daeExecutionContext* pExecutionContext);
+    void UpdateEquations();
 
 protected:
     daeFiniteElementObject_t*               m_fe;

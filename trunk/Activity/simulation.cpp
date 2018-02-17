@@ -35,6 +35,13 @@ daeSimulation::daeSimulation(void)
     m_nNumberOfObjectiveFunctions	= 1;
     m_pCurrentSensitivityMatrix     = NULL;
 
+    m_bEvaluationModeSet    = false;
+    m_computeStackEvaluator = NULL;
+
+    m_InitializationDuration  = 0;
+    m_SolveInitalDuration     = 0;
+    m_IntegrationDuration     = 0;
+
     daeConfig& cfg = daeConfig::GetConfig();
     m_bReportTimeDerivatives = cfg.GetBoolean("daetools.activity.reportTimeDerivatives", false);
     m_bReportSensitivities   = cfg.GetBoolean("daetools.activity.reportSensitivities",   false);
@@ -303,10 +310,17 @@ void daeSimulation::Initialize(daeDAESolver_t* pDAESolver,
         m_pLog->Message(string("    InitializeStage5"), 0);
     m_ptrBlock = m_pModel->InitializeStage5();
 
+    daeBlock* pBlock = dynamic_cast<daeBlock*>(m_ptrBlock);
+
+    // Set the computeStackEvaluator (if specified)
+    if(m_computeStackEvaluator)
+        pBlock->SetComputeStackEvaluator(m_computeStackEvaluator);
+    else if(m_bEvaluationModeSet)
+        m_pModel->GetDataProxy()->SetEvaluationMode(m_evaluationMode);
+
     // If required manipulate the block indexes (i.e. used in C++(MPI) code generator)
     if(bPrintInfo)
         m_pLog->Message(string("    DoDataPartitioning"), 0);
-    daeBlock* pBlock = dynamic_cast<daeBlock*>(m_ptrBlock);
     DoDataPartitioning(pBlock->m_EquationsIndexes, pBlock->m_mapVariableIndexes);
 
     // Use the block indexes from the daeBlock to populate EquationExecutionInfos,
@@ -335,6 +349,25 @@ void daeSimulation::Initialize(daeDAESolver_t* pDAESolver,
     m_pLog->Message(string("The system created successfully in: ") +
                     toStringFormatted<real_t>(m_ProblemCreationEnd - m_ProblemCreationStart, -1, 3) +
                     string(" s"), 0);
+}
+
+std::map<std::string, real_t> daeSimulation::GetEvaluationCallsStats()
+{
+    std::map<std::string, real_t> stats;
+
+    daeBlock* pBlock = dynamic_cast<daeBlock*>(m_ptrBlock);
+    if(!pBlock)
+        daeDeclareAndThrowException(exInvalidPointer);
+    stats["nuberOfResidualsCalls"]              = pBlock->m_nNuberOfResidualsCalls;
+    stats["nuberOfJacobianCalls"]               = pBlock->m_nNuberOfJacobianCalls;
+    stats["nuberOfSensitivityResidualsCalls"]   = pBlock->m_nNuberOfSensitivityResidualsCalls;
+    stats["totalTimeForResiduals"]              = pBlock->m_dTotalTimeForResiduals;
+    stats["totalTimeForJacobian"]               = pBlock->m_dTotalTimeForJacobian;
+    stats["totalTimeForSensitivityResiduals"]   = pBlock->m_dTotalTimeForSensitivityResiduals;
+    stats["initializationTime"]                 = m_InitializationDuration;
+    stats["solveInitialTime"]                   = m_SolveInitalDuration;
+    stats["integrationTime"]                    = m_IntegrationDuration;
+    return stats;
 }
 
 std::vector<daeEquationExecutionInfo*> daeSimulation::GetEquationExecutionInfos(void) const
@@ -534,8 +567,6 @@ void daeSimulation::SolveInitial(void)
 
 // Start initialization
     m_InitializationStart = dae::GetTimeInSeconds();
-    m_IntegrationStart    = dae::GetTimeInSeconds();
-    m_IntegrationEnd      = dae::GetTimeInSeconds();
 
     daeConfig& cfg = daeConfig::GetConfig();
     bool bPrintInfo = cfg.GetBoolean("daetools.core.printInfo", false);
@@ -669,15 +700,16 @@ void daeSimulation::Run(void)
     {
         m_IntegrationEnd = dae::GetTimeInSeconds();
 
-        double creation       = m_ProblemCreationEnd - m_ProblemCreationStart;
-        double initialization = m_InitializationEnd  - m_InitializationStart;
-        double integration    = m_IntegrationEnd     - m_IntegrationStart;
+        m_InitializationDuration = m_ProblemCreationEnd - m_ProblemCreationStart;
+        m_SolveInitalDuration    = m_InitializationEnd  - m_InitializationStart;
+        m_IntegrationDuration    = m_IntegrationEnd     - m_IntegrationStart;
+        double totalTime = m_InitializationDuration + m_SolveInitalDuration + m_IntegrationDuration;
 
         m_pLog->Message(string(" "), 0);
         m_pLog->Message(string("The simulation has finished successfuly!"), 0);
-        m_pLog->Message(string("Initialization time = ") + toStringFormatted<real_t>(initialization,                          -1, 3) + string(" s"), 0);
-        m_pLog->Message(string("Integration time = ")    + toStringFormatted<real_t>(integration,                             -1, 3) + string(" s"), 0);
-        m_pLog->Message(string("Total run time = ")      + toStringFormatted<real_t>(creation + initialization + integration, -1, 3) + string(" s"), 0);
+        m_pLog->Message(string("Initialization time = ") + toStringFormatted<real_t>(m_InitializationDuration,  -1, 3) + string(" s"), 0);
+        m_pLog->Message(string("Integration time = ")    + toStringFormatted<real_t>(m_IntegrationDuration,     -1, 3) + string(" s"), 0);
+        m_pLog->Message(string("Total run time = ")      + toStringFormatted<real_t>(totalTime,                 -1, 3) + string(" s"), 0);
     }
 }
 
@@ -695,11 +727,16 @@ void daeSimulation::Finalize(void)
         m_pDataReporter->EndOfData();
         m_pDataReporter->Disconnect();
     }
+    if(m_computeStackEvaluator)
+    {
+        m_computeStackEvaluator->FreeResources();
+    }
 
     m_pModel		= NULL;
     m_pDAESolver	= NULL;
     m_pDataReporter = NULL;
     m_pLog			= NULL;
+    m_computeStackEvaluator = NULL;
 
     m_bIsInitialized	 = false;
     m_bIsSolveInitial	 = false;
@@ -1102,6 +1139,30 @@ real_t daeSimulation::GetNextReportingTime(void) const
 real_t daeSimulation::GetCurrentTime_() const
 {
     return m_dCurrentTime;
+}
+
+void daeSimulation::SetComputeStackEvaluator(computestack::adComputeStackEvaluator_t* computeStackEvaluator)
+{
+    m_computeStackEvaluator = computeStackEvaluator;
+}
+
+daeeEvaluationMode daeSimulation::GetEvaluationMode()
+{
+    return m_evaluationMode;
+}
+
+void daeSimulation::SetEvaluationMode(daeeEvaluationMode evaluationMode)
+{
+    if(evaluationMode == eComputeStack_External)
+    {
+        daeDeclareException(exInvalidCall);
+        e << "EvaluationMode mode can be only set to eEvaluationTree_OpenMP and eComputeStack_OpenMP. "
+          << "For external evaluators use SetComputeStackEvaluator function.";
+        throw e;
+    }
+
+    m_bEvaluationModeSet = true;
+    m_evaluationMode     = evaluationMode;
 }
 
 void daeSimulation::SetInitialConditionMode(daeeInitialConditionMode eMode)

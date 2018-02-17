@@ -121,7 +121,7 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc0000;
         <span style='color:#3605fb;'>self</span>.n_components <b><span style='color:#0000ff;'>=</span></b> <span style='color:#2a00d6;'>int</span>(numpy.<span style='color:#2a00d6;'>sum</span>([dof.Multiplicity <b>for</b> dof <b>in</b> dofs]))
 
         meshes_dir <b><span style='color:#0000ff;'>=</span></b> os.path.join(os.path.dirname(os.path.abspath(<span style='color:#3605fb;'>__file__</span>)), <span style='color:#cc0000;'>'meshes'</span>)
-        mesh_file  <b><span style='color:#0000ff;'>=</span></b> os.path.join(meshes_dir, <span style='color:#cc0000;'>'square(0,1)x(0,1)-64x64.msh'</span>)
+        mesh_file  <b><span style='color:#0000ff;'>=</span></b> os.path.join(meshes_dir, <span style='color:#cc0000;'>'square(0,1)x(0,1)-96x96.msh'</span>)
 
         <span style='color:#017a31;'># Store the object so it does not go out of scope while still in use by daetools</span>
         <span style='color:#3605fb;'>self</span>.fe_system <b><span style='color:#0000ff;'>=</span></b> dealiiFiniteElementSystem_2D(meshFilename    <b><span style='color:#0000ff;'>=</span></b> mesh_file,     <span style='color:#017a31;'># path to mesh</span>
@@ -168,6 +168,10 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc0000;
         xyz     <b><span style='color:#0000ff;'>=</span></b> xyz_2D(fe_q)
         JxW     <b><span style='color:#0000ff;'>=</span></b> JxW_2D(fe_q)
         
+        <span style='color:#017a31;'>#h       = cell_diameter_2D()</span>
+        <span style='color:#017a31;'>#sqrt_fe = feExpression_2D.sqrt</span>
+        <span style='color:#017a31;'>#kappa_art = 0.25 * h * sqrt_fe(u_dof*u_dof)</span>
+        
         <span style='color:#3605fb;'>self</span>.gammaFun <b><span style='color:#0000ff;'>=</span></b> TemperatureSource_2D()
         gamma <b><span style='color:#0000ff;'>=</span></b> function_value_2D(<span style='color:#cc0000;'>&quot;gamma&quot;</span>, <span style='color:#3605fb;'>self</span>.gammaFun, xyz)
         
@@ -206,14 +210,15 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc0000;
 
         <span style='color:#017a31;'># Contributions from the heat convection-diffusion equation:</span>
         Mij_T_accumulation <b><span style='color:#0000ff;'>=</span></b> phi_T_i <b><span style='color:#0000ff;'>*</span></b> phi_T_j <b><span style='color:#0000ff;'>*</span></b> JxW
-        Aij_T_convection   <b><span style='color:#0000ff;'>=</span></b> (u_dof, phi_T_i, dphi_T_j <b><span style='color:#0000ff;'>*</span></b> JxW)
         <span style='color:#017a31;'>#Aij_T_convection   = u_dof*(phi_T_i*dphi_T_j * JxW) # -&gt; Tensor&lt;rank=1,float&gt; * Tensor&lt;rank=1,adouble&gt; </span>
+        Aij_T_convection   <b><span style='color:#0000ff;'>=</span></b> (u_dof, phi_T_i, dphi_T_j <b><span style='color:#0000ff;'>*</span></b> JxW)
         Aij_T_diffusion    <b><span style='color:#0000ff;'>=</span></b> kappa <b><span style='color:#0000ff;'>*</span></b> (dphi_T_i <b><span style='color:#0000ff;'>*</span></b> dphi_T_j) <b><span style='color:#0000ff;'>*</span></b> JxW
+        <span style='color:#017a31;'>#Aij_T_diffusion    = (kappa + kappa_art, dphi_T_i, dphi_T_j * JxW)</span>
         Fi_T_source        <b><span style='color:#0000ff;'>=</span></b> phi_T_i <b><span style='color:#0000ff;'>*</span></b> gamma <b><span style='color:#0000ff;'>*</span></b> JxW
 
         <span style='color:#017a31;'># Total contributions (using the new way - python lists of expressions or tuples):</span>
         Mij <b><span style='color:#0000ff;'>=</span></b> [Mij_T_accumulation]
-        Aij <b><span style='color:#0000ff;'>=</span></b> [Aij_u_gradient <b><span style='color:#0000ff;'>+</span></b> Aij_p_gradient <b><span style='color:#0000ff;'>+</span></b> Aij_continuity <b><span style='color:#0000ff;'>+</span></b> Aij_T_diffusion,  Aij_T_convection]
+        Aij <b><span style='color:#0000ff;'>=</span></b> [Aij_u_gradient <b><span style='color:#0000ff;'>+</span></b> Aij_p_gradient <b><span style='color:#0000ff;'>+</span></b> Aij_continuity, Aij_T_diffusion,  Aij_T_convection]
         Fi  <b><span style='color:#0000ff;'>=</span></b> [Fi_T_source, Fi_buoyancy]
         
         weakForm <b><span style='color:#0000ff;'>=</span></b> dealiiFiniteElementWeakForm_2D(Aij <b><span style='color:#0000ff;'>=</span></b> Aij,
@@ -240,7 +245,7 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc0000;
     guiRun <b><span style='color:#0000ff;'>=</span></b> kwargs.get(<span style='color:#cc0000;'>'guiRun'</span>, <span style='color:#3605fb;'>False</span>)
     
     simulation <b><span style='color:#0000ff;'>=</span></b> simTutorial()
-
+    
     <span style='color:#017a31;'># Create SuperLU LA solver</span>
     lasolver <b><span style='color:#0000ff;'>=</span></b> pySuperLU.daeCreateSuperLUSolver()
 

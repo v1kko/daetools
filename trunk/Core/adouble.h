@@ -40,6 +40,7 @@ DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 #include "io_impl.h"
 #include "export.h"
 #include "../Units/units.h"
+#include "compute_stack.h"
 
 #include <cstdio>
 #include <cstdlib>
@@ -47,11 +48,6 @@ DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 #include <cmath>
 #include <float.h>
 #include <stack>
-
-namespace computestack
-{
-#include "compute_stack.h"
-}
 
 namespace dae
 {
@@ -62,6 +58,7 @@ using units::unit;
 using units::quantity;
 using computestack::adComputeStackItem_t;
 using computestack::adJacobianMatrixItem_t;
+using computestack::adComputeStackEvaluator_t;
 
 /*********************************************************************************************
     daeCondition

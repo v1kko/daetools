@@ -171,6 +171,7 @@ def run(**kwargs):
     fontsize = 14
     fontsize_legend = 11
     fig = plt.figure(figsize=(12,4), facecolor='white')
+    fig.canvas.set_window_title('Tutorial cv_11')
     
     ax = plt.subplot(131)
     plt.figure(1, facecolor='white')

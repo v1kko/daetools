@@ -18,6 +18,8 @@ python tutorial16.py console
 python tutorial17.py console
 python tutorial18.py console
 python tutorial19.py console
+python tutorial20.py console
+python tutorial21.py console
 
 python tutorial_adv_1.py console
 python tutorial_adv_2.py console

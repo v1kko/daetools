@@ -166,9 +166,23 @@ const std::map< size_t, std::pair<size_t, adNodePtr> >& daeEquationExecutionInfo
     return m_mapJacobianExpressions;
 }
 
-const std::vector<adComputeStackItem_t>& daeEquationExecutionInfo::GetComputeStack() const
+std::vector<adComputeStackItem_t> daeEquationExecutionInfo::GetComputeStack() const
 {
-    return std::vector<adComputeStackItem_t>();
+    if(!m_pEquation->m_pModel)
+        daeDeclareAndThrowException(exInvalidPointer);
+    if(!m_pEquation->m_pModel->GetDataProxy())
+        daeDeclareAndThrowException(exInvalidPointer);
+    if(!m_pEquation->m_pModel->GetDataProxy()->GetBlock())
+        daeDeclareAndThrowException(exInvalidPointer);
+
+    std::vector<adComputeStackItem_t> cs;
+    std::vector<adComputeStackItem_t>& all_cs = m_pEquation->m_pModel->GetDataProxy()->GetBlock()->m_arrAllComputeStacks;
+    adComputeStackItem_t item0 = all_cs[m_nComputeStackIndex];
+    size_t n = item0.size;
+    cs.resize(n);
+    for(size_t i = 0; i < n; i++)
+        cs[i] = all_cs[m_nComputeStackIndex+i];
+    return cs;
 }
 
 uint8_t daeEquationExecutionInfo::GetComputeStack_max_valueSize() const

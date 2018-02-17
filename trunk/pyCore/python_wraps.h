@@ -239,7 +239,7 @@ std::string GetString1(daeConfig& self, const std::string& strPropertyPath, cons
 void SetBoolean(daeConfig& self, const std::string& strPropertyPath, bool value);
 void SetFloat(daeConfig& self, const std::string& strPropertyPath, real_t value);
 void SetInteger(daeConfig& self, const std::string& strPropertyPath, int value);
-void SetString(daeConfig& self, const std::string& strPropertyPath, std::string& value);
+void SetString(daeConfig& self, const std::string& strPropertyPath, const std::string& value);
 
 std::string daeConfig__str__(daeConfig& self);
 std::string daeConfig__repr__(daeConfig& self);
@@ -1366,16 +1366,16 @@ public:
         this->daeModel::DeclareEquations();
     }
 
-    void UpdateEquations(const daeExecutionContext* pExecutionContext)
+    void UpdateEquations()
     {
         if(boost::python::override f = this->get_override("UpdateEquations"))
-            f(pExecutionContext);
+            f();
         else
-            this->daeModel::UpdateEquations(pExecutionContext);
+            this->daeModel::UpdateEquations();
     }
-    void def_UpdateEquations(const daeExecutionContext* pExecutionContext)
+    void def_UpdateEquations()
     {
-        this->daeModel::UpdateEquations(pExecutionContext);
+        this->daeModel::UpdateEquations();
     }
 
     /* If InitializeModel is called on daeModelWrapper object from c++ then daeModelWrapper::InitializeModel
@@ -1453,6 +1453,8 @@ boost::python::dict daeModel_dictSTNs(daeModel& self);
 boost::python::dict daeModel_dictEquations(daeModel& self);
 boost::python::dict daeModel_dictPortConnections(daeModel& self);
 boost::python::dict daeModel_dictEventPortConnections(daeModel& self);
+
+boost::python::list daeModel_GetComputeStack(daeModel& self);
 
 using dae::tpp::daeThermoPhysicalPropertyPackage_t;
 using dae::tpp::daeeThermoPackagePhase;

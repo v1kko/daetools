@@ -88,6 +88,10 @@ public:
     virtual void GetObjectiveFunctions(std::vector<daeObjectiveFunction_t*>& ptrarrObjectiveFunctions) const;
     virtual daeObjectiveFunction* GetObjectiveFunction(void) const;
 
+    daeeEvaluationMode GetEvaluationMode();
+    void SetEvaluationMode(daeeEvaluationMode evaluationMode);
+    void SetComputeStackEvaluator(computestack::adComputeStackEvaluator_t* computeStackEvaluator);
+
     daeeInitialConditionMode	GetInitialConditionMode(void) const;
     void						SetInitialConditionMode(daeeInitialConditionMode eMode);
 
@@ -120,6 +124,8 @@ public:
     std::vector<daeEquationExecutionInfo*> GetEquationExecutionInfos(void) const;
     size_t	GetNumberOfEquations(void) const;
     size_t	GetTotalNumberOfVariables(void) const; // including assigned
+
+    std::map<std::string, real_t> GetEvaluationCallsStats();
 
     void	Register(daeModel* pModel);
     void	Register(daePort* pPort);
@@ -187,6 +193,7 @@ protected:
     double						m_InitializationEnd;
     double						m_IntegrationStart;
     double						m_IntegrationEnd;
+
     bool						m_bConditionalIntegrationMode;
     bool						m_bIsInitialized;
     bool						m_bIsSolveInitial;
@@ -201,6 +208,10 @@ protected:
     std::vector<daeVariable*>	m_ptrarrReportVariables;
     std::vector<daeParameter*>	m_ptrarrReportParameters;
 
+    bool                                     m_bEvaluationModeSet;
+    daeeEvaluationMode                       m_evaluationMode;
+    computestack::adComputeStackEvaluator_t* m_computeStackEvaluator;
+
 // Optimization related data
     bool														m_bCalculateSensitivities;
     std::string                                                 m_strSensitivityDataDirectory;
@@ -214,6 +225,12 @@ protected:
 // Parameter estimation related data
     std::vector< boost::shared_ptr<daeVariableWrapper> >		m_arrInputVariables;
     std::vector< boost::shared_ptr<daeMeasuredVariable> >		m_arrMeasuredVariables;
+
+// Integration statistics data
+public:
+    double m_InitializationDuration;
+    double m_SolveInitalDuration;
+    double m_IntegrationDuration;
 };
 
 /*********************************************************************************************

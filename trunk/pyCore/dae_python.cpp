@@ -305,6 +305,13 @@ BOOST_PYTHON_MODULE(pyCore)
         .export_values()
     ;
 
+    enum_<daeeEvaluationMode>("daeeEvaluationMode")
+        .value("eEvaluationTree_OpenMP",	dae::core::eEvaluationTree_OpenMP)
+        .value("eComputeStack_OpenMP",      dae::core::eComputeStack_OpenMP)
+        .value("eComputeStack_External",    dae::core::eComputeStack_External)
+        .export_values()
+    ;
+
     class_< std::vector<std::string> >("vector_string")
         .def(vector_indexing_suite< std::vector<std::string> >())
     ;
@@ -424,6 +431,7 @@ BOOST_PYTHON_MODULE(pyCore)
         .add_property("variableName",   &daepython::adComputeStackItem_variableName)
 #endif
         .def("__str__",                 &daepython::adComputeStackItem__str__)
+        .def("__repr__",                &daepython::adComputeStackItem__repr__)
     ;
 
     class_<adNode, boost::noncopyable>("adNode", no_init)
@@ -628,6 +636,9 @@ BOOST_PYTHON_MODULE(pyCore)
         .def_readonly("ConditionType",	&condExpressionNode::m_eConditionType)
         .add_property("LNode",          make_function(&condExpressionNode::getLeftRawPtr,  return_internal_reference<>()))
         .add_property("RNode",          make_function(&condExpressionNode::getRightRawPtr, return_internal_reference<>()))
+    ;
+
+    class_<computestack::adComputeStackEvaluator_t, boost::noncopyable>("adComputeStackEvaluator_t", no_init)
     ;
 
     class_<daeCondition>("daeCondition", DOCSTR_daeCondition, no_init)
@@ -1703,6 +1714,8 @@ BOOST_PYTHON_MODULE(pyCore)
         .add_property("dictPortConnections",		&daepython::daeModel_dictPortConnections,        DOCSTR_daeModel_PortConnections)
         .add_property("dictEventPortConnections",	&daepython::daeModel_dictEventPortConnections,   DOCSTR_daeModel_EventPortConnections)
 
+        .add_property("ComputeStack",               &daepython::daeModel_GetComputeStack,            DOCSTR_daeModel_ComputeStack)
+
         .add_property("IsModelDynamic",			&daeModel::IsModelDynamic,                      DOCSTR_daeModel_IsModelDynamic)
         .add_property("ModelType",	   		    &daeModel::GetModelType,                        DOCSTR_daeModel_ModelType)
         .add_property("InitialConditionMode",	&daeModel::GetInitialConditionMode,
@@ -1719,7 +1732,7 @@ BOOST_PYTHON_MODULE(pyCore)
 
         // Virtual function that can be implemented in derived classes in python if equations need an update (useful for FE models)
         .def("UpdateEquations",  &daepython::daeModelWrapper::UpdateEquations,  &daepython::daeModelWrapper::def_UpdateEquations,
-                                 ( arg("self"), arg("executionContext") ), DOCSTR_daeModel_UpdateEquations)
+                                 ( arg("self") ), DOCSTR_daeModel_UpdateEquations)
 
          // Virtual function that can be implemented in derived classes in python to have a generic initialization method (useful for FE models)
         .def("InitializeModel",  &daepython::daeModel_def_InitializeModel,
@@ -1851,7 +1864,7 @@ BOOST_PYTHON_MODULE(pyCore)
                                                                            arg("feObject")
                                                                         ), DOCSTR_daeModel_init))
 
-        .def("UpdateEquations",  &daeFiniteElementModel::UpdateEquations, ( arg("self"), arg("executionContext") ), DOCSTR_daeModel_UpdateEquations)
+        .def("UpdateEquations",  &daeFiniteElementModel::UpdateEquations, ( arg("self") ), DOCSTR_daeModel_UpdateEquations)
         .def("DeclareEquations", &daeFiniteElementModel::DeclareEquations, ( arg("self") ), DOCSTR_daeModel_DeclareEquations)
     ;
 

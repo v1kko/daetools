@@ -188,7 +188,8 @@ class simTutorial(daeSimulation):
         fontsize_suptitle = 16
         fontsize_legend = 11
         
-        plt.figure(figsize=(8,4), facecolor='white')
+        fig = plt.figure(figsize=(8,4), facecolor='white')
+        fig.canvas.set_window_title('Tutorial cv_1')
         plt.suptitle('Sensitivities from DAESolver.SensitivityMatrix', fontsize=fontsize_suptitle)
         ax = plt.subplot(121)
         ax.set_title('Numerical sensitivities')
@@ -291,7 +292,8 @@ def run(**kwargs):
     fontsize_suptitle = 16
     fontsize_legend = 11
     
-    plt.figure(figsize=(8,4), facecolor='white')
+    fig = plt.figure(figsize=(8,4), facecolor='white')
+    fig.canvas.set_window_title('Tutorial cv_1')
     plt.suptitle('Sensitivities from DataReporter', fontsize=fontsize_suptitle)
     ax = plt.subplot(121)
     ax.set_title('Numerical sensitivities')

@@ -21,6 +21,7 @@ class daeActivity(object):
                              datareporter                   = None, 
                              daesolver                      = None, 
                              lasolver                       = None,
+                             computeStackEvaluator          = None,
                              timeHorizon                    = 0.0,
                              reportingTimes                 = [],
                              reportingInterval              = 0.0,
@@ -68,6 +69,9 @@ class daeActivity(object):
         if reportDataAroundDiscontinuities != None:
             simulation.ReportDataAroundDiscontinuities = reportDataAroundDiscontinuities            
 
+        if computeStackEvaluator:
+            simulation.SetComputeStackEvaluator(computeStackEvaluator)
+            
         if guiRun:
             if not qtApp:
                 qtApp = daeCreateQtApplication(sys.argv)
@@ -161,6 +165,7 @@ class daeActivity(object):
                              lasolver                       = None,
                              optimization                   = None,
                              nlpsolver                      = None,
+                             computeStackEvaluator          = None,
                              timeHorizon                    = 0.0,
                              reportingInterval              = 0.0,
                              reportingTimes                 = [],
@@ -208,6 +213,9 @@ class daeActivity(object):
 
         if not optimization:
             optimization = daeOptimization()
+
+        if computeStackEvaluator:
+            simulation.SetComputeStackEvaluator(computeStackEvaluator)
             
         if guiRun:
             if not qtApp:

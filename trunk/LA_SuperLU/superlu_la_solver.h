@@ -25,7 +25,7 @@ extern "C"
 }
 #endif
 
-				
+
 namespace dae
 {
 namespace solver
@@ -41,69 +41,78 @@ namespace superlu_mt
 
 class DAE_SOLVER_API daeSuperLUSolver : public dae::solver::daeIDALASolver_t
 {
-	typedef daeCSRMatrix<real_t, int> daeSuperLUMatrix;
+    typedef daeCSRMatrix<real_t, int> daeSuperLUMatrix;
 public:
-	daeSuperLUSolver();
-	~daeSuperLUSolver();
-	
+    daeSuperLUSolver();
+    ~daeSuperLUSolver();
+
 public:
-	int Create(void* ida, size_t n, daeDAESolver_t* pDAESolver);
-	int Reinitialize(void* ida);
-	int SaveAsXPM(const std::string& strFileName);
-	int SaveAsMatrixMarketFile(const std::string& strFileName, const std::string& strMatrixName, const std::string& strMatrixDescription);
-	string GetName(void) const;
+    int Create(void* ida, size_t n, daeDAESolver_t* pDAESolver);
+    int Reinitialize(void* ida);
+    int SaveAsXPM(const std::string& strFileName);
+    int SaveAsMatrixMarketFile(const std::string& strFileName, const std::string& strMatrixName, const std::string& strMatrixDescription);
+    string GetName(void) const;
     void SetOpenBLASNoThreads(int n);
 
-	int Init(void* ida);
-	int Setup(void* ida,
-			  N_Vector	vectorVariables, 
-			  N_Vector	vectorTimeDerivatives, 
-			  N_Vector	vectorResiduals,
-			  N_Vector	vectorTemp1, 
-			  N_Vector	vectorTemp2, 
-			  N_Vector	vectorTemp3);
-	int Solve(void* ida,
-			  N_Vector	b, 
-			  N_Vector	weight, 
-			  N_Vector	vectorVariables,
-			  N_Vector	vectorTimeDerivatives, 
-			  N_Vector	vectorResiduals);
-	int Free(void* ida);
+    int Init(void* ida);
+    int Setup(void* ida,
+              N_Vector	vectorVariables,
+              N_Vector	vectorTimeDerivatives,
+              N_Vector	vectorResiduals,
+              N_Vector	vectorTemp1,
+              N_Vector	vectorTemp2,
+              N_Vector	vectorTemp3);
+    int Solve(void* ida,
+              N_Vector	b,
+              N_Vector	weight,
+              N_Vector	vectorVariables,
+              N_Vector	vectorTimeDerivatives,
+              N_Vector	vectorResiduals);
+    int Free(void* ida);
+
+    std::map<std::string, real_t> GetEvaluationCallsStats();
 
 #ifdef daeSuperLU_MT
-	superlumt_options_t& GetOptions(void);
+    superlumt_options_t& GetOptions(void);
 #endif
 
 #ifdef daeSuperLU
-	superlu_options_t& GetOptions(void);
+    superlu_options_t& GetOptions(void);
 #endif
-	
+
 protected:
-	void InitializeSuperLU(size_t nnz);
-	void FreeMemory(void);
-	void PrintStats(void);
-	
+    void InitializeSuperLU(size_t nnz);
+    void FreeMemory(void);
+    void PrintStats(void);
+
 public:
-	daeBlock_t*			m_pBlock;
-	int					m_nNoEquations;  
-	real_t*				m_vecB;
-	real_t*				m_vecX;
-	daeDAESolver_t*		m_pDAESolver;
-	size_t				m_nJacobianEvaluations;
-	
+    daeBlock_t*			m_pBlock;
+    int					m_nNoEquations;
+    real_t*				m_vecB;
+    real_t*				m_vecX;
+    daeDAESolver_t*		m_pDAESolver;
+    size_t				m_nJacobianEvaluations;
+
     daeRawDataArray<real_t>	m_arrValues;
     daeRawDataArray<real_t>	m_arrTimeDerivatives;
     daeRawDataArray<real_t>	m_arrResiduals;
     daeSuperLUMatrix        m_matJacobian;
     bool                    m_bFactorizationDone;
-	
+
+    size_t m_nNumberOfSetupCalls;
+    size_t m_nNumberOfSolveCalls;
+    real_t m_SetupTime;
+    real_t m_SolveTime;
+
+    int m_omp_num_threads;
+
 #ifdef daeSuperLU_MT
-	SuperMatrix			m_matA;
-	SuperMatrix			m_matB;
-	SuperMatrix			m_matX;
-	SuperMatrix			m_matL;	
-	SuperMatrix			m_matU;	
-	SuperMatrix			m_matAC;
+    SuperMatrix			m_matA;
+    SuperMatrix			m_matB;
+    SuperMatrix			m_matX;
+    SuperMatrix			m_matL;
+    SuperMatrix			m_matU;
+    SuperMatrix			m_matAC;
 
     superlumt_options_t	m_Options;
     Gstat_t				m_Stats;
@@ -113,13 +122,13 @@ public:
     int*				m_perm_c;
     int*				m_perm_r;
 #endif
-	
+
 #ifdef daeSuperLU
     SuperMatrix			m_matA;
-	SuperMatrix			m_matB;
-	SuperMatrix			m_matX;
-	SuperMatrix			m_matL;	
-	SuperMatrix			m_matU;	
+    SuperMatrix			m_matB;
+    SuperMatrix			m_matX;
+    SuperMatrix			m_matL;
+    SuperMatrix			m_matU;
     SuperMatrix			m_matAC;
 
     superlu_options_t	m_Options;
@@ -130,22 +139,22 @@ public:
     int*				m_etree;
     real_t*				m_R;
     real_t*				m_C;
-	char				m_equed;
+    char				m_equed;
     real_t				m_ferr;
     real_t				m_berr;
-	
-	int					m_lwork;
-	void*				m_work;
+
+    int					m_lwork;
+    void*				m_work;
     int*				m_perm_c;
     int*				m_perm_r;
-	
-	int					m_iFactorization;
-	bool				m_bUseUserSuppliedWorkSpace;
-	double				m_dWorkspaceMemoryIncrement;
-	double				m_dWorkspaceSizeMultiplier;
+
+    int					m_iFactorization;
+    bool				m_bUseUserSuppliedWorkSpace;
+    double				m_dWorkspaceMemoryIncrement;
+    double				m_dWorkspaceSizeMultiplier;
 #endif
-	
-	double m_solve, m_factorize;
+
+    double m_solve, m_factorize;
 };
 
 #ifdef daeSuperLU

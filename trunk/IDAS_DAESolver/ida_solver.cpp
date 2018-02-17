@@ -614,7 +614,7 @@ void daeIDASolver::RefreshEquationSetAndRootFunctions(void)
     if(!m_pBlock)
         daeDeclareAndThrowException(exInvalidPointer);
 
-    m_pBlock->RebuildActiveEquationSetAndRootExpressions();
+    m_pBlock->RebuildActiveEquationSetAndRootExpressions(m_bCalculateSensitivities);
     nNoRoots = m_pBlock->GetNumberOfRoots();
 
     retval = IDARootInit(m_pIDA, (int)nNoRoots, roots);

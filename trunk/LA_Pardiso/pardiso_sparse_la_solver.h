@@ -56,6 +56,8 @@ public:
               N_Vector	vectorResiduals);
     int Free(void* ida);
 
+    std::map<std::string, real_t> GetEvaluationCallsStats();
+
 protected:
     void InitializePardiso(size_t nnz);
     void ResetMatrix(size_t nnz);
@@ -86,6 +88,11 @@ public:
     daeRawDataArray<real_t>	m_arrTimeDerivatives;
     daeRawDataArray<real_t>	m_arrResiduals;
     daeMKLMatrix            m_matJacobian;
+
+    size_t m_nNumberOfSetupCalls;
+    size_t m_nNumberOfSolveCalls;
+    real_t m_SetupTime;
+    real_t m_SolveTime;
 };
 
 }

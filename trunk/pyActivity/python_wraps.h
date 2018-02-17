@@ -59,6 +59,22 @@ boost::python::list getListFromVectorByValue(const ITEM* pItems, size_t n)
     return l;
 }
 
+template<typename KEY, typename VALUE>
+boost::python::dict getDictFromMapByValue(std::map<KEY,VALUE>& mapItems)
+{
+    boost::python::dict res;
+    typename std::map<KEY,VALUE>::iterator iter;
+
+    for(iter = mapItems.begin(); iter != mapItems.end(); iter++)
+    {
+        KEY   key = iter->first;
+        VALUE val = iter->second;
+        res[key] = val;
+    }
+
+    return res;
+}
+
 class daeSimulationWrapper : public daeSimulation_t,
                              public boost::python::wrapper<daeSimulation_t>
 {
@@ -613,6 +629,12 @@ public:
         }
 
         daeSimulation::SetReportingTimes(darrReportingTimes);
+    }
+
+    boost::python::dict GetEvaluationCallsStats_()
+    {
+        std::map<std::string, real_t> stats = GetEvaluationCallsStats();
+        return getDictFromMapByValue(stats);
     }
 
 public:

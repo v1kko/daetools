@@ -67,6 +67,7 @@ PROJECT:
         nlopt               Build NLOPT nlp solver and its python extension module (pyNLOPT).
         deal.ii             Build deal.II FEM library and its python extension module (pyDealII).
         cape_open_thermo    Build Cape Open thermo-physical property package library (cdaeCapeOpenThermoPackage.dll, Windows only).
+        opencl              Build OpenCL compute stack evaluator python extension module (pyEvaluator_OpenCL).
 EOF
 }
 
@@ -214,7 +215,6 @@ fi
 if [ ${Ncpu} -gt 1 ]; then
   Ncpu=$(($Ncpu+1))
 fi
-Ncpu=3
 
 MAKE="make"
 if [ ${PLATFORM} = "Windows" ]; then
@@ -299,6 +299,7 @@ do
     nlopt)            ;; 
     deal.ii)          ;; 
     cape_open_thermo) ;; 
+    opencl)           ;;
     *) echo Unrecognized project: "$project"
        exit
        ;;
@@ -474,6 +475,10 @@ do
             
         cape_open_thermo) compile_cape_open_thermo
                           ;;
+        
+        opencl) compile Evaluator_OpenCL   "-j1"
+                compile pyEvaluator_OpenCL "-j1"
+                ;;
         
         *) echo "??????????????????????"
            echo Unrecognized project: "$project"

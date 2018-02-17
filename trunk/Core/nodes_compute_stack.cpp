@@ -138,7 +138,7 @@ void adNode::CreateComputeStack(adNode* adnode, std::vector<adComputeStackItem_t
     else if( dynamic_cast<adRuntimeVariableNode*>(adnode) )
     {
         /* Important:
-         *   vnode->m_bIsAssigned and vnode->m_nBlockIndex might not be initialised at he moment of creation
+         *   vnode->m_bIsAssigned and vnode->m_nBlockIndex might not be initialised at the moment of creation
          *   of the compute stack (if it is created after SolveInitial then they are available).
          *   Therefore, use the information from the block.
          */

@@ -57,6 +57,16 @@ Again, the Dirichlet boundary conditions are used:
    v(x,  LB) = vm(x,  LB)
    v(x,  UB) = vm(x,  UB)
 
+Steady-state results (w0 = 0.0) for the u-component:
+    
+.. image:: _static/tutorial_cv_4-u_component.png
+   :width: 500px
+
+Steady-state results (w0 = 0.0) for the v-component:
+    
+.. image:: _static/tutorial_cv_4-v_component.png
+   :width: 500px
+
 Numerical vs. manufactured solution plot (u velocity component, 40x32 grid):
 
 .. image:: _static/tutorial_cv_4-results.png
@@ -86,7 +96,7 @@ class modTutorial(daeModel):
 
         self.u0  = 1.0
         self.v0  = 1.0
-        self.w0  = 0.1
+        self.w0  = 0.0
         self.ni  = 0.7
         self.eps = 0.001
 
@@ -99,11 +109,11 @@ class modTutorial(daeModel):
         daeModel.DeclareEquations(self)
 
         # Create some auxiliary functions to make equations more readable 
-        u0       = self.u0
-        v0       = self.v0
-        ni       = self.ni
-        w0       = self.w0
-        eps      = self.eps
+        u0      = self.u0
+        v0      = self.v0
+        ni      = self.ni
+        w0      = self.w0
+        eps     = self.eps
         t       = Time()
         
         u       = lambda x,y: self.u(x,y)
@@ -246,7 +256,7 @@ class simTutorial(daeSimulation):
                 self.m.v.SetInitialCondition(x,y, vm0(xp[x], yp[y]))
                 
 # Setup everything manually and run in a console
-def simulate(Nx, Ny):
+def simulate(Nx, Ny, **kwargs):
     # Create Log, Solver, DataReporter and Simulation object
     log          = daePythonStdOutLog()
     daesolver    = daeIDAS()
@@ -257,24 +267,14 @@ def simulate(Nx, Ny):
     log.PrintProgress = False
 
     lasolver = pySuperLU.daeCreateSuperLUSolver()
-    daesolver.SetLASolver(lasolver)
-
-    # Enable reporting of all variables
-    simulation.m.SetReportingOn(True)
 
     # Enable reporting of time derivatives for all reported variables
     simulation.ReportTimeDerivatives = True
 
-    # Set the time horizon and the reporting interval
-    simulation.ReportingInterval = 2
-    simulation.TimeHorizon = 90
-
-    # Connect data reporter
-    simName = simulation.m.Name + strftime(" [%d.%m.%Y %H:%M:%S]", localtime())
-
     # 1. TCP/IP
     tcpipDataReporter = daeTCPIPDataReporter()
     datareporter.AddDataReporter(tcpipDataReporter)
+    simName = simulation.m.Name + strftime(" [%d.%m.%Y %H:%M:%S]", localtime())
     if not tcpipDataReporter.Connect("", simName):
         sys.exit()
 
@@ -282,20 +282,11 @@ def simulate(Nx, Ny):
     dr = daeNoOpDataReporter()
     datareporter.AddDataReporter(dr)
 
-    # Initialize the simulation
-    simulation.Initialize(daesolver, datareporter, log)
-
-    # Save the model report and the runtime model report
-    #simulation.m.SaveModelReport(simulation.m.Name + ".xml")
-    #simulation.m.SaveRuntimeModelReport(simulation.m.Name + "-rt.xml")
-
-    # Solve at time=0 (initialization)
-    simulation.SolveInitial()
-
-    # Run
-    simulation.Run()
-    simulation.Finalize()
-    
+    daeActivity.simulate(simulation, reportingInterval = 2.0, 
+                                     timeHorizon       = 90.0,
+                                     lasolver          = lasolver,
+                                     datareporter      = datareporter,
+                                     **kwargs)    
     
     ###########################################
     #  Data                                   #
@@ -311,7 +302,7 @@ def simulate(Nx, Ny):
     um = umvar.Values[-1, :, :] # 3D array [t,x,y]
     vm = vmvar.Values[-1, :, :] # 3D array [t,x,y]
     
-    return times,u,v,um,vm
+    return times,u,v,um,vm, simulation
 
 def run(**kwargs):
     Nxs = numpy.array([10, 20, 40, 80])
@@ -331,7 +322,7 @@ def run(**kwargs):
     for i in range(n):
         Nx = int(Nxs[i])
         Ny = int(Nys[i])
-        times, u, v, um, vm = simulate(Nx, Ny)
+        times, u, v, um, vm, simulation = simulate(Nx, Ny, **kwargs)
         Eu[i] = numpy.sqrt((1.0/(Nx*Ny)) * numpy.sum((u-um)**2))
         Ev[i] = numpy.sqrt((1.0/(Nx*Ny)) * numpy.sum((v-vm)**2))
 
@@ -353,12 +344,17 @@ def run(**kwargs):
     Eu2 = C2u * hs**2 # Eu for the second order slope
     Ev2 = C2v * hs**2 # Ev for the second order slope
     
+    print('Eu2 =', Eu2)
+    print('Ev2 =', Ev2)
+    print('pu ', pu)
+    print('pv =', pv)
+    
     fontsize = 14
     fontsize_legend = 11
     fig = plt.figure(figsize=(10,8), facecolor='white')
     grids = ['%dx%d' % (Nx,Ny) for (Nx,Ny) in zip(Nxs,Nys)]
     grids = ','.join(grids)
-    fig.canvas.set_window_title('The Normalised global errors and the Orders of accuracy (grids: %s)' % grids)
+    fig.canvas.set_window_title('The Normalised global errors and the Orders of accuracy (grids: %s) (cv_4)' % grids)
     
     ax = plt.subplot(221)
     plt.figure(1, facecolor='white')

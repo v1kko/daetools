@@ -183,7 +183,8 @@ def simulate(run_no, n, B, gamma, psi, theta_a, x_0, theta_0, sequential):
     # the overall performance.
     cfg  = daeGetConfig()
     if not sequential:
-        cfg.SetBoolean("daetools.core.equations.parallelEvaluation", False)
+        cfg.SetString("daetools.core.equations.evaluationMode", "evaluationTree_OpenMP")
+        cfg.SetInteger("daetools.core.equations.evaluationTree_OpenMP.numThreads", 1)
         
     # Create Log, Solver, DataReporter and Simulation object
     log          = daePythonStdOutLog()
@@ -439,6 +440,7 @@ def run(**kwargs):
     fontsize = 14
     fontsize_legend = 11
     fig = plt.figure(figsize=(10,8), facecolor='white')
+    fig.canvas.set_window_title('Tutorial sa_3')
 
     ax = plt.subplot(231)
     plt.scatter(B, max_rise_T, c='b', s=6)

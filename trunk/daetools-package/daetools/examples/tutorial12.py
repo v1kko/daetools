@@ -119,7 +119,9 @@ def createLASolver():
 
     elif lasolver.Name == 'SuperLU_MT':
         # SuperLU_MT options:
-        options.nprocs            = 4                 # No. of threads (= no. of CPUs/Cores)
+        # Leave nprocs to default (specified in daetools.cfg) or specify it manually
+        #options.nprocs           = 4                 # No. of threads (= no. of CPUs/Cores)
+        print('SuperLU_MT numThreads = %d' % options.nprocs)
         options.PrintStat         = superlu.YES       # {YES, NO}
         options.ColPerm           = superlu.COLAMD    # {NATURAL, MMD_ATA, MMD_AT_PLUS_A, COLAMD}
         options.diag_pivot_thresh = 1.0               # Between 0.0 and 1.0

@@ -198,9 +198,9 @@ void daeFiniteElementModel::DeclareEquationsForWeakForm(void)
     }
 }
 
-void daeFiniteElementModel::UpdateEquations(const daeExecutionContext* pExecutionContext)
+void daeFiniteElementModel::UpdateEquations()
 {
-    daeModel::UpdateEquations(pExecutionContext);
+    daeModel::UpdateEquations();
 
     // Here we call ReAssembleSystem() to update the system matrices and rhs if the flag NeedsReAssembling is set.
     if(m_fe->NeedsReAssembling())

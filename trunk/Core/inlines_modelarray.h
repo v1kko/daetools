@@ -36,10 +36,10 @@ public:
             it->CleanUpSetupData();
     }
 
-    virtual void UpdateEquations(const daeExecutionContext* pExecutionContext)
+    virtual void UpdateEquations()
     {
         for(iterator it = this->m_ptrarrObjects.begin(); it != this->m_ptrarrObjects.end(); it++)
-            it->UpdateEquations(pExecutionContext);
+            it->UpdateEquations();
     }
 
     virtual void BuildExpressions(daeBlock* pBlock)

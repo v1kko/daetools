@@ -306,8 +306,11 @@ class simTutorial(daeSimulation):
 def run(**kwargs):
     simulation = simTutorial()
     relativeTolerance = 1e-07
+    from daetools.solvers.superlu import pySuperLU as superlu
+    lasolver = superlu.daeCreateSuperLUSolver()
     return daeActivity.simulate(simulation, reportingInterval = 60,
                                             timeHorizon       = 3000,
+                                            lasolver = lasolver,
                                             relativeTolerance = relativeTolerance,
                                             **kwargs)
 

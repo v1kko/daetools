@@ -165,6 +165,8 @@ def run(**kwargs):
     
     plt.figure(figsize=(8,6), facecolor='white')
     plt.plot(times, dT_dQin, label=r'$\frac{\partial T(t)}{\partial Q_{in}}$')
+    fig = plt.gcf()
+    fig.canvas.set_window_title('Tutorial sa_1')
     plt.xlabel('Time (s)', fontsize=fontsize)
     plt.ylabel('dT/dQin', fontsize=fontsize)
     plt.legend(fontsize=fontsize_legend)

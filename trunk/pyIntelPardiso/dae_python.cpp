@@ -29,11 +29,12 @@ BOOST_PYTHON_MODULE(pyIntelPardiso)
         ;
 
     class_<daeIntelPardisoSolver, bases<daeIDALASolver_t>, boost::noncopyable>("daeIntelPardisoSolver")
-        .add_property("Name",			&daeIntelPardisoSolver::GetName)
-        .def("get_iparm",               &daepython::daeIntelPardisoSolver_get_iparm)
-        .def("set_iparm",               &daepython::daeIntelPardisoSolver_set_iparm)
-        .def("SaveAsXPM",				&daeIntelPardisoSolver::SaveAsXPM)
-        .def("SaveAsMatrixMarketFile",	&daeIntelPardisoSolver::SaveAsMatrixMarketFile)
+        .add_property("Name",                   &daeIntelPardisoSolver::GetName)
+        .add_property("EvaluationCallsStats",   &daepython::GetEvaluationCallsStats_)
+        .def("get_iparm",                       &daepython::daeIntelPardisoSolver_get_iparm)
+        .def("set_iparm",                       &daepython::daeIntelPardisoSolver_set_iparm)
+        .def("SaveAsXPM",                       &daeIntelPardisoSolver::SaveAsXPM)
+        .def("SaveAsMatrixMarketFile",          &daeIntelPardisoSolver::SaveAsMatrixMarketFile)
         ;
 
     def("daeCreateIntelPardisoSolver", daeCreateIntelPardisoSolver, return_value_policy<manage_new_object>());

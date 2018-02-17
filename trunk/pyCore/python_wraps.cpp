@@ -272,7 +272,7 @@ void SetInteger(daeConfig& self, const std::string& strPropertyPath, int value)
     self.SetInteger(strPropertyPath, value);
 }
 
-void SetString(daeConfig& self, const std::string& strPropertyPath, std::string& value)
+void SetString(daeConfig& self, const std::string& strPropertyPath, const std::string& value)
 {
     self.SetString(strPropertyPath, value);
 }
@@ -972,6 +972,8 @@ string adComputeStackItem__repr__(const adComputeStackItem_t& self)
             res += string("eArcTanh");
         else if(eValue == eErf)
             res += string("eErf");
+        else if(eValue == eScaling)
+            res += string("eScaling");
         else
             res += string("unknown");
     }
@@ -5461,6 +5463,11 @@ boost::python::dict daeModel_dictPortConnections(daeModel& self)
 boost::python::dict daeModel_dictEventPortConnections(daeModel& self)
 {
     return getDictFromObjectArray(self.EventPortConnections());
+}
+
+boost::python::list daeModel_GetComputeStack(daeModel& self)
+{
+    return getListFromVectorByValue(self.GetComputeStack());
 }
 
 /*******************************************************

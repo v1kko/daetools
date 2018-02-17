@@ -45,6 +45,7 @@ import sys, math, numpy
 from time import localtime, strftime
 import matplotlib.pyplot as plt
 from daetools.pyDAE import *
+from daetools.solvers.superlu import pySuperLU
 
 # Standard variable types are defined in variable_types.py
 from pyUnits import m, g, kg, s, K, mol, kmol, J, um
@@ -103,7 +104,7 @@ class simTutorial(daeSimulation):
             self.m.c.SetInitialCondition(i, numpy.sin(pi*xp[i]))
 
 # Setup everything manually and run in a console
-def simulate(Nx):
+def simulate(Nx, **kwargs):
     # Create Log, Solver, DataReporter and Simulation object
     log          = daePythonStdOutLog()
     daesolver    = daeIDAS()
@@ -113,21 +114,14 @@ def simulate(Nx):
     # Do no print progress
     log.PrintProgress = False
 
+    lasolver = pySuperLU.daeCreateSuperLUSolver()
+
     daesolver.RelativeTolerance = 1e-7
     
-    # Enable reporting of all variables
-    simulation.m.SetReportingOn(True)
-
-    # Set the time horizon and the reporting interval
-    simulation.ReportingInterval = 0.02
-    simulation.TimeHorizon = dt
-
-    # Connect data reporter
-    simName = simulation.m.Name + strftime(" [%d.%m.%Y %H:%M:%S]", localtime())
-
     # 1. TCP/IP
     tcpipDataReporter = daeTCPIPDataReporter()
     datareporter.AddDataReporter(tcpipDataReporter)
+    simName = simulation.m.Name + strftime(" [%d.%m.%Y %H:%M:%S]", localtime())
     if not tcpipDataReporter.Connect("", simName):
         sys.exit()
 
@@ -135,19 +129,11 @@ def simulate(Nx):
     dr = daeNoOpDataReporter()
     datareporter.AddDataReporter(dr)
 
-    # Initialize the simulation
-    simulation.Initialize(daesolver, datareporter, log)
-
-    # Save the model report and the runtime model report
-    #simulation.m.SaveModelReport(simulation.m.Name + ".xml")
-    #simulation.m.SaveRuntimeModelReport(simulation.m.Name + "-rt.xml")
-
-    # Solve at time=0 (initialization)
-    simulation.SolveInitial()
-
-    # Run
-    simulation.Run()
-    simulation.Finalize()
+    daeActivity.simulate(simulation, reportingInterval = 0.02, 
+                                     timeHorizon       = dt,
+                                     lasolver          = lasolver,
+                                     datareporter      = datareporter,
+                                     **kwargs)
     
     ###########################################
     #  Data                                   #
@@ -157,7 +143,7 @@ def simulate(Nx):
     cvar = results[simulation.m.Name + '.c']
     c    = cvar.Values[-1, :]  # 2D array [t,x]
     
-    return simulation.m.x.Points, c
+    return simulation.m.x.Points, c, simulation
 
 def run(**kwargs):
     Nxs = numpy.array([20, 40, 80])
@@ -167,7 +153,7 @@ def run(**kwargs):
     
     # Run simulations
     for i,Nx in enumerate(Nxs):
-        nx, c_ = simulate(int(Nx))
+        nx, c_, simulation = simulate(int(Nx), **kwargs)
         # Exact solution:
         cexact_ = []
         for xk in nx:
@@ -181,6 +167,7 @@ def run(**kwargs):
     fontsize = 14
     fontsize_legend = 11
     fig = plt.figure(figsize=(12,4), facecolor='white')
+    fig.canvas.set_window_title('Tutorial cv_6')
     
     ax = plt.subplot(131)
     plt.figure(1, facecolor='white')

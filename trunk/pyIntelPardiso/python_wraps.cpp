@@ -5,6 +5,22 @@ using namespace boost::python;
 
 namespace daepython
 {
+template<typename KEY, typename VALUE>
+boost::python::dict getDictFromMapByValue(std::map<KEY,VALUE>& mapItems)
+{
+    boost::python::dict res;
+    typename std::map<KEY,VALUE>::iterator iter;
+
+    for(iter = mapItems.begin(); iter != mapItems.end(); iter++)
+    {
+        KEY   key = iter->first;
+        VALUE val = iter->second;
+        res[key] = val;
+    }
+
+    return res;
+}
+
 boost::python::list daeIntelPardisoSolver_get_iparm(daeIntelPardisoSolver& self)
 {
     boost::python::list l;
@@ -28,6 +44,12 @@ void daeIntelPardisoSolver_set_iparm(daeIntelPardisoSolver& self, boost::python:
 
     for(boost::python::ssize_t i = 0; i < n; i++)
         self.iparm[i] = extract<int>(l_iparm[i]);
+}
+
+boost::python::dict GetEvaluationCallsStats_(daeIntelPardisoSolver& self)
+{
+    std::map<std::string, real_t> stats = self.GetEvaluationCallsStats();
+    return getDictFromMapByValue(stats);
 }
 
 }

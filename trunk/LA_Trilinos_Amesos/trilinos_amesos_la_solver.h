@@ -254,6 +254,8 @@ public:
               N_Vector	vectorResiduals);
     int Free(void* ida);
 
+    std::map<std::string, real_t> GetEvaluationCallsStats();
+
     bool SetupLinearProblem(void);
     void PrintPreconditionerInfo(void);
 
@@ -308,6 +310,11 @@ public:
     daeEpetraCSRMatrix		m_matJacobian;
     size_t					m_nJacobianEvaluations;
     bool					m_bMatrixStructureChanged;
+
+    size_t m_nNumberOfSetupCalls;
+    size_t m_nNumberOfSolveCalls;
+    real_t m_SetupTime;
+    real_t m_SolveTime;
 
 /* AMESOS */
     boost::shared_ptr<Amesos_BaseSolver>	m_pAmesosSolver;

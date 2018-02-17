@@ -327,7 +327,7 @@ def run(**kwargs):
     fontsize = 14
     fontsize_legend = 11
     fig = plt.figure(figsize=(10,4), facecolor='white')
-    title = 'Plots for coarse and fine grids (Order of accuracy = %.2f, quadrature order = %d)' % (p, quadratureFormulaOrder)
+    title = 'Plots for coarse and fine grids (Order of accuracy = %.2f, quadrature order = %d) (cv_5)' % (p, quadratureFormulaOrder)
     fig.canvas.set_window_title(title)
     
     ax = plt.subplot(121)

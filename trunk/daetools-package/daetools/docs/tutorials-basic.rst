@@ -94,6 +94,12 @@ Basic Tutorials
 :ref:`tutorial20`         |t_20|
 =======================   =================================================================
 
+.. rubric:: Equation evaluation modes:
+
+=======================   =================================================================
+:ref:`tutorial21`         |t_21|
+=======================   =================================================================
+
 
 .. |witt| replace:: Importing DAE Tools pyDAE module(s), units and variable types
                     developing models, setting up a simulation, declaring auxiliary
@@ -147,6 +153,7 @@ Basic Tutorials
 
 .. |t_20| replace:: Specifying variable constraints in DAE Tools.
 
+.. |t_21| replace:: Specifying different equation evaluation modes and evaluators.
 
 .. begin-command
 
@@ -522,6 +529,22 @@ Tutorial 20
 
 =====================   =================================================================
 Source code             `tutorial20.py <../examples/tutorial20.html>`_
+=====================   =================================================================
+
+
+.. _tutorial21:
+
+Tutorial 21
+===========
+
+.. automodule:: daetools.examples.tutorial21
+   :no-members:
+   :no-undoc-members:
+
+.. rubric:: Files
+
+=====================   =================================================================
+Source code             `tutorial21.py <../examples/tutorial21.html>`_
 =====================   =================================================================
 
 

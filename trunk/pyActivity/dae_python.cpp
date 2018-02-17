@@ -113,6 +113,14 @@ BOOST_PYTHON_MODULE(pyActivity)
         .add_property("RelativeTolerance",      &daepython::daeDefaultSimulationWrapper::GetRelativeTolerance,      DOCSTR_daeSimulation_RelativeTolerance)
         .add_property("AbsoluteTolerances",     &daepython::daeDefaultSimulationWrapper::GetAbsoluteTolerances,     DOCSTR_daeSimulation_AbsoluteTolerances)
 
+        .def_readonly("InitializationDuration", &daeSimulation::m_InitializationDuration)
+        .def_readonly("SolveInitialDuration",   &daeSimulation::m_SolveInitalDuration)
+        .def_readonly("IntegrationDuration",    &daeSimulation::m_IntegrationDuration)
+
+
+        .add_property("EvaluationMode",         &daeSimulation::GetEvaluationMode,
+                                                &daeSimulation::SetEvaluationMode,                          DOCSTR_daeSimulation_EvaluationMode)
+
         .add_property("LastSatisfiedCondition", make_function(&daeSimulation::GetLastSatisfiedCondition, return_internal_reference<>()),
                                                                                                             DOCSTR_daeSimulation_LastSatisfiedCondition)
 
@@ -165,6 +173,11 @@ BOOST_PYTHON_MODULE(pyActivity)
 
         .add_property("StopAtModelDiscontinuity",        &daeSimulation::GetStopAtModelDiscontinuity,        &daeSimulation::SetStopAtModelDiscontinuity)
         .add_property("ReportDataAroundDiscontinuities", &daeSimulation::GetReportDataAroundDiscontinuities, &daeSimulation::SetReportDataAroundDiscontinuities)
+
+        .add_property("EvaluationCallsStats",           &daepython::daeDefaultSimulationWrapper::GetEvaluationCallsStats_)
+
+        .def("SetComputeStackEvaluator",    &daeSimulation::SetComputeStackEvaluator,
+                                            ( arg("self"), arg("computeStackEvaluator") ), DOCSTR_daeSimulation_SetComputeStackEvaluator)
 
         .def("SetUpParametersAndDomains",   &daeSimulation::SetUpParametersAndDomains, &daepython::daeDefaultSimulationWrapper::def_SetUpParametersAndDomains,
                                             ( arg("self") ), DOCSTR_daeSimulation_SetUpParametersAndDomains)

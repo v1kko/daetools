@@ -99,10 +99,27 @@ adouble _pow_(const adouble a, const adouble b)
 {
     adouble tmp;
     
-    tmp.m_dValue = pow(a.m_dValue, b.m_dValue);
-    real_t tmp2 = b.m_dValue * pow(a.m_dValue, b.m_dValue-1);
-    real_t tmp3 = log(a.m_dValue) * tmp.m_dValue;
-    tmp.m_dDeriv = tmp2 * a.m_dDeriv + tmp3 * b.m_dDeriv;
+    if(b.m_dDeriv == 0)
+    {
+        /* To avoid logarithm of a negative number assume we have pow(adouble, const). */
+        tmp.m_dValue = pow(a.m_dValue, b.m_dValue);
+        real_t tmp2 = b.m_dValue * pow(a.m_dValue, b.m_dValue-1);
+        tmp.m_dDeriv = tmp2 * a.m_dDeriv;
+    }
+    else if(a.m_dValue <= 0)
+    {
+        /* Power function called for a negative base. */
+        tmp.m_dValue = _makeNaN_();
+        tmp.m_dDeriv = _makeNaN_();
+    }
+    else
+    {
+        tmp.m_dValue = pow(a.m_dValue, b.m_dValue);
+        real_t tmp2 = b.m_dValue * pow(a.m_dValue, b.m_dValue-1);
+        real_t tmp3 = log(a.m_dValue) * tmp.m_dValue;
+        tmp.m_dDeriv = tmp2 * a.m_dDeriv + tmp3 * b.m_dDeriv;
+    }
+
     return tmp;
 }
 
@@ -110,9 +127,18 @@ adouble _log10_(const adouble a)
 {
     adouble tmp;
     
-    tmp.m_dValue = log10(a.m_dValue);
-    real_t tmp2 = log((real_t)10) * a.m_dValue;
-    tmp.m_dDeriv = a.m_dDeriv / tmp2;
+    if(a.m_dValue <= 0)
+    {
+        /* log10(number) = NaN if the number is <= 0 */
+        tmp.m_dValue = _makeNaN_();
+        tmp.m_dDeriv = _makeNaN_();
+    }
+    else
+    {
+        tmp.m_dValue = log10(a.m_dValue);
+        real_t tmp2 = log((real_t)10) * a.m_dValue;
+        tmp.m_dDeriv = a.m_dDeriv / tmp2;
+    }
     return tmp;
 }
 
@@ -129,8 +155,17 @@ adouble _log_(const adouble a)
 {
     adouble tmp;
     
-    tmp.m_dValue = log(a.m_dValue);
-    tmp.m_dDeriv = a.m_dDeriv / a.m_dValue;
+    if(a.m_dValue <= 0)
+    {
+        /* log(number) = NaN if the number is <= 0 */
+        tmp.m_dValue = _makeNaN_();
+        tmp.m_dDeriv = _makeNaN_();
+    }
+    else
+    {
+        tmp.m_dValue = log(a.m_dValue);
+        tmp.m_dDeriv = a.m_dDeriv / a.m_dValue;
+    }
     return tmp;
 }
 
@@ -260,25 +295,66 @@ adouble _atan_(const adouble a)
 adouble _sinh_(const adouble a)
 {
     adouble tmp;
-    tmp.m_dValue = sinh(a.m_dValue);
-    tmp.m_dDeriv = a.m_dDeriv / sqrt(a.m_dValue*a.m_dValue + 1);
+    const adouble c1  = {1.0, 0.0};
+    const adouble c05 = {0.5, 0.0};
+
+    if(a.m_dValue < 0.0)
+    {
+        tmp = _exp_(a);
+        tmp1 = _divide_(c1, tmp);
+        tmp2 = _minus_(tmp, tmp1);
+        return _multi_(c05, tmp2);
+        /*return 0.5*(tmp - 1.0/tmp);*/
+    }
+    else
+    {
+        tmp = _exp_(_sign_(a));
+        tmp1 = _divide_(c1, tmp);
+        tmp2 = _minus_(tmp1, tmp);
+        return _multi_(c05, tmp2);
+        /*return 0.5*(1.0/tmp - tmp);*/
+    }
     return tmp;
 }
 
 adouble _cosh_(const adouble a)
 {
     adouble tmp;
-    tmp.m_dValue = cosh(a.m_dValue);
-    tmp.m_dDeriv = a.m_dDeriv / sqrt(a.m_dValue*a.m_dValue - 1);
-    return tmp;
+    const adouble c1  = {1.0, 0.0};
+    const adouble c05 = {0.5, 0.0};
+
+    if(a.m_dValue < 0.0)
+        tmp = _exp_(a);
+    else
+        tmp = _exp_(_sign_(a));
+    tmp1 = _divide_(c1, tmp);
+    tmp2 = _plus_(tmp, tmp1);
+    return _multi_(c05, tmp2);
+    /*return 0.5*(tmp + 1.0/tmp);*/
 }
 
 adouble _tanh_(const adouble a)
 {
-    adouble tmp;
-    tmp.m_dValue = tanh(a.m_dValue);
-    tmp.m_dDeriv = a.m_dDeriv / (1 - a.m_dValue*a.m_dValue);
-    return tmp;
+    adouble tmp, tmp1, tmp2;
+    const adouble c1 = {1.0, 0.0};
+    const adouble c2 = {2.0, 0.0};
+    if(a.m_dValue < 0.0)
+    {
+        tmp = _exp_(_multi_(c2, a));
+        /*tmp = exp(2.0*a);*/
+        tmp1 = _minus_(tmp, c1);
+        tmp2 = _plus_(tmp, c1);
+        /*return (tmp - 1.0)/(tmp + 1.0);*/
+    }
+    else
+    {
+        tmp = _exp_(_multi_(_sign_(c2), a));
+        /*tmp = exp(-2.0*a);*/
+        tmp1 = _minus_(c1, tmp);
+        tmp2 = _plus_(tmp, c1);
+        /*return (1.0 - tmp)/(tmp + 1.0);*/
+    }
+    return _divide_(tmp1, tmp2);
 }
 
 adouble _asinh_(const adouble a)

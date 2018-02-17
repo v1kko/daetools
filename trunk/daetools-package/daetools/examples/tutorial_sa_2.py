@@ -213,6 +213,8 @@ def run(**kwargs):
     
     ax = plt.subplot(221)
     plt.figure(1, facecolor='white')
+    fig = plt.gcf()
+    fig.canvas.set_window_title('Tutorial sa_2')
     plt.plot(times, Ca, 'b-', label='Ca')
     plt.plot(times, Cb, 'r-', label='Cb')
     plt.xlabel('time', fontsize=fontsize)

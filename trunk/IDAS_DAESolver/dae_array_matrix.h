@@ -190,6 +190,17 @@ public:
         return NULL;
     }
 
+    real_t* GetData()
+    {
+        if(!data)
+            daeDeclareAndThrowException(exInvalidPointer);
+        if(data_access != eColumnWise)
+            daeDeclareAndThrowException(exInvalidCall);
+
+        // Returns a pointer to the first element of the 'data' member (a contiguous array in memory).
+        return data[0];
+    }
+
     void InitMatrix(size_t nrows, size_t ncols, real_t** pData, daeeMatrixAccess access)
     {
         Nrow        = nrows;

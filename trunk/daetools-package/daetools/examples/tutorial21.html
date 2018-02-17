@@ -1,0 +1,167 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<meta name="Generator" content="Kate, the KDE Advanced Text Editor" />
+<title>tutorial21.py</title>
+</head>
+<!-- Highlighting: "Python" -->
+<body>
+<pre style='color:#1f1c1b;background-color:#ffffff;'>
+<span style='color:#017a31;'>#!/usr/bin/env python</span>
+<span style='color:#017a31;'># -*- coding: utf-8 -*-</span>
+
+<span style='color:#017a31;'>&quot;&quot;&quot;</span>
+<span style='color:#017a31;'>***********************************************************************************</span>
+<span style='color:#017a31;'>                            tutorial21.py</span>
+<span style='color:#017a31;'>                DAE Tools: pyDAE module, www.daetools.com</span>
+<span style='color:#017a31;'>                Copyright (C) Dragan Nikolic</span>
+<span style='color:#017a31;'>***********************************************************************************</span>
+<span style='color:#017a31;'>DAE Tools is free software; you can redistribute it and/or modify it under the</span>
+<span style='color:#017a31;'>terms of the GNU General Public License version 3 as published by the Free Software</span>
+<span style='color:#017a31;'>Foundation. DAE Tools is distributed in the hope that it will be useful, but WITHOUT</span>
+<span style='color:#017a31;'>ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A</span>
+<span style='color:#017a31;'>PARTICULAR PURPOSE. See the GNU General Public License for more details.</span>
+<span style='color:#017a31;'>You should have received a copy of the GNU General Public License along with the</span>
+<span style='color:#017a31;'>DAE Tools software; if not, see &lt;http://www.gnu.org/licenses/&gt;.</span>
+<span style='color:#017a31;'>************************************************************************************</span>
+<span style='color:#017a31;'>&quot;&quot;&quot;</span>
+__doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc0000;'>&quot;&quot;&quot;</span>
+<span style='color:#cc0000;'>This tutorial introduces the concep of compute stack evaluators.</span>
+<span style='color:#cc0000;'>At the moment, there is only one implementation: OpenCl.</span>
+
+<span style='color:#cc0000;'>&quot;&quot;&quot;</span>
+
+<span style='color:#3605fb;'>import</span> os, sys, tempfile
+<span style='color:#3605fb;'>from</span> time <span style='color:#3605fb;'>import</span> localtime, strftime
+<span style='color:#3605fb;'>from</span> daetools.pyDAE <span style='color:#3605fb;'>import</span> <b><span style='color:#0000ff;'>*</span></b>
+<span style='color:#3605fb;'>from</span> daetools.solvers.superlu <span style='color:#3605fb;'>import</span> pySuperLU
+<span style='color:#3605fb;'>from</span> daetools.pyDAE.evaluator_opencl <span style='color:#3605fb;'>import</span> pyEvaluator_OpenCL
+
+<span style='color:#017a31;'># Standard variable types are defined in variable_types.py</span>
+<span style='color:#3605fb;'>from</span> pyUnits <span style='color:#3605fb;'>import</span> m, kg, s, K, Pa, mol, J, W
+
+<b>class</b> modTutorial(daeModel):
+    <b>def</b> <b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#3605fb;'>self</span>, Name, Parent <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>None</span>, Description <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc0000;'>&quot;&quot;</span>):
+        daeModel.<b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#3605fb;'>self</span>, Name, Parent, Description)
+
+        <span style='color:#3605fb;'>self</span>.x <b><span style='color:#0000ff;'>=</span></b> daeDomain(<span style='color:#cc0000;'>&quot;x&quot;</span>, <span style='color:#3605fb;'>self</span>, m, <span style='color:#cc0000;'>&quot;X axis domain&quot;</span>)
+        <span style='color:#3605fb;'>self</span>.y <b><span style='color:#0000ff;'>=</span></b> daeDomain(<span style='color:#cc0000;'>&quot;y&quot;</span>, <span style='color:#3605fb;'>self</span>, m, <span style='color:#cc0000;'>&quot;Y axis domain&quot;</span>)
+
+        <span style='color:#3605fb;'>self</span>.Qb  <b><span style='color:#0000ff;'>=</span></b> daeParameter(<span style='color:#cc0000;'>&quot;Q_b&quot;</span>,         W<b><span style='color:#0000ff;'>/</span></b>(m<b><span style='color:#0000ff;'>**</span></b><span style='color:#cc047c;'>2</span>), <span style='color:#3605fb;'>self</span>, <span style='color:#cc0000;'>&quot;Heat flux at the bottom edge of the plate&quot;</span>)
+        <span style='color:#3605fb;'>self</span>.Tt  <b><span style='color:#0000ff;'>=</span></b> daeParameter(<span style='color:#cc0000;'>&quot;T_t&quot;</span>,                K, <span style='color:#3605fb;'>self</span>, <span style='color:#cc0000;'>&quot;Temperature at the top edge of the plate&quot;</span>)
+        <span style='color:#3605fb;'>self</span>.rho <b><span style='color:#0000ff;'>=</span></b> daeParameter(<span style='color:#cc0000;'>&quot;&amp;rho;&quot;</span>,      kg<b><span style='color:#0000ff;'>/</span></b>(m<b><span style='color:#0000ff;'>**</span></b><span style='color:#cc047c;'>3</span>), <span style='color:#3605fb;'>self</span>, <span style='color:#cc0000;'>&quot;Density of the plate&quot;</span>)
+        <span style='color:#3605fb;'>self</span>.cp  <b><span style='color:#0000ff;'>=</span></b> daeParameter(<span style='color:#cc0000;'>&quot;c_p&quot;</span>,         J<b><span style='color:#0000ff;'>/</span></b>(kg<b><span style='color:#0000ff;'>*</span></b>K), <span style='color:#3605fb;'>self</span>, <span style='color:#cc0000;'>&quot;Specific heat capacity of the plate&quot;</span>)
+        <span style='color:#3605fb;'>self</span>.k   <b><span style='color:#0000ff;'>=</span></b> daeParameter(<span style='color:#cc0000;'>&quot;&amp;lambda;_p&quot;</span>,   W<b><span style='color:#0000ff;'>/</span></b>(m<b><span style='color:#0000ff;'>*</span></b>K), <span style='color:#3605fb;'>self</span>, <span style='color:#cc0000;'>&quot;Thermal conductivity of the plate&quot;</span>)
+       
+        <span style='color:#3605fb;'>self</span>.T <b><span style='color:#0000ff;'>=</span></b> daeVariable(<span style='color:#cc0000;'>&quot;T&quot;</span>, temperature_t, <span style='color:#3605fb;'>self</span>)
+        <span style='color:#3605fb;'>self</span>.T.DistributeOnDomain(<span style='color:#3605fb;'>self</span>.x)
+        <span style='color:#3605fb;'>self</span>.T.DistributeOnDomain(<span style='color:#3605fb;'>self</span>.y)
+        <span style='color:#3605fb;'>self</span>.T.Description <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc0000;'>&quot;Temperature of the plate&quot;</span>
+
+    <b>def</b> DeclareEquations(<span style='color:#3605fb;'>self</span>):
+        daeModel.DeclareEquations(<span style='color:#3605fb;'>self</span>)
+
+        eq <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.CreateEquation(<span style='color:#cc0000;'>&quot;HeatBalance&quot;</span>, <span style='color:#cc0000;'>&quot;Heat balance equation valid on open x and y domains&quot;</span>)
+        x <b><span style='color:#0000ff;'>=</span></b> eq.DistributeOnDomain(<span style='color:#3605fb;'>self</span>.x, eOpenOpen)
+        y <b><span style='color:#0000ff;'>=</span></b> eq.DistributeOnDomain(<span style='color:#3605fb;'>self</span>.y, eOpenOpen)
+        eq.Residual <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.rho() <b><span style='color:#0000ff;'>*</span></b> <span style='color:#3605fb;'>self</span>.cp() <b><span style='color:#0000ff;'>*</span></b> dt(<span style='color:#3605fb;'>self</span>.T(x,y)) <b><span style='color:#0000ff;'>-</span></b> <b><span style='color:#0000ff;'>\</span></b>
+                      <span style='color:#3605fb;'>self</span>.k() <b><span style='color:#0000ff;'>*</span></b> (d2(<span style='color:#3605fb;'>self</span>.T(x,y), <span style='color:#3605fb;'>self</span>.x, eCFDM) <b><span style='color:#0000ff;'>+</span></b> d2(<span style='color:#3605fb;'>self</span>.T(x,y), <span style='color:#3605fb;'>self</span>.y, eCFDM))
+
+        eq <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.CreateEquation(<span style='color:#cc0000;'>&quot;BC_bottom&quot;</span>, <span style='color:#cc0000;'>&quot;Neumann boundary conditions at the bottom edge (constant flux)&quot;</span>)
+        x <b><span style='color:#0000ff;'>=</span></b> eq.DistributeOnDomain(<span style='color:#3605fb;'>self</span>.x, eOpenOpen)
+        y <b><span style='color:#0000ff;'>=</span></b> eq.DistributeOnDomain(<span style='color:#3605fb;'>self</span>.y, eLowerBound)
+        eq.Residual <b><span style='color:#0000ff;'>=</span></b> <b><span style='color:#0000ff;'>-</span></b> <span style='color:#3605fb;'>self</span>.k() <b><span style='color:#0000ff;'>*</span></b> d(<span style='color:#3605fb;'>self</span>.T(x,y), <span style='color:#3605fb;'>self</span>.y, eCFDM) <b><span style='color:#0000ff;'>-</span></b> <span style='color:#3605fb;'>self</span>.Qb()
+
+        eq <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.CreateEquation(<span style='color:#cc0000;'>&quot;BC_top&quot;</span>, <span style='color:#cc0000;'>&quot;Dirichlet boundary conditions at the top edge (constant temperature)&quot;</span>)
+        x <b><span style='color:#0000ff;'>=</span></b> eq.DistributeOnDomain(<span style='color:#3605fb;'>self</span>.x, eOpenOpen)
+        y <b><span style='color:#0000ff;'>=</span></b> eq.DistributeOnDomain(<span style='color:#3605fb;'>self</span>.y, eUpperBound)
+        eq.Residual <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.T(x,y) <b><span style='color:#0000ff;'>-</span></b> <span style='color:#3605fb;'>self</span>.Tt()
+
+        eq <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.CreateEquation(<span style='color:#cc0000;'>&quot;BC_left&quot;</span>, <span style='color:#cc0000;'>&quot;Neumann boundary conditions at the left edge (insulated)&quot;</span>)
+        x <b><span style='color:#0000ff;'>=</span></b> eq.DistributeOnDomain(<span style='color:#3605fb;'>self</span>.x, eLowerBound)
+        y <b><span style='color:#0000ff;'>=</span></b> eq.DistributeOnDomain(<span style='color:#3605fb;'>self</span>.y, eClosedClosed)
+        eq.Residual <b><span style='color:#0000ff;'>=</span></b> d(<span style='color:#3605fb;'>self</span>.T(x,y), <span style='color:#3605fb;'>self</span>.x, eCFDM)
+
+        eq <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.CreateEquation(<span style='color:#cc0000;'>&quot;BC_right&quot;</span>, <span style='color:#cc0000;'>&quot;Neumann boundary conditions at the right edge (insulated)&quot;</span>)
+        x <b><span style='color:#0000ff;'>=</span></b> eq.DistributeOnDomain(<span style='color:#3605fb;'>self</span>.x, eUpperBound)
+        y <b><span style='color:#0000ff;'>=</span></b> eq.DistributeOnDomain(<span style='color:#3605fb;'>self</span>.y, eClosedClosed)
+        eq.Residual <b><span style='color:#0000ff;'>=</span></b> d(<span style='color:#3605fb;'>self</span>.T(x,y), <span style='color:#3605fb;'>self</span>.x, eCFDM)
+
+<b>class</b> simTutorial(daeSimulation):
+    <b>def</b> <b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#3605fb;'>self</span>):
+        daeSimulation.<b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#3605fb;'>self</span>)
+        <span style='color:#3605fb;'>self</span>.m <b><span style='color:#0000ff;'>=</span></b> modTutorial(<span style='color:#cc0000;'>&quot;tutorial21&quot;</span>)
+        <span style='color:#3605fb;'>self</span>.m.Description <b><span style='color:#0000ff;'>=</span></b> __doc__
+        
+    <b>def</b> SetUpParametersAndDomains(<span style='color:#3605fb;'>self</span>):
+        <span style='color:#3605fb;'>self</span>.m.x.CreateStructuredGrid(<span style='color:#cc047c;'>20</span>, <span style='color:#cc047c;'>0</span>, <span style='color:#cc047c;'>0.1</span>)
+        <span style='color:#3605fb;'>self</span>.m.y.CreateStructuredGrid(<span style='color:#cc047c;'>20</span>, <span style='color:#cc047c;'>0</span>, <span style='color:#cc047c;'>0.1</span>)
+
+        <span style='color:#3605fb;'>self</span>.m.k.SetValue(<span style='color:#cc047c;'>401</span> <b><span style='color:#0000ff;'>*</span></b> W<b><span style='color:#0000ff;'>/</span></b>(m<b><span style='color:#0000ff;'>*</span></b>K))
+        <span style='color:#3605fb;'>self</span>.m.cp.SetValue(<span style='color:#cc047c;'>385</span> <b><span style='color:#0000ff;'>*</span></b> J<b><span style='color:#0000ff;'>/</span></b>(kg<b><span style='color:#0000ff;'>*</span></b>K))
+        <span style='color:#3605fb;'>self</span>.m.rho.SetValue(<span style='color:#cc047c;'>8960</span> <b><span style='color:#0000ff;'>*</span></b> kg<b><span style='color:#0000ff;'>/</span></b>(m<b><span style='color:#0000ff;'>**</span></b><span style='color:#cc047c;'>3</span>))
+        <span style='color:#3605fb;'>self</span>.m.Qb.SetValue(<span style='color:#cc047c;'>1.0e5</span> <b><span style='color:#0000ff;'>*</span></b> W<b><span style='color:#0000ff;'>/</span></b>(m<b><span style='color:#0000ff;'>**</span></b><span style='color:#cc047c;'>2</span>))
+        <span style='color:#3605fb;'>self</span>.m.Tt.SetValue(<span style='color:#cc047c;'>300</span> <b><span style='color:#0000ff;'>*</span></b> K)
+
+    <b>def</b> SetUpVariables(<span style='color:#3605fb;'>self</span>):
+        <b>for</b> x <b>in</b> <span style='color:#2a00d6;'>range</span>(<span style='color:#cc047c;'>1</span>, <span style='color:#3605fb;'>self</span>.m.x.NumberOfPoints <b><span style='color:#0000ff;'>-</span></b> <span style='color:#cc047c;'>1</span>):
+            <b>for</b> y <b>in</b> <span style='color:#2a00d6;'>range</span>(<span style='color:#cc047c;'>1</span>, <span style='color:#3605fb;'>self</span>.m.y.NumberOfPoints <b><span style='color:#0000ff;'>-</span></b> <span style='color:#cc047c;'>1</span>):
+                <span style='color:#3605fb;'>self</span>.m.T.SetInitialCondition(x, y, <span style='color:#cc047c;'>300</span> <b><span style='color:#0000ff;'>*</span></b> K)
+
+<b>def</b> run(<b><span style='color:#0000ff;'>**</span></b>kwargs):
+    simulation <b><span style='color:#0000ff;'>=</span></b> simTutorial()
+    
+    <span style='color:#017a31;'># Equation EvaluationMode can be one of:</span>
+    <span style='color:#017a31;'>#  - eEvaluationTree_OpenMP</span>
+    <span style='color:#017a31;'>#  - eComputeStack_OpenMP</span>
+    <span style='color:#017a31;'>#simulation.EvaluationMode = eComputeStack_External</span>
+
+    <span style='color:#017a31;'># External compute stack evaluators can be set using SetComputeStackEvaluator function.</span>
+    <span style='color:#017a31;'># Here, the evaluation mode is set to eComputeStack_External.</span>
+    <span style='color:#017a31;'># Evaluators can be also set using the computeStackEvaluator argument of daeActivity.simulate function.</span>
+    <span style='color:#017a31;'># Available OpenCL platforms/devices can be obtained using the following functions: </span>
+    openclPlatforms <b><span style='color:#0000ff;'>=</span></b> pyEvaluator_OpenCL.AvailableOpenCLPlatforms()
+    openclDevices   <b><span style='color:#0000ff;'>=</span></b> pyEvaluator_OpenCL.AvailableOpenCLDevices()
+    <span style='color:#2a00d6;'>print</span>(<span style='color:#cc0000;'>'Available OpenCL platforms:'</span>)
+    <b>for</b> platform <b>in</b> openclPlatforms:
+        <span style='color:#2a00d6;'>print</span>(<span style='color:#cc0000;'>'  Platform: </span><span style='color:#cc0000;'>%s</span><span style='color:#cc0000;'>'</span> <b><span style='color:#0000ff;'>%</span></b> platform.Name)
+        <span style='color:#2a00d6;'>print</span>(<span style='color:#cc0000;'>'    PlatformID: </span><span style='color:#cc0000;'>%d</span><span style='color:#cc0000;'>'</span> <b><span style='color:#0000ff;'>%</span></b> platform.PlatformID)
+        <span style='color:#2a00d6;'>print</span>(<span style='color:#cc0000;'>'    Vendor:     </span><span style='color:#cc0000;'>%s</span><span style='color:#cc0000;'>'</span> <b><span style='color:#0000ff;'>%</span></b> platform.Vendor)
+        <span style='color:#2a00d6;'>print</span>(<span style='color:#cc0000;'>'    Version:    </span><span style='color:#cc0000;'>%s</span><span style='color:#cc0000;'>'</span> <b><span style='color:#0000ff;'>%</span></b> platform.Version)
+        <span style='color:#017a31;'>#print('    Profile:    %s' % platform.Profile)</span>
+        <span style='color:#017a31;'>#print('    Extensions: %s' % platform.Extensions)</span>
+        <span style='color:#2a00d6;'>print</span>(<span style='color:#cc0000;'>''</span>)
+    <span style='color:#2a00d6;'>print</span>(<span style='color:#cc0000;'>'Available OpenCL devices:'</span>)
+    <b>for</b> device <b>in</b> openclDevices:
+        <span style='color:#2a00d6;'>print</span>(<span style='color:#cc0000;'>'  Device: </span><span style='color:#cc0000;'>%s</span><span style='color:#cc0000;'>'</span> <b><span style='color:#0000ff;'>%</span></b> device.Name)
+        <span style='color:#2a00d6;'>print</span>(<span style='color:#cc0000;'>'    PlatformID:      </span><span style='color:#cc0000;'>%d</span><span style='color:#cc0000;'>'</span> <b><span style='color:#0000ff;'>%</span></b> device.PlatformID)
+        <span style='color:#2a00d6;'>print</span>(<span style='color:#cc0000;'>'    DeviceID:        </span><span style='color:#cc0000;'>%d</span><span style='color:#cc0000;'>'</span> <b><span style='color:#0000ff;'>%</span></b> device.DeviceID)
+        <span style='color:#2a00d6;'>print</span>(<span style='color:#cc0000;'>'    DeviceVersion:   </span><span style='color:#cc0000;'>%s</span><span style='color:#cc0000;'>'</span> <b><span style='color:#0000ff;'>%</span></b> device.DeviceVersion)
+        <span style='color:#2a00d6;'>print</span>(<span style='color:#cc0000;'>'    DriverVersion:   </span><span style='color:#cc0000;'>%s</span><span style='color:#cc0000;'>'</span> <b><span style='color:#0000ff;'>%</span></b> device.DriverVersion)
+        <span style='color:#2a00d6;'>print</span>(<span style='color:#cc0000;'>'    OpenCLVersion:   </span><span style='color:#cc0000;'>%s</span><span style='color:#cc0000;'>'</span> <b><span style='color:#0000ff;'>%</span></b> device.OpenCLVersion)
+        <span style='color:#2a00d6;'>print</span>(<span style='color:#cc0000;'>'    MaxComputeUnits: </span><span style='color:#cc0000;'>%d</span><span style='color:#cc0000;'>'</span> <b><span style='color:#0000ff;'>%</span></b> device.MaxComputeUnits)
+        <span style='color:#2a00d6;'>print</span>(<span style='color:#cc0000;'>''</span>)
+
+    <span style='color:#017a31;'># OpenCL evaluators can use a single or multiple OpenCL devices.</span>
+    <span style='color:#017a31;'>#   a) Single OpenCLdevice:</span>
+    computeStackEvaluator <b><span style='color:#0000ff;'>=</span></b> pyEvaluator_OpenCL.CreateComputeStackEvaluator(platformID <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>0</span>, deviceID <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>0</span>)
+    <span style='color:#017a31;'>#   b) Multiple OpenCL devices (for heterogenous computing):</span>
+    <span style='color:#017a31;'>#computeStackEvaluator = pyEvaluator_OpenCL.CreateComputeStackEvaluator( [(0, 0, 0.6), (1, 1, 0.4)] )</span>
+    simulation.SetComputeStackEvaluator(computeStackEvaluator)
+    
+    <span style='color:#017a31;'># Create LA solver</span>
+    lasolver <b><span style='color:#0000ff;'>=</span></b> pySuperLU.daeCreateSuperLUSolver()
+    
+    <b>return</b> daeActivity.simulate(simulation, reportingInterval <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>5</span>, 
+                                            timeHorizon       <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>500</span>,
+                                            lasolver          <b><span style='color:#0000ff;'>=</span></b> lasolver,
+                                            <b><span style='color:#0000ff;'>**</span></b>kwargs)
+
+<b>if</b> <span style='color:#3605fb;'>__name__</span> <b><span style='color:#0000ff;'>==</span></b> <span style='color:#cc0000;'>&quot;__main__&quot;</span>:
+    guiRun <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>False</span> <b>if</b> (<span style='color:#2a00d6;'>len</span>(sys.argv) <b><span style='color:#0000ff;'>&gt;</span></b> <span style='color:#cc047c;'>1</span> <b>and</b> sys.argv[<span style='color:#cc047c;'>1</span>] <b><span style='color:#0000ff;'>==</span></b> <span style='color:#cc0000;'>'console'</span>) <b>else</b> <span style='color:#3605fb;'>True</span>
+    run(guiRun <b><span style='color:#0000ff;'>=</span></b> guiRun)    
+</pre>
+</body>
+</html>

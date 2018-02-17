@@ -15,7 +15,6 @@ You should have received a copy of the GNU General Public License along with the
 DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 ************************************************************************************"""
 import sys, numpy, math
-import matplotlib.pyplot
 from daetools.pyDAE import *
 
 # These function operate on adouble objects
@@ -348,6 +347,7 @@ daeHRUpwindSchemeEquation.supported_flux_limiters = [daeHRUpwindSchemeEquation.P
                                                      daeHRUpwindSchemeEquation.Phi_vanLeer_minmod]
 
 def plot_flux_limiters():
+    import matplotlib.pyplot
     n = 30
     figure = matplotlib.pyplot.figure(figsize = (9,9), dpi=100, facecolor='white')
     figure.canvas.set_window_title('Flux Limiters')

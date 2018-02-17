@@ -24,7 +24,7 @@ namespace daepython
 {
 boost::python::list daePardisoSolver_get_iparm(daePardisoSolver& self);
 void daePardisoSolver_set_iparm(daePardisoSolver& self, boost::python::list l_iparm);
-
+boost::python::dict GetEvaluationCallsStats_(daeIntelPardisoSolver& self);
 }
 
 #endif

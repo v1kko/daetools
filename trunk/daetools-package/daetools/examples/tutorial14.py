@@ -253,16 +253,16 @@ class modTutorial(daeModel):
         eq.Residual = self.Qin() - Constant(1500 * W)
 
         # Here the Time() function is used to get the current time (time elapsed) in the simulation
-        self.SWITCH_TO("Cooling",   self.T() > Constant(340 * K))
-        self.SWITCH_TO("HeaterOff", Time()   > Constant(350 * s))
+        self.ON_CONDITION(self.T() > Constant(340 * K), switchToStates = [ ('Regulator', 'Heating') ])
+        self.ON_CONDITION(Time()   > Constant(350 * s), switchToStates = [ ('Regulator', 'HeaterOff') ])
 
         self.STATE("Cooling")
 
         eq = self.CreateEquation("Q_in", "The heater is off")
         eq.Residual = self.Qin()
 
-        self.SWITCH_TO("Heating",   self.T() < Constant(320 * K))
-        self.SWITCH_TO("HeaterOff", Time()   > Constant(350 * s))
+        self.ON_CONDITION(self.T() < Constant(320 * K), switchToStates = [ ('Regulator', 'Heating') ])
+        self.ON_CONDITION(Time()   > Constant(350 * s), switchToStates = [ ('Regulator', 'HeaterOff') ])
 
         self.STATE("HeaterOff")
 
@@ -292,6 +292,7 @@ class simTutorial(daeSimulation):
 
 def run(**kwargs):
     simulation = simTutorial()
+   
     res = daeActivity.simulate(simulation, reportingInterval = 0.5, 
                                            timeHorizon       = 500,
                                            **kwargs)

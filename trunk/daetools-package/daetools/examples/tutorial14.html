@@ -206,7 +206,7 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc0000;
         eq.Residual <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.Heat_ext1() <b><span style='color:#0000ff;'>-</span></b> <span style='color:#3605fb;'>self</span>.exfnHeat1()
 
         <span style='color:#017a31;'>#</span>
-        <span style='color:#017a31;'># Scalar external function #3</span>
+        <span style='color:#017a31;'># Scalar external function #2</span>
         <span style='color:#017a31;'>#</span>
         <span style='color:#017a31;'># Create ctypes external function</span>
         <span style='color:#017a31;'># Use the function calculate from the shared library.</span>
@@ -264,16 +264,16 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc0000;
         eq.Residual <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.Qin() <b><span style='color:#0000ff;'>-</span></b> Constant(<span style='color:#cc047c;'>1500</span> <b><span style='color:#0000ff;'>*</span></b> W)
 
         <span style='color:#017a31;'># Here the Time() function is used to get the current time (time elapsed) in the simulation</span>
-        <span style='color:#3605fb;'>self</span>.SWITCH_TO(<span style='color:#cc0000;'>&quot;Cooling&quot;</span>,   <span style='color:#3605fb;'>self</span>.T() <b><span style='color:#0000ff;'>&gt;</span></b> Constant(<span style='color:#cc047c;'>340</span> <b><span style='color:#0000ff;'>*</span></b> K))
-        <span style='color:#3605fb;'>self</span>.SWITCH_TO(<span style='color:#cc0000;'>&quot;HeaterOff&quot;</span>, Time()   <b><span style='color:#0000ff;'>&gt;</span></b> Constant(<span style='color:#cc047c;'>350</span> <b><span style='color:#0000ff;'>*</span></b> s))
+        <span style='color:#3605fb;'>self</span>.ON_CONDITION(<span style='color:#3605fb;'>self</span>.T() <b><span style='color:#0000ff;'>&gt;</span></b> Constant(<span style='color:#cc047c;'>340</span> <b><span style='color:#0000ff;'>*</span></b> K), switchToStates <b><span style='color:#0000ff;'>=</span></b> [ (<span style='color:#cc0000;'>'Regulator'</span>, <span style='color:#cc0000;'>'Heating'</span>) ])
+        <span style='color:#3605fb;'>self</span>.ON_CONDITION(Time()   <b><span style='color:#0000ff;'>&gt;</span></b> Constant(<span style='color:#cc047c;'>350</span> <b><span style='color:#0000ff;'>*</span></b> s), switchToStates <b><span style='color:#0000ff;'>=</span></b> [ (<span style='color:#cc0000;'>'Regulator'</span>, <span style='color:#cc0000;'>'HeaterOff'</span>) ])
 
         <span style='color:#3605fb;'>self</span>.STATE(<span style='color:#cc0000;'>&quot;Cooling&quot;</span>)
 
         eq <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.CreateEquation(<span style='color:#cc0000;'>&quot;Q_in&quot;</span>, <span style='color:#cc0000;'>&quot;The heater is off&quot;</span>)
         eq.Residual <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.Qin()
 
-        <span style='color:#3605fb;'>self</span>.SWITCH_TO(<span style='color:#cc0000;'>&quot;Heating&quot;</span>,   <span style='color:#3605fb;'>self</span>.T() <b><span style='color:#0000ff;'>&lt;</span></b> Constant(<span style='color:#cc047c;'>320</span> <b><span style='color:#0000ff;'>*</span></b> K))
-        <span style='color:#3605fb;'>self</span>.SWITCH_TO(<span style='color:#cc0000;'>&quot;HeaterOff&quot;</span>, Time()   <b><span style='color:#0000ff;'>&gt;</span></b> Constant(<span style='color:#cc047c;'>350</span> <b><span style='color:#0000ff;'>*</span></b> s))
+        <span style='color:#3605fb;'>self</span>.ON_CONDITION(<span style='color:#3605fb;'>self</span>.T() <b><span style='color:#0000ff;'>&lt;</span></b> Constant(<span style='color:#cc047c;'>320</span> <b><span style='color:#0000ff;'>*</span></b> K), switchToStates <b><span style='color:#0000ff;'>=</span></b> [ (<span style='color:#cc0000;'>'Regulator'</span>, <span style='color:#cc0000;'>'Heating'</span>) ])
+        <span style='color:#3605fb;'>self</span>.ON_CONDITION(Time()   <b><span style='color:#0000ff;'>&gt;</span></b> Constant(<span style='color:#cc047c;'>350</span> <b><span style='color:#0000ff;'>*</span></b> s), switchToStates <b><span style='color:#0000ff;'>=</span></b> [ (<span style='color:#cc0000;'>'Regulator'</span>, <span style='color:#cc0000;'>'HeaterOff'</span>) ])
 
         <span style='color:#3605fb;'>self</span>.STATE(<span style='color:#cc0000;'>&quot;HeaterOff&quot;</span>)
 
@@ -303,6 +303,7 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc0000;
 
 <b>def</b> run(<b><span style='color:#0000ff;'>**</span></b>kwargs):
     simulation <b><span style='color:#0000ff;'>=</span></b> simTutorial()
+   
     res <b><span style='color:#0000ff;'>=</span></b> daeActivity.simulate(simulation, reportingInterval <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>0.5</span>, 
                                            timeHorizon       <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>500</span>,
                                            <b><span style='color:#0000ff;'>**</span></b>kwargs)

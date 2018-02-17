@@ -457,7 +457,7 @@ class simTutorial(daeSimulation):
         self.N_p = 20
         # Number of radial grid points for active particles in each electrode
         self.NR_n = 15
-        self.NR_p = 15
+        self.NR_p = 20
         # Radius of active particles in each electrode
         self.R_n = 18e-6 * m
         self.R_p = 1e-6 * m

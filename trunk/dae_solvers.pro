@@ -13,4 +13,6 @@ SUBDIRS = LA_SuperLU \
     BONMIN_MINLPSolver \
     pyNLOPT \
     pyBONMIN \
-    pyDealII
+    pyDealII \
+    Evaluator_OpenCL \
+    pyEvaluator_OpenCL

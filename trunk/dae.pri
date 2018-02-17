@@ -655,7 +655,7 @@ win64-g++-*::INTEL_MKL_LIBS =
 
 win32-msvc2015::ARCH = $$QMAKE_TARGET.arch
 unix::ARCH           = $$QMAKE_HOST.arch
-message(Building IntelPardiso on $${ARCH} architecture)
+#message(Building IntelPardiso on $${ARCH} architecture)
 
 contains(ARCH, x86) {
     win32-msvc2015::MKL_LIBS       = -L$${MKLPATH}/mkl/lib/ia32 -L$${MKLPATH}/compiler/lib/ia32
@@ -741,6 +741,31 @@ macx-g++::COOLPROP_LIBS       = -L$${COOLPROP_LIB_DIR}/Darwin  -lCoolProp
 unix::OPENMP_LIB           = -lgomp
 win32-msvc2015::OPENMP_LIB =
 
+
+#####################################################################################
+#                              NVidia OpenCL
+#####################################################################################
+unix::NVIDIA_OPENCL_DIR               = /usr/local/cuda
+win32-msvc2015::NVIDIA_OPENCL_DIR     =
+
+unix::NVIDIA_OPENCL_INCLUDE           = $${NVIDIA_OPENCL_DIR}/include
+win32-msvc2015::NVIDIA_OPENCL_INCLUDE =
+
+unix::NVIDIA_OPENCL_LIBS              = -L$${NVIDIA_OPENCL_DIR}/lib64 -lOpenCL
+win32-msvc2015::NVIDIA_OPENCL_LIBS    =
+
+#####################################################################################
+#                              Intel OpenCL
+#####################################################################################
+unix::INTEL_OPENCL_DIR               = /opt/intel/opencl
+win32-msvc2015::INTEL_OPENCL_DIR     =
+
+unix::INTEL_OPENCL_INCLUDE           = $${INTEL_OPENCL_DIR}/include
+win32-msvc2015::INTEL_OPENCL_INCLUDE =
+
+unix::INTEL_OPENCL_LIBS              = -L$${INTEL_OPENCL_DIR} -lOpenCL
+win32-msvc2015::INTEL_OPENCL_LIBS    =
+
 #####################################################################################
 #                                 MPI
 #####################################################################################
@@ -785,6 +810,7 @@ win32-msvc2015::DAE_DAETOOLS_FMI_CS_LIB         = cdaeFMU_CS-py$${PYTHON_MAJOR}$
 win32-msvc2015::DAE_DAETOOLS_FMI_CS_WS_LIB      = cdaeFMU_CS_WS$${SHARED_LIB_POSTFIX}.lib
 win32-msvc2015::DAE_CAPE_THERMO_PACKAGE_LIB     = cdaeCapeOpenThermoPackage.lib
 win32-msvc2015::DAE_COOLPROP_THERMO_PACKAGE_LIB = cdaeCoolPropThermoPackage.lib
+win32-msvc2015::DAE_EVALUATOR_OPENCL_LIB        = cdaeEvaluator_OpenCL.lib
 
 win32-g++-*::DAE_CONFIG_LIB                  = -lcdaeConfig-py$${PYTHON_MAJOR}$${PYTHON_MINOR}
 win32-g++-*::DAE_CORE_LIB                    = -lcdaeCore $${OPENMP_LIB}
@@ -807,6 +833,7 @@ win32-g++-*::DAE_DAETOOLS_FMI_CS_LIB         = -lcdaeFMU_CS-py$${PYTHON_MAJOR}$$
 win32-g++-*::DAE_DAETOOLS_FMI_CS_WS_LIB      = -lcdaeFMU_CS_WS
 win32-g++-*::DAE_CAPE_THERMO_PACKAGE_LIB     =
 win32-g++-*::DAE_COOLPROP_THERMO_PACKAGE_LIB = -lcdaeCoolPropThermoPackage
+win32-g++-*::DAE_EVALUATOR_OPENCL_LIB        = -lcdaeEvaluator_OpenCL
 
 win64-g++-*::DAE_CONFIG_LIB                  = -lcdaeConfig-py$${PYTHON_MAJOR}$${PYTHON_MINOR}
 win64-g++-*::DAE_CORE_LIB                    = -lcdaeCore $${OPENMP_LIB}
@@ -829,6 +856,7 @@ win64-g++-*::DAE_DAETOOLS_FMI_CS_LIB         = -lcdaeFMU_CS-py$${PYTHON_MAJOR}$$
 win64-g++-*::DAE_DAETOOLS_FMI_CS_WS_LIB      = -lcdaeFMU_CS_WS
 win64-g++-*::DAE_CAPE_THERMO_PACKAGE_LIB     =
 win64-g++-*::DAE_COOLPROP_THERMO_PACKAGE_LIB = -lcdaeCoolPropThermoPackage
+win64-g++-*::DAE_EVALUATOR_OPENCL_LIB        = -lcdaeEvaluator_OpenCL
 
 unix::DAE_CONFIG_LIB                    = -lcdaeConfig-py$${PYTHON_MAJOR}$${PYTHON_MINOR}
 unix::DAE_CORE_LIB                      = -lcdaeCore $${OPENMP_LIB}
@@ -851,6 +879,7 @@ unix::DAE_DAETOOLS_FMI_CS_LIB           = -lcdaeFMU_CS-py$${PYTHON_MAJOR}$${PYTH
 unix::DAE_DAETOOLS_FMI_CS_WS_LIB        = -lcdaeFMU_CS_WS
 unix::DAE_CAPE_THERMO_PACKAGE_LIB       =
 unix::DAE_COOLPROP_THERMO_PACKAGE_LIB   = -lcdaeCoolPropThermoPackage
+unix::DAE_EVALUATOR_OPENCL_LIB          = -lcdaeEvaluator_OpenCL
 
 QMAKE_LIBDIR += $${DAE_DEST_DIR} $${BOOSTLIBPATH} $${PYTHON_LIB_DIR}
 

@@ -3,6 +3,7 @@
 #include <boost/python.hpp>
 #include <idas/idas_impl.h>
 #include "pardiso_sparse_la_solver.h"
+#include <omp.h>
 
 namespace dae
 {
@@ -34,6 +35,11 @@ daePardisoSolver::daePardisoSolver(void)
     int res = 0;
     m_pBlock = NULL;
     m_vecB   = NULL;
+
+    m_nNumberOfSetupCalls = 0;
+    m_nNumberOfSolveCalls = 0;
+    m_SetupTime           = 0;
+    m_SolveTime           = 0;
 
     for(size_t i = 0; i < 64; i++)
     {
@@ -67,11 +73,13 @@ daePardisoSolver::daePardisoSolver(void)
     }
 
     /* Numbers of processors, value of OMP_NUM_THREADS */
-    char* omp_no_threads = getenv("OMP_NUM_THREADS");
-    if(omp_no_threads != NULL)
-        iparm[2] = atoi(omp_no_threads);
-    else
-        iparm[2] = 1;
+    char* omp_no_threads_s = getenv("OMP_NUM_THREADS");
+    if(omp_no_threads_s != NULL)
+    {
+        int omp_no_threads = atoi(omp_no_threads_s);
+        if(omp_no_threads > 0)
+            omp_set_num_threads(omp_no_threads);
+    }
 }
 
 daePardisoSolver::~daePardisoSolver(void)
@@ -229,6 +237,8 @@ int daePardisoSolver::Setup(void*		ida,
     real_t ddum;
     realtype *pdValues, *pdTimeDerivatives, *pdResiduals;
 
+    double timeStart = dae::GetTimeInSeconds();
+
     IDAMem ida_mem = (IDAMem)ida;
     if(!ida_mem)
         return IDA_MEM_NULL;
@@ -323,6 +333,10 @@ int daePardisoSolver::Setup(void*		ida,
         throw e;
     }
 
+    double timeEnd = dae::GetTimeInSeconds();
+    m_SetupTime += (timeEnd - timeStart);
+    m_nNumberOfSetupCalls += 1;
+
     return IDA_SUCCESS;
 }
 
@@ -335,6 +349,8 @@ int daePardisoSolver::Solve(void*		ida,
 {
     int res, idum;
     realtype* pdB;
+
+    double timeStart = dae::GetTimeInSeconds();
 
     IDAMem ida_mem = (IDAMem)ida;
     if(!ida_mem)
@@ -382,6 +398,10 @@ int daePardisoSolver::Solve(void*		ida,
         //N_VScale(2.0 / (1.0 + ida_mem->ida_cjratio), vectorB, vectorB);
     }
 
+    double timeEnd = dae::GetTimeInSeconds();
+    m_SolveTime += (timeEnd - timeStart);
+    m_nNumberOfSolveCalls += 1;
+
     return IDA_SUCCESS;
 }
 
@@ -415,6 +435,15 @@ int daePardisoSolver::Free(void* ida)
     return IDA_SUCCESS;
 }
 
+std::map<std::string, real_t> daePardisoSolver::GetEvaluationCallsStats()
+{
+    std::map<std::string, real_t> stats;
+    stats["numberOfLAFactorizationCalls"] = m_nNumberOfSetupCalls;
+    stats["numberOfLASolveCalls"]         = m_nNumberOfSolveCalls;
+    stats["factorizationLATime"]          = m_SetupTime;
+    stats["solveLATime"]                  = m_SolveTime;
+    return stats;
+}
 
 int init_la(IDAMem ida_mem)
 {

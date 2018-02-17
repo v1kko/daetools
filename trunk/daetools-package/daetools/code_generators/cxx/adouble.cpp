@@ -76,10 +76,28 @@ adouble pow_(const adouble& a, const adouble& b)
 {
     adouble tmp;
     
-    tmp.m_dValue = pow(a.m_dValue, b.m_dValue);
-    real_t tmp2 = b.m_dValue * pow(a.m_dValue, b.m_dValue-1);
-    real_t tmp3 = log(a.m_dValue) * tmp.m_dValue;
-    tmp.m_dDeriv = tmp2 * a.m_dDeriv + tmp3 * b.m_dDeriv;
+    if(b.m_dDeriv == 0)
+    {
+    // In order to avoid logarithm of a negative number here I work as if I have: pow(adouble, const)!!
+    // It is useful if I want (expression)^2 for instance, so that expression MAY take negative numbers
+        /* To avoid logarithm of a negative number assume we have pow(adouble, const). */
+        tmp.m_dValue = ::pow(a.m_dValue, b.m_dValue);
+        real_t tmp2 = b.m_dValue * ::pow(a.m_dValue, b.m_dValue-1);
+        tmp.m_dDeriv = tmp2 * a.m_dDeriv;
+    }
+    else if(a.m_dValue <= 0)
+    {
+        /* Power function called for a negative base. */
+        tmp.m_dValue = _makeNaN_();
+        tmp.m_dDeriv = _makeNaN_();
+    }
+    else
+    {
+        tmp.m_dValue = ::pow(a.m_dValue, b.m_dValue);
+        real_t tmp2 = b.m_dValue * ::pow(a.m_dValue, b.m_dValue-1);
+        real_t tmp3 = ::log(a.m_dValue) * tmp.m_dValue;
+        tmp.m_dDeriv = tmp2 * a.m_dDeriv + tmp3 * b.m_dDeriv;
+    }
     return tmp;
 }
 
@@ -87,9 +105,18 @@ adouble log10_(const adouble& a)
 {
     adouble tmp;
     
-    tmp.m_dValue = log10(a.m_dValue);
-    real_t tmp2 = log((real_t)10) * a.m_dValue;
-    tmp.m_dDeriv = a.m_dDeriv / tmp2;
+    if(a.m_dValue <= 0)
+    {
+        /* log10(number) = NaN if the number is <= 0 */
+        tmp.m_dValue = _makeNaN_();
+        tmp.m_dDeriv = _makeNaN_();
+    }
+    else
+    {
+        tmp.m_dValue = ::log10(a.m_dValue);
+        real_t tmp2 = ::log((real_t)10) * a.m_dValue;
+        tmp.m_dDeriv = a.m_dDeriv / tmp2;
+    }
     return tmp;
 }
 
@@ -106,8 +133,17 @@ adouble log_(const adouble& a)
 {
     adouble tmp;
     
-    tmp.m_dValue = log(a.m_dValue);
-    tmp.m_dDeriv = a.m_dDeriv / a.m_dValue;
+    if(a.m_dValue <= 0)
+    {
+        /* log(number) = NaN if the number is <= 0 */
+        tmp.m_dValue = _makeNaN_();
+        tmp.m_dDeriv = _makeNaN_();
+    }
+    else
+    {
+        tmp.m_dValue = ::log(a.m_dValue);
+        tmp.m_dDeriv = a.m_dDeriv / a.m_dValue;
+    }
     return tmp;
 }
 
@@ -237,25 +273,38 @@ adouble atan_(const adouble& a)
 adouble sinh_(const adouble& a)
 {
     adouble tmp;
-    tmp.m_dValue = sinh(a.m_dValue);
-    tmp.m_dDeriv = a.m_dDeriv / sqrt(a.m_dValue*a.m_dValue + 1);
-    return tmp;
+    if(a.m_dValue < 0.0)
+    {
+        tmp = exp_(a);
+        return 0.5*(tmp - 1.0/tmp);
+    }
+    else
+    {
+        tmp = exp_(-a);
+        return 0.5*(1.0/tmp - tmp);
+    }
 }
 
 adouble cosh_(const adouble& a)
 {
     adouble tmp;
-    tmp.m_dValue = cosh(a.m_dValue);
-    tmp.m_dDeriv = a.m_dDeriv / sqrt(a.m_dValue*a.m_dValue - 1);
-    return tmp;
+    tmp = (a.m_dValue < 0.0) ? exp_(a) : exp_(-a);
+    return 0.5*(tmp + 1.0/tmp);
 }
 
 adouble tanh_(const adouble& a)
 {
     adouble tmp;
-    tmp.m_dValue = tanh(a.m_dValue);
-    tmp.m_dDeriv = a.m_dDeriv / (1 - a.m_dValue*a.m_dValue);
-    return tmp;
+    if(a.m_dValue < 0.0)
+    {
+        tmp = exp_(2.0*a);
+        return (tmp - 1.0)/(tmp + 1.0);
+    }
+    else
+    {
+        tmp = exp_((-2.0)*a);
+        return (1.0 - tmp)/(tmp + 1.0);
+    }
 }
 
 adouble asinh_(const adouble& a)

@@ -487,6 +487,9 @@ def plot(times,
     plt.figure(figsize=(10,7), facecolor='white')
     plt.suptitle(title, fontsize=fontsize_suptitle)
     
+    fig = plt.gcf()
+    fig.canvas.set_window_title('Tutorial19')
+    
     # Figure 4.
     ax = plt.subplot(221)
     ax.set_title('Figure 4.', fontsize=fontsize)
@@ -547,7 +550,7 @@ def run(**kwargs):
     log          = daePythonStdOutLog()
     daesolver    = daeIDAS()
     simulation   = simTutorial()
-  
+    
     simulation.__drdata__ = None
     
     # If datareporter is in the keyword argument do not create local datareporters.

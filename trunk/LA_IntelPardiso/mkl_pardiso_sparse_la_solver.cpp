@@ -4,6 +4,8 @@
 #include <idas/idas_impl.h>
 #include "mkl_pardiso_sparse_la_solver.h"
 #include "mkl.h"
+#include <omp.h>
+#include "../config.h"
 
 namespace dae
 {
@@ -35,6 +37,11 @@ daeIntelPardisoSolver::daeIntelPardisoSolver(void)
     m_pBlock = NULL;
     m_vecB   = NULL;
 
+    m_nNumberOfSetupCalls = 0;
+    m_nNumberOfSolveCalls = 0;
+    m_SetupTime           = 0;
+    m_SolveTime           = 0;
+
     for(size_t i = 0; i < 64; i++)
     {
         pt[i]    = 0;
@@ -53,19 +60,19 @@ daeIntelPardisoSolver::daeIntelPardisoSolver(void)
     mkl_set_dynamic(0);
 
     /* Numbers of processors, value of MKL_NUM_THREADS or OMP_NUM_THREADS */
-    int no_threads = 0;
+    daeConfig& cfg = daeConfig::GetConfig();
     char* mkl_no_threads = getenv("MKL_NUM_THREADS");
     char* omp_no_threads = getenv("OMP_NUM_THREADS");
+    m_no_threads = 0;
     if(mkl_no_threads != NULL)
-        no_threads = atoi(mkl_no_threads);
+        m_no_threads = atoi(mkl_no_threads);
     else if(omp_no_threads != NULL)
-        no_threads = atoi(omp_no_threads);
-
-    if(no_threads > 0)
-    {
-        mkl_set_num_threads(no_threads);
-        printf("Number of threads = %d\n", no_threads);
-    }
+        m_no_threads = atoi(omp_no_threads);
+    else
+        m_no_threads = cfg.GetInteger("daetools.intel_pardiso.numThreads", 0);
+    if(m_no_threads <= 0)
+        m_no_threads = omp_get_num_procs();
+    printf("IntelPardiso numThreads = %d\n", m_no_threads);
 
     iparm[26] = 1; /* check the sparse matrix representation */
 
@@ -167,6 +174,16 @@ int daeIntelPardisoSolver::Reinitialize(void* ida)
     return IDA_SUCCESS;
 }
 
+std::map<std::string, real_t> daeIntelPardisoSolver::GetEvaluationCallsStats()
+{
+    std::map<std::string, real_t> stats;
+    stats["numberOfLAFactorizationCalls"] = m_nNumberOfSetupCalls;
+    stats["numberOfLASolveCalls"]         = m_nNumberOfSolveCalls;
+    stats["factorizationLATime"]          = m_SetupTime;
+    stats["solveLATime"]                  = m_SolveTime;
+    return stats;
+}
+
 int daeIntelPardisoSolver::SaveAsXPM(const std::string& strFileName)
 {
     m_matJacobian.SaveMatrixAsXPM(strFileName);
@@ -231,6 +248,8 @@ int daeIntelPardisoSolver::Setup(void*		ida,
     real_t ddum;
     realtype *pdValues, *pdTimeDerivatives, *pdResiduals;
 
+    double timeStart = dae::GetTimeInSeconds();
+
     IDAMem ida_mem = (IDAMem)ida;
     if(!ida_mem)
         return IDA_MEM_NULL;
@@ -263,6 +282,8 @@ int daeIntelPardisoSolver::Setup(void*		ida,
 // Reordering and Symbolic Factorization.
 // This step also allocates all memory
 // that is necessary for the factorization.
+    mkl_set_num_threads(m_no_threads);
+
     phase = 11;
     PARDISO (pt,
              &maxfct,
@@ -315,6 +336,10 @@ int daeIntelPardisoSolver::Setup(void*		ida,
         throw e;
     }
 
+    double timeEnd = dae::GetTimeInSeconds();
+    m_SetupTime += (timeEnd - timeStart);
+    m_nNumberOfSetupCalls += 1;
+
     return IDA_SUCCESS;
 }
 
@@ -328,6 +353,8 @@ int daeIntelPardisoSolver::Solve(void*		ida,
     _INTEGER_t res, idum;
     realtype* pdB;
 
+    double timeStart = dae::GetTimeInSeconds();
+
     IDAMem ida_mem = (IDAMem)ida;
     if(!ida_mem)
         return IDA_MEM_NULL;
@@ -337,10 +364,11 @@ int daeIntelPardisoSolver::Solve(void*		ida,
     size_t Neq = m_nNoEquations;
     pdB        = NV_DATA_S(vectorB);
 
-
     memcpy(m_vecB, pdB, Neq*sizeof(real_t));
 
 // Solve
+    mkl_set_num_threads(m_no_threads);
+
     phase = 33;
     iparm[7] = 2; /* Max numbers of iterative refinement steps. */
     PARDISO (pt,
@@ -372,6 +400,10 @@ int daeIntelPardisoSolver::Solve(void*		ida,
             pdB[i] *= 2.0 / (1.0 + ida_mem->ida_cjratio);
         //N_VScale(2.0 / (1.0 + ida_mem->ida_cjratio), vectorB, vectorB);
     }
+
+    double timeEnd = dae::GetTimeInSeconds();
+    m_SolveTime += (timeEnd - timeStart);
+    m_nNumberOfSolveCalls += 1;
 
     return IDA_SUCCESS;
 }

@@ -11,53 +11,53 @@ INCLUDEPATH += $${BOOSTDIR} \
 LIBS +=	$${DAE_CONFIG_LIB} \
         $${MPI_LIBS}
 
-SOURCES +=  xmlreadstream.cpp \
-            xmlfunctions.cpp \
-            xmlfile.cpp \
-            variablearray.cpp \
-            variable_types.cpp \
-            variable.cpp \
-            stn.cpp \
-            if.cpp \
-            state.cpp \
-            ports.cpp \
-            event_port.cpp \
-            action.cpp \
-            on_event_actions.cpp \
-            on_condition_actions.cpp \
-            partial.cpp \
-            parameter.cpp \
-            object.cpp \
-            model_port_arrays.cpp \
-            model.cpp \
-            finite_element_model.cpp \
-            ode_model.cpp \
-            equation.cpp \
-            domain.cpp \
-            distributed_variable_array.cpp \
+SOURCES +=  action.cpp \
+            adouble.cpp \
+            adouble_array.cpp \
+            base_logging.cpp \
+            block.cpp \
+            compute_stack_kernels_openmp.cpp \
             condnode.cpp \
             condition.cpp \
             class_factory.cpp \
-            block.cpp \
-            adouble.cpp \
-            setup_nodes.cpp \
-            xmltag.cpp \
-            io_impl.cpp \
-            adouble_array.cpp \
-            nodes_array.cpp \
-            setup_node_array.cpp \
-            base_logging.cpp \
-            stdafx.cpp \
+            domain.cpp \
+            distributed_variable_array.cpp \
             dllmain.cpp \
-            global_functions.cpp \
-            tcpiplog.cpp \
-            objfun_constraints.cpp \
+            equation.cpp \
+            event_port.cpp \
             external_function.cpp \
             event_handling.cpp \
+            finite_element_model.cpp \
+            global_functions.cpp \
+            if.cpp \
+            io_impl.cpp \
+            model_port_arrays.cpp \
+            model.cpp \
             nodes.cpp \
-            thermo_package.cpp \
+            nodes_array.cpp \
             nodes_compute_stack.cpp \
-            compute_stack.cpp
+            object.cpp \
+            objfun_constraints.cpp \
+            ode_model.cpp \
+            on_event_actions.cpp \
+            on_condition_actions.cpp \
+            ports.cpp \
+            partial.cpp \
+            parameter.cpp \
+            setup_nodes.cpp \
+            stn.cpp \
+            state.cpp \
+            setup_node_array.cpp \
+            stdafx.cpp \
+            tcpiplog.cpp \
+            thermo_package.cpp \
+            variablearray.cpp \
+            variable_types.cpp \
+            variable.cpp \
+            xmltag.cpp \
+            xmlreadstream.cpp \
+            xmlfunctions.cpp \
+            xmlfile.cpp
 
 HEADERS +=  xmlfunctions.h \
             xmlfile.h \
@@ -93,8 +93,7 @@ HEADERS +=  xmlfunctions.h \
             simplify_node.h \
             thermo_package.h \
             compute_stack.h \
-            compute_stack_adouble.h \
-            compute_stack_lifo.h
+            compute_stack_kernels_openmp.h
 
 #win32{
 #QMAKE_POST_LINK = $${COPY_FILES} $${TARGET}.lib $${STATIC_LIBS_DIR}

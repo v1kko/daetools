@@ -24,7 +24,7 @@ by the temperature differences in the fluid is solved
 The differences to the original problem are that the grid is not adaptive and no 
 stabilisation method is used.
 
-The problem can be described using the following equations (the Boussinesq equations):
+The problem can be described using the Stokes equations:
 
 .. code-block:: none
 
@@ -234,7 +234,7 @@ def run(**kwargs):
     guiRun = kwargs.get('guiRun', False)
     
     simulation = simTutorial()
-
+    
     # Create SuperLU LA solver
     lasolver = pySuperLU.daeCreateSuperLUSolver()
 
