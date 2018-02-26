@@ -134,7 +134,7 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc0000;
         y <b><span style='color:#0000ff;'>=</span></b> eq.DistributeOnDomain(<span style='color:#3605fb;'>self</span>.y, eClosedClosed)
         eq.Residual <b><span style='color:#0000ff;'>=</span></b> dT_dx(x,y)
 
-        eq <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.CreateEquation(<span style='color:#cc0000;'>&quot;BC_right&quot;</span>, <span style='color:#cc0000;'>&quot; Neumann boundary conditions at the right edge (insulated)&quot;</span>)
+        eq <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.CreateEquation(<span style='color:#cc0000;'>&quot;BC_right&quot;</span>, <span style='color:#cc0000;'>&quot;Neumann boundary conditions at the right edge (insulated)&quot;</span>)
         x <b><span style='color:#0000ff;'>=</span></b> eq.DistributeOnDomain(<span style='color:#3605fb;'>self</span>.x, eUpperBound)
         y <b><span style='color:#0000ff;'>=</span></b> eq.DistributeOnDomain(<span style='color:#3605fb;'>self</span>.y, eClosedClosed)
         eq.Residual <b><span style='color:#0000ff;'>=</span></b> dT_dx(x,y)
@@ -209,7 +209,7 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc0000;
         <span style='color:#017a31;'># The degrees of freedom can be fixed by assigning the variable value by using a function AssignValue:</span>
         <span style='color:#3605fb;'>self</span>.m.rho.AssignValue(<span style='color:#cc047c;'>8960</span> <b><span style='color:#0000ff;'>*</span></b> kg<b><span style='color:#0000ff;'>/</span></b>(m<b><span style='color:#0000ff;'>**</span></b><span style='color:#cc047c;'>3</span>))
 
-        <span style='color:#017a31;'># To help the DAE solver it is possible to set initial guesses of of the variables.</span>
+        <span style='color:#017a31;'># To help the DAE solver it is possible to set initial guesses of the variables.</span>
         <span style='color:#017a31;'># Closer the initial guess is to the solution - faster the solver will converge to the solution</span>
         <span style='color:#017a31;'># Just for fun, here we will try to obstruct the solver by setting the initial guess which is rather far from the solution.</span>
         <span style='color:#017a31;'># Despite that, the solver will successfully initialize the system! </span>

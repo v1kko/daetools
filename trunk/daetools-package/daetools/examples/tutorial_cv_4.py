@@ -96,7 +96,7 @@ class modTutorial(daeModel):
 
         self.u0  = 1.0
         self.v0  = 1.0
-        self.w0  = 0.0
+        self.w0  = 0.1
         self.ni  = 0.7
         self.eps = 0.001
 
@@ -284,6 +284,7 @@ def simulate(Nx, Ny, **kwargs):
 
     daeActivity.simulate(simulation, reportingInterval = 2.0, 
                                      timeHorizon       = 90.0,
+                                     log               = log,
                                      lasolver          = lasolver,
                                      datareporter      = datareporter,
                                      **kwargs)    

@@ -28,9 +28,48 @@
 <span style='color:#017a31;'>************************************************************************************</span>
 <span style='color:#017a31;'>&quot;&quot;&quot;</span>
 __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc0000;'>&quot;&quot;&quot;</span>
-<span style='color:#cc0000;'>This tutorial introduces the concep of compute stack evaluators.</span>
-<span style='color:#cc0000;'>At the moment, there is only one implementation: OpenCl.</span>
+<span style='color:#cc0000;'>This tutorial introduces different methods for evaluation of equations in parallel.</span>
+<span style='color:#cc0000;'>Equations residuals, Jacobian matrix and sensitivity residuals can be evaluated </span>
+<span style='color:#cc0000;'>in parallel using two methods</span>
 
+<span style='color:#cc0000;'>1. The Evaluation Tree approach (default)</span>
+<span style='color:#cc0000;'>   </span>
+<span style='color:#cc0000;'>   OpenMP API is used for evaluation in parallel.</span>
+<span style='color:#cc0000;'>   This method is specified by setting daetools.core.equations.evaluationMode option </span>
+<span style='color:#cc0000;'>   in daetools.cfg to &quot;evaluationTree_OpenMP&quot; or setting the simulation property:</span>
+<span style='color:#cc0000;'>   </span>
+<span style='color:#cc0000;'>   simulation.EvaluationMode = eEvaluationTree_OpenMP</span>
+<span style='color:#cc0000;'>   </span>
+<span style='color:#cc0000;'>   numThreads controls the number of OpenMP threads in a team.</span>
+<span style='color:#cc0000;'>   If numThreads is 0 the default number of threads is used (the number of cores in the system). </span>
+<span style='color:#cc0000;'>   Sequential evaluation is achieved by setting numThreads to 1.</span>
+<span style='color:#cc0000;'>   </span>
+<span style='color:#cc0000;'>2. The Compute Stack approach</span>
+
+<span style='color:#cc0000;'>   Equations can be evaluated in parallel using:</span>
+
+<span style='color:#cc0000;'>   a) OpenMP API for general purpose processors and manycore devices (i.e. Xeon Phi).</span>
+<span style='color:#cc0000;'>      </span>
+<span style='color:#cc0000;'>      This method is specified by setting daetools.core.equations.evaluationMode option </span>
+<span style='color:#cc0000;'>      in daetools.cfg to &quot;computeStack_OpenMP&quot; or setting the simulation property:</span>
+<span style='color:#cc0000;'>   </span>
+<span style='color:#cc0000;'>      simulation.EvaluationMode = eComputeStack_OpenMP</span>
+<span style='color:#cc0000;'>   </span>
+<span style='color:#cc0000;'>      numThreads controls the number of OpenMP threads in a team.</span>
+<span style='color:#cc0000;'>      If numThreads is 0 the default number of threads is used (the number of cores in the system). </span>
+<span style='color:#cc0000;'>      Sequential evaluation is achieved by setting numThreads to 1.</span>
+
+<span style='color:#cc0000;'>   b) OpenCL framework for streaming processors (GPU, GPGA) and heterogeneous systems.</span>
+
+<span style='color:#cc0000;'>      This type is implemented in an external Python module pyEvaluator_OpenCL. </span>
+<span style='color:#cc0000;'>      It is up to one order of magnitude faster than the Evaluation Tree approach. </span>
+<span style='color:#cc0000;'>      However, it does not support external functions nor thermo-physical packages.</span>
+<span style='color:#cc0000;'>      </span>
+<span style='color:#cc0000;'>      OpenCL evaluators can use a single or multiple OpenCL devices.</span>
+<span style='color:#cc0000;'>      It is required to install OpenCL drivers/runtime libraries.</span>
+<span style='color:#cc0000;'>      InteL: https://software.intel.com/en-us/articles/opencl-drivers</span>
+<span style='color:#cc0000;'>      AMD: https://support.amd.com/en-us/kb-articles/Pages/OpenCL2-Driver.aspx</span>
+<span style='color:#cc0000;'>      NVidia: https://developer.nvidia.com/opencl</span>
 <span style='color:#cc0000;'>&quot;&quot;&quot;</span>
 
 <span style='color:#3605fb;'>import</span> os, sys, tempfile

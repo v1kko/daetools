@@ -198,6 +198,8 @@ CONFIG += rtti
 unix::QMAKE_CXXFLAGS           += -fopenmp
 win32-msvc2015::QMAKE_CXXFLAGS += /openmp
 
+unix::QMAKE_LFLAGS += -fopenmp
+
 win32-msvc2015::QMAKE_CXXFLAGS += -D_CRT_SECURE_NO_WARNINGS -DNOMINMAX
 win32-msvc2015::QMAKE_CXXFLAGS += -DBOOST_ALL_NO_LIB=1
 win32-msvc2015::QMAKE_CXXFLAGS += /bigobj
@@ -746,13 +748,21 @@ win32-msvc2015::OPENMP_LIB =
 #                              NVidia OpenCL
 #####################################################################################
 unix::NVIDIA_OPENCL_DIR               = /usr/local/cuda
-win32-msvc2015::NVIDIA_OPENCL_DIR     =
+win32-msvc2015::NVIDIA_OPENCL_DIR     = "$$(CUDA_PATH)"
 
 unix::NVIDIA_OPENCL_INCLUDE           = $${NVIDIA_OPENCL_DIR}/include
 win32-msvc2015::NVIDIA_OPENCL_INCLUDE =
 
+contains(ARCH, x86) {
+win32-msvc2015::NVIDIA_OPENCL_LIBDIR    = $${NVIDIA_OPENCL_DIR}/lib/Win32
+}
+contains(ARCH, x86_64) {
+win32-msvc2015::NVIDIA_OPENCL_LIBDIR    = $${NVIDIA_OPENCL_DIR}/lib/x64
+}
+#message($${ARCH} architecture: $${NVIDIA_OPENCL_LIBDIR})
+
 unix::NVIDIA_OPENCL_LIBS              = -L$${NVIDIA_OPENCL_DIR}/lib64 -lOpenCL
-win32-msvc2015::NVIDIA_OPENCL_LIBS    =
+win32-msvc2015::NVIDIA_OPENCL_LIBS    = "$${NVIDIA_OPENCL_LIBDIR}\OpenCL.lib"
 
 #####################################################################################
 #                              Intel OpenCL

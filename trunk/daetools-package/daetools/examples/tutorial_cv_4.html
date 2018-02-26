@@ -68,6 +68,16 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc0000;
 <span style='color:#cc0000;'>   v(x,  LB) = vm(x,  LB)</span>
 <span style='color:#cc0000;'>   v(x,  UB) = vm(x,  UB)</span>
 
+<span style='color:#cc0000;'>Steady-state results (w0 = 0.0) for the u-component:</span>
+<span style='color:#cc0000;'>    </span>
+<span style='color:#cc0000;'>.. image:: _static/tutorial_cv_4-u_component.png</span>
+<span style='color:#cc0000;'>   :width: 500px</span>
+
+<span style='color:#cc0000;'>Steady-state results (w0 = 0.0) for the v-component:</span>
+<span style='color:#cc0000;'>    </span>
+<span style='color:#cc0000;'>.. image:: _static/tutorial_cv_4-v_component.png</span>
+<span style='color:#cc0000;'>   :width: 500px</span>
+
 <span style='color:#cc0000;'>Numerical vs. manufactured solution plot (u velocity component, 40x32 grid):</span>
 
 <span style='color:#cc0000;'>.. image:: _static/tutorial_cv_4-results.png</span>
@@ -110,11 +120,11 @@ no_t <b><span style='color:#0000ff;'>=</span></b> daeVariableType(<span style='c
         daeModel.DeclareEquations(<span style='color:#3605fb;'>self</span>)
 
         <span style='color:#017a31;'># Create some auxiliary functions to make equations more readable </span>
-        u0       <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.u0
-        v0       <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.v0
-        ni       <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.ni
-        w0       <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.w0
-        eps      <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.eps
+        u0      <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.u0
+        v0      <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.v0
+        ni      <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.ni
+        w0      <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.w0
+        eps     <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.eps
         t       <b><span style='color:#0000ff;'>=</span></b> Time()
         
         u       <b><span style='color:#0000ff;'>=</span></b> <b>lambda</b> x,y: <span style='color:#3605fb;'>self</span>.u(x,y)
@@ -257,7 +267,7 @@ no_t <b><span style='color:#0000ff;'>=</span></b> daeVariableType(<span style='c
                 <span style='color:#3605fb;'>self</span>.m.v.SetInitialCondition(x,y, vm0(xp[x], yp[y]))
                 
 <span style='color:#017a31;'># Setup everything manually and run in a console</span>
-<b>def</b> simulate(Nx, Ny):
+<b>def</b> simulate(Nx, Ny, <b><span style='color:#0000ff;'>**</span></b>kwargs):
     <span style='color:#017a31;'># Create Log, Solver, DataReporter and Simulation object</span>
     log          <b><span style='color:#0000ff;'>=</span></b> daePythonStdOutLog()
     daesolver    <b><span style='color:#0000ff;'>=</span></b> daeIDAS()
@@ -268,24 +278,14 @@ no_t <b><span style='color:#0000ff;'>=</span></b> daeVariableType(<span style='c
     log.PrintProgress <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>False</span>
 
     lasolver <b><span style='color:#0000ff;'>=</span></b> pySuperLU.daeCreateSuperLUSolver()
-    daesolver.SetLASolver(lasolver)
-
-    <span style='color:#017a31;'># Enable reporting of all variables</span>
-    simulation.m.SetReportingOn(<span style='color:#3605fb;'>True</span>)
 
     <span style='color:#017a31;'># Enable reporting of time derivatives for all reported variables</span>
     simulation.ReportTimeDerivatives <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>True</span>
 
-    <span style='color:#017a31;'># Set the time horizon and the reporting interval</span>
-    simulation.ReportingInterval <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>2</span>
-    simulation.TimeHorizon <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>90</span>
-
-    <span style='color:#017a31;'># Connect data reporter</span>
-    simName <b><span style='color:#0000ff;'>=</span></b> simulation.m.Name <b><span style='color:#0000ff;'>+</span></b> strftime(<span style='color:#cc0000;'>&quot; [</span><span style='color:#cc0000;'>%d</span><span style='color:#cc0000;'>.%m.%Y %H:%M:%S]&quot;</span>, localtime())
-
     <span style='color:#017a31;'># 1. TCP/IP</span>
     tcpipDataReporter <b><span style='color:#0000ff;'>=</span></b> daeTCPIPDataReporter()
     datareporter.AddDataReporter(tcpipDataReporter)
+    simName <b><span style='color:#0000ff;'>=</span></b> simulation.m.Name <b><span style='color:#0000ff;'>+</span></b> strftime(<span style='color:#cc0000;'>&quot; [</span><span style='color:#cc0000;'>%d</span><span style='color:#cc0000;'>.%m.%Y %H:%M:%S]&quot;</span>, localtime())
     <b>if</b> <b>not</b> tcpipDataReporter.Connect(<span style='color:#cc0000;'>&quot;&quot;</span>, simName):
         sys.exit()
 
@@ -293,20 +293,11 @@ no_t <b><span style='color:#0000ff;'>=</span></b> daeVariableType(<span style='c
     dr <b><span style='color:#0000ff;'>=</span></b> daeNoOpDataReporter()
     datareporter.AddDataReporter(dr)
 
-    <span style='color:#017a31;'># Initialize the simulation</span>
-    simulation.Initialize(daesolver, datareporter, log)
-
-    <span style='color:#017a31;'># Save the model report and the runtime model report</span>
-    <span style='color:#017a31;'>#simulation.m.SaveModelReport(simulation.m.Name + &quot;.xml&quot;)</span>
-    <span style='color:#017a31;'>#simulation.m.SaveRuntimeModelReport(simulation.m.Name + &quot;-rt.xml&quot;)</span>
-
-    <span style='color:#017a31;'># Solve at time=0 (initialization)</span>
-    simulation.SolveInitial()
-
-    <span style='color:#017a31;'># Run</span>
-    simulation.Run()
-    simulation.Finalize()
-    
+    daeActivity.simulate(simulation, reportingInterval <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>2.0</span>, 
+                                     timeHorizon       <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>90.0</span>,
+                                     lasolver          <b><span style='color:#0000ff;'>=</span></b> lasolver,
+                                     datareporter      <b><span style='color:#0000ff;'>=</span></b> datareporter,
+                                     <b><span style='color:#0000ff;'>**</span></b>kwargs)    
     
     <span style='color:#017a31;'>########################################</span><span style='color:#81ca2d;'>###</span>
     <span style='color:#017a31;'>#  Data                                   #</span>
@@ -322,7 +313,7 @@ no_t <b><span style='color:#0000ff;'>=</span></b> daeVariableType(<span style='c
     um <b><span style='color:#0000ff;'>=</span></b> umvar.Values[<b><span style='color:#0000ff;'>-</span></b><span style='color:#cc047c;'>1</span>, :, :] <span style='color:#017a31;'># 3D array [t,x,y]</span>
     vm <b><span style='color:#0000ff;'>=</span></b> vmvar.Values[<b><span style='color:#0000ff;'>-</span></b><span style='color:#cc047c;'>1</span>, :, :] <span style='color:#017a31;'># 3D array [t,x,y]</span>
     
-    <b>return</b> times,u,v,um,vm
+    <b>return</b> times,u,v,um,vm, simulation
 
 <b>def</b> run(<b><span style='color:#0000ff;'>**</span></b>kwargs):
     Nxs <b><span style='color:#0000ff;'>=</span></b> numpy.array([<span style='color:#cc047c;'>10</span>, <span style='color:#cc047c;'>20</span>, <span style='color:#cc047c;'>40</span>, <span style='color:#cc047c;'>80</span>])
@@ -342,7 +333,7 @@ no_t <b><span style='color:#0000ff;'>=</span></b> daeVariableType(<span style='c
     <b>for</b> i <b>in</b> <span style='color:#2a00d6;'>range</span>(n):
         Nx <b><span style='color:#0000ff;'>=</span></b> <span style='color:#2a00d6;'>int</span>(Nxs[i])
         Ny <b><span style='color:#0000ff;'>=</span></b> <span style='color:#2a00d6;'>int</span>(Nys[i])
-        times, u, v, um, vm <b><span style='color:#0000ff;'>=</span></b> simulate(Nx, Ny)
+        times, u, v, um, vm, simulation <b><span style='color:#0000ff;'>=</span></b> simulate(Nx, Ny, <b><span style='color:#0000ff;'>**</span></b>kwargs)
         Eu[i] <b><span style='color:#0000ff;'>=</span></b> numpy.sqrt((<span style='color:#cc047c;'>1.0</span><b><span style='color:#0000ff;'>/</span></b>(Nx<b><span style='color:#0000ff;'>*</span></b>Ny)) <b><span style='color:#0000ff;'>*</span></b> numpy.<span style='color:#2a00d6;'>sum</span>((u<b><span style='color:#0000ff;'>-</span></b>um)<b><span style='color:#0000ff;'>**</span></b><span style='color:#cc047c;'>2</span>))
         Ev[i] <b><span style='color:#0000ff;'>=</span></b> numpy.sqrt((<span style='color:#cc047c;'>1.0</span><b><span style='color:#0000ff;'>/</span></b>(Nx<b><span style='color:#0000ff;'>*</span></b>Ny)) <b><span style='color:#0000ff;'>*</span></b> numpy.<span style='color:#2a00d6;'>sum</span>((v<b><span style='color:#0000ff;'>-</span></b>vm)<b><span style='color:#0000ff;'>**</span></b><span style='color:#cc047c;'>2</span>))
 
@@ -364,12 +355,17 @@ no_t <b><span style='color:#0000ff;'>=</span></b> daeVariableType(<span style='c
     Eu2 <b><span style='color:#0000ff;'>=</span></b> C2u <b><span style='color:#0000ff;'>*</span></b> hs<b><span style='color:#0000ff;'>**</span></b><span style='color:#cc047c;'>2</span> <span style='color:#017a31;'># Eu for the second order slope</span>
     Ev2 <b><span style='color:#0000ff;'>=</span></b> C2v <b><span style='color:#0000ff;'>*</span></b> hs<b><span style='color:#0000ff;'>**</span></b><span style='color:#cc047c;'>2</span> <span style='color:#017a31;'># Ev for the second order slope</span>
     
+    <span style='color:#2a00d6;'>print</span>(<span style='color:#cc0000;'>'Eu2 ='</span>, Eu2)
+    <span style='color:#2a00d6;'>print</span>(<span style='color:#cc0000;'>'Ev2 ='</span>, Ev2)
+    <span style='color:#2a00d6;'>print</span>(<span style='color:#cc0000;'>'pu '</span>, pu)
+    <span style='color:#2a00d6;'>print</span>(<span style='color:#cc0000;'>'pv ='</span>, pv)
+    
     fontsize <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>14</span>
     fontsize_legend <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>11</span>
     fig <b><span style='color:#0000ff;'>=</span></b> plt.figure(figsize<b><span style='color:#0000ff;'>=</span></b>(<span style='color:#cc047c;'>10</span>,<span style='color:#cc047c;'>8</span>), facecolor<b><span style='color:#0000ff;'>=</span></b><span style='color:#cc0000;'>'white'</span>)
     grids <b><span style='color:#0000ff;'>=</span></b> [<span style='color:#cc0000;'>'</span><span style='color:#cc0000;'>%d</span><span style='color:#cc0000;'>x</span><span style='color:#cc0000;'>%d</span><span style='color:#cc0000;'>'</span> <b><span style='color:#0000ff;'>%</span></b> (Nx,Ny) <b>for</b> (Nx,Ny) <b>in</b> <span style='color:#2a00d6;'>zip</span>(Nxs,Nys)]
     grids <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc0000;'>','</span>.join(grids)
-    fig.canvas.set_window_title(<span style='color:#cc0000;'>'The Normalised global errors and the Orders of accuracy (grids: </span><span style='color:#cc0000;'>%s</span><span style='color:#cc0000;'>)'</span> <b><span style='color:#0000ff;'>%</span></b> grids)
+    fig.canvas.set_window_title(<span style='color:#cc0000;'>'The Normalised global errors and the Orders of accuracy (grids: </span><span style='color:#cc0000;'>%s</span><span style='color:#cc0000;'>) (cv_4)'</span> <b><span style='color:#0000ff;'>%</span></b> grids)
     
     ax <b><span style='color:#0000ff;'>=</span></b> plt.subplot(<span style='color:#cc047c;'>221</span>)
     plt.figure(<span style='color:#cc047c;'>1</span>, facecolor<b><span style='color:#0000ff;'>=</span></b><span style='color:#cc0000;'>'white'</span>)

@@ -130,7 +130,9 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc0000;
 
     <b>elif</b> lasolver.Name <b><span style='color:#0000ff;'>==</span></b> <span style='color:#cc0000;'>'SuperLU_MT'</span>:
         <span style='color:#017a31;'># SuperLU_MT options:</span>
-        options.nprocs            <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>4</span>                 <span style='color:#017a31;'># No. of threads (= no. of CPUs/Cores)</span>
+        <span style='color:#017a31;'># Leave nprocs to default (specified in daetools.cfg) or specify it manually</span>
+        <span style='color:#017a31;'>#options.nprocs           = 4                 # No. of threads (= no. of CPUs/Cores)</span>
+        <span style='color:#2a00d6;'>print</span>(<span style='color:#cc0000;'>'SuperLU_MT numThreads = </span><span style='color:#cc0000;'>%d</span><span style='color:#cc0000;'>'</span> <b><span style='color:#0000ff;'>%</span></b> options.nprocs)
         options.PrintStat         <b><span style='color:#0000ff;'>=</span></b> superlu.YES       <span style='color:#017a31;'># {YES, NO}</span>
         options.ColPerm           <b><span style='color:#0000ff;'>=</span></b> superlu.COLAMD    <span style='color:#017a31;'># {NATURAL, MMD_ATA, MMD_AT_PLUS_A, COLAMD}</span>
         options.diag_pivot_thresh <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>1.0</span>               <span style='color:#017a31;'># Between 0.0 and 1.0</span>

@@ -166,7 +166,7 @@ void daeComputeStackEvaluator_OpenCL_multi::EvaluateResiduals(daeComputeStackEva
         omp_set_num_threads(noEvaluators);
 
     #pragma omp parallel for firstprivate(EC)
-    for(size_t i = 0; i < noEvaluators; i++)
+    for(int i = 0; i < noEvaluators; i++)
     {
         daeComputeStackEvaluator_OpenCL* evaluator = m_evaluators[i];
 
@@ -195,7 +195,7 @@ void daeComputeStackEvaluator_OpenCL_multi::EvaluateJacobian(daeComputeStackEval
         omp_set_num_threads(noEvaluators);
 
     #pragma omp parallel for firstprivate(EC)
-    for(size_t i = 0; i < noEvaluators; i++)
+    for(int i = 0; i < noEvaluators; i++)
     {
         daeComputeStackEvaluator_OpenCL* evaluator = m_evaluators[i];
 
@@ -227,7 +227,7 @@ void daeComputeStackEvaluator_OpenCL_multi::EvaluateSensitivityResiduals(daeComp
         omp_set_num_threads(noEvaluators);
 
     #pragma omp parallel for firstprivate(EC)
-    for(size_t i = 0; i < noEvaluators; i++)
+    for(int i = 0; i < noEvaluators; i++)
     {
         daeComputeStackEvaluator_OpenCL* evaluator = m_evaluators[i];
 

@@ -56,6 +56,7 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc0000;
 <span style='color:#3605fb;'>from</span> time <span style='color:#3605fb;'>import</span> localtime, strftime
 <span style='color:#3605fb;'>import</span> matplotlib.pyplot <span style='color:#3605fb;'>as</span> plt
 <span style='color:#3605fb;'>from</span> daetools.pyDAE <span style='color:#3605fb;'>import</span> <b><span style='color:#0000ff;'>*</span></b>
+<span style='color:#3605fb;'>from</span> daetools.solvers.superlu <span style='color:#3605fb;'>import</span> pySuperLU
 
 <span style='color:#017a31;'># Standard variable types are defined in variable_types.py</span>
 <span style='color:#3605fb;'>from</span> pyUnits <span style='color:#3605fb;'>import</span> m, g, kg, s, K, mol, kmol, J, um
@@ -114,7 +115,7 @@ pi <b><span style='color:#0000ff;'>=</span></b> numpy.pi
             <span style='color:#3605fb;'>self</span>.m.c.SetInitialCondition(i, numpy.sin(pi<b><span style='color:#0000ff;'>*</span></b>xp[i]))
 
 <span style='color:#017a31;'># Setup everything manually and run in a console</span>
-<b>def</b> simulate(Nx):
+<b>def</b> simulate(Nx, <b><span style='color:#0000ff;'>**</span></b>kwargs):
     <span style='color:#017a31;'># Create Log, Solver, DataReporter and Simulation object</span>
     log          <b><span style='color:#0000ff;'>=</span></b> daePythonStdOutLog()
     daesolver    <b><span style='color:#0000ff;'>=</span></b> daeIDAS()
@@ -124,21 +125,14 @@ pi <b><span style='color:#0000ff;'>=</span></b> numpy.pi
     <span style='color:#017a31;'># Do no print progress</span>
     log.PrintProgress <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>False</span>
 
+    lasolver <b><span style='color:#0000ff;'>=</span></b> pySuperLU.daeCreateSuperLUSolver()
+
     daesolver.RelativeTolerance <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>1e-7</span>
     
-    <span style='color:#017a31;'># Enable reporting of all variables</span>
-    simulation.m.SetReportingOn(<span style='color:#3605fb;'>True</span>)
-
-    <span style='color:#017a31;'># Set the time horizon and the reporting interval</span>
-    simulation.ReportingInterval <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>0.02</span>
-    simulation.TimeHorizon <b><span style='color:#0000ff;'>=</span></b> dt
-
-    <span style='color:#017a31;'># Connect data reporter</span>
-    simName <b><span style='color:#0000ff;'>=</span></b> simulation.m.Name <b><span style='color:#0000ff;'>+</span></b> strftime(<span style='color:#cc0000;'>&quot; [</span><span style='color:#cc0000;'>%d</span><span style='color:#cc0000;'>.%m.%Y %H:%M:%S]&quot;</span>, localtime())
-
     <span style='color:#017a31;'># 1. TCP/IP</span>
     tcpipDataReporter <b><span style='color:#0000ff;'>=</span></b> daeTCPIPDataReporter()
     datareporter.AddDataReporter(tcpipDataReporter)
+    simName <b><span style='color:#0000ff;'>=</span></b> simulation.m.Name <b><span style='color:#0000ff;'>+</span></b> strftime(<span style='color:#cc0000;'>&quot; [</span><span style='color:#cc0000;'>%d</span><span style='color:#cc0000;'>.%m.%Y %H:%M:%S]&quot;</span>, localtime())
     <b>if</b> <b>not</b> tcpipDataReporter.Connect(<span style='color:#cc0000;'>&quot;&quot;</span>, simName):
         sys.exit()
 
@@ -146,19 +140,11 @@ pi <b><span style='color:#0000ff;'>=</span></b> numpy.pi
     dr <b><span style='color:#0000ff;'>=</span></b> daeNoOpDataReporter()
     datareporter.AddDataReporter(dr)
 
-    <span style='color:#017a31;'># Initialize the simulation</span>
-    simulation.Initialize(daesolver, datareporter, log)
-
-    <span style='color:#017a31;'># Save the model report and the runtime model report</span>
-    <span style='color:#017a31;'>#simulation.m.SaveModelReport(simulation.m.Name + &quot;.xml&quot;)</span>
-    <span style='color:#017a31;'>#simulation.m.SaveRuntimeModelReport(simulation.m.Name + &quot;-rt.xml&quot;)</span>
-
-    <span style='color:#017a31;'># Solve at time=0 (initialization)</span>
-    simulation.SolveInitial()
-
-    <span style='color:#017a31;'># Run</span>
-    simulation.Run()
-    simulation.Finalize()
+    daeActivity.simulate(simulation, reportingInterval <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>0.02</span>, 
+                                     timeHorizon       <b><span style='color:#0000ff;'>=</span></b> dt,
+                                     lasolver          <b><span style='color:#0000ff;'>=</span></b> lasolver,
+                                     datareporter      <b><span style='color:#0000ff;'>=</span></b> datareporter,
+                                     <b><span style='color:#0000ff;'>**</span></b>kwargs)
     
     <span style='color:#017a31;'>########################################</span><span style='color:#81ca2d;'>###</span>
     <span style='color:#017a31;'>#  Data                                   #</span>
@@ -168,7 +154,7 @@ pi <b><span style='color:#0000ff;'>=</span></b> numpy.pi
     cvar <b><span style='color:#0000ff;'>=</span></b> results[simulation.m.Name <b><span style='color:#0000ff;'>+</span></b> <span style='color:#cc0000;'>'.c'</span>]
     c    <b><span style='color:#0000ff;'>=</span></b> cvar.Values[<b><span style='color:#0000ff;'>-</span></b><span style='color:#cc047c;'>1</span>, :]  <span style='color:#017a31;'># 2D array [t,x]</span>
     
-    <b>return</b> simulation.m.x.Points, c
+    <b>return</b> simulation.m.x.Points, c, simulation
 
 <b>def</b> run(<b><span style='color:#0000ff;'>**</span></b>kwargs):
     Nxs <b><span style='color:#0000ff;'>=</span></b> numpy.array([<span style='color:#cc047c;'>20</span>, <span style='color:#cc047c;'>40</span>, <span style='color:#cc047c;'>80</span>])
@@ -178,7 +164,7 @@ pi <b><span style='color:#0000ff;'>=</span></b> numpy.pi
     
     <span style='color:#017a31;'># Run simulations</span>
     <b>for</b> i,Nx <b>in</b> <span style='color:#2a00d6;'>enumerate</span>(Nxs):
-        nx, c_ <b><span style='color:#0000ff;'>=</span></b> simulate(<span style='color:#2a00d6;'>int</span>(Nx))
+        nx, c_, simulation <b><span style='color:#0000ff;'>=</span></b> simulate(<span style='color:#2a00d6;'>int</span>(Nx), <b><span style='color:#0000ff;'>**</span></b>kwargs)
         <span style='color:#017a31;'># Exact solution:</span>
         cexact_ <b><span style='color:#0000ff;'>=</span></b> []
         <b>for</b> xk <b>in</b> nx:
@@ -192,6 +178,7 @@ pi <b><span style='color:#0000ff;'>=</span></b> numpy.pi
     fontsize <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>14</span>
     fontsize_legend <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>11</span>
     fig <b><span style='color:#0000ff;'>=</span></b> plt.figure(figsize<b><span style='color:#0000ff;'>=</span></b>(<span style='color:#cc047c;'>12</span>,<span style='color:#cc047c;'>4</span>), facecolor<b><span style='color:#0000ff;'>=</span></b><span style='color:#cc0000;'>'white'</span>)
+    fig.canvas.set_window_title(<span style='color:#cc0000;'>'Tutorial cv_6'</span>)
     
     ax <b><span style='color:#0000ff;'>=</span></b> plt.subplot(<span style='color:#cc047c;'>131</span>)
     plt.figure(<span style='color:#cc047c;'>1</span>, facecolor<b><span style='color:#0000ff;'>=</span></b><span style='color:#cc0000;'>'white'</span>)

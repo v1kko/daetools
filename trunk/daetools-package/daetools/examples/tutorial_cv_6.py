@@ -131,6 +131,7 @@ def simulate(Nx, **kwargs):
 
     daeActivity.simulate(simulation, reportingInterval = 0.02, 
                                      timeHorizon       = dt,
+                                     log               = log,
                                      lasolver          = lasolver,
                                      datareporter      = datareporter,
                                      **kwargs)

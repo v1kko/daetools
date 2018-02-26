@@ -152,15 +152,15 @@
   DAE Tools Project, \url{http://www.daetools.com}
 }
 %\logo{\includegraphics{../images/[d][a][e]_Tools_project.png}}
-\date{16 October 2017} 
+\date{20 February 2018} 
 
 \hypersetup{
-pdfauthor = {Dragan Nikolić: dnikolic@daetools.com},
-pdfsubject = {Introduction to DAE Tools},
-pdfkeywords = {Modelling, Simulation, Optimisation, Modelling languages, Model exchange, Domain
-               specific languages, Equation-based, DAE, Code generation},
-pdfmoddate= {D:\pdfdate},
-pdfcreator = {Dragan Nikolić}
+    pdfauthor = {Dragan Nikolić: dnikolic@daetools.com},
+    pdfsubject = {Introduction to DAE Tools},
+    pdfkeywords = {Modelling, Simulation, Optimisation, Modelling languages, Model exchange, Domain
+                specific languages, Equation-based, DAE, Code generation},
+    pdfmoddate= {D:\pdfdate},
+    pdfcreator = {Dragan Nikolić}
 }
 
 % \titlegraphic{\includegraphics{../[d][a][e]_Tools_project.png}}
@@ -405,19 +405,124 @@ Current approaches to mathematical modelling:
 %   \end{itemize}
 % \end{frame}
 
-\begin{frame}{Additional \textsc{DAE Tools} features}
+\section{Main Features}
+
+\begin{frame}[plain]{Parallel Computing}
+    The \alert{shared-memory} parallel programming model supported.
     \begin{itemize}
-        \item Support for \alert{multiple platforms/architectures} 
-        \item Support for the \alert{automatic differentiation} (ADOL-C)
-        \item Support for the \alert{sensitivity analysis} through the auto-differentiation capabilities
-        \item Support for the \alert{parallel} computation (OpenMP, GPGPU, MPI)
-        \item Support for a large number of \alert{DAE}, \alert{LA} and \alert{NLP} solvers 
-        \item Support for the generation of \alert{model reports} (XML + MathML, Latex)
-        \item \alert{Export} of the \alert{simulation results} to various file formats (Matlab, Excel, json, xml, HDF5, Pandas, VTK)
+      \item \alert{Evaluation of equations and derivatives} 
+         \begin{itemize}
+            \item \alert{OpenMP}: general purpose processors and manycore devices
+            \item \alert{OpenCL}: streaming processors (GPU, GPGA) and heterogeneous systems
+         \end{itemize}   
+      \item \alert{Assembly of Finite Element systems} (OpenMP)
+      \item \alert{Solution of systems of linear equations} (SuperLU\_MT, Pardiso and Intel Pardiso solvers)
+      \item \alert{Global Sensitivity Analysis} (multiprocessing.Pool)
     \end{itemize}
+    \begin{center}
+        \includegraphics[align=c, height=0.30\paperheight]{Compute-Stack-Evaluator.png}
+    \end{center}
 \end{frame}
 
-\begin{frame}{Additional \textsc{DAE Tools} features (cont'd)}
+\begin{frame}{Multiphysics Capabilities}
+    Modelling of multiple simultaneous physical phenomena
+    \begin{columns}[c]
+      \begin{column}{0.6\paperwidth}
+        {\small
+        \begin{itemize}
+            \item \alert{Finite Difference} (FD), \alert{Finite Volume} (FV) and \alert{Finite Element} (FE) methods
+            \item Mixed coupled systems of equations \\ 
+                  (FD, FV and FE methods)
+            \item DAE Tools variables for boundary \\
+                  conditions, source terms and non-linear \\
+                  coefficients
+            \item Additional constraints and auxiliary \\
+                  equations
+        \end{itemize}
+        }
+      \end{column}
+      
+      \begin{column}{0.27\paperwidth}
+        \begin{center}
+          \includegraphics[align=c, width=0.25\paperwidth]{buoyancy.png}
+        \end{center}
+      \end{column}
+    \end{columns}
+\end{frame}
+
+\begin{frame}{Code Generation \& Co-Simulation}
+    \begin{columns}[c]
+      \begin{column}{0.5\paperwidth}
+        {\small
+        \begin{itemize}
+            \item \alert{Code-generation}
+                \begin{itemize}
+                    \item Modelica
+                    \item gPROMS
+                    \item C99 (embedded systems)
+                    \item C++ MPI (distributed systems)
+                \end{itemize}
+            \item \alert{Co-simulation}
+                \begin{itemize}
+                    \item Matlab MEX-functions
+                    \item Simulink user-defined S-functions
+                    \item Functional Mockup Interface (FMI) for Co-Simulation
+                \end{itemize}
+        \end{itemize}
+        }
+      \end{column}
+      
+      \begin{column}{0.45\paperwidth}
+        \begin{center}
+          \includegraphics[align=c, width=0.4\paperwidth]{StateMachineCoSimulation.png}
+        \end{center}
+      \end{column}
+    \end{columns}
+\end{frame}
+
+\begin{frame}{Software As a Service}
+    \begin{itemize}
+      \item \alert{Web service with the RESTful API} 
+        \begin{itemize}
+          \item DAE Tools simulations (daetools\_ws)
+          \item DAE Tools FMU objects (daetools\_fmi\_ws)
+        \end{itemize}
+      \item \alert{Language independent} (JavaScript, Python, C++, ...)
+      \item \alert{Benefits}:
+        \begin{itemize}
+          \item Application servers
+          \item Individual simulations as a web service
+          \item Attractive Graphical User Interface
+        \end{itemize}
+    \end{itemize}
+    \begin{center}
+        \includegraphics[align=c, height=0.30\paperheight]{daetools_web_service.png}
+    \end{center}
+\end{frame}
+
+\begin{frame}[plain]{Sensitivity Analysis}
+    \begin{itemize}
+      \item \alert{Local sensitivity analysis} (derivative-based)
+      \item \alert{Global sensitivity analysis} (SALib library):
+        \begin{itemize}
+          \item 1st and 2nd order sensitivities and confidence intervals
+          \item Total sensitivity indices and confidence intervals
+          \item Scatter plots
+        \end{itemize}
+      \item Methods available:
+        \begin{itemize}
+          \item \alert{Method of Morris} (elementary effect method)
+          \item \alert{FAST} (variance-based)
+          \item \alert{Sobol} (variance-based)
+        \end{itemize}
+      \item Simulations performed in parallel (multiprocessing.Pool)
+    \end{itemize}
+    \begin{center}
+        \includegraphics[align=c, height=0.25\paperheight]{sa_scatter_sobol.png}
+    \end{center}
+\end{frame}
+
+\begin{frame}[plain]{Code Verification}
   \begin{itemize}
       \item The \alert{formal code verification techniques} applied to test almost all aspects of the software
       \item The \alert{most rigorous code verification methods} used:
@@ -427,14 +532,24 @@ Current approaches to mathematical modelling:
         \end{itemize}
       \item The \alert{most rigorous acceptance criteria} used:
         \begin{itemize}
-          \item Percent Error
-          \item Consistency
+          \item Percent error
+          \item Normalised global error
           \item \alert{Order-of-accuracy}
         \end{itemize}
   \end{itemize}
   \begin{center}
-      \includegraphics[align=c, height=0.27\paperheight]{code_verification.png}
+      \includegraphics[align=c, height=0.35\paperheight]{code_verification.png}
   \end{center}
+\end{frame}
+
+\begin{frame}{Additional \textsc{DAE Tools} features}
+    \begin{itemize}
+        \item Support for \alert{multiple platforms/architectures} 
+        \item Support for the \alert{automatic differentiation} (ADOL-C)
+        \item Support for a large number of \alert{DAE}, \alert{LA} and \alert{NLP} solvers 
+        \item Support for the generation of \alert{model reports} (XML + MathML, Latex)
+        \item \alert{Export} of the \alert{simulation results} to various file formats (Matlab, Excel, json, xml, HDF5, Pandas, VTK)
+    \end{itemize}
 \end{frame}
 
 \section{Programming Paradigms}
@@ -625,217 +740,214 @@ Current approaches to mathematical modelling:
 \end{itemize}
 \end{frame}
 
-\section{Architecture}
 
-\begin{frame}[plain]{The fundamental concepts/software interfaces}
-\begin{columns}
-    \begin{column}{0.28\paperwidth}
-        \tiny{
-        \begin{itemize}
-            \item The main concepts:
-                \begin{itemize}
-                    \tiny{
-                        \item \textcolor{sthlmRed}{daeModel\_t}
-                        \item \textcolor{sthlmRed}{daeSimulation\_t}
-                        \item \textcolor{sthlmRed}{daeOptimization\_t}
-                        \item \textcolor{sthlmRed}{daeBlock\_t}
-                        \item \textcolor{sthlmRed}{daeDAESolver\_t}
-                        \item \textcolor{sthlmRed}{daeLASolver\_t}
-                        \item \textcolor{sthlmRed}{daeDataReporter\_t}
-                        \item \textcolor{sthlmRed}{daeBlock\_t}
-                    }
-                \end{itemize}
-            \item In 6 packages:
-                \begin{itemize}
-                \tiny{
-                        \item \alert{core}
-                        \item \alert{activity}
-                        \item \alert{datareporting}
-                        \item \alert{solvers}
-                        \item \alert{logging}
-                        \item \alert{units}
-                    }
-                \end{itemize}
-        \end{itemize}
-        }
-     \end{column}
-     
-     \begin{column}{0.72\paperwidth}
-         \begin{center}
-             \begin{figure}
-               \includegraphics[width=0.68\paperwidth]{daetools-architecture.png}      
-               \caption{The architecture of \alert{DAE Tools}.}
-            \end{figure}
-         \end{center}
-     \end{column}
-   \end{columns}
-\end{frame}
-
-\begin{frame}{Package \textsc{core}}
-\scriptsize
-{
-\begin{table}
-  \caption*{The key modelling concepts in the \alert{core} package.}
-  \begin{tabularx}{\linewidth}{l>{\raggedright}X}
-    \toprule
-    \textcolor{sthlmRed}{\textbf{Concept}} & \textcolor{sthlmRed}{\textbf{Description}} \tabularnewline
-    \midrule
-    \textcolor{sthlmRed}{\textit{daeVariableType\_t}} & Defines a variable type that has the units, lower and upper bounds, a default value and 
-                                  an absolute tolerance \tabularnewline
-    \textcolor{sthlmRed}{\textit{daeDomain\_t}} & Defines ordinary arrays or spatial distributions such as structured and unstructured grids \tabularnewline 
-    \textcolor{sthlmRed}{\textit{daeParameter\_t}} & Defines time invariant quantities that do not change during a simulation \tabularnewline 
-    \textcolor{sthlmRed}{\textit{daeVariable\_t}} & Defines time varying quantities that change during a simulation \tabularnewline 
-    \textcolor{sthlmRed}{\textit{daePort\_t}} & Defines connection points between model instances for exchange of continuous quantities \tabularnewline 
-    \textcolor{sthlmRed}{\textit{daeEventPort\_t}} & Defines connection points between model instances for exchange of discrete messages/events \tabularnewline
-    \bottomrule
-  \end{tabularx}
-\end{table}
-}
-\end{frame}
-
-\begin{frame}{Package \textsc{core} (cont'd)}
-\scriptsize
-{
-\begin{table}
-  \caption*{The key modelling concepts in the \alert{core} package (cont'd).}
-  \begin{tabularx}{\linewidth}{l>{\raggedright}X}
-    \toprule
-    \textcolor{sthlmRed}{\textbf{Concept}} & \textcolor{sthlmRed}{\textbf{Description}} \tabularnewline
-    \midrule
-    \textcolor{sthlmRed}{\textit{daePortConnection\_t}} & Defines connections between two ports \tabularnewline 
-    \textcolor{sthlmRed}{\textit{daeEventPortConnection\_t}} & Defines connections between two event ports \tabularnewline
-    \textcolor{sthlmRed}{\textit{daeEquation\_t}} & Defines model equations given in an implicit form \tabularnewline 
-    \textcolor{sthlmRed}{\textit{daeSTN\_t}} & Defines state transition networks used to model discontinuous equations \tabularnewline
-    \textcolor{sthlmRed}{\textit{daeOnConditionActions\_t}} & Defines actions to be performed when a specified condition is satisfied \tabularnewline
-    \textcolor{sthlmRed}{\textit{daeOnEventActions\_t}} & Defines actions to be performed when an event is triggered on the specified event port \tabularnewline
-    \textcolor{sthlmRed}{\textit{daeState\_t}} & Defines a state in a state transition network \tabularnewline 
-    \textcolor{sthlmRed}{\textit{daeModel\_t}} & Represents a model \tabularnewline
-    \bottomrule
-  \end{tabularx}
-\end{table}
-}
-\end{frame}
-
-\begin{frame}{Package \textsc{core} - interface implementations}
-    \begin{center}
-        \begin{figure}
-            \includegraphics[width=0.8\paperwidth]{Supplemental_Figure_S3.png}      
-            %\caption{\alert{core} package interface implementations.}
-        \end{figure}
-    \end{center}
-\end{frame}
-
-\begin{frame}{Package \textsc{activity}}
-\scriptsize
-{
-\begin{table}
-  \caption*{The key concepts in the \alert{activity} package.}
-  \begin{tabularx}{\linewidth}{l>{\raggedright}X}
-    \toprule
-    \textcolor{sthlmRed}{\textbf{Concept}} & \textcolor{sthlmRed}{\textbf{Description}} \tabularnewline
-    \midrule
-    \textcolor{sthlmRed}{\textit{daeSimulation\_t}} & Defines a functionality used to perfom simulations \tabularnewline 
-    \textcolor{sthlmRed}{\textit{daeOptimisation\_t}} & Defines a functionality used to perform optimisations \tabularnewline
-    \bottomrule
-  \end{tabularx}
-\end{table}
-}
-\end{frame}
-
-\begin{frame}{Package \textsc{solvers}}
-\scriptsize
-{
-\begin{table}
-  \caption*{The key concepts in the \alert{solvers} package.}
-  \begin{tabularx}{\linewidth}{l>{\raggedright}X}
-    \toprule
-    \textcolor{sthlmRed}{\textbf{Concept}} & \textcolor{sthlmRed}{\textbf{Description}} \tabularnewline
-    \midrule
-    \textcolor{sthlmRed}{\textit{daeDAESolver\_t}} & Defines a functionality for the solution of DAE systems \tabularnewline 
-    \textcolor{sthlmRed}{\textit{daeLASolver\_t}} & Defines a functionality for the solution of LA systems \tabularnewline
-    \textcolor{sthlmRed}{\textit{daeNLPSolver\_t}} & Defines a functionality for the solution of (MI)NLP problems \tabularnewline
-    \textcolor{sthlmRed}{\textit{daeIDALASolver\_t}} & Sundials IDAS LA solver interface \tabularnewline
-    \midrule
-    \textcolor{sthlmRed}{\textit{daeMatrix\_t<typename FLOAT>}} & Defines a common matrix functionality \tabularnewline
-    \bottomrule
-  \end{tabularx}
-\end{table}
-}
-\end{frame}
-
-\begin{frame}{Package \textsc{solvers} - interface implementations}
-    \begin{center}
-        \begin{figure}
-            \includegraphics[width=0.75\paperwidth]{Supplemental_Figure_S5.png}      
-            %\caption{\alert{solvers} package interface implementations.}
-        \end{figure}
-    \end{center}
-\end{frame}
-
-\begin{frame}{Package \textsc{datareporting}}
-\scriptsize
-{
-\begin{table}
-  \caption*{The key concepts in the \alert{datareporting} package.}
-  \begin{tabularx}{\linewidth}{l>{\raggedright}X}
-    \toprule
-    \textcolor{sthlmRed}{\textbf{Concept}} & \textcolor{sthlmRed}{\textbf{Description}} \tabularnewline
-    \midrule
-    \textcolor{sthlmRed}{\textit{daeDataReporter\_t}} & Defines a functionality/data structures used by a simulation to report the simulation results \tabularnewline 
-    \textcolor{sthlmRed}{\textit{daeDataReceiver\_t}} & Defines a functionality/data structures for accessing the simulation results \tabularnewline
-    \bottomrule
-  \end{tabularx}
-\end{table}
-}
-\end{frame}
-
-\begin{frame}{Package \textsc{datareporting} - interface implementations}
-    \begin{center}
-        \includegraphics[width=0.8\paperwidth]{Supplemental_Figure_S6.png}      
-    \end{center}
-\end{frame}
-
-\begin{frame}{Package \textsc{log} and its interface implementations}
-\scriptsize
-{
-\begin{table}
-  \caption*{The key concepts in the \alert{log} package.}
-  \begin{tabularx}{\linewidth}{l>{\raggedright}X}
-    \toprule
-    \textcolor{sthlmRed}{\textbf{Concept}} & \textcolor{sthlmRed}{\textbf{Description}} \tabularnewline
-    \midrule
-    \textcolor{sthlmRed}{\textit{daeLog\_t}} & Defines a functionality for sending messages from a simulation \tabularnewline 
-    \bottomrule
-  \end{tabularx}
-\end{table}
-}
-    \begin{center}
-        \includegraphics[width=0.6\paperwidth]{Supplemental_Figure_S7.png}      
-    \end{center}
-\end{frame}
-
-\begin{frame}{Package \textsc{units}}
-\scriptsize
-{
-\begin{table}
-  \caption*{The key concepts in the \alert{units} package.}
-  \begin{tabularx}{\linewidth}{l>{\raggedright}X}
-    \toprule
-    \textcolor{sthlmRed}{\textbf{Concept}} & \textcolor{sthlmRed}{\textbf{Description}} \tabularnewline
-    \midrule
-    \textcolor{sthlmRed}{\textit{unit}} & Defines SI base/derived units \tabularnewline 
-    \textcolor{sthlmRed}{\textit{quantity}} & Defines a numerical value in terms of a unit of measurement \tabularnewline
-    \bottomrule
-  \end{tabularx}
-\end{table}
-}
-\end{frame}
-
-% \section{Developing models with DAE Tools} 
 % 
-% \begin{frame}{Overview}
+% \section{Architecture}
+% 
+% \begin{frame}[plain]{The fundamental concepts/software interfaces}
+% \begin{columns}
+%     \begin{column}{0.28\paperwidth}
+%         \tiny{
+%         \begin{itemize}
+%             \item The main concepts:
+%                 \begin{itemize}
+%                     \tiny{
+%                         \item \textcolor{sthlmRed}{daeModel\_t}
+%                         \item \textcolor{sthlmRed}{daeSimulation\_t}
+%                         \item \textcolor{sthlmRed}{daeOptimization\_t}
+%                         \item \textcolor{sthlmRed}{daeBlock\_t}
+%                         \item \textcolor{sthlmRed}{daeDAESolver\_t}
+%                         \item \textcolor{sthlmRed}{daeLASolver\_t}
+%                         \item \textcolor{sthlmRed}{daeDataReporter\_t}
+%                         \item \textcolor{sthlmRed}{daeBlock\_t}
+%                     }
+%                 \end{itemize}
+%             \item In 6 packages:
+%                 \begin{itemize}
+%                 \tiny{
+%                         \item \alert{core}
+%                         \item \alert{activity}
+%                         \item \alert{datareporting}
+%                         \item \alert{solvers}
+%                         \item \alert{logging}
+%                         \item \alert{units}
+%                     }
+%                 \end{itemize}
+%         \end{itemize}
+%         }
+%      \end{column}
+%      
+%      \begin{column}{0.72\paperwidth}
+%          \begin{center}
+%              \begin{figure}
+%                \includegraphics[width=0.68\paperwidth]{daetools-architecture.png}      
+%                \caption{The architecture of \alert{DAE Tools}.}
+%             \end{figure}
+%          \end{center}
+%      \end{column}
+%    \end{columns}
 % \end{frame}
 % 
+% \begin{frame}{Package \textsc{core}}
+% \scriptsize
+% {
+% \begin{table}
+%   \caption*{The key modelling concepts in the \alert{core} package.}
+%   \begin{tabularx}{\linewidth}{l>{\raggedright}X}
+%     \toprule
+%     \textcolor{sthlmRed}{\textbf{Concept}} & \textcolor{sthlmRed}{\textbf{Description}} \tabularnewline
+%     \midrule
+%     \textcolor{sthlmRed}{\textit{daeVariableType\_t}} & Defines a variable type that has the units, lower and upper bounds, a default value and 
+%                                   an absolute tolerance \tabularnewline
+%     \textcolor{sthlmRed}{\textit{daeDomain\_t}} & Defines ordinary arrays or spatial distributions such as structured and unstructured grids \tabularnewline 
+%     \textcolor{sthlmRed}{\textit{daeParameter\_t}} & Defines time invariant quantities that do not change during a simulation \tabularnewline 
+%     \textcolor{sthlmRed}{\textit{daeVariable\_t}} & Defines time varying quantities that change during a simulation \tabularnewline 
+%     \textcolor{sthlmRed}{\textit{daePort\_t}} & Defines connection points between model instances for exchange of continuous quantities \tabularnewline 
+%     \textcolor{sthlmRed}{\textit{daeEventPort\_t}} & Defines connection points between model instances for exchange of discrete messages/events \tabularnewline
+%     \bottomrule
+%   \end{tabularx}
+% \end{table}
+% }
+% \end{frame}
+% 
+% \begin{frame}{Package \textsc{core} (cont'd)}
+% \scriptsize
+% {
+% \begin{table}
+%   \caption*{The key modelling concepts in the \alert{core} package (cont'd).}
+%   \begin{tabularx}{\linewidth}{l>{\raggedright}X}
+%     \toprule
+%     \textcolor{sthlmRed}{\textbf{Concept}} & \textcolor{sthlmRed}{\textbf{Description}} \tabularnewline
+%     \midrule
+%     \textcolor{sthlmRed}{\textit{daePortConnection\_t}} & Defines connections between two ports \tabularnewline 
+%     \textcolor{sthlmRed}{\textit{daeEventPortConnection\_t}} & Defines connections between two event ports \tabularnewline
+%     \textcolor{sthlmRed}{\textit{daeEquation\_t}} & Defines model equations given in an implicit form \tabularnewline 
+%     \textcolor{sthlmRed}{\textit{daeSTN\_t}} & Defines state transition networks used to model discontinuous equations \tabularnewline
+%     \textcolor{sthlmRed}{\textit{daeOnConditionActions\_t}} & Defines actions to be performed when a specified condition is satisfied \tabularnewline
+%     \textcolor{sthlmRed}{\textit{daeOnEventActions\_t}} & Defines actions to be performed when an event is triggered on the specified event port \tabularnewline
+%     \textcolor{sthlmRed}{\textit{daeState\_t}} & Defines a state in a state transition network \tabularnewline 
+%     \textcolor{sthlmRed}{\textit{daeModel\_t}} & Represents a model \tabularnewline
+%     \bottomrule
+%   \end{tabularx}
+% \end{table}
+% }
+% \end{frame}
+% 
+% \begin{frame}{Package \textsc{core} - interface implementations}
+%     \begin{center}
+%         \begin{figure}
+%             \includegraphics[width=0.8\paperwidth]{Supplemental_Figure_S3.png}      
+%             %\caption{\alert{core} package interface implementations.}
+%         \end{figure}
+%     \end{center}
+% \end{frame}
+% 
+% \begin{frame}{Package \textsc{activity}}
+% \scriptsize
+% {
+% \begin{table}
+%   \caption*{The key concepts in the \alert{activity} package.}
+%   \begin{tabularx}{\linewidth}{l>{\raggedright}X}
+%     \toprule
+%     \textcolor{sthlmRed}{\textbf{Concept}} & \textcolor{sthlmRed}{\textbf{Description}} \tabularnewline
+%     \midrule
+%     \textcolor{sthlmRed}{\textit{daeSimulation\_t}} & Defines a functionality used to perfom simulations \tabularnewline 
+%     \textcolor{sthlmRed}{\textit{daeOptimisation\_t}} & Defines a functionality used to perform optimisations \tabularnewline
+%     \bottomrule
+%   \end{tabularx}
+% \end{table}
+% }
+% \end{frame}
+% 
+% \begin{frame}{Package \textsc{solvers}}
+% \scriptsize
+% {
+% \begin{table}
+%   \caption*{The key concepts in the \alert{solvers} package.}
+%   \begin{tabularx}{\linewidth}{l>{\raggedright}X}
+%     \toprule
+%     \textcolor{sthlmRed}{\textbf{Concept}} & \textcolor{sthlmRed}{\textbf{Description}} \tabularnewline
+%     \midrule
+%     \textcolor{sthlmRed}{\textit{daeDAESolver\_t}} & Defines a functionality for the solution of DAE systems \tabularnewline 
+%     \textcolor{sthlmRed}{\textit{daeLASolver\_t}} & Defines a functionality for the solution of LA systems \tabularnewline
+%     \textcolor{sthlmRed}{\textit{daeNLPSolver\_t}} & Defines a functionality for the solution of (MI)NLP problems \tabularnewline
+%     \textcolor{sthlmRed}{\textit{daeIDALASolver\_t}} & Sundials IDAS LA solver interface \tabularnewline
+%     \midrule
+%     \textcolor{sthlmRed}{\textit{daeMatrix\_t<typename FLOAT>}} & Defines a common matrix functionality \tabularnewline
+%     \bottomrule
+%   \end{tabularx}
+% \end{table}
+% }
+% \end{frame}
+% 
+% \begin{frame}{Package \textsc{solvers} - interface implementations}
+%     \begin{center}
+%         \begin{figure}
+%             \includegraphics[width=0.75\paperwidth]{Supplemental_Figure_S5.png}      
+%             %\caption{\alert{solvers} package interface implementations.}
+%         \end{figure}
+%     \end{center}
+% \end{frame}
+% 
+% \begin{frame}{Package \textsc{datareporting}}
+% \scriptsize
+% {
+% \begin{table}
+%   \caption*{The key concepts in the \alert{datareporting} package.}
+%   \begin{tabularx}{\linewidth}{l>{\raggedright}X}
+%     \toprule
+%     \textcolor{sthlmRed}{\textbf{Concept}} & \textcolor{sthlmRed}{\textbf{Description}} \tabularnewline
+%     \midrule
+%     \textcolor{sthlmRed}{\textit{daeDataReporter\_t}} & Defines a functionality/data structures used by a simulation to report the simulation results \tabularnewline 
+%     \textcolor{sthlmRed}{\textit{daeDataReceiver\_t}} & Defines a functionality/data structures for accessing the simulation results \tabularnewline
+%     \bottomrule
+%   \end{tabularx}
+% \end{table}
+% }
+% \end{frame}
+% 
+% \begin{frame}{Package \textsc{datareporting} - interface implementations}
+%     \begin{center}
+%         \includegraphics[width=0.8\paperwidth]{Supplemental_Figure_S6.png}      
+%     \end{center}
+% \end{frame}
+% 
+% \begin{frame}{Package \textsc{log} and its interface implementations}
+% \scriptsize
+% {
+% \begin{table}
+%   \caption*{The key concepts in the \alert{log} package.}
+%   \begin{tabularx}{\linewidth}{l>{\raggedright}X}
+%     \toprule
+%     \textcolor{sthlmRed}{\textbf{Concept}} & \textcolor{sthlmRed}{\textbf{Description}} \tabularnewline
+%     \midrule
+%     \textcolor{sthlmRed}{\textit{daeLog\_t}} & Defines a functionality for sending messages from a simulation \tabularnewline 
+%     \bottomrule
+%   \end{tabularx}
+% \end{table}
+% }
+%     \begin{center}
+%         \includegraphics[width=0.6\paperwidth]{Supplemental_Figure_S7.png}      
+%     \end{center}
+% \end{frame}
+% 
+% \begin{frame}{Package \textsc{units}}
+% \scriptsize
+% {
+% \begin{table}
+%   \caption*{The key concepts in the \alert{units} package.}
+%   \begin{tabularx}{\linewidth}{l>{\raggedright}X}
+%     \toprule
+%     \textcolor{sthlmRed}{\textbf{Concept}} & \textcolor{sthlmRed}{\textbf{Description}} \tabularnewline
+%     \midrule
+%     \textcolor{sthlmRed}{\textit{unit}} & Defines SI base/derived units \tabularnewline 
+%     \textcolor{sthlmRed}{\textit{quantity}} & Defines a numerical value in terms of a unit of measurement \tabularnewline
+%     \bottomrule
+%   \end{tabularx}
+% \end{table}
+% }
+% \end{frame}
+
 \section{Use Cases} 
 
 \begin{frame}[plain]{Use Case 1 - Chemical Engineering}

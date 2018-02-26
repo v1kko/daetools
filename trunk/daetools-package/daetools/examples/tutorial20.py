@@ -21,17 +21,45 @@ This tutorial illustrates the support variable constraints available in Sundials
 Benchmarks are available from `Matlab documentation 
 <https://www.mathworks.com/help/matlab/math/nonnegative-ode-solution.html>`_.
 
+1. Absolute Value Function:
+    
+   dy/dt = -fabs(y)
+   
+   solved on the interval [0,40] with the initial condition y(0) = 1.
+   The solution of this ODE decays to zero. If the solver produces a negative solution value,
+   the computation eventually will fail as the calculated solution diverges to -inf.
+   Using the constraint y >= 0 resolves this problem.
+   
+2. The Knee problem:
+
+   epsilon * dy/dt = (1-t)*y - y**2
+  
+   solved on the interval [0,2] with the initial condition y(0) = 1.
+   The parameter epsilon is 0 < epsilon << 1 and in this example equal to 1e-6.
+   The solution follows the y = 1-x isocline for the whole interval of integration
+   which is incorrect. Using the constraint y >= 0 resolves the problem.
+  
 In DAE Tools contraints follow the Sundials IDA solver implementation and can be 
 specified using the valueConstraint argument of the daeVariableType class __init__
 function:
 
- - eNoConstraint (default)
- - eValueGTEQ: imposes >= 0 constraint
- - eValueLTEQ: imposes <= 0 constraint
- - eValueGT:   imposes > 0 constraint
- - eValueLT:   imposes < 0 constraint
+- eNoConstraint (default)
+- eValueGTEQ: imposes >= 0 constraint
+- eValueLTEQ: imposes <= 0 constraint
+- eValueGT:   imposes > 0 constraint
+- eValueLT:   imposes < 0 constraint
 
 and changed for individual variables using daeVariable.SetValueConstraint functions. 
+
+Absolute Value Function solution plot:
+    
+.. image:: _static/tutorial20-results1.png
+   :width: 500px
+
+The Knee problem solution plot:
+    
+.. image:: _static/tutorial20-results2.png
+   :width: 500px
 """
 
 import sys, numpy
@@ -103,6 +131,10 @@ class simTutorial2(daeSimulation):
     def SetUpVariables(self):
         self.m.y.SetInitialCondition(1.0)
 
+def run(**kwargs):
+    run1(**kwargs)
+    run2(**kwargs)
+    
 def run1(**kwargs):
     simulation = simTutorial1()
     return daeActivity.simulate(simulation, reportingInterval = 1.0, 
@@ -117,5 +149,4 @@ def run2(**kwargs):
 
 if __name__ == "__main__":
     guiRun = False if (len(sys.argv) > 1 and sys.argv[1] == 'console') else True
-    run1(guiRun = guiRun)
-    run2(guiRun = guiRun)
+    run(guiRun = guiRun)

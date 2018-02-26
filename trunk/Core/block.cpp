@@ -176,7 +176,7 @@ void daeBlock::CalculateResiduals(real_t			dTime,
                 omp_set_num_threads(m_omp_num_threads);
 
             #pragma omp parallel for firstprivate(EC)
-            for(uint32_t ei = 0; ei < m_nNumberOfEquations; ei++)
+            for(int ei = 0; ei < m_nNumberOfEquations; ei++)
             {
                 openmp_evaluator::EvaluateResiduals(computeStacks,
                                                     ei,
@@ -312,7 +312,7 @@ void daeBlock::CalculateJacobian(real_t				dTime,
                 omp_set_num_threads(m_omp_num_threads);
 
             #pragma omp parallel for firstprivate(EC)
-            for(uint32_t ji = 0; ji < noJacobianItems; ji++)
+            for(int ji = 0; ji < noJacobianItems; ji++)
             {
                 openmp_evaluator::EvaluateJacobian(computeStacks,
                                                    ji,
@@ -346,7 +346,7 @@ void daeBlock::CalculateJacobian(real_t				dTime,
                     omp_set_num_threads(m_omp_num_threads);
 
                 #pragma omp parallel for firstprivate(EC)
-                for(uint32_t ji = 0; ji < noJacobianItems; ji++)
+                for(int ji = 0; ji < noJacobianItems; ji++)
                 {
                     calculate_cs_jacobian_dns(computeStacks,
                                               ji,
@@ -370,7 +370,7 @@ void daeBlock::CalculateJacobian(real_t				dTime,
                     omp_set_num_threads(m_omp_num_threads);
 
                 #pragma omp parallel for firstprivate(EC)
-                for(uint32_t ji = 0; ji < noJacobianItems; ji++)
+                for(int ji = 0; ji < noJacobianItems; ji++)
                 {
                     calculate_cs_jacobian_csr(computeStacks,
                                               ji,
@@ -396,7 +396,7 @@ void daeBlock::CalculateJacobian(real_t				dTime,
                     omp_set_num_threads(m_omp_num_threads);
 
                 #pragma omp parallel for firstprivate(EC)
-                for(uint32_t ji = 0; ji < noJacobianItems; ji++)
+                for(int ji = 0; ji < noJacobianItems; ji++)
                 {
                     calculate_cs_jacobian_gen(computeStacks,
                                               ji,
@@ -586,7 +586,7 @@ void daeBlock::CalculateSensitivityResiduals(real_t						dTime,
                     omp_set_num_threads(m_omp_num_threads);
 
                 #pragma omp parallel for firstprivate(EC)
-                for(uint32_t ei = 0; ei < m_nNumberOfEquations; ei++)
+                for(int ei = 0; ei < m_nNumberOfEquations; ei++)
                 {
                     openmp_evaluator::EvaluateSensitivityResiduals(computeStacks,
                                                                    ei,

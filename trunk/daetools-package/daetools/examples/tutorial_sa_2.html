@@ -224,6 +224,8 @@ mass_concentration_t <b><span style='color:#0000ff;'>=</span></b> daeVariableTyp
     
     ax <b><span style='color:#0000ff;'>=</span></b> plt.subplot(<span style='color:#cc047c;'>221</span>)
     plt.figure(<span style='color:#cc047c;'>1</span>, facecolor<b><span style='color:#0000ff;'>=</span></b><span style='color:#cc0000;'>'white'</span>)
+    fig <b><span style='color:#0000ff;'>=</span></b> plt.gcf()
+    fig.canvas.set_window_title(<span style='color:#cc0000;'>'Tutorial sa_2'</span>)
     plt.plot(times, Ca, <span style='color:#cc0000;'>'b-'</span>, label<b><span style='color:#0000ff;'>=</span></b><span style='color:#cc0000;'>'Ca'</span>)
     plt.plot(times, Cb, <span style='color:#cc0000;'>'r-'</span>, label<b><span style='color:#0000ff;'>=</span></b><span style='color:#cc0000;'>'Cb'</span>)
     plt.xlabel(<span style='color:#cc0000;'>'time'</span>, fontsize<b><span style='color:#0000ff;'>=</span></b>fontsize)

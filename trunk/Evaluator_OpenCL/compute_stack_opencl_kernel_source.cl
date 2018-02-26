@@ -682,6 +682,9 @@ CS_DECL int _lt_(const adouble_t a, const adouble_t b)
     return (a.m_dValue < b.m_dValue);
 }
 
+)====="
+"/* VC++ C2026: string literals can only be 16380 characters long.*/"
+R"=====(
 
 /*************************************************************************************************
  *  LIFO stack implementation
@@ -1057,6 +1060,10 @@ CS_DECL void setCSRMatrixItem(int row, int col, real_t value, CS_KERNEL_FLAG con
 }
 
 /* End of declarations for inclusion into kernel sources. */
+
+)====="
+"/* VC++ C2026: string literals can only be 16380 characters long.*/"
+R"=====(
 
 /**************************************************************
  * OpenCL kernel functions

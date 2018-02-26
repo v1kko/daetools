@@ -41,6 +41,10 @@ Optional packages:
 * PyGraphviz: `<https://pygraphviz.github.io>`_ (Python interface to the Graphviz graph layout and visualization package)
 * SALib: `<https://github.com/SALib/SALib>`_ (Sensitivity Analysis in Python; included in ``daetools/ext_libs/SALib``)
 * PyEVTK: `<https://pypi.python.org/pypi/PyEVTK>`_ (data export to binary VTK files; included in ``daetools/ext_libs/pyevtk``)
+* OpenCL drivers/runtime libraries
+  (InteL: `<https://software.intel.com/en-us/articles/opencl-drivers>`_;
+  AMD: `<https://support.amd.com/en-us/kb-articles/Pages/OpenCL2-Driver.aspx>`_;
+  NVidia: `<https://developer.nvidia.com/opencl>`_)
 
 Optional packages (proprietary):
 
@@ -71,16 +75,16 @@ or from the `SourceForge <https://sourceforge.net/projects/daetools/files>`_ web
     From the version 1.6.0 Windows installer is not provided anymore.
 
 The naming convention for the installation files: ``daetools-major.minor.platform-architecture.tar.gz``
-where ``major.minor.build`` represents the version (``1.7.2`` for instance),
+where ``major.minor.build`` represents the version (``1.8.0`` for instance),
 ``platform`` can be ``gnu_linux``, ``win32`` and ``macosx``, and
 ``architecture`` can be ``i686``, ``x86_64`` or ``universal``.
 
-An example: ``daetools-1.7.2-gnu_linux-x86_64.tar.gz`` is the version 1.7.2 for 64 bit GNU/Linux.
+An example: ``daetools-1.8.0-gnu_linux-x86_64.tar.gz`` is the version 1.8.0 for 64 bit GNU/Linux.
 
 For other platforms, architectures and python versions not listed in `System requirements`_
 daetools must be compiled from the source.
 The source code can be downloaded either from the subversion tree or from the download section
-(``daetools-1.7.2-source.tar.gz`` for instance).
+(``daetools-1.8.0-source.tar.gz`` for instance).
 
 Installation
 ============
@@ -409,6 +413,8 @@ It is also possible to compile individual libraries using one of the following o
         ipopt               Build IPOPT nlp solver and its python extension module (pyIPOPT).
         nlopt               Build NLOPT nlp solver and its python extension module (pyNLOPT).
         deal.ii             Build deal.II FEM library and its python extension module (pyDealII).
+        cape_open_thermo    Build Cape Open thermo-physical property package library (cdaeCapeOpenThermoPackage.dll, Windows only).
+        opencl_evaluator    Build Evaluator_OpenCL library and its python extension module (pyEvaluator_OpenCL).
 
 All python extensions are located in the platform-dependent locations in ``trunk/daetools-package/daetools/pyDAE`` and
 ``trunk/daetools-package/daetools/solvers`` folders.

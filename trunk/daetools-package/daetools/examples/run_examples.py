@@ -164,14 +164,14 @@ class RunExamples(QtWidgets.QDialog):
         self.setTutorialLink("all-tutorials")
         
     def setTutorialLink(self, module_name):
-        #address = join(_examples_dir, "..", "docs", "html", "tutorials-all.html#%s" % module_name)
-        #address = "file:///" + os.path.normpath(address)
-        #address = address.replace('\\', '/')
+        address = join(_examples_dir, "..", "docs", "html", "tutorials-all.html#%s" % module_name)
+        address = "file:///" + os.path.normpath(address)
+        address = address.replace('\\', '/')
         # The url contains bookmarks (i.e. tutorials-all.html#tutorial1.html) - can't use QUrl.fromLocalFile()
         
         # Perhaps it is better to use the file from the daetools website so the docs do not need to be included
         #address = 'http://www.daetools.com/docs-%s/tutorials-all.html#%s' % (daeVersion(True), module_name)
-        address = 'http://www.daetools.com/docs/tutorials-all.html#%s' % module_name
+        #address = 'http://www.daetools.com/docs/tutorials-all.html#%s' % module_name
         url = QtCore.QUrl(address)
         #print(url)
         self.ui.docstringWeb.load(url)

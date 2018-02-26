@@ -6,8 +6,10 @@ TARGET = cdaeEvaluator_OpenCL
 TEMPLATE = lib
 CONFIG += staticlib
 
-QMAKE_CFLAGS += -g -O0
-QMAKE_CXXFLAGS += -g -O0
+unix::QMAKE_CXXFLAGS  += -std=c++11
+unix::QMAKE_LFLAGS    += -std=c++11
+win32::QMAKE_CXXFLAGS += /std:c++11
+win32::QMAKE_LFLAGS   += /std:c++11
 
 INCLUDEPATH += $${INTEL_OPENCL_INCLUDE}
 

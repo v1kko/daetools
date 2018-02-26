@@ -143,6 +143,11 @@ pbm_number_density_t <b><span style='color:#0000ff;'>=</span></b> daeVariableTyp
         <span style='color:#3605fb;'>self</span>.m.t.SetInitialCondition(<span style='color:#cc047c;'>0.0</span>)
 
 <b>def</b> run_analytical(simulationPrefix, modelName, N, L, G, ni_0, reportingInterval, timeHorizon):
+    <span style='color:#017a31;'># External functions are not supported by the Compute Stack approach.</span>
+    <span style='color:#017a31;'># Therefore, activate the old approach.</span>
+    cfg <b><span style='color:#0000ff;'>=</span></b> daeGetConfig()
+    cfg.SetString(<span style='color:#cc0000;'>'daetools.core.equations.evaluationMode'</span>, <span style='color:#cc0000;'>'evaluationTree_OpenMP'</span>)
+
     <span style='color:#017a31;'># Create Log, Solver, DataReporter and Simulation object</span>
     log          <b><span style='color:#0000ff;'>=</span></b> daePythonStdOutLog()
     daesolver    <b><span style='color:#0000ff;'>=</span></b> daeIDAS()

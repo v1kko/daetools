@@ -399,6 +399,11 @@ class simTutorial(daeSimulation):
         self.m.T.SetInitialCondition(283 * K)
 
 def run(**kwargs):
+    # Thermo-physical property packages are not supported by the Compute Stack approach.
+    # Therefore, activate the old approach.
+    cfg = daeGetConfig()
+    cfg.SetString('daetools.core.equations.evaluationMode', 'evaluationTree_OpenMP')
+
     # Test low-level calculation routines.
     # CapeOpen thermo packages are available only on Windows.
     if daetools.daetools_system == 'Windows':

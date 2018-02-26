@@ -253,7 +253,7 @@ class modTutorial(daeModel):
         eq.Residual = self.Qin() - Constant(1500 * W)
 
         # Here the Time() function is used to get the current time (time elapsed) in the simulation
-        self.ON_CONDITION(self.T() > Constant(340 * K), switchToStates = [ ('Regulator', 'Heating') ])
+        self.ON_CONDITION(self.T() > Constant(340 * K), switchToStates = [ ('Regulator', 'Cooling') ])
         self.ON_CONDITION(Time()   > Constant(350 * s), switchToStates = [ ('Regulator', 'HeaterOff') ])
 
         self.STATE("Cooling")
@@ -291,6 +291,11 @@ class simTutorial(daeSimulation):
         self.m.T.SetInitialCondition(283 * K)
 
 def run(**kwargs):
+    # External functions are not supported by the Compute Stack approach.
+    # Therefore, activate the old approach.
+    cfg = daeGetConfig()
+    cfg.SetString('daetools.core.equations.evaluationMode', 'evaluationTree_OpenMP')
+
     simulation = simTutorial()
    
     res = daeActivity.simulate(simulation, reportingInterval = 0.5, 

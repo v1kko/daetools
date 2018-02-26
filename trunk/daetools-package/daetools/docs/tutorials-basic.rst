@@ -419,11 +419,12 @@ Tutorial 14
 
 .. rubric:: Files
 
-=====================   =================================================================
-Model report            `tutorial14.xml <../examples/tutorial14.xml>`_
-Runtime model report    `tutorial14-rt.xml <../examples/tutorial14-rt.xml>`_
-Source code             `tutorial14.py <../examples/tutorial14.html>`_
-=====================   =================================================================
+==============================   =================================================================
+Model report                     `tutorial14.xml <../examples/tutorial14.xml>`_
+Runtime model report             `tutorial14-rt.xml <../examples/tutorial14-rt.xml>`_
+Source code                      `tutorial14.py <../examples/tutorial14.html>`_
+External function source code    `tutorial14_heat_function.c <../examples/tutorial14_heat_function.html>`_
+==============================   =================================================================
 
 
 .. _tutorial15:
@@ -536,7 +537,7 @@ Source code             `tutorial20.py <../examples/tutorial20.html>`_
 
 Tutorial 21
 ===========
-
+ 
 .. automodule:: daetools.examples.tutorial21
    :no-members:
    :no-undoc-members:

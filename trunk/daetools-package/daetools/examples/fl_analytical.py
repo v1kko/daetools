@@ -132,6 +132,11 @@ class simFluxLimiter(daeSimulation):
         self.m.t.SetInitialCondition(0.0)
 
 def run_analytical(simulationPrefix, modelName, N, L, G, ni_0, reportingInterval, timeHorizon):
+    # External functions are not supported by the Compute Stack approach.
+    # Therefore, activate the old approach.
+    cfg = daeGetConfig()
+    cfg.SetString('daetools.core.equations.evaluationMode', 'evaluationTree_OpenMP')
+
     # Create Log, Solver, DataReporter and Simulation object
     log          = daePythonStdOutLog()
     daesolver    = daeIDAS()

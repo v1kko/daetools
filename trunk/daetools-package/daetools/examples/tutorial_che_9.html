@@ -498,6 +498,9 @@ Keq_t <b><span style='color:#0000ff;'>=</span></b> daeVariableType(<span style='
     plt.figure(figsize<b><span style='color:#0000ff;'>=</span></b>(<span style='color:#cc047c;'>10</span>,<span style='color:#cc047c;'>7</span>), facecolor<b><span style='color:#0000ff;'>=</span></b><span style='color:#cc0000;'>'white'</span>)
     plt.suptitle(title, fontsize<b><span style='color:#0000ff;'>=</span></b>fontsize_suptitle)
     
+    fig <b><span style='color:#0000ff;'>=</span></b> plt.gcf()
+    fig.canvas.set_window_title(<span style='color:#cc0000;'>'Tutorial19'</span>)
+    
     <span style='color:#017a31;'># Figure 4.</span>
     ax <b><span style='color:#0000ff;'>=</span></b> plt.subplot(<span style='color:#cc047c;'>221</span>)
     ax.set_title(<span style='color:#cc0000;'>'Figure 4.'</span>, fontsize<b><span style='color:#0000ff;'>=</span></b>fontsize)
@@ -558,7 +561,7 @@ Keq_t <b><span style='color:#0000ff;'>=</span></b> daeVariableType(<span style='
     log          <b><span style='color:#0000ff;'>=</span></b> daePythonStdOutLog()
     daesolver    <b><span style='color:#0000ff;'>=</span></b> daeIDAS()
     simulation   <b><span style='color:#0000ff;'>=</span></b> simTutorial()
-  
+    
     simulation.__drdata__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>None</span>
     
     <span style='color:#017a31;'># If datareporter is in the keyword argument do not create local datareporters.</span>

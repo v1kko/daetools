@@ -176,6 +176,8 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc0000;
     
     plt.figure(figsize<b><span style='color:#0000ff;'>=</span></b>(<span style='color:#cc047c;'>8</span>,<span style='color:#cc047c;'>6</span>), facecolor<b><span style='color:#0000ff;'>=</span></b><span style='color:#cc0000;'>'white'</span>)
     plt.plot(times, dT_dQin, label<b><span style='color:#0000ff;'>=</span></b><span style='color:#cc0000;'>r'$\frac{\partial T(t)}{\partial Q_</span><span style='color:#cc0000;'>{in}</span><span style='color:#cc0000;'>}$'</span>)
+    fig <b><span style='color:#0000ff;'>=</span></b> plt.gcf()
+    fig.canvas.set_window_title(<span style='color:#cc0000;'>'Tutorial sa_1'</span>)
     plt.xlabel(<span style='color:#cc0000;'>'Time (s)'</span>, fontsize<b><span style='color:#0000ff;'>=</span></b>fontsize)
     plt.ylabel(<span style='color:#cc0000;'>'dT/dQin'</span>, fontsize<b><span style='color:#0000ff;'>=</span></b>fontsize)
     plt.legend(fontsize<b><span style='color:#0000ff;'>=</span></b>fontsize_legend)

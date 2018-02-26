@@ -194,7 +194,8 @@ mass_concentration_t <b><span style='color:#0000ff;'>=</span></b> daeVariableTyp
     <span style='color:#017a31;'># the overall performance.</span>
     cfg  <b><span style='color:#0000ff;'>=</span></b> daeGetConfig()
     <b>if</b> <b>not</b> sequential:
-        cfg.SetBoolean(<span style='color:#cc0000;'>&quot;daetools.core.equations.parallelEvaluation&quot;</span>, <span style='color:#3605fb;'>False</span>)
+        cfg.SetString(<span style='color:#cc0000;'>&quot;daetools.core.equations.evaluationMode&quot;</span>, <span style='color:#cc0000;'>&quot;evaluationTree_OpenMP&quot;</span>)
+        cfg.SetInteger(<span style='color:#cc0000;'>&quot;daetools.core.equations.evaluationTree_OpenMP.numThreads&quot;</span>, <span style='color:#cc047c;'>1</span>)
         
     <span style='color:#017a31;'># Create Log, Solver, DataReporter and Simulation object</span>
     log          <b><span style='color:#0000ff;'>=</span></b> daePythonStdOutLog()
@@ -450,6 +451,7 @@ mass_concentration_t <b><span style='color:#0000ff;'>=</span></b> daeVariableTyp
     fontsize <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>14</span>
     fontsize_legend <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>11</span>
     fig <b><span style='color:#0000ff;'>=</span></b> plt.figure(figsize<b><span style='color:#0000ff;'>=</span></b>(<span style='color:#cc047c;'>10</span>,<span style='color:#cc047c;'>8</span>), facecolor<b><span style='color:#0000ff;'>=</span></b><span style='color:#cc0000;'>'white'</span>)
+    fig.canvas.set_window_title(<span style='color:#cc0000;'>'Tutorial sa_3'</span>)
 
     ax <b><span style='color:#0000ff;'>=</span></b> plt.subplot(<span style='color:#cc047c;'>231</span>)
     plt.scatter(B, max_rise_T, c<b><span style='color:#0000ff;'>=</span></b><span style='color:#cc0000;'>'b'</span>, s<b><span style='color:#0000ff;'>=</span></b><span style='color:#cc047c;'>6</span>)

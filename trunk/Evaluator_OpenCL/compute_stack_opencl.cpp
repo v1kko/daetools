@@ -251,11 +251,11 @@ void daeComputeStackEvaluator_OpenCL::Initialize(bool calculateSensitivities,
     cl_int ret;
     size_t global_item_size;
 
-    printf("numberOfVariables          = %d\n", numberOfVariables);
+    //printf("numberOfVariables          = %d\n", numberOfVariables);
     //printf("numberOfEquationsToProcess = %d\n", numberOfEquationsToProcess);
     //printf("numberOfDOFs               = %d\n", numberOfDOFs);
-    printf("numberOfComputeStackItems  = %d\n", numberOfComputeStackItems);
-    printf("numberOfJacobianItems      = %d\n", numberOfJacobianItems);
+    //printf("numberOfComputeStackItems  = %d\n", numberOfComputeStackItems);
+    //printf("numberOfJacobianItems      = %d\n", numberOfJacobianItems);
 
     size_t bufferSize = numberOfComputeStackItems*sizeof(adComputeStackItem_t);
     mem_computeStacks = clCreateBuffer(context, CL_MEM_READ_ONLY, bufferSize, NULL, &ret);

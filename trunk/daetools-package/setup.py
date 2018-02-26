@@ -281,7 +281,13 @@ except:
 docs_html_folder = os.path.join(root_dir, 'daetools', 'docs', 'html')
 daetools_folder  = os.path.join(root_dir, 'daetools')
 
-docs_html_dirs = [os.path.relpath(f[0], daetools_folder)+'/*.*' for f in os.walk(docs_html_folder)]
+docs_html_dirs = []
+for f in os.walk(docs_html_folder):
+    try:
+        p = os.path.relpath(f[0], daetools_folder)
+        docs_html_dirs.append(os.path.join(p, '*.*'))
+    except:
+        pass
 #print('\n'.join(docs_html_dirs))
 
 ####################################################################################
@@ -331,7 +337,7 @@ setup(name = 'daetools',
                        'daetools':                 ['*.txt',
                                                     '*.cfg',
                                                     'docs/presentations/*.pdf'
-                                                   ], # + docs_html_dirs, <----------- EXCLUDE DOCS
+                                                   ] + docs_html_dirs, # <----------- EXCLUDE DOCS
                        'daetools.pyDAE':           solibs,
                        'daetools.solvers':         solibs,
                        'daetools.solibs':          ['%s_%s/*.*' % (daetools_system, daetools_machine),

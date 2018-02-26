@@ -112,8 +112,8 @@ executable and deployed without a need for any run time libraries.
 Parallel computation is supported using the shared-memory parallel programming model at the moment. 
 The following part of the code support parallelisation:
 
-- Evaluation of equations, Jacobian matrix and sensitivity residuals using the OpenMP interface
-- Assembly of Finite Element systems using the OpenMP interface or Intel Thread Building Blocks (TBB)
+- Evaluation of equations, Jacobian matrix and sensitivity residuals using OpenMP API or OpenCL framework
+- Assembly of Finite Element systems using OpenMP API
 - Solution of systems of linear equations (SuperLU_MT, Pardiso and Intel Pardiso solvers)
 
 In addition, there is an experimental code generator that generates C++ source code with the 

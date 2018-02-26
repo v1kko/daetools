@@ -51,7 +51,7 @@ inline void processFCVP(const size_t overallIndex,
     if(dataProxy->GetVariableType(overallIndex) == cnAssigned)
     {
         std::map<size_t, size_t>::const_iterator it = mapAssignedVarsIndexes.find(overallIndex);
-        if(it == mapAssignedVarsIndexes.cend())
+        if(it == mapAssignedVarsIndexes.end())
             daeDeclareAndThrowException(exInvalidCall);
 
         size_t dofIndex = it->second;
@@ -153,7 +153,7 @@ void adNode::CreateComputeStack(adNode* adnode, std::vector<adComputeStackItem_t
         if(dataProxy->GetVariableType(vnode->m_nOverallIndex) == cnAssigned)
         {
             std::map<size_t, size_t>::const_iterator it = mapAssignedVarsIndexes.find(vnode->m_nOverallIndex);
-            if(it == mapAssignedVarsIndexes.cend())
+            if(it == mapAssignedVarsIndexes.end())
                 daeDeclareAndThrowException(exInvalidCall);
 
             size_t dofIndex = it->second;

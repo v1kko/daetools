@@ -17,9 +17,48 @@ DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 ************************************************************************************
 """
 __doc__ = """
-This tutorial introduces the concep of compute stack evaluators.
-At the moment, there is only one implementation: OpenCl.
+This tutorial introduces different methods for evaluation of equations in parallel.
+Equations residuals, Jacobian matrix and sensitivity residuals can be evaluated 
+in parallel using two methods
 
+1. The Evaluation Tree approach (default)
+   
+   OpenMP API is used for evaluation in parallel.
+   This method is specified by setting daetools.core.equations.evaluationMode option 
+   in daetools.cfg to "evaluationTree_OpenMP" or setting the simulation property:
+   
+   simulation.EvaluationMode = eEvaluationTree_OpenMP
+   
+   numThreads controls the number of OpenMP threads in a team.
+   If numThreads is 0 the default number of threads is used (the number of cores in the system). 
+   Sequential evaluation is achieved by setting numThreads to 1.
+   
+2. The Compute Stack approach
+
+   Equations can be evaluated in parallel using:
+
+   a) OpenMP API for general purpose processors and manycore devices (i.e. Xeon Phi).
+      
+      This method is specified by setting daetools.core.equations.evaluationMode option 
+      in daetools.cfg to "computeStack_OpenMP" or setting the simulation property:
+   
+      simulation.EvaluationMode = eComputeStack_OpenMP
+   
+      numThreads controls the number of OpenMP threads in a team.
+      If numThreads is 0 the default number of threads is used (the number of cores in the system). 
+      Sequential evaluation is achieved by setting numThreads to 1.
+
+   b) OpenCL framework for streaming processors (GPU, GPGA) and heterogeneous systems.
+
+      This type is implemented in an external Python module pyEvaluator_OpenCL. 
+      It is up to one order of magnitude faster than the Evaluation Tree approach. 
+      However, it does not support external functions nor thermo-physical packages.
+      
+      OpenCL evaluators can use a single or multiple OpenCL devices.
+      It is required to install OpenCL drivers/runtime libraries.
+      InteL: https://software.intel.com/en-us/articles/opencl-drivers
+      AMD: https://support.amd.com/en-us/kb-articles/Pages/OpenCL2-Driver.aspx
+      NVidia: https://developer.nvidia.com/opencl
 """
 
 import os, sys, tempfile
