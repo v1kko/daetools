@@ -64,6 +64,7 @@ class daeCodeGeneratorAnalyzer(object):
         self.runtimeInformation['TotalNumberOfVariables'] = self._simulation.TotalNumberOfVariables
         self.runtimeInformation['NumberOfEquations']      = self._simulation.NumberOfEquations
         self.runtimeInformation['IDs']                    = self._simulation.VariableTypes
+        self.runtimeInformation['DOFs']                   = self._simulation.DOFs
         self.runtimeInformation['Values']                 = self._simulation.Values
         self.runtimeInformation['TimeDerivatives']        = self._simulation.TimeDerivatives
         self.runtimeInformation['IndexMappings']          = self._simulation.IndexMappings

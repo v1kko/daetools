@@ -295,6 +295,88 @@ void adNode::CreateComputeStack(adNode* adnode, std::vector<adComputeStackItem_t
     computeStack[start].size = stackSize;
 }
 
+void adNode::GetNodeCount(adNode* adnode, std::map<std::string, size_t>& mapCount)
+{
+    if(!adnode)
+        daeDeclareAndThrowException(exInvalidPointer);
+
+    if( dynamic_cast<adConstantNode*>(adnode) )
+    {
+        size_t& count = mapCount["adConstantNode"];
+        count++;
+    }
+    else if( dynamic_cast<adRuntimeParameterNode*>(adnode) )
+    {
+        size_t& count = mapCount["adRuntimeParameterNode"];
+        count++;
+    }
+    else if( dynamic_cast<adDomainIndexNode*>(adnode) )
+    {
+        size_t& count = mapCount["adDomainIndexNode"];
+        count++;
+    }
+    else if( dynamic_cast<adTimeNode*>(adnode) )
+    {
+        size_t& count = mapCount["adTimeNode"];
+        count++;
+    }
+    else if( dynamic_cast<adInverseTimeStepNode*>(adnode) )
+    {
+        size_t& count = mapCount["adInverseTimeStepNode"];
+        count++;
+    }
+    else if( dynamic_cast<adRuntimeVariableNode*>(adnode) )
+    {
+        size_t& count = mapCount["adRuntimeVariableNode"];
+        count++;
+    }
+    else if( dynamic_cast<adRuntimeTimeDerivativeNode*>(adnode) )
+    {
+        size_t& count = mapCount["adRuntimeTimeDerivativeNode"];
+        count++;
+    }
+    else if( dynamic_cast<adFloatCoefficientVariableSumNode*>(adnode) )
+    {
+        adFloatCoefficientVariableSumNode* fcvsnode = dynamic_cast<adFloatCoefficientVariableSumNode*>(adnode);
+        size_t& count = mapCount["adFloatCoefficientVariableSumNode"];
+        count++;
+
+        // Base
+        std::map<size_t, daeFloatCoefficientVariableProduct>::const_iterator it;
+        for(it = fcvsnode->m_sum.begin(); it != fcvsnode->m_sum.end(); it++)
+        {
+        }
+    }
+    else if( dynamic_cast<adUnaryNode*>(adnode) )
+    {
+        adUnaryNode* unode = dynamic_cast<adUnaryNode*>(adnode);
+
+        size_t& count = mapCount["adUnaryNode"];
+        count++;
+
+        GetNodeCount(unode->node.get(), mapCount);
+    }
+    else if( dynamic_cast<adBinaryNode*>(adnode) )
+    {
+        adBinaryNode* bnode = dynamic_cast<adBinaryNode*>(adnode);
+
+        size_t& count = mapCount["adBinaryNode"];
+        count++;
+
+        // Process left node:
+        GetNodeCount(bnode->left.get(), mapCount);
+
+        // Process right node:
+        GetNodeCount(bnode->right.get(), mapCount);
+    }
+    else
+    {
+        daeDeclareException(exInvalidCall);
+        e << "Invalid runtime node";
+        throw e;
+    }
+}
+
 uint32_t adNode::GetComputeStackSize(adNode* adnode)
 {
     if(!adnode)

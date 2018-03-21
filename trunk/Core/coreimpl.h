@@ -1643,6 +1643,10 @@ public:
 
     virtual bool	IsModelDynamic() const;
     virtual void	CleanUpSetupData();
+
+    virtual std::vector<size_t>           GetActiveEquationSetMemory() const;
+    virtual std::map<std::string, size_t> GetActiveEquationSetNodeCount() const;
+
 //	virtual real_t* GetValuesPointer();
 //	virtual real_t* GetTimeDerivativesPointer();
 //	virtual real_t* GetAbsoluteTolerancesPointer();
@@ -1688,6 +1692,14 @@ public:
 
     adComputeStackEvaluator_t* GetComputeStackEvaluator();
     void SetComputeStackEvaluator(adComputeStackEvaluator_t* computeStackEvaluator);
+
+    void BuildComputeStackStructs();
+    void CleanComputeStackStructs();
+    void ExportComputeStackStructs(const std::string& filenameComputeStacks,
+                                   const std::string& filenameJacobianIndexes,
+                                   int startEquationIndex = 0,
+                                   int endEquationIndex = -1,
+                                   const std::map<int,int>& bi_to_bi_local = std::map<int,int>());
 
 public:
 // Used internally by the block during calculation of Residuals/Jacobian/Hesian

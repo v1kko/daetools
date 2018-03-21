@@ -36,6 +36,7 @@ public:
     bool IsLinear(void) const;
     bool IsFunctionOfVariables(void) const;
     bool IsDifferential(void) const;
+    size_t SizeOf(void) const;
 };
 
 daeeEquationType DetectEquationType(adNodePtr node);
@@ -66,6 +67,7 @@ public:
     virtual bool	IsLinear(void) const;
     virtual bool	IsFunctionOfVariables(void) const;
     virtual const quantity GetQuantity(void) const;
+    virtual size_t  SizeOf(void) const;
 
 public:
     quantity m_quantity;
@@ -94,6 +96,7 @@ public:
     virtual bool	IsLinear(void) const;
     virtual bool	IsFunctionOfVariables(void) const;
     virtual const quantity GetQuantity(void) const;
+    virtual size_t  SizeOf(void) const;
 };
 
 /*********************************************************************************************
@@ -119,6 +122,7 @@ public:
     virtual bool	IsLinear(void) const;
     virtual bool	IsFunctionOfVariables(void) const;
     virtual const quantity GetQuantity(void) const;
+    virtual size_t  SizeOf(void) const;
 
 public:
     daeEventPort*	m_pEventPort;
@@ -150,12 +154,13 @@ public:
     virtual bool	IsLinear(void) const;
     virtual bool	IsFunctionOfVariables(void) const;
     virtual const quantity GetQuantity(void) const;
+    virtual size_t  SizeOf(void) const;
 
 public:
 // Runtime part
-    real_t*			m_pdValue;
+    real_t*             m_pdValue;
 // Report/GUI part
-    daeParameter*	m_pParameter;
+    daeParameter*       m_pParameter;
     std::vector<size_t>	m_narrDomains;
 };
 
@@ -183,6 +188,7 @@ public:
     virtual bool	IsLinear(void) const;
     virtual bool	IsFunctionOfVariables(void) const;
     virtual const quantity GetQuantity(void) const;
+    virtual size_t  SizeOf(void) const;
 
 public:
 // Report/GUI part
@@ -217,6 +223,7 @@ public:
     virtual bool	IsLinear(void) const;
     virtual bool	IsFunctionOfVariables(void) const;
     virtual const quantity GetQuantity(void) const;
+    virtual size_t  SizeOf(void) const;
 
 public:
 // Runtime part
@@ -224,7 +231,7 @@ public:
     size_t			m_nBlockIndex;
     bool			m_bIsAssigned;
 // Report/GUI part
-    daeVariable*	m_pVariable;
+    daeVariable*        m_pVariable;
     std::vector<size_t>	m_narrDomains;
 };
 
@@ -254,6 +261,7 @@ public:
     virtual void	AddVariableIndexToArray(map<size_t, size_t>& mapIndexes, bool bAddFixed);
     virtual const quantity GetQuantity(void) const;
     virtual bool    IsDifferential(void) const;
+    virtual size_t  SizeOf(void) const;
 
 public:
 // Runtime part
@@ -262,7 +270,7 @@ public:
     size_t		    m_nBlockIndex;
     size_t			m_nOrder;
 // Report/GUI part
-    daeVariable*	m_pVariable;
+    daeVariable*        m_pVariable;
     std::vector<size_t>	m_narrDomains;
 };
 
@@ -290,6 +298,7 @@ public:
     virtual bool	IsLinear(void) const;
     virtual bool	IsFunctionOfVariables(void) const;
     virtual const quantity GetQuantity(void) const;
+    virtual size_t  SizeOf(void) const;
 };
 
 /*********************************************************************************************
@@ -358,6 +367,7 @@ public:
     virtual void	Export(std::string& strContent, daeeModelLanguage eLanguage, daeModelExportContext& c) const;
     virtual const quantity GetQuantity(void) const;
     virtual bool    IsDifferential(void) const;
+    virtual size_t  SizeOf(void) const;
 
     adNode* getNodeRawPtr() const
     {
@@ -394,6 +404,7 @@ public:
     virtual void	Export(std::string& strContent, daeeModelLanguage eLanguage, daeModelExportContext& c) const;
     virtual const quantity GetQuantity(void) const;
     virtual bool    IsDifferential(void) const;
+    virtual size_t  SizeOf(void) const;
 
     adNode* getLeftRawPtr() const
     {
@@ -1008,6 +1019,7 @@ public:
     virtual bool	IsLinear(void) const;
     virtual bool	IsFunctionOfVariables(void) const;
     virtual const quantity GetQuantity(void) const;
+    virtual size_t  SizeOf(void) const;
 
     void AddItem(double coefficient, daeVariable* variable, unsigned int variableIndex);
 

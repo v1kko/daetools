@@ -75,6 +75,25 @@ boost::python::dict getDictFromMapByValue(std::map<KEY,VALUE>& mapItems)
     return res;
 }
 
+template<typename TYPE1, typename TYPE2>
+std::map<TYPE1,TYPE2> getMapFromDict(boost::python::dict d)
+{
+    std::map<TYPE1,TYPE2> m;
+
+    // Get the list of pairs key:value
+    boost::python::stl_input_iterator<boost::python::tuple> iter(d.attr("items")()), end;
+
+    for(; iter != end; iter++)
+    {
+        boost::python::tuple t = *iter;
+        TYPE1 key = boost::python::extract<TYPE1>(t[0]);
+        TYPE2 val = boost::python::extract<TYPE1>(t[1]);
+        m[key] = val;
+    }
+
+    return m;
+}
+
 class daeSimulationWrapper : public daeSimulation_t,
                              public boost::python::wrapper<daeSimulation_t>
 {
@@ -231,6 +250,17 @@ public:
     boost::python::object GetModel_(void) const
     {
         return model;
+    }
+
+    boost::python::list GetDOFs(void) const
+    {
+        boost::python::list l;
+        boost::shared_ptr<daeDataProxy_t> pDataProxy = m_pModel->GetDataProxy();
+        const std::vector<real_t>& dofs = pDataProxy->GetAssignedVarsValues();
+        for(size_t i = 0; i < dofs.size(); i++)
+            l.append(dofs[i]);
+
+        return l;
     }
 
     boost::python::list GetValues(void) const
@@ -608,6 +638,30 @@ public:
     }
 
 
+    boost::python::list lGetActiveEquationSetMemory()
+    {
+        std::vector<size_t> sizes = daeSimulation::GetActiveEquationSetMemory();
+        boost::python::list lSizes;
+
+        for(size_t i = 0; i < sizes.size(); i++)
+        {
+            lSizes.append(sizes[i]);
+        }
+        return lSizes;
+    }
+
+    boost::python::dict dGetActiveEquationSetNodeCount()
+    {
+        std::map<std::string, size_t> mapCount = daeSimulation::GetActiveEquationSetNodeCount();
+        boost::python::dict dCount;
+
+        for(std::map<std::string, size_t>::iterator it = mapCount.begin(); it != mapCount.end(); it++)
+        {
+            dCount[it->first] = it->second;
+        }
+        return dCount;
+    }
+
     boost::python::list GetReportingTimes(void) const
     {
         boost::python::list l;
@@ -636,6 +690,16 @@ public:
         std::map<std::string, real_t> stats = GetEvaluationCallsStats();
         return getDictFromMapByValue(stats);
     }
+
+    void dExportComputeStackStructs(const std::string& filenameComputeStacks,
+                                    const std::string& filenameJacobianIndexes,
+                                    int startEquationIndex = 0,
+                                    int endEquationIndex = -1,
+                                    boost::python::dict dict_bi_to_bi_local = boost::python::dict())
+   {
+        std::map<int,int> bi_to_bi_local = getMapFromDict<int,int>(dict_bi_to_bi_local);
+        ExportComputeStackStructs(filenameComputeStacks, filenameJacobianIndexes, startEquationIndex, endEquationIndex, bi_to_bi_local);
+   }
 
 public:
     boost::python::object model;

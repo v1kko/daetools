@@ -565,6 +565,7 @@ public:
     virtual bool	IsLinear(void) const											= 0;
     virtual bool	IsFunctionOfVariables(void) const								= 0;
     virtual bool    IsDifferential(void) const                                      = 0;
+    virtual size_t  SizeOf(void) const                                              = 0;
 
     static adNode*	CreateNode(const io::xmlTag_t* pTag);
     static void		SaveNode(io::xmlTag_t* pTag, const string& strObjectName, const adNode* node);
@@ -581,6 +582,7 @@ public:
                                     bool bAppendEqualToZero = false);
     static adJacobian Derivative(adNodePtr node, size_t nOverallVariableIndex);
     static adNodePtr  SimplifyNode(adNodePtr node);
+    static void       GetNodeCount(adNode* adnode, std::map<std::string, size_t>& mapNumbers);
     static void       CreateComputeStack(adNode* node, std::vector<adComputeStackItem_t>& computeStack, daeBlock_t* pBlock, real_t scaling = 1.0);
     static uint32_t   GetComputeStackSize(adNode* node);
     static void       EstimateComputeStackSizes(const std::vector<adComputeStackItem_t>& computeStack, size_t start, size_t end,

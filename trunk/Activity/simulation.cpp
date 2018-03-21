@@ -1370,6 +1370,34 @@ void daeSimulation::SetReportDataAroundDiscontinuities(bool bReportDataAroundDis
     m_bReportDataAroundDiscontinuities = bReportDataAroundDiscontinuities;
 }
 
+std::vector<size_t> daeSimulation::GetActiveEquationSetMemory() const
+{
+    if(!m_ptrBlock)
+        daeDeclareAndThrowException(exInvalidPointer);
+
+    return m_ptrBlock->GetActiveEquationSetMemory();
+}
+
+std::map<std::string, size_t> daeSimulation::GetActiveEquationSetNodeCount() const
+{
+    if(!m_ptrBlock)
+        daeDeclareAndThrowException(exInvalidPointer);
+
+    return m_ptrBlock->GetActiveEquationSetNodeCount();
+}
+
+void daeSimulation::ExportComputeStackStructs(const std::string& filenameComputeStacks,
+                                              const std::string& filenameJacobianIndexes,
+                                              int startEquationIndex,
+                                              int endEquationIndex,
+                                              const std::map<int,int>& bi_to_bi_local)
+{
+    if(!m_ptrBlock)
+        daeDeclareAndThrowException(exInvalidPointer);
+
+    m_ptrBlock->ExportComputeStackStructs(filenameComputeStacks, filenameJacobianIndexes, startEquationIndex, endEquationIndex, bi_to_bi_local);
+}
+
 void daeSimulation::EnterConditionalIntegrationMode(void)
 {
 /**************************************************************/

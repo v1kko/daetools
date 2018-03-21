@@ -7,6 +7,7 @@ const char* DOCSTR_daeSimulation = "";
     const char* DOCSTR_daeSimulation_model = "";
     const char* DOCSTR_daeSimulation_m = "";
     const char* DOCSTR_daeSimulation_EquationExecutionInfos = "";
+    const char* DOCSTR_daeSimulation_DOFs = "";
     const char* DOCSTR_daeSimulation_Values = "";
     const char* DOCSTR_daeSimulation_TimeDerivatives = "";
     const char* DOCSTR_daeSimulation_VariableTypes = "";
@@ -72,6 +73,7 @@ const char* DOCSTR_daeSimulation = "";
     const char* DOCSTR_daeSimulation_SetMeasuredVariable = "";
     const char* DOCSTR_daeSimulation_SetInputVariable = "";
     const char* DOCSTR_daeSimulation_SetModelParameter = "";
+    const char* DOCSTR_daeSimulation_ExportComputeStackStructs = "";
 
 const char* DOCSTR_daeOptimization = "";
     const char* DOCSTR_daeOptimization_init = "";

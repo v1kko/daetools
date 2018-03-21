@@ -29,7 +29,7 @@ public:
     /* Initialize function. */
     void Initialize(bool                    calculateSensitivities,
                     size_t                  numberOfVariables,
-                    size_t                  numberOfEquations,
+                    size_t                  numberOfEquationsToProcess,
                     size_t                  numberOfDOFs,
                     size_t                  numberOfComputeStackItems,
                     size_t                  numberOfJacobianItems,

@@ -161,6 +161,14 @@ public:
     bool GetReportDataAroundDiscontinuities(void) const;
     void SetReportDataAroundDiscontinuities(bool bReportDataAroundDiscontinuities);
 
+    std::vector<size_t>           GetActiveEquationSetMemory() const;
+    std::map<std::string, size_t> GetActiveEquationSetNodeCount() const;
+    void                          ExportComputeStackStructs(const std::string& filenameComputeStacks,
+                                                            const std::string& filenameJacobianIndexes,
+                                                            int startEquationIndex = 0,
+                                                            int endEquationIndex = -1,
+                                                            const std::map<int,int>& bi_to_bi_local = std::map<int,int>());
+
 protected:
 //	void	SetInitialConditionsToZero(void);
     void	CheckSystem(void) const;

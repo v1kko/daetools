@@ -64,6 +64,7 @@ void daeModel::Clone(const daeModel& rObject)
     {
         daeDomain* pDomain = new daeDomain(rObject.m_ptrarrDomains[i]->m_strShortName,
                                            this,
+                                           rObject.m_ptrarrDomains[i]->m_Unit,
                                            rObject.m_ptrarrDomains[i]->m_strDescription);
         pDomain->Clone(*rObject.m_ptrarrDomains[i]);
     }

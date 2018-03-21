@@ -51,6 +51,7 @@ LIBRARY:
     mumps            Mumps linear solver
     umfpack          Umfpack solver
     idas             IDAS solver
+    idas_mpi         IDAS solver with MPI interface enabled
     superlu          SuperLU solver
     superlu_mt       SuperLU_MT solver
     bonmin           Bonmin solver
@@ -278,7 +279,7 @@ PYTHON_VERSION=$PYTHON_MAJOR.$PYTHON_MINOR
 
 SOLIBS_DIR="${TRUNK}/daetools-package/daetools/solibs/${PLATFORM}_${HOST_ARCH}"
 if [ ! -e ${SOLIBS_DIR} ]; then
-    mkdir ${SOLIBS_DIR}
+    mkdir -p ${SOLIBS_DIR}
 fi
 
 if [ ${PLATFORM} = "Darwin" ]; then
@@ -403,6 +404,7 @@ else
         openblas)         ;;
         umfpack)          ;;
         idas)             ;;
+        idas_mpi)         ;;
         trilinos)         ;;
         superlu)          ;;
         superlu_mt)       ;;
@@ -639,6 +641,9 @@ configure_boost_static()
   echo "[*] Setting-up boost_static"
   echo ""
   
+  BOOST_USER_CONFIG=~/user-config.jam
+  echo "using mpi ;" > ${BOOST_USER_CONFIG}
+  
   if [ ${PLATFORM} = "Windows" ]; then
     if [ ! -e boost_${vBOOST_}.zip ]; then
       $WGET ${BOOST_HTTP}/${vBOOST}/boost_${vBOOST_}.zip
@@ -646,6 +651,11 @@ configure_boost_static()
     unzip boost_${vBOOST_}.zip
     mv boost_${vBOOST_} boost
     cd boost
+    
+    # There is a problem when there are multiple vc++ version installed.
+    # Therefore, specify the version in the jam file.
+    echo "using msvc : 14.0 : : ;" >>  ${BOOST_USER_CONFIG}
+    
     # There is a problem with executing bootstrap.bat with arguments from bash.
     # Solution: create a proxy batch file which runs 'bootstrap vc14'. 
     echo "call bootstrap vc14" > dae_bootstrap.bat
@@ -682,17 +692,13 @@ compile_boost_static()
 	    ADDRESS_MODEL=""
 	fi
 	
-    # There is a problem when there are multiple vc++ version installed.
-    # Therefore, specify the version in the jam file.
-    echo "using msvc : 14.0 : : ;" >  ${BOOST_USER_CONFIG}
-    
     ./bjam --build-dir=./build --debug-building --layout=system ${ADDRESS_MODEL} \
-           --with-system --with-filesystem --with-thread --with-regex \
+           --with-system --with-filesystem --with-thread --with-regex --with-mpi --with-serialization \
            variant=release link=static threading=multi runtime-link=shared cxxflags="\MD"
 
   else
     ./bjam --build-dir=./build --debug-building --layout=system \
-           --with-system --with-filesystem --with-thread --with-regex \
+           --with-system --with-filesystem --with-thread --with-regex --with-mpi --with-serialization \
            variant=release link=static threading=multi runtime-link=shared cxxflags="-fPIC"
   fi
 
@@ -1264,6 +1270,12 @@ clean_umfpack()
 #######################################################
 configure_idas()
 {
+  IDAS_MPI_ENABLE=$1
+  if [ "${IDAS_MPI_ENABLE}" = "" ]; then
+    IDAS_MPI_ENABLE=OFF
+  fi
+  #echo "IDAS_MPI_ENABLE = ${IDAS_MPI_ENABLE}"
+
   if [ "${DAE_IF_CROSS_COMPILING}" = "1" ]; then
     echo ""
     echo "Sundials IDAS:"
@@ -1292,6 +1304,7 @@ configure_idas()
 
   cmake \
     -G"${CMAKE_GENERATOR}" \
+    -DMPI_ENABLE:BOOL=${IDAS_MPI_ENABLE} \
     -DCMAKE_BUILD_TYPE:STRING=RELEASE \
     -DBUILD_SHARED_LIBS:BOOL=OFF \
     -DCMAKE_INSTALL_PREFIX:PATH=. \
@@ -2102,7 +2115,20 @@ do
                       ;;
 
     idas)             if [ "${DO_CONFIGURE}" = "yes" ]; then
-                        configure_idas
+                        configure_idas "OFF"
+                      fi
+
+                      if [ "${DO_BUILD}" = "yes" ]; then
+                        compile_idas
+                      fi
+
+                      if [ "${DO_CLEAN}" = "yes" ]; then
+                        clean_idas
+                      fi
+                      ;;
+
+    idas_mpi)         if [ "${DO_CONFIGURE}" = "yes" ]; then
+                        configure_idas "ON"
                       fi
 
                       if [ "${DO_BUILD}" = "yes" ]; then

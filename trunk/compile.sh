@@ -48,26 +48,28 @@ PROJECT:
     pydae           Build daetools core python extension modules only.
     
     Individual projects:
-        config              Build Config shared c++ library.
-        core                Build Core c++ library and its python extension module (pyCore).
-        activity            Build Activity c++ library and its python extension module (pyActivity).
-        data_reporting      Build DataReporting c++ library and its python extension module (pyDataReporting).
-        idas                Build IDAS c++ library and its python extension module (pyIDAS).
-        units               Build Units c++ library and its python extension module (pyUnits).
-        simulation_loader   Build simulation_loader shared library.
-        fmi                 Build FMI wrapper shared library.
-        fmi_ws              Build FMI wrapper shared library that uses daetools FMI web service.
-        trilinos            Build Trilinos Amesos/AztecOO linear solver and its python extension module (pyTrilinos).
-        superlu             Build SuperLU linear solver and its python extension module (pySuperLU).
-        superlu_mt          Build SuperLU_MT linear solver and its python extension module (pySuperLU_MT).
-        pardiso             Build PARDISO linear solver and its python extension module (pyPardiso).
-        intel_pardiso       Build Intel PARDISO linear solver and its python extension module (pyIntelPardiso).
-        bonmin              Build BONMIN minlp solver and its python extension module (pyBONMIN).
-        ipopt               Build IPOPT nlp solver and its python extension module (pyIPOPT).
-        nlopt               Build NLOPT nlp solver and its python extension module (pyNLOPT).
-        deal.ii             Build deal.II FEM library and its python extension module (pyDealII).
-        cape_open_thermo    Build Cape Open thermo-physical property package library (cdaeCapeOpenThermoPackage.dll, Windows only).
-        opencl_evaluator    Build Evaluator_OpenCL library and its python extension module (pyEvaluator_OpenCL).
+        config                  Build Config shared c++ library.
+        core                    Build Core c++ library and its python extension module (pyCore).
+        activity                Build Activity c++ library and its python extension module (pyActivity).
+        data_reporting          Build DataReporting c++ library and its python extension module (pyDataReporting).
+        idas                    Build IDAS c++ library and its python extension module (pyIDAS).
+        units                   Build Units c++ library and its python extension module (pyUnits).
+        simulation_loader       Build simulation_loader shared library.
+        fmi                     Build FMI wrapper shared library.
+        fmi_ws                  Build FMI wrapper shared library that uses daetools FMI web service.
+        trilinos                Build Trilinos Amesos/AztecOO linear solver and its python extension module (pyTrilinos).
+        superlu                 Build SuperLU linear solver and its python extension module (pySuperLU).
+        superlu_mt              Build SuperLU_MT linear solver and its python extension module (pySuperLU_MT).
+        pardiso                 Build PARDISO linear solver and its python extension module (pyPardiso).
+        intel_pardiso           Build Intel PARDISO linear solver and its python extension module (pyIntelPardiso).
+        bonmin                  Build BONMIN minlp solver and its python extension module (pyBONMIN).
+        ipopt                   Build IPOPT nlp solver and its python extension module (pyIPOPT).
+        nlopt                   Build NLOPT nlp solver and its python extension module (pyNLOPT).
+        deal.ii                 Build deal.II FEM library and its python extension module (pyDealII).
+        cape_open_thermo        Build Cape Open thermo-physical property package library (cdaeCapeOpenThermoPackage.dll, Windows only).
+        opencl_evaluator        Build Evaluator_OpenCL library and its python extension module (pyEvaluator_OpenCL).
+        daetools_mpi_simulator  Build the generic DAE Tools parallel simulator that use MPI interface.
+                                Requires boost_static and idas_mpi to be compiled.
 EOF
 }
 
@@ -215,7 +217,6 @@ fi
 if [ ${Ncpu} -gt 1 ]; then
   Ncpu=$(($Ncpu+1))
 fi
-Ncpu=3
 
 MAKE="make"
 if [ ${PLATFORM} = "Windows" ]; then
@@ -301,6 +302,7 @@ do
     deal.ii)          ;; 
     cape_open_thermo) ;; 
     opencl_evaluator) ;;
+    daetools_mpi_simulator) ;;
     *) echo Unrecognized project: "$project"
        exit
        ;;
@@ -480,6 +482,8 @@ do
         opencl_evaluator) compile Evaluator_OpenCL   "-j1"
                           compile pyEvaluator_OpenCL "-j1"
                           ;;
+        daetools_mpi_simulator) compile daetools_mpi_simulator
+                                ;;
         
         *) echo "??????????????????????"
            echo Unrecognized project: "$project"

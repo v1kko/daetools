@@ -96,22 +96,25 @@ BOOST_PYTHON_MODULE(pyActivity)
     class_<daepython::daeDefaultSimulationWrapper, bases<daeSimulation_t>, boost::noncopyable>("daeSimulation", DOCSTR_daeSimulation, no_init)
         .def(init<>(( arg("self") ), DOCSTR_daeSimulation_init))
 
-        .add_property("Model",                  &daepython::daeDefaultSimulationWrapper::GetModel_,
-                                                &daepython::daeDefaultSimulationWrapper::SetModel_, DOCSTR_daeSimulation_Model)
-        .add_property("model",                  &daepython::daeDefaultSimulationWrapper::GetModel_,
-                                                &daepython::daeDefaultSimulationWrapper::SetModel_, DOCSTR_daeSimulation_model)
-        .add_property("m",                      &daepython::daeDefaultSimulationWrapper::GetModel_,
-                                                &daepython::daeDefaultSimulationWrapper::SetModel_, DOCSTR_daeSimulation_m)
+        .add_property("Model",                   &daepython::daeDefaultSimulationWrapper::GetModel_,
+                                                 &daepython::daeDefaultSimulationWrapper::SetModel_, DOCSTR_daeSimulation_Model)
+        .add_property("model",                   &daepython::daeDefaultSimulationWrapper::GetModel_,
+                                                 &daepython::daeDefaultSimulationWrapper::SetModel_, DOCSTR_daeSimulation_model)
+        .add_property("m",                       &daepython::daeDefaultSimulationWrapper::GetModel_,
+                                                 &daepython::daeDefaultSimulationWrapper::SetModel_, DOCSTR_daeSimulation_m)
 
-        .add_property("EquationExecutionInfos", &daepython::daeDefaultSimulationWrapper::GetEqExecutionInfos,       DOCSTR_daeSimulation_EquationExecutionInfos)
-        .add_property("Values",                 &daepython::daeDefaultSimulationWrapper::GetValues,                 DOCSTR_daeSimulation_Values)
-        .add_property("TimeDerivatives",        &daepython::daeDefaultSimulationWrapper::GetTimeDerivatives,        DOCSTR_daeSimulation_TimeDerivatives)
-        .add_property("VariableTypes",          &daepython::daeDefaultSimulationWrapper::GetVariableTypes,          DOCSTR_daeSimulation_VariableTypes)
-        .add_property("IndexMappings",          &daepython::daeDefaultSimulationWrapper::GetIndexMappings,          DOCSTR_daeSimulation_IndexMappings)
-        .add_property("NumberOfEquations",      &daepython::daeDefaultSimulationWrapper::GetNumberOfEquations,      DOCSTR_daeSimulation_NumberOfEquations)
-        .add_property("TotalNumberOfVariables", &daepython::daeDefaultSimulationWrapper::GetTotalNumberOfVariables, DOCSTR_daeSimulation_TotalNumberOfVariables)
-        .add_property("RelativeTolerance",      &daepython::daeDefaultSimulationWrapper::GetRelativeTolerance,      DOCSTR_daeSimulation_RelativeTolerance)
-        .add_property("AbsoluteTolerances",     &daepython::daeDefaultSimulationWrapper::GetAbsoluteTolerances,     DOCSTR_daeSimulation_AbsoluteTolerances)
+        .add_property("EquationExecutionInfos",  &daepython::daeDefaultSimulationWrapper::GetEqExecutionInfos,       DOCSTR_daeSimulation_EquationExecutionInfos)
+        .add_property("DOFs",                    &daepython::daeDefaultSimulationWrapper::GetDOFs,                   DOCSTR_daeSimulation_DOFs)
+        .add_property("Values",                  &daepython::daeDefaultSimulationWrapper::GetValues,                 DOCSTR_daeSimulation_Values)
+        .add_property("TimeDerivatives",         &daepython::daeDefaultSimulationWrapper::GetTimeDerivatives,        DOCSTR_daeSimulation_TimeDerivatives)
+        .add_property("VariableTypes",           &daepython::daeDefaultSimulationWrapper::GetVariableTypes,          DOCSTR_daeSimulation_VariableTypes)
+        .add_property("IndexMappings",           &daepython::daeDefaultSimulationWrapper::GetIndexMappings,          DOCSTR_daeSimulation_IndexMappings)
+        .add_property("NumberOfEquations",       &daepython::daeDefaultSimulationWrapper::GetNumberOfEquations,      DOCSTR_daeSimulation_NumberOfEquations)
+        .add_property("TotalNumberOfVariables",  &daepython::daeDefaultSimulationWrapper::GetTotalNumberOfVariables, DOCSTR_daeSimulation_TotalNumberOfVariables)
+        .add_property("RelativeTolerance",       &daepython::daeDefaultSimulationWrapper::GetRelativeTolerance,      DOCSTR_daeSimulation_RelativeTolerance)
+        .add_property("AbsoluteTolerances",      &daepython::daeDefaultSimulationWrapper::GetAbsoluteTolerances,     DOCSTR_daeSimulation_AbsoluteTolerances)
+        .add_property("ActiveEquationSetMemory",    &daepython::daeDefaultSimulationWrapper::lGetActiveEquationSetMemory)
+        .add_property("ActiveEquationSetNodeCount", &daepython::daeDefaultSimulationWrapper::dGetActiveEquationSetNodeCount)
 
         .def_readonly("InitializationDuration", &daeSimulation::m_InitializationDuration)
         .def_readonly("SolveInitialDuration",   &daeSimulation::m_SolveInitalDuration)
@@ -264,7 +267,12 @@ BOOST_PYTHON_MODULE(pyActivity)
                                         return_internal_reference<>(), ( arg("self"), arg("ad") ), DOCSTR_daeSimulation_SetInputVariable)
         .def("SetModelParameter",       &daepython::daeDefaultSimulationWrapper::SetModelParameter2,
                                         return_internal_reference<>(), ( arg("self"), arg("ad"), arg("lowerBound"), arg("upperBound"), arg("defaultValue") ), DOCSTR_daeSimulation_SetModelParameter)
-        ;
+
+        .def("ExportComputeStackStructs", &daepython::daeDefaultSimulationWrapper::dExportComputeStackStructs,
+                                          (arg("self"), arg("filenameComputeStacks"), arg("filenameJacobianIndexes"),
+                                           arg("startEquationIndex") = 0, arg("endEquationIndex") = -1, arg("bi_to_bi_local") = boost::python::dict()),
+                                          DOCSTR_daeSimulation_ExportComputeStackStructs)
+    ;
 
 /**************************************************************
     daeOptimization_t

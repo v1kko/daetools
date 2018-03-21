@@ -124,8 +124,8 @@ class simTutorial(daeSimulation):
         self.m.Description = __doc__
 
     def SetUpParametersAndDomains(self):
-        self.m.x.CreateStructuredGrid(39, 0, 0.1)
-        self.m.y.CreateStructuredGrid(39, 0, 0.1)
+        self.m.x.CreateStructuredGrid(199, 0, 10.0)
+        self.m.y.CreateStructuredGrid(199, 0, 10.0)
 
         self.m.k.SetValue(401 * W/(m*K))
         self.m.cp.SetValue(385 * J/(kg*K))
@@ -142,6 +142,7 @@ def run_code_generators(simulation, log):
     # Demonstration of daetools c++/MPI code-generator:
     import tempfile
     tmp_folder = tempfile.mkdtemp(prefix = 'daetools-code_generator-cxx-')
+    tmp_folder = '/home/ciroki/mpi-exchange/tutorial_adv_4'
     msg = 'Generated c++/MPI code will be located in: \n%s' % tmp_folder
     log.Message(msg, 0)
 
@@ -153,7 +154,7 @@ def run_code_generators(simulation, log):
     # Generate c++ MPI code for 4 nodes
     from daetools.code_generators.cxx_mpi import daeCodeGenerator_cxx_mpi
     cg = daeCodeGenerator_cxx_mpi()
-    cg.generateSimulation(simulation, tmp_folder, 4)
+    cg.generateSimulation(simulation, tmp_folder, 8)
 
 def setupLASolver():
     lasolver = pyTrilinos.daeCreateTrilinosSolver("AztecOO", "")
@@ -185,7 +186,8 @@ def run(**kwargs):
                                             timeHorizon              = 100,
                                             lasolver                 = lasolver,
                                             relativeTolerance        = 1e-3,
-                                            run_before_simulation_fn = run_code_generators,
+                                            run_after_simulation_init_fn = run_code_generators,
+                                            #run_before_simulation_fn = run_code_generators,
                                             **kwargs)
 
 if __name__ == "__main__":

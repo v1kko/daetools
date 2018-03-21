@@ -439,6 +439,7 @@ BOOST_PYTHON_MODULE(pyCore)
         .add_property("IsFunctionOfVariables",  &adNode::IsFunctionOfVariables)
         .add_property("IsDifferential",         &adNode::IsDifferential)
         .add_property("Quantity",               &adNode::GetQuantity)
+        .add_property("SizeOf",                 &adNode::SizeOf)
 
         .def("SaveAsLatex", &adNode::SaveAsLatex)
 

@@ -894,6 +894,15 @@ public:
 
     virtual bool	IsModelDynamic() const = 0;
     virtual void	CleanUpSetupData() = 0;
+
+    virtual std::vector<size_t>           GetActiveEquationSetMemory() const = 0;
+    virtual std::map<std::string, size_t> GetActiveEquationSetNodeCount() const = 0;
+    virtual void                          ExportComputeStackStructs(const std::string& filenameComputeStacks,
+                                                                    const std::string& filenameJacobianIndexes,
+                                                                    int startEquationIndex = 0,
+                                                                    int endEquationIndex = -1,
+                                                                    const std::map<int,int>& bi_to_bi_local = std::map<int,int>()) = 0;
+
 //	virtual real_t* GetValuesPointer() = 0;
 //	virtual real_t* GetTimeDerivativesPointer() = 0;
 //	virtual real_t* GetAbsoluteTolerancesPointer() = 0;

@@ -771,6 +771,11 @@ bool adNodeImpl::IsDifferential(void) const
     return false;
 }
 
+size_t adNodeImpl::SizeOf(void) const
+{
+    return sizeof(*this);
+}
+
 daeeEquationType DetectEquationType(adNodePtr node)
 {
     adNode* n = node.get();
@@ -856,6 +861,11 @@ const quantity adConstantNode::GetQuantity(void) const
     return m_quantity;
 }
 
+size_t adConstantNode::SizeOf(void) const
+{
+    return sizeof(adConstantNode);
+}
+
 adNode* adConstantNode::Clone(void) const
 {
     return new adConstantNode(*this);
@@ -936,6 +946,11 @@ adouble adTimeNode::Evaluate(const daeExecutionContext* pExecutionContext) const
 const quantity adTimeNode::GetQuantity(void) const
 {
     return quantity(0.0, unit("s", 1));
+}
+
+size_t adTimeNode::SizeOf(void) const
+{
+    return sizeof(adTimeNode);
 }
 
 adNode* adTimeNode::Clone(void) const
@@ -1032,6 +1047,11 @@ adouble adEventPortDataNode::Evaluate(const daeExecutionContext* pExecutionConte
 const quantity adEventPortDataNode::GetQuantity(void) const
 {
     return quantity();
+}
+
+size_t adEventPortDataNode::SizeOf(void) const
+{
+    return sizeof(adEventPortDataNode);
 }
 
 adNode* adEventPortDataNode::Clone(void) const
@@ -1165,6 +1185,11 @@ const quantity adRuntimeParameterNode::GetQuantity(void) const
 
     //std::cout << (boost::format("%s units = %s") % m_pParameter->GetCanonicalName() % m_pParameter->GetUnits().getBaseUnit().toString()).str() << std::endl;
     return quantity(*m_pdValue, m_pParameter->GetUnits());
+}
+
+size_t adRuntimeParameterNode::SizeOf(void) const
+{
+    return sizeof(adRuntimeParameterNode) + sizeof(size_t)*m_narrDomains.capacity();
 }
 
 adNode* adRuntimeParameterNode::Clone(void) const
@@ -1324,6 +1349,11 @@ const quantity adDomainIndexNode::GetQuantity(void) const
     if(!m_pDomain)
         daeDeclareAndThrowException(exInvalidCall);
     return quantity(0.0, m_pDomain->GetUnits());
+}
+
+size_t adDomainIndexNode::SizeOf(void) const
+{
+    return sizeof(adDomainIndexNode);
 }
 
 adNode* adDomainIndexNode::Clone(void) const
@@ -1552,6 +1582,11 @@ const quantity adRuntimeVariableNode::GetQuantity(void) const
     return quantity(0.0, m_pVariable->GetVariableType()->GetUnits());
 }
 
+size_t adRuntimeVariableNode::SizeOf(void) const
+{
+    return sizeof(adRuntimeVariableNode) + sizeof(size_t)*m_narrDomains.capacity();
+}
+
 adNode* adRuntimeVariableNode::Clone(void) const
 {
 //    __no_of_runtime_vars++;
@@ -1775,6 +1810,11 @@ const quantity adRuntimeTimeDerivativeNode::GetQuantity(void) const
     return quantity(0.0, m_pVariable->GetVariableType()->GetUnits() / unit("s", 1));
 }
 
+size_t adRuntimeTimeDerivativeNode::SizeOf(void) const
+{
+    return sizeof(adRuntimeTimeDerivativeNode) + sizeof(size_t)*m_narrDomains.capacity();
+}
+
 adNode* adRuntimeTimeDerivativeNode::Clone(void) const
 {
     return new adRuntimeTimeDerivativeNode(*this);
@@ -1903,6 +1943,11 @@ adouble adInverseTimeStepNode::Evaluate(const daeExecutionContext* pExecutionCon
 const quantity adInverseTimeStepNode::GetQuantity(void) const
 {
     return (1.0 * units::units_pool::s ^ (-1));
+}
+
+size_t adInverseTimeStepNode::SizeOf(void) const
+{
+    return sizeof(adInverseTimeStepNode);
 }
 
 adNode* adInverseTimeStepNode::Clone(void) const
@@ -2344,6 +2389,11 @@ const quantity adUnaryNode::GetQuantity(void) const
         daeDeclareAndThrowException(exNotImplemented);
         return quantity();
     }
+}
+
+size_t adUnaryNode::SizeOf(void) const
+{
+    return sizeof(adUnaryNode) + node->SizeOf();
 }
 
 adNode* adUnaryNode::Clone(void) const
@@ -3400,6 +3450,11 @@ const quantity adBinaryNode::GetQuantity(void) const
         daeDeclareAndThrowException(exNotImplemented);
         return quantity();
     }
+}
+
+size_t adBinaryNode::SizeOf(void) const
+{
+    return sizeof(adBinaryNode) + left->SizeOf() + right->SizeOf();
 }
 
 adNode* adBinaryNode::Clone(void) const
@@ -5077,6 +5132,12 @@ void adFloatCoefficientVariableSumNode::AddItem(double coefficient, daeVariable*
 const quantity adFloatCoefficientVariableSumNode::GetQuantity(void) const
 {
     return quantity(0.0, unit());
+}
+
+size_t adFloatCoefficientVariableSumNode::SizeOf(void) const
+{
+    // In general, std::map also includes some overhead (sizeof(key)+sizeof(value)+overhead)*N
+    return sizeof(*this) + (sizeof(size_t) + sizeof(daeFloatCoefficientVariableProduct)) * m_sum.size();
 }
 
 adNode* adFloatCoefficientVariableSumNode::Clone(void) const

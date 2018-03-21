@@ -47,39 +47,4 @@ void EvaluateSensitivityResiduals(const adComputeStackItem_t*         computeSta
                                   const real_t*                       svalues,
                                   const real_t*                       sdvalues,
                                         real_t*                       sresiduals);
-
-/* Unused functions
-void calculate_cs_jacobian_dns(const adComputeStackItem_t*         computeStacks,
-                               uint32_t                            jacobianItemIndex,
-                               const uint32_t*                     activeEquationSetIndexes,
-                               const adJacobianMatrixItem_t*       computeStackJacobianItems,
-                               daeComputeStackEvaluationContext_t  EC,
-                               const real_t*                       dofs,
-                               const real_t*                       values,
-                               const real_t*                       timeDerivatives,
-                               real_t**                            jacobian);
-
-void calculate_cs_jacobian_csr(const adComputeStackItem_t*         computeStacks,
-                               uint32_t                            jacobianItemIndex,
-                               const uint32_t*                     activeEquationSetIndexes,
-                               const adJacobianMatrixItem_t*       computeStackJacobianItems,
-                               daeComputeStackEvaluationContext_t  EC,
-                               const real_t*                       dofs,
-                               const real_t*                       values,
-                               const real_t*                       timeDerivatives,
-                               const int*                          IA,
-                               const int*                          JA,
-                               real_t*                             A);
-
-void calculate_cs_jacobian_gen(const adComputeStackItem_t*         computeStacks,
-                               uint32_t                            jacobianItemIndex,
-                               const uint32_t*                     activeEquationSetIndexes,
-                               const adJacobianMatrixItem_t*       computeStackJacobianItems,
-                               daeComputeStackEvaluationContext_t  EC,
-                               const real_t*                       dofs,
-                               const real_t*                       values,
-                               const real_t*                       timeDerivatives,
-                               void*                               jacobianMatrix,
-                               jacobian_fn                         jacobian);
-*/
 }
