@@ -1,7 +1,7 @@
 ************
 Introduction
 ************
-..
+..  
     Copyright (C) Dragan Nikolic
     DAE Tools is free software; you can redistribute it and/or modify it under the
     terms of the GNU General Public License version 3 as published by the Free Software
@@ -61,6 +61,7 @@ Type of activities that can be performed on models developed in **DAE Tools**:
 
   * `Matlab MAT (.mat) <http://www.mathworks.com/help/pdf_doc/matlab/matfile_format.pdf>`_
   * `Microsoft Excel (.xls) <http://office.microsoft.com/en-gb/excel>`_
+  * Comma Separated Values (.csv)
   * `JSON (.json) <http://www.json.org>`_
   * `XML (.xml) <http://www.w3.org/XML>`_
   * `Hierarchical Data Format (.hdf5) <http://www.hdfgroup.org/HDF5>`_
@@ -191,12 +192,10 @@ DAE Tools use the following third party free software libraries (GNU GPL, GNU LG
 * Sundials IDAS: `<https://computation.llnl.gov/casc/sundials/main.html>`_
 * Boost: `<http://www.boost.org>`_
 * ADOL-C: `<https://projects.coin-or.org/ADOL-C>`_
-* Qt and pyQt4: `<http://qt.nokia.com>`_, `<http://www.riverbankcomputing.co.uk/software/pyqt/intro>`_
 * Numpy: `<http://numpy.scipy.org http://numpy.scipy.org>`_
 * Scipy: `<http://www.scipy.org>`_
 * Blas/Lapack/CLapack: `<http://www.netlib.org>`_
 * Minpack: `<http://www.netlib.org/minpack>`_
-* Atlas: `<http://math-atlas.sourceforge.net>`_
 * Trilinos Amesos: `<http://trilinos.sandia.gov/packages/amesos>`_
 * Trilinos AztecOO: `<http://trilinos.sandia.gov/packages/aztecoo>`_
 * SuperLU/SuperLU_MT: `<http://crd.lbl.gov/~xiaoye/SuperLU/index.html>`_
@@ -205,11 +204,24 @@ DAE Tools use the following third party free software libraries (GNU GPL, GNU LG
 * IPOPT: `<https://projects.coin-or.org/Ipopt>`_
 * Bonmin: `<https://projects.coin-or.org/Bonmin>`_
 * NLOPT: `<http://ab-initio.mit.edu/wiki/index.php/NLopt>`_
-* CUSP: `<http://code.google.com/p/cusp-library>`_
+* pyQt: `<http://www.riverbankcomputing.co.uk/software/pyqt>`_
+* Matplotlib: `<http://matplotlib.sourceforge.net>`_
+* SALib: `<https://github.com/SALib/SALib>`_
+* lxml: `<http://lxml.de>`_
+* openpyxl: `<http://www.python-excel.org>`_
+* HDF5 for Python: `<http://www.h5py.org>`_
+* Pandas: `<http://pandas.pydata.org>`_
+* Mayavi2: `<http://docs.enthought.com/mayavi/mayavi>`_
+* PyGraphviz: `<https://pygraphviz.github.io>`_
+* PyEVTK: `<https://pypi.python.org/pypi/PyEVTK>`_
 
 **DAE Tools** can optionally use the following proprietary software libraries:
 
 * Pardiso linear solver (pyPardiso module): `<http://www.pardiso-project.org>`_
 * Intel Pardiso linear solver (pyIntelPardiso module): `<http://software.intel.com/en-us/articles/intel-mkl>`_
+* OpenCL drivers/runtime libraries
+  (Intel: `<https://software.intel.com/en-us/articles/opencl-drivers>`_;
+  AMD: `<https://support.amd.com/en-us/kb-articles/Pages/OpenCL2-Driver.aspx>`_;
+  NVidia: `<https://developer.nvidia.com/opencl>`_)
 
 Please see the corresponding websites for more details about the licences.

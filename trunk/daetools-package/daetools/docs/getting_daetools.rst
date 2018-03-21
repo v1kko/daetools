@@ -1,7 +1,7 @@
 *****************
 Getting DAE Tools
 *****************
-..
+..  
     Copyright (C) Dragan Nikolic
     DAE Tools is free software; you can redistribute it and/or modify it under the
     terms of the GNU General Public License version 3 as published by the Free Software
@@ -42,7 +42,7 @@ Optional packages:
 * SALib: `<https://github.com/SALib/SALib>`_ (Sensitivity Analysis in Python; included in ``daetools/ext_libs/SALib``)
 * PyEVTK: `<https://pypi.python.org/pypi/PyEVTK>`_ (data export to binary VTK files; included in ``daetools/ext_libs/pyevtk``)
 * OpenCL drivers/runtime libraries
-  (InteL: `<https://software.intel.com/en-us/articles/opencl-drivers>`_;
+  (Intel: `<https://software.intel.com/en-us/articles/opencl-drivers>`_;
   AMD: `<https://support.amd.com/en-us/kb-articles/Pages/OpenCL2-Driver.aspx>`_;
   NVidia: `<https://developer.nvidia.com/opencl>`_)
 
@@ -363,6 +363,7 @@ It is also possible to compile individual libraries using one of the following o
       mumps            Mumps linear solver
       umfpack          Umfpack solver
       idas             IDAS solver
+      idas_mpi         IDAS solver with MPI interface enabled
       superlu          SuperLU solver
       superlu_mt       SuperLU_MT solver
       bonmin           Bonmin solver
@@ -395,26 +396,28 @@ It is also possible to compile individual libraries using one of the following o
     pydae           Build daetools core python extension modules only.
     
     Individual projects:
-        config              Build Config shared c++ library.
-        core                Build Core c++ library and its python extension module (pyCore).
-        activity            Build Activity c++ library and its python extension module (pyActivity).
-        data_reporting      Build DataReporting c++ library and its python extension module (pyDataReporting).
-        idas                Build IDAS c++ library and its python extension module (pyIDAS).
-        units               Build Units c++ library and its python extension module (pyUnits).
-        simulation_loader   Build simulation_loader shared library.
-        fmi                 Build FMI wrapper shared library.
-        fmi_ws              Build FMI wrapper shared library that uses daetools FMI web service.
-        trilinos            Build Trilinos Amesos/AztecOO linear solver and its python extension module (pyTrilinos).
-        superlu             Build SuperLU linear solver and its python extension module (pySuperLU).
-        superlu_mt          Build SuperLU_MT linear solver and its python extension module (pySuperLU_MT).
-        pardiso             Build PARDISO linear solver and its python extension module (pyPardiso).
-        intel_pardiso       Build Intel PARDISO linear solver and its python extension module (pyIntelPardiso).
-        bonmin              Build BONMIN minlp solver and its python extension module (pyBONMIN).
-        ipopt               Build IPOPT nlp solver and its python extension module (pyIPOPT).
-        nlopt               Build NLOPT nlp solver and its python extension module (pyNLOPT).
-        deal.ii             Build deal.II FEM library and its python extension module (pyDealII).
-        cape_open_thermo    Build Cape Open thermo-physical property package library (cdaeCapeOpenThermoPackage.dll, Windows only).
-        opencl_evaluator    Build Evaluator_OpenCL library and its python extension module (pyEvaluator_OpenCL).
+        config                  Build Config shared c++ library.
+        core                    Build Core c++ library and its python extension module (pyCore).
+        activity                Build Activity c++ library and its python extension module (pyActivity).
+        data_reporting          Build DataReporting c++ library and its python extension module (pyDataReporting).
+        idas                    Build IDAS c++ library and its python extension module (pyIDAS).
+        units                   Build Units c++ library and its python extension module (pyUnits).
+        simulation_loader       Build simulation_loader shared library.
+        fmi                     Build FMI wrapper shared library.
+        fmi_ws                  Build FMI wrapper shared library that uses daetools FMI web service.
+        trilinos                Build Trilinos Amesos/AztecOO linear solver and its python extension module (pyTrilinos).
+        superlu                 Build SuperLU linear solver and its python extension module (pySuperLU).
+        superlu_mt              Build SuperLU_MT linear solver and its python extension module (pySuperLU_MT).
+        pardiso                 Build PARDISO linear solver and its python extension module (pyPardiso).
+        intel_pardiso           Build Intel PARDISO linear solver and its python extension module (pyIntelPardiso).
+        bonmin                  Build BONMIN minlp solver and its python extension module (pyBONMIN).
+        ipopt                   Build IPOPT nlp solver and its python extension module (pyIPOPT).
+        nlopt                   Build NLOPT nlp solver and its python extension module (pyNLOPT).
+        deal.ii                 Build deal.II FEM library and its python extension module (pyDealII).
+        cape_open_thermo        Build Cape Open thermo-physical property package library (cdaeCapeOpenThermoPackage.dll, Windows only).
+        opencl_evaluator        Build Evaluator_OpenCL library and its python extension module (pyEvaluator_OpenCL).
+        daetools_mpi_simulator  Build the generic DAE Tools parallel simulator that use MPI interface.
+                                Requires boost_static and idas_mpi to be compiled.
 
 All python extensions are located in the platform-dependent locations in ``trunk/daetools-package/daetools/pyDAE`` and
 ``trunk/daetools-package/daetools/solvers`` folders.

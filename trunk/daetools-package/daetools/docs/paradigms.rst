@@ -1,7 +1,7 @@
 *********************
 Programming Paradigms
 *********************
-..
+..  
     Copyright (C) Dragan Nikolic
     DAE Tools is free software; you can redistribute it and/or modify it under the
     terms of the GNU General Public License version 3 as published by the Free Software
@@ -69,7 +69,7 @@ an outlet flow where the outlet flowrate depends on the liquid level in the tank
 +-----------------------+---------------------+------------------------+
 
 
-**DAE Tools** provide low-level concepts such as parameters, variables, equations, ports, models,
+**DAE Tools** provide the low-level modelling concepts such as parameters, variables, equations, ports, models,
 state transition networks, discrete events etc. so that the key concepts from new application domains
 can be added on top of those low level concepts. For instance, the key modelling concepts from the
 simulator-independent xml-based domain specific language for modelling of biological neural
@@ -104,12 +104,11 @@ Side-by-side comparison between the DSL approach and the **DAE Tools** hybrid ap
         robust error handling, universal grammar and massively tested
     * - Cost of learning a new language vs. its limited applicability: users are required to master a new language
         (yet another language grammar)
-      - No learning of a new language required (everything can get done in a favourite programming language)
+      - No learning of a new language required (everything done in a favourite programming language)
     * - Increased difficulty of integrating the DSL with other components: calling external functions/libraries and
         interaction with other software is limited by the existence of wrappers around a simulator engine
         (for instance some scripting languages like Python or javascript)
-      - Calling external functions/libraries is a natural and straightforward Interaction with other software is
-        natural and straightforward
+      - Calling external functions/libraries and interaction with other software is a built-in feature
     * - Models usually cannot be created in the runtime/on the fly (or at least not easily) and cannot be modified
         in the runtime
       - Models can be created in the runtime/on the fly and easily modified in the runtime
@@ -118,13 +117,12 @@ Side-by-side comparison between the DSL approach and the **DAE Tools** hybrid ap
         some other software (for example to chain several software calls where outputs of previous calls represent
         inputs to the subsequent ones)
       - Setting up a simulation is done programmaticaly and the initial values can be obtained from some other software
-        in a natural way (chaining several software calls is easy since a large number of libraries make Python wrappers
-        available)
+        (chaining several software calls is easy since a large number of libraries make Python wrappers available)
     * - Schedules (operating procedures) are not flexible; manipulation of model parameters, variables, equations,
         simulation results etc is limited to only those operations provided by the language
       - Schedules are completely flexible (within the limits of a programming language itself) and a
         manipulation of model parameters, variables, equations, simulation results etc can be done in any way which
-        a user considers suitable for his/her problem
+        a user considers suitable for her problem
     * - Only the type of results provided by the language/simulator is available; custom processing is usually not
         possible or if a simulator does provide a way to build extensions it is limited to the functionality made
         available to them
@@ -142,8 +140,8 @@ In general, three approaches to process modelling exist ([#Morton2003]_):
 * Simultaneous Modular (**SimM**) approach
 * Equation-Oriented (**EO**) approach
 
-The pros & cons of the first two approaches are extensively studied in the literature. Under the **EO** approach we generate
-and gather together all equations and variables which constitute the model representing the process. The equations are solved
+The pros & cons of the first two approaches are extensively studied in the literature. Under the **EO** approach all 
+equations and variables which constitute the model representing the process are gathered together. The equations are solved
 simultaneously using a suitable mathematical algorithm (Morton, 2003 [#Morton2003]_). Equation-oriented simulation requires
 simultaneous solution of a set of differential algebraic equations (**DAE**) which itself requires a solution of a set of
 nonlinear algebraic equations (**NLAE**) and linear algebraic equations (**LAE**). The Newton's method or some variant of it
@@ -152,7 +150,8 @@ is almost always used to solve problems described by NLAEs. A brief history of E
 in Morton, 2003 ([#Morton2003]_). Also a good overview of the equation-oriented approach and its application in
 `gPROMS <http://www.psenterprise.com/gproms>`_ is given by Barton & Pantelides ([#Pantelides1]_ [#Pantelides2]_ [#Pantelides3]_).
 
-**DAE Tools** use the Equation-Oriented approach to process modelling, and the following types of processes can be modelled:
+**DAE Tools** apply the Equation-Oriented approach to process modelling.
+The following types of processes can be modelled:
 
 * Lumped and distributed
 * Steady-state and dynamic
@@ -186,7 +185,7 @@ The main characteristics of the Equation-oriented (acausal) approach:
     .. math::
        x_1 + x_2 + x_3 = 0
 
-    can be used to determine either ``x1``, ``x2`` or ``x3`` depending on what combination
+    can be used to determine either `x1`, `x2` or `x3` depending on what combination
     of variables is known:
 
     .. math::

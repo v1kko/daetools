@@ -111,7 +111,7 @@ pygments_style = 'vs'
 
 numfig = True
 
-# pngmath
+# pngmath 
 #pngmath_dvipng_args = ['-gamma', '1.5', '-D', '110', '-bg', 'Transparent']
 
  
@@ -121,7 +121,7 @@ numfig = True
 # a list of builtin themes.
 # sphinxdoc, nature, default
 
-html_theme = 'bootstrap'
+html_theme = 'bootstrap' 
 
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the
@@ -129,7 +129,7 @@ html_theme = 'bootstrap'
 html_theme_options = {
     #"sidebarwidth" : 250
     'navbar_links': [
-                      ("Home", "/", True)
+                      ("Home", "/", True) 
                     ],
     'source_link_position': "footer",
     'globaltoc_depth': 1,

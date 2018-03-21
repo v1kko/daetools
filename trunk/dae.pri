@@ -194,6 +194,12 @@ CONFIG += rtti
 # For profiling with Valgrind
 #unix::QMAKE_CXXFLAGS += -g
 
+# c++11
+unix::QMAKE_CXXFLAGS  += -std=c++11
+unix::QMAKE_LFLAGS    += -std=c++11
+win32::QMAKE_CXXFLAGS += /std:c++11
+win32::QMAKE_LFLAGS   += /std:c++11
+
 # OpenMP
 unix::QMAKE_CXXFLAGS           += -fopenmp
 win32-msvc2015::QMAKE_CXXFLAGS += /openmp
