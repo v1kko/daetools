@@ -15,6 +15,61 @@ namespace dae
 {
 namespace solver
 {
+class daeBlockOfEquations : public daeBlockOfEquations_t
+{
+public:
+    daeBlockOfEquations(daeBlock_t* block)
+    {
+        m_pBlock = block;
+    }
+
+public:
+    int CalcNonZeroElements()
+    {
+        int nnz;
+        m_pBlock->CalcNonZeroElements(nnz);
+        return nnz;
+    }
+
+    void FillSparseMatrix(daeSparseMatrix<real_t>* pmatrix)
+    {
+        m_pBlock->FillSparseMatrix(pmatrix);
+    }
+
+    void CalculateJacobian(real_t				time,
+                           real_t				inverseTimeStep,
+                           daeArray<real_t>&	arrValues,
+                           daeArray<real_t>&	arrResiduals,
+                           daeArray<real_t>&	arrTimeDerivatives,
+                           daeMatrix<real_t>&	matJacobian)
+    {
+        m_pBlock->CalculateJacobian(time,
+                                    arrValues,
+                                    arrResiduals,
+                                    arrTimeDerivatives,
+                                    matJacobian,
+                                    inverseTimeStep);
+    }
+public:
+    daeBlock_t* m_pBlock;
+};
+
+int init_la(IDAMem ida_mem);
+int setup_la(IDAMem ida_mem,
+              N_Vector	vectorVariables,
+              N_Vector	vectorTimeDerivatives,
+              N_Vector	vectorResiduals,
+              N_Vector	vectorTemp1,
+              N_Vector	vectorTemp2,
+              N_Vector	vectorTemp3);
+int solve_la(IDAMem ida_mem,
+              N_Vector	b,
+              N_Vector	weight,
+              N_Vector	vectorVariables,
+              N_Vector	vectorTimeDerivatives,
+              N_Vector	vectorResiduals);
+int free_la(IDAMem ida_mem);
+
 int residuals(realtype	time,
               N_Vector	vectorVariables,
               N_Vector	vectorTimeDerivatives,
@@ -122,8 +177,7 @@ daeIDASolver::daeIDASolver(void)
 
 daeIDASolver::~daeIDASolver(void)
 {
-    if(m_pIDA)
-        IDAFree(&m_pIDA);
+    Finalize();
 }
 
 daeIDALASolver_t* daeIDASolver::GetLASolver() const
@@ -212,6 +266,8 @@ void daeIDASolver::Initialize(daeBlock_t* pBlock,
 
     m_nNumberOfEquations    = m_pBlock->GetNumberOfEquations();
 
+    m_pBlockOfEquations.reset(new daeBlockOfEquations(m_pBlock));
+
 // Create data IDA vectors etc
     CreateArrays();
 
@@ -241,6 +297,19 @@ void daeIDASolver::Initialize(daeBlock_t* pBlock,
 
 // Rebuild the expression map and set the number of roots
     RefreshEquationSetAndRootFunctions();
+}
+
+void daeIDASolver::Finalize()
+{
+    if(m_pIDA)
+        IDAFree(&m_pIDA);
+
+    m_pLog      = NULL;
+    m_pBlock    = NULL;
+    m_pIDA      = NULL;
+    m_pLASolver = NULL;
+    m_pIDASolverData.reset();
+    m_pBlockOfEquations.reset();
 }
 
 void daeIDASolver::CreateArrays(void)
@@ -371,8 +440,8 @@ void daeIDASolver::CreateIDA(void)
     bool bval;
     daeConfig& cfg = daeConfig::GetConfig();
 
-    IDASetMaxOrd(m_pIDA,      cfg.GetInteger("daetools.IDAS.MaxOrd",      5));
-    IDASetMaxNumSteps(m_pIDA, cfg.GetInteger("daetools.IDAS.MaxNumSteps", 500));
+    IDASetMaxOrd(m_pIDA,         cfg.GetInteger("daetools.IDAS.MaxOrd",         5));
+    IDASetMaxNumSteps(m_pIDA,    cfg.GetInteger("daetools.IDAS.MaxNumSteps",    500));
 
     fval = cfg.GetFloat("daetools.IDAS.InitStep", 0.0);
     if(fval > 0.0)
@@ -590,13 +659,25 @@ void daeIDASolver::CreateLinearSolver(void)
         }
 
     // Third party LA Solver
-        retval = m_pLASolver->Create(m_pIDA, m_nNumberOfEquations, this);
+        int nnz = 0;
+        m_pBlock->CalcNonZeroElements(nnz);
+        retval = m_pLASolver->Create(m_nNumberOfEquations, nnz, m_pBlockOfEquations.get());
         if(!CheckFlag(retval))
         {
             daeDeclareException(exRuntimeCheck);
             e << "The third party linear solver chickenly failed to initialize it self; " << CreateIDAErrorMessage(retval);
             throw e;
         }
+
+        IDAMem ida_mem = (IDAMem)m_pIDA;
+
+        ida_mem->ida_linit        = init_la;
+        ida_mem->ida_lsetup       = setup_la;
+        ida_mem->ida_lsolve       = solve_la;
+        ida_mem->ida_lperf        = NULL;
+        ida_mem->ida_lfree        = free_la;
+        ida_mem->ida_lmem         = m_pLASolver;
+        ida_mem->ida_setupNonNull = TRUE;
     }
     else
     {
@@ -639,11 +720,11 @@ void daeIDASolver::SolveInitial(void)
 
     daeConfig& cfg = daeConfig::GetConfig();
 
-    IDASetNonlinConvCoefIC(m_pIDA,  cfg.GetFloat("daetools.IDAS.NonlinConvCoefIC", 0.0033));
-    IDASetMaxNumStepsIC(m_pIDA,     cfg.GetInteger   ("daetools.IDAS.MaxNumStepsIC",    5));
-    IDASetMaxNumJacsIC(m_pIDA,      cfg.GetInteger   ("daetools.IDAS.MaxNumJacsIC",     4));
-    IDASetMaxNumItersIC(m_pIDA,     cfg.GetInteger   ("daetools.IDAS.MaxNumItersIC",    10));
-    IDASetLineSearchOffIC(m_pIDA,   cfg.GetBoolean  ("daetools.IDAS.LineSearchOffIC",  false));
+    IDASetNonlinConvCoefIC(m_pIDA,  cfg.GetFloat  ("daetools.IDAS.NonlinConvCoefIC", 0.0033));
+    IDASetMaxNumStepsIC(m_pIDA,     cfg.GetInteger("daetools.IDAS.MaxNumStepsIC",    5));
+    IDASetMaxNumJacsIC(m_pIDA,      cfg.GetInteger("daetools.IDAS.MaxNumJacsIC",     4));
+    IDASetMaxNumItersIC(m_pIDA,     cfg.GetInteger("daetools.IDAS.MaxNumItersIC",    10));
+    IDASetLineSearchOffIC(m_pIDA,   cfg.GetBoolean("daetools.IDAS.LineSearchOffIC",  false));
 
     for(iCounter = 0; iCounter < m_iNumberOfSTNRebuildsDuringInitialization; iCounter++)
     {
@@ -890,7 +971,11 @@ void daeIDASolver::ResetIDASolver(bool bCopyDataFromBlock, real_t t0, bool bRese
     if(m_eLASolver == eThirdParty)
     {
         if(m_bResetLAMatrixAfterDiscontinuity)
-            m_pLASolver->Reinitialize(m_pIDA);
+        {
+            int nnz = 0;
+            m_pBlock->CalcNonZeroElements(nnz);
+            m_pLASolver->Reinitialize(nnz);
+        }
     }
 
 // ReInit IDA
@@ -985,6 +1070,12 @@ real_t daeIDASolver::Solve(real_t dTime, daeeStopCriterion eCriterion, bool bRep
             throw e;
         }
 
+        //int kcur;
+        //realtype hcur;
+        //IDAGetCurrentOrder(m_pIDA, &kcur);
+        //IDAGetCurrentStep(m_pIDA, &hcur);
+        //printf("    t = %.15f, k = %d, h = %.15f\n", m_dCurrentTime, kcur, hcur);
+
     // Now we have to copy the values *from* the solver *to* the block.
     // Achtung, Achtung: This is extremely important to do, for we must be able to re-set the
     //                   variables' values or initial conditions after any IntegrateXXX function,
@@ -1040,7 +1131,7 @@ real_t daeIDASolver::Solve(real_t dTime, daeeStopCriterion eCriterion, bool bRep
             }
         }
 
-        if(m_dCurrentTime == m_dTargetTime)
+        if(m_dCurrentTime >= m_dTargetTime)
             break;
     }
 
@@ -1312,6 +1403,109 @@ void daeIDASolver::OnCalculateSensitivityResiduals()
 
 }
 
+
+
+int init_la(IDAMem ida_mem)
+{
+    daeIDALASolver_t* pLASolver = (daeIDALASolver_t*)ida_mem->ida_lmem;
+    if(!pLASolver)
+        return IDA_MEM_NULL;
+
+    int ret = pLASolver->Init();
+    if(ret == 0)
+        return IDA_SUCCESS;
+    else
+        return IDA_LINIT_FAIL;
+}
+
+int setup_la(IDAMem	    ida_mem,
+             N_Vector	vectorVariables,
+             N_Vector	vectorTimeDerivatives,
+             N_Vector	vectorResiduals,
+             N_Vector	vectorTemp1,
+             N_Vector	vectorTemp2,
+             N_Vector	vectorTemp3)
+{
+    daeIDALASolver_t* pLASolver = (daeIDALASolver_t*)ida_mem->ida_lmem;
+    if(!pLASolver)
+        return IDA_MEM_NULL;
+
+    realtype *pdValues, *pdTimeDerivatives, *pdResiduals;
+
+    real_t time            = ida_mem->ida_tn;
+    real_t inverseTimeStep = ida_mem->ida_cj;
+
+    pdValues			= NV_DATA_S(vectorVariables);
+    pdTimeDerivatives	= NV_DATA_S(vectorTimeDerivatives);
+    pdResiduals			= NV_DATA_S(vectorResiduals);
+
+    int ret = pLASolver->Setup(time,
+                               inverseTimeStep,
+                               pdValues,
+                               pdTimeDerivatives,
+                               pdResiduals);
+
+    if(ret == 0)
+        return IDA_SUCCESS;
+    else
+        return IDA_LSETUP_FAIL;
+}
+
+int solve_la(IDAMem	  ida_mem,
+             N_Vector vectorB,
+             N_Vector vectorWeight,
+             N_Vector vectorVariables,
+             N_Vector vectorTimeDerivatives,
+             N_Vector vectorResiduals)
+{
+    daeIDALASolver_t* pLASolver = (daeIDALASolver_t*)ida_mem->ida_lmem;
+    if(!pLASolver)
+        return IDA_MEM_NULL;
+
+    realtype *pdValues, *pdTimeDerivatives, *pdResiduals, *pdWeight, *pdB;
+
+    real_t time            = ida_mem->ida_tn;
+    real_t inverseTimeStep = ida_mem->ida_cj;
+    real_t cjratio         = ida_mem->ida_cjratio;
+
+    pdWeight			= NV_DATA_S(vectorWeight);
+    pdB      			= NV_DATA_S(vectorB);
+    pdValues			= NV_DATA_S(vectorVariables);
+    pdTimeDerivatives	= NV_DATA_S(vectorTimeDerivatives);
+    pdResiduals			= NV_DATA_S(vectorResiduals);
+
+    int ret = pLASolver->Solve(time,
+                               inverseTimeStep,
+                               cjratio,
+                               pdB,
+                               pdWeight,
+                               pdValues,
+                               pdTimeDerivatives,
+                               pdResiduals);
+    if(ret == 0)
+        return IDA_SUCCESS;
+    else
+        return IDA_LSOLVE_FAIL;
+}
+
+int free_la(IDAMem ida_mem)
+{
+    daeIDALASolver_t* pLASolver = (daeIDALASolver_t*)ida_mem->ida_lmem;
+    if(!pLASolver)
+        return IDA_MEM_NULL;
+
+    int ret = pLASolver->Free();
+
+    // ACHTUNG, ACHTUNG!!
+    // It is the responsibility of the user to delete LA solver pointer!!
+    ida_mem->ida_lmem = NULL;
+
+    if(ret == 0)
+        return IDA_SUCCESS;
+    else
+        return IDA_MEM_FAIL;
+}
+
 int residuals(realtype	time,
               N_Vector	vectorVariables,
               N_Vector	vectorTimeDerivatives,
@@ -1344,6 +1538,30 @@ int residuals(realtype	time,
                                pSolver->m_arrTimeDerivatives);
 
     pSolver->OnCalculateResiduals();
+
+
+/*
+    int currentOrder;
+    realtype currentStep;
+    IDAGetCurrentOrder(pSolver->m_pIDA, &currentOrder);
+    IDAGetCurrentStep(pSolver->m_pIDA,  &currentStep);
+    printf("  residuals at t = %.15f\n", time);
+    printf("      currentOrder = %d\n", currentOrder);
+    printf("      currentStep  = %.15f\n", currentStep);
+    cout<< "      x    = [";
+    for(int i = 0; i < 30; i++)
+        cout << toStringFormatted(pSolver->m_arrValues.GetItem(i), -1, DBL_DIG, false) << ", ";
+    cout << "]" << endl;
+    cout<< "      dxdt = [";
+    for(int i = 0; i < 30; i++)
+        cout << toStringFormatted(pSolver->m_arrTimeDerivatives.GetItem(i), -1, DBL_DIG, false) << ", ";
+    cout << "]" << endl;
+    printf("      res  = [");
+    for(size_t i = 0; i < 30; i++)
+        cout << toStringFormatted(pSolver->m_arrResiduals.GetItem(i), -1, DBL_DIG, false) << ", ";
+    printf("]\n");
+*/
+
 
     if(pSolver->m_bPrintInfo)
     {

@@ -95,7 +95,7 @@ class modTutorial(daeModel):
         eq_types[ : , -1] = 'T' # top boundary
         eq_types[  0, : ] = 'L' # left boundary
         eq_types[ -1, : ] = 'R' # right boundary
-        print(eq_types.T) # print it transposed to visalise it more easily
+        print(eq_types.T) # print it transposed to visualize it more easily
         for x,y in indexes:
             eq_type = eq_types[x,y]
             eq = self.CreateEquation("HeatBalance", "")
@@ -142,7 +142,6 @@ def run_code_generators(simulation, log):
     # Demonstration of daetools c++/MPI code-generator:
     import tempfile
     tmp_folder = tempfile.mkdtemp(prefix = 'daetools-code_generator-cxx-')
-    tmp_folder = '/home/ciroki/mpi-exchange/tutorial_adv_4'
     msg = 'Generated c++/MPI code will be located in: \n%s' % tmp_folder
     log.Message(msg, 0)
 
@@ -154,7 +153,7 @@ def run_code_generators(simulation, log):
     # Generate c++ MPI code for 4 nodes
     from daetools.code_generators.cxx_mpi import daeCodeGenerator_cxx_mpi
     cg = daeCodeGenerator_cxx_mpi()
-    cg.generateSimulation(simulation, tmp_folder, 8)
+    cg.generateSimulation(simulation, tmp_folder, 4)
 
 def setupLASolver():
     lasolver = pyTrilinos.daeCreateTrilinosSolver("AztecOO", "")

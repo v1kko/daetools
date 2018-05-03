@@ -1249,7 +1249,11 @@ boost::python::list daeEquation_DistributedEquationDomainInfos(daeEquation& self
 *******************************************************/
 adNode* daeEquationExecutionInfo_GetNode(daeEquationExecutionInfo& self);
 boost::python::list daeEquationExecutionInfo_GetComputeStack(daeEquationExecutionInfo& self);
+boost::python::tuple daeEquationExecutionInfo_GetComputeStackInfo(daeEquationExecutionInfo& self,
+                                                                  boost::python::dict dUnaryOps  = boost::python::dict(),
+                                                                  boost::python::dict dBinaryOps = boost::python::dict());
 boost::python::list daeEquationExecutionInfo_GetVariableIndexes(daeEquationExecutionInfo& self);
+boost::python::list daeEquationExecutionInfo_GetDiffVariableIndexes(daeEquationExecutionInfo& self);
 boost::python::dict daeEquationExecutionInfo_JacobianExpressions(daeEquationExecutionInfo& self);
 
 /*******************************************************

@@ -1911,6 +1911,7 @@ BOOST_PYTHON_MODULE(pyCore)
         .add_property("Node",	             make_function(&daepython::daeEquationExecutionInfo_GetNode, return_internal_reference<>()), DOCSTR_daeEquationExecutionInfo_Node)
         .add_property("Name",                &daeEquationExecutionInfo::GetName, DOCSTR_daeEquationExecutionInfo_Name)
         .add_property("VariableIndexes",     &daepython::daeEquationExecutionInfo_GetVariableIndexes, DOCSTR_daeEquationExecutionInfo_VariableIndexes)
+        .add_property("DiffVariableIndexes", &daepython::daeEquationExecutionInfo_GetDiffVariableIndexes, DOCSTR_daeEquationExecutionInfo_DiffVariableIndexes)
         .add_property("EquationIndex",       &daeEquationExecutionInfo::GetEquationIndexInBlock, DOCSTR_daeEquationExecutionInfo_EquationIndex)
         .add_property("EquationType",	     &daeEquationExecutionInfo::GetEquationType, DOCSTR_daeEquationExecutionInfo_EquationType)
         .add_property("JacobianExpressions", &daepython::daeEquationExecutionInfo_JacobianExpressions, DOCSTR_daeEquationExecutionInfo_JacobianExpressions)
@@ -1920,6 +1921,13 @@ BOOST_PYTHON_MODULE(pyCore)
         .def_readonly("ComputeStack_max_valueSize",  &daeEquationExecutionInfo::GetComputeStack_max_valueSize)
         .def_readonly("ComputeStack_max_lvalueSize", &daeEquationExecutionInfo::GetComputeStack_max_lvalueSize)
         .def_readonly("ComputeStack_max_rvalueSize", &daeEquationExecutionInfo::GetComputeStack_max_rvalueSize)
+
+        .def("GetComputeStackInfo",                  &daepython::daeEquationExecutionInfo_GetComputeStackInfo,
+                                                     ( arg("self"),
+                                                       arg("unaryOps")  = boost::python::dict(),
+                                                       arg("binaryOps") = boost::python::dict()
+                                                     ),
+                                                     DOCSTR_daeEquationExecutionInfo_GetComputeStackInfo)
     ;
 
     class_<daeEquation, bases<daeObject>, boost::noncopyable>("daeEquation", DOCSTR_daeEquation, no_init)

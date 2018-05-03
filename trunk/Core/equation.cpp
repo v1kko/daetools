@@ -166,6 +166,28 @@ const std::map< size_t, std::pair<size_t, adNodePtr> >& daeEquationExecutionInfo
     return m_mapJacobianExpressions;
 }
 
+std::pair<size_t,size_t> daeEquationExecutionInfo::GetComputeStackInfo(const std::map<daeeUnaryFunctions,size_t>&  unaryOps,
+                                                                       const std::map<daeeBinaryFunctions,size_t>& binaryOps) const
+{
+    if(!m_pEquation->m_pModel)
+        daeDeclareAndThrowException(exInvalidPointer);
+    if(!m_pEquation->m_pModel->GetDataProxy())
+        daeDeclareAndThrowException(exInvalidPointer);
+    if(!m_pEquation->m_pModel->GetDataProxy()->GetBlock())
+        daeDeclareAndThrowException(exInvalidPointer);
+
+    std::pair<size_t,size_t> cssize_flops = std::make_pair<size_t,size_t>(0, 0);
+    if(m_nComputeStackIndex >= 0)
+    {
+        std::vector<adComputeStackItem_t>& all_cs = m_pEquation->m_pModel->GetDataProxy()->GetBlock()->m_arrAllComputeStacks;
+        adComputeStackItem_t* cs = &all_cs[m_nComputeStackIndex];
+
+        cssize_flops.first  = cs->size;
+        cssize_flops.second = adNode::EstimateComputeStackFlops(cs, unaryOps, binaryOps);
+    }
+    return cssize_flops;
+}
+
 std::vector<adComputeStackItem_t> daeEquationExecutionInfo::GetComputeStack() const
 {
     if(!m_pEquation->m_pModel)
@@ -176,12 +198,16 @@ std::vector<adComputeStackItem_t> daeEquationExecutionInfo::GetComputeStack() co
         daeDeclareAndThrowException(exInvalidPointer);
 
     std::vector<adComputeStackItem_t> cs;
-    std::vector<adComputeStackItem_t>& all_cs = m_pEquation->m_pModel->GetDataProxy()->GetBlock()->m_arrAllComputeStacks;
-    adComputeStackItem_t item0 = all_cs[m_nComputeStackIndex];
-    size_t n = item0.size;
-    cs.resize(n);
-    for(size_t i = 0; i < n; i++)
-        cs[i] = all_cs[m_nComputeStackIndex+i];
+    if(m_nComputeStackIndex >= 0)
+    {
+        std::vector<adComputeStackItem_t>& all_cs = m_pEquation->m_pModel->GetDataProxy()->GetBlock()->m_arrAllComputeStacks;
+        adComputeStackItem_t item0 = all_cs[m_nComputeStackIndex];
+        size_t n = item0.size;
+        cs.resize(n);
+        for(size_t i = 0; i < n; i++)
+            cs[i] = all_cs[m_nComputeStackIndex+i];
+    }
+
     return cs;
 }
 

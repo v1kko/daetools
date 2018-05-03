@@ -46,7 +46,7 @@ void daeIntelPardisoSolver_set_iparm(daeIntelPardisoSolver& self, boost::python:
         self.iparm[i] = extract<int>(l_iparm[i]);
 }
 
-boost::python::dict GetEvaluationCallsStats_(daeIntelPardisoSolver& self)
+boost::python::dict daeIntelPardisoSolver_GetEvaluationCallsStats_(daeIntelPardisoSolver& self)
 {
     std::map<std::string, real_t> stats = self.GetEvaluationCallsStats();
     return getDictFromMapByValue(stats);

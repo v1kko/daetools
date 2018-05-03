@@ -1,5 +1,5 @@
 #include "stdafx.h"
-#include <idas/idas_impl.h>
+//#include <idas/idas_impl.h>
 #include "superlu_la_solver.h"
 #include <stdlib.h>
 #include "config_data.h"
@@ -36,6 +36,7 @@ namespace superlu_mt
 {
 #endif
 
+/*
 int init_la(IDAMem ida_mem);
 int setup_la(IDAMem ida_mem,
               N_Vector	vectorVariables,
@@ -51,6 +52,7 @@ int solve_la(IDAMem ida_mem,
               N_Vector	vectorTimeDerivatives,
               N_Vector	vectorResiduals);
 int free_la(IDAMem ida_mem);
+*/
 
 daeSuperLUSolver::daeSuperLUSolver(void)
 {
@@ -162,8 +164,9 @@ void daeSuperLUSolver::SetOpenBLASNoThreads(int n)
 #endif
 }
 
-int daeSuperLUSolver::Create(void* ida, size_t n, daeDAESolver_t* pDAESolver)
+int daeSuperLUSolver::Create(size_t n, size_t nnz, daeBlockOfEquations_t* block)
 {
+/*
     IDAMem ida_mem = (IDAMem)ida;
     if(!ida_mem)
         return IDA_MEM_NULL;
@@ -193,12 +196,21 @@ int daeSuperLUSolver::Create(void* ida, size_t n, daeDAESolver_t* pDAESolver)
 
     ida_mem->ida_lmem         = this;
     ida_mem->ida_setupNonNull = TRUE;
+*/
+    if(!block)
+        return -1;
+    m_nNoEquations         = n;
+    m_pBlock               = block;
+    m_nJacobianEvaluations = 0;
 
-    return IDA_SUCCESS;
+    InitializeSuperLU(nnz);
+
+    return 0;
 }
 
-int daeSuperLUSolver::Reinitialize(void* ida)
+int daeSuperLUSolver::Reinitialize(size_t nnz)
 {
+/*
     IDAMem ida_mem = (IDAMem)ida;
     if(!ida_mem)
         return IDA_MEM_NULL;
@@ -209,6 +221,13 @@ int daeSuperLUSolver::Reinitialize(void* ida)
     int nnz = 0;
     m_pBlock->CalcNonZeroElements(nnz);
 
+    m_matJacobian.Reset(m_nNoEquations, nnz, CSR_C_STYLE);
+    m_matJacobian.ResetCounters();
+    m_pBlock->FillSparseMatrix(&m_matJacobian);
+    m_matJacobian.Sort();
+*/
+    if(!m_pBlock)
+        return -1;
     m_matJacobian.Reset(m_nNoEquations, nnz, CSR_C_STYLE);
     m_matJacobian.ResetCounters();
     m_pBlock->FillSparseMatrix(&m_matJacobian);
@@ -278,7 +297,7 @@ int daeSuperLUSolver::Reinitialize(void* ida)
 
     m_bFactorizationDone = false;
 
-    return IDA_SUCCESS;
+    return 0; //IDA_SUCCESS;
 }
 
 void daeSuperLUSolver::FreeMemory(void)
@@ -371,6 +390,13 @@ void daeSuperLUSolver::FreeMemory(void)
 
 void daeSuperLUSolver::InitializeSuperLU(size_t nnz)
 {
+    if(!m_pBlock)
+    {
+        daeDeclareException(exInvalidPointer);
+        e << "Invalid block pointer";
+        throw e;
+    }
+
 // Initialize sparse matrix
     m_matJacobian.Reset(m_nNoEquations, nnz, CSR_C_STYLE);
     m_matJacobian.ResetCounters();
@@ -467,27 +493,41 @@ superlu_options_t& daeSuperLUSolver::GetOptions(void)
 }
 #endif
 
-int daeSuperLUSolver::Init(void* ida)
+int daeSuperLUSolver::Init()
 {
-    return IDA_SUCCESS;
+    return 0; //IDA_SUCCESS;
+}
+
+int daeSuperLUSolver::Free()
+{
+    return 0; //IDA_SUCCESS;
 }
 
 //#include <suitesparse/btf.h>
 
-int daeSuperLUSolver::Setup(void*		ida,
-                            N_Vector	vectorVariables,
-                            N_Vector	vectorTimeDerivatives,
-                            N_Vector	vectorResiduals,
-                            N_Vector	vectorTemp1,
-                            N_Vector	vectorTemp2,
-                            N_Vector	vectorTemp3)
+//int daeSuperLUSolver::Setup(void*		ida,
+//                            N_Vector	vectorVariables,
+//                            N_Vector	vectorTimeDerivatives,
+//                            N_Vector	vectorResiduals,
+//                            N_Vector	vectorTemp1,
+//                            N_Vector	vectorTemp2,
+//                            N_Vector	vectorTemp3)
+int daeSuperLUSolver::Setup(real_t  time,
+                            real_t  inverseTimeStep,
+                            real_t* pdValues,
+                            real_t* pdTimeDerivatives,
+                            real_t* pdResiduals)
 {
     int info;
     int memSize;
     double rpg, rcond;
-    realtype *pdValues, *pdTimeDerivatives, *pdResiduals;
+
+    if(!m_pBlock)
+        return -1;
 
     double timeStart = dae::GetTimeInSeconds();
+/*
+    realtype *pdValues, *pdTimeDerivatives, *pdResiduals;
 
     IDAMem ida_mem = (IDAMem)ida;
     if(!ida_mem)
@@ -502,12 +542,13 @@ int daeSuperLUSolver::Setup(void*		ida,
     pdValues			= NV_DATA_S(vectorVariables);
     pdTimeDerivatives	= NV_DATA_S(vectorTimeDerivatives);
     pdResiduals			= NV_DATA_S(vectorResiduals);
-
+*/
+    size_t Neq = m_nNoEquations;
     m_nJacobianEvaluations++;
 
-    m_arrValues.InitArray(Neq, pdValues);
-    m_arrTimeDerivatives.InitArray(Neq, pdTimeDerivatives);
-    m_arrResiduals.InitArray(Neq, pdResiduals);
+    m_arrValues.InitArray(m_nNoEquations, pdValues);
+    m_arrTimeDerivatives.InitArray(m_nNoEquations, pdTimeDerivatives);
+    m_arrResiduals.InitArray(m_nNoEquations, pdResiduals);
 
 /* ACHTUNG!
    Do we need to clear the Jacobian matrix? It is sparse and all non-zero items will be overwritten.
@@ -516,11 +557,11 @@ int daeSuperLUSolver::Setup(void*		ida,
     m_matJacobian.ClearValues();
 
     m_pBlock->CalculateJacobian(time,
+                                inverseTimeStep,
                                 m_arrValues,
                                 m_arrResiduals,
                                 m_arrTimeDerivatives,
-                                m_matJacobian,
-                                dInverseTimeStep);
+                                m_matJacobian);
 
 /* BTF_ORDER permutes a square matrix into upper block triangular form. */
 /*
@@ -664,7 +705,7 @@ int daeSuperLUSolver::Setup(void*		ida,
     if(info != 0)
     {
         std::cout << "SuperLU factorization failed = " << info << std::endl;
-        return IDA_LSETUP_FAIL;
+        return -1; //IDA_LSETUP_FAIL;
     }
 
     //PrintStats();
@@ -713,7 +754,7 @@ int daeSuperLUSolver::Setup(void*		ida,
         else
         {
             std::cout << "SuperLU invalid factorization option" << std::endl;
-            return IDA_LSETUP_FAIL;
+            return -1; //IDA_LSETUP_FAIL;
         }
     }
     else
@@ -752,7 +793,7 @@ int daeSuperLUSolver::Setup(void*		ida,
             if(!m_work)
             {
                 std::cout << "SuperLU failed to allocate the Workspace memory (" << real_t(m_lwork)/1E6 << " MB)" << std::endl;
-                return IDA_LSETUP_FAIL;
+                return -1; //IDA_LSETUP_FAIL;
             }
             std::cout << "Predicted memory requirements = " << info << " bytes (initially allocated " << m_lwork << ")" << std::endl;
         }
@@ -762,7 +803,7 @@ int daeSuperLUSolver::Setup(void*		ida,
     if(info != 0)
     {
         std::cout << "SuperLU factorization failed; info = " << info << std::endl;
-        return IDA_LSETUP_FAIL;
+        return -1; //IDA_LSETUP_FAIL;
     }
 
     /* Not working...
@@ -865,22 +906,36 @@ int daeSuperLUSolver::Setup(void*		ida,
     m_SetupTime += (timeEnd - timeStart);
     m_nNumberOfSetupCalls += 1;
 
-    return IDA_SUCCESS;
+    return 0; //IDA_SUCCESS;
 }
 
-int daeSuperLUSolver::Solve(void*		ida,
-                            N_Vector	vectorB,
-                            N_Vector	vectorWeight,
-                            N_Vector	vectorVariables,
-                            N_Vector	vectorTimeDerivatives,
-                            N_Vector	vectorResiduals)
+//int daeSuperLUSolver::Solve(void*		ida,
+//                            N_Vector	vectorB,
+//                            N_Vector	vectorWeight,
+//                            N_Vector	vectorVariables,
+//                            N_Vector	vectorTimeDerivatives,
+//                            N_Vector	vectorResiduals)
+int daeSuperLUSolver::Solve(real_t  time,
+                            real_t  inverseTimeStep,
+                            real_t  cjratio,
+                            real_t* b,
+                            real_t* weight,
+                            real_t* pdValues,
+                            real_t* pdTimeDerivatives,
+                            real_t* pdResiduals)
 {
     int info;
     double rpg, rcond;
-    realtype* pdB;
 
     double timeStart = dae::GetTimeInSeconds();
 
+    size_t Neq = m_nNoEquations;
+
+    if(!m_pBlock)
+        return -1;
+
+/*
+    realtype* pdB;
     IDAMem ida_mem = (IDAMem)ida;
     if(!ida_mem)
         return IDA_MEM_NULL;
@@ -889,14 +944,14 @@ int daeSuperLUSolver::Solve(void*		ida,
 
     size_t Neq = m_nNoEquations;
     pdB        = NV_DATA_S(vectorB);
-
+*/
     double start, end;
     start = dae::GetTimeInSeconds();
 
 #ifdef daeSuperLU_MT
     omp_set_num_threads(m_omp_num_threads);
 
-    ::memcpy(m_vecB, pdB, Neq*sizeof(real_t));
+    ::memcpy(m_vecB, b, Neq*sizeof(real_t));
 
 /**********************************************/
 //	daeDenseArray x;
@@ -912,7 +967,7 @@ int daeSuperLUSolver::Solve(void*		ida,
     if(info != 0)
     {
         std::cout << "SuperLU solve failed = " << info << std::endl;
-        return IDA_LSOLVE_FAIL;
+        return -1; //IDA_LSOLVE_FAIL;
     }
 
     PrintStats();
@@ -920,11 +975,11 @@ int daeSuperLUSolver::Solve(void*		ida,
 //	std::cout << "X vector:" << std::endl;
 //	x.Print();
 /**********************************************/
-    ::memcpy(pdB, m_vecB, Neq*sizeof(real_t));
+    ::memcpy(b, m_vecB, Neq*sizeof(real_t));
 #endif
 
 #ifdef daeSuperLU
-    ::memcpy(m_vecB, pdB, Neq*sizeof(real_t));
+    ::memcpy(m_vecB, b, Neq*sizeof(real_t));
 
     StatInit(&m_Stats);
 
@@ -933,31 +988,30 @@ int daeSuperLUSolver::Solve(void*		ida,
     if(info != 0)
     {
         std::cout << "SuperLU solve failed; info = " << info << std::endl;
-        return IDA_LSOLVE_FAIL;
+        return -1; //IDA_LSOLVE_FAIL;
     }
 
     PrintStats();
     StatFree(&m_Stats);
 
-    ::memcpy(pdB, m_vecB, Neq*sizeof(real_t));
+    ::memcpy(b, m_vecB, Neq*sizeof(real_t));
 #endif
 
     end = dae::GetTimeInSeconds();
     double timeElapsed = end - start;
     m_solve += timeElapsed;
 
-    if(ida_mem->ida_cjratio != 1.0)
+    if(cjratio != 1.0)
     {
         for(size_t i = 0; i < Neq; i++)
-            pdB[i] *= 2.0 / (1.0 + ida_mem->ida_cjratio);
-        //N_VScale(2.0 / (1.0 + ida_mem->ida_cjratio), vectorB, vectorB);
+            b[i] *= 2.0 / (1.0 + cjratio);
     }
 
     double timeEnd = dae::GetTimeInSeconds();
     m_SolveTime += (timeEnd - timeStart);
     m_nNumberOfSolveCalls += 1;
 
-    return IDA_SUCCESS;
+    return 0; //IDA_SUCCESS;
 }
 
 std::map<std::string, real_t> daeSuperLUSolver::GetEvaluationCallsStats()
@@ -994,12 +1048,7 @@ void daeSuperLUSolver::PrintStats(void)
 #endif
 }
 
-int daeSuperLUSolver::Free(void* ida)
-{
-    return IDA_SUCCESS;
-}
-
-
+/*
 int init_la(IDAMem ida_mem)
 {
     daeSuperLUSolver* pSolver = (daeSuperLUSolver*)ida_mem->ida_lmem;
@@ -1066,6 +1115,7 @@ int free_la(IDAMem ida_mem)
 
     return ret;
 }
+*/
 
 #ifdef daeSuperLU
 }

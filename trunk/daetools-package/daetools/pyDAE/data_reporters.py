@@ -573,10 +573,12 @@ class daeCSVFileDataReporter(daeDataReporterFile):
     Saves the results in the comma-separated values (CSV) format.
     The separator is ',' and the variable names are double quoted '"'.
     """
-    def __init__(self, uniqueTimeValues = False):
+    def __init__(self, uniqueTimeValues = False, nameBrackets = '[]'):
         daeDataReporterFile.__init__(self)
 
         self.uniqueTimeValues = uniqueTimeValues
+        self.lBracket = nameBrackets[0]
+        self.rBracket = nameBrackets[1]
         
     def WriteDataToFile(self):
         variable_names  = []
@@ -599,7 +601,7 @@ class daeCSVFileDataReporter(daeDataReporterFile):
                 for index_list in indexes:
                     str_index_list = [str(item) for item in index_list]
                     if str_index_list:
-                        inds = '[' + ','.join(str_index_list) + ']' 
+                        inds = '%s%s%s' % (self.lBracket, ','.join(str_index_list), self.rBracket) 
                     else:
                         inds = ''
                     variable_names.append('%s%s' % (varName, inds))

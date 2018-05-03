@@ -225,13 +225,13 @@ def createLASolver():
     #lasolver = pyTrilinos.daeCreateTrilinosSolver("Amesos_Superlu", "")
 
     # AztecOO built-in preconditioners are specified through AZ_precond option
-    lasolver = pyTrilinos.daeCreateTrilinosSolver("AztecOO", "")
+    #lasolver = pyTrilinos.daeCreateTrilinosSolver("AztecOO", "")
 
     # Ifpack preconditioner can be one of: [ILU, ILUT, PointRelaxation, BlockRelaxation, IC, ICT]
-    #lasolver = pyTrilinos.daeCreateTrilinosSolver("AztecOO_Ifpack", "PointRelaxation")
+    lasolver = pyTrilinos.daeCreateTrilinosSolver("AztecOO_Ifpack", "ILU")
     
     # ML preconditioner can be one of: [SA, DD, DD-ML, DD-ML-LU, maxwell, NSSA]
-    #lasolver = pyTrilinos.daeCreateTrilinosSolver("AztecOO_ML", "maxwell")
+    #lasolver = pyTrilinos.daeCreateTrilinosSolver("AztecOO_ML", "SA")
     
     return lasolver
 
@@ -273,13 +273,14 @@ def setOptions(lasolver):
 
         lasolver.NumIters  = 500
         lasolver.Tolerance = 1e-3
-        paramListAztec.set_int("AZ_solver",    daeAztecOptions.AZ_gmres)
-        paramListAztec.set_int("AZ_kspace",    500)
-        paramListAztec.set_int("AZ_scaling",   daeAztecOptions.AZ_none)
-        paramListAztec.set_int("AZ_reorder",   0)
-        paramListAztec.set_int("AZ_conv",      daeAztecOptions.AZ_r0)
-        paramListAztec.set_int("AZ_keep_info", 1)
-        paramListAztec.set_int("AZ_output",    daeAztecOptions.AZ_warnings) # {AZ_all, AZ_none, AZ_last, AZ_summary, AZ_warnings}
+        paramListAztec.set_int("AZ_solver",      daeAztecOptions.AZ_gmres)
+        paramListAztec.set_int("AZ_kspace",      500)
+        paramListAztec.set_int("AZ_scaling",     daeAztecOptions.AZ_none)
+        paramListAztec.set_int("AZ_reorder",     0)
+        paramListAztec.set_int("AZ_conv",        daeAztecOptions.AZ_r0)
+        paramListAztec.set_int("AZ_keep_info",   1)
+        paramListAztec.set_int("AZ_output",      daeAztecOptions.AZ_warnings) # {AZ_all, AZ_none, AZ_last, AZ_summary, AZ_warnings}
+        paramListAztec.set_int("AZ_diagnostics", daeAztecOptions.AZ_none)     # {AZ_all, AZ_none, AZ_last, AZ_summary, AZ_warnings}
         paramListAztec.Print()
 
     #######################################################
@@ -288,12 +289,9 @@ def setOptions(lasolver):
     if "AztecOO_Ifpack" in lasolver.Name:
         # 2b) Ifpack preconditioner:
         paramListIfpack = lasolver.IfpackOptions
-        paramListIfpack.set_string("relaxation: type",               "Jacobi")
-        paramListIfpack.set_float ("relaxation: min diagonal value", 1e-2)
-        paramListIfpack.set_int   ("relaxation: sweeps",             5)
-        #paramListIfpack.set_float("fact: ilut level-of-fill",        3.0)
-        #paramListIfpack.set_float("fact: absolute threshold",        1e8)
-        #paramListIfpack.set_float("fact: relative threshold",        0.0)
+        paramListIfpack.set_int  ("fact: level-of-fill",      3)
+        paramListIfpack.set_float("fact: absolute threshold", 1e-5)
+        paramListIfpack.set_float("fact: relative threshold", 1.0)
         paramListIfpack.Print()
 
     elif "AztecOO_ML" in lasolver.Name:
@@ -305,15 +303,12 @@ def setOptions(lasolver):
     elif "AztecOO" in lasolver.Name:
         # 2a) AztecOO built-in preconditioner:
         paramListAztec = lasolver.AztecOOOptions
-        paramListAztec.set_int("AZ_precond",         daeAztecOptions.AZ_Jacobi)
-        paramListAztec.set_int("AZ_subdomain_solve", daeAztecOptions.AZ_ilut)
-        paramListAztec.set_int("AZ_overlap",         daeAztecOptions.AZ_none)
-        paramListAztec.set_int("AZ_graph_fill",      1)
-        #paramListAztec.set_int("AZ_type_overlap",    daeAztecOptions.AZ_standard)
-        #paramListAztec.set_float("AZ_ilut_fill",     3.0)
-        #paramListAztec.set_float("AZ_drop",          0.0)
-        #paramListAztec.set_float("AZ_athresh",       1e8)
-        #paramListAztec.set_float("AZ_rthresh",       0.0)
+        paramListAztec.set_int("AZ_precond",         daeAztecOptions.AZ_dom_decomp)
+        paramListAztec.set_int("AZ_subdomain_solve", daeAztecOptions.AZ_ilu)
+        paramListAztec.set_int("AZ_orthog",          daeAztecOptions.AZ_modified)
+        paramListAztec.set_int("AZ_graph_fill",      3)
+        paramListAztec.set_float("AZ_athresh",       1e-5)
+        paramListAztec.set_float("AZ_rthresh",       1.0)
         paramListAztec.Print()
     
 def run(**kwargs):

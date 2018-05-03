@@ -33,6 +33,22 @@ namespace dae
 {
 namespace solver
 {
+class daeBlockOfEquations_t
+{
+public:
+    virtual ~daeBlockOfEquations_t(){}
+
+public:
+    virtual int  CalcNonZeroElements() = 0;
+    virtual void FillSparseMatrix(daeSparseMatrix<real_t>* pmatrix) = 0;
+    virtual void CalculateJacobian(real_t				time,
+                                   real_t				inverseTimeStep,
+                                   daeArray<real_t>&	arrValues,
+                                   daeArray<real_t>&	arrResiduals,
+                                   daeArray<real_t>&	arrTimeDerivatives,
+                                   daeMatrix<real_t>&	matJacobian) = 0;
+};
+
 /*********************************************************************************************
     daeLASolver
 **********************************************************************************************/
@@ -42,7 +58,33 @@ public:
     virtual ~daeLASolver_t(void){}
 
 public:
-    virtual std::string GetName(void) const	= 0;
+    virtual std::string GetName(void) const                                     = 0;
+    virtual int Create(size_t n, size_t nnz, daeBlockOfEquations_t* block)      = 0;
+    virtual int Reinitialize(size_t nnz)                                        = 0;
+    virtual int Init()                                                          = 0;
+    virtual int Setup(real_t    time,
+                      real_t    inverseTimeStep,
+                      real_t*	values,
+                      real_t*	timeDerivatives,
+                      real_t*	residuals)                                      = 0;
+    virtual int Solve(real_t    time,
+                      real_t    inverseTimeStep,
+                      real_t    cjratio,
+                      real_t*	b,
+                      real_t*	weight,
+                      real_t*	values,
+                      real_t*	timeDerivatives,
+                      real_t*	residuals)                                      = 0;
+    virtual int Free()                                                          = 0;
+    virtual int SaveAsXPM(const std::string& strFileName)                       = 0;
+    virtual int SaveAsMatrixMarketFile(const std::string& strFileName,
+                                       const std::string& strMatrixName,
+                                       const std::string& strMatrixDescription) = 0;
+    //virtual void SetOption(const std::string& optionName, const std::string& optionValue) = 0;
+};
+
+class daeIDALASolver_t : public daeLASolver_t
+{
 };
 
 /*********************************************************************************************
@@ -72,6 +114,7 @@ public:
                                                    daeeInitialConditionMode eMode,
                                                    bool bCalculateSensitivities,
                                                    const std::vector<size_t>& narrParametersIndexes)= 0;
+    virtual void						Finalize(void)													= 0;
     virtual void						SolveInitial(void)											= 0;
     virtual real_t						Solve(real_t dTime,
                                               daeeStopCriterion eCriterion,

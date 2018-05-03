@@ -11,102 +11,188 @@ You should have received a copy of the GNU General Public License along with the
 DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 ***********************************************************************************/
 #include "auxiliary.h"
-#include "simulation.h"
+#include "typedefs.h"
 #include <fstream>
 #include <iomanip>
 #include <boost/filesystem.hpp>
 #include <boost/filesystem/operations.hpp>
 
-void simInitialize(daeSimulation_t* s, daeModel_t* model, daeIDASolver_t* dae_solver, daeLASolver_t* lasolver,
-                   const std::string& outputDirectory, bool bCalculateSensitivities)
+namespace daetools_mpi
 {
-    s->m_outputDirectory         = outputDirectory;
-    s->m_bCalculateSensitivities = bCalculateSensitivities;
-    s->m_pModel                  = model;
-    s->m_pDAESolver              = dae_solver;
-    s->m_bIsInitialized          = true;
-    s->m_dCurrentTime            = model->startTime;
-    s->m_dTimeHorizon            = model->timeHorizon;
-    s->m_dReportingInterval      = model->reportingInterval;
+daeSimulation_t::daeSimulation_t()
+{
 
-    solInitialize(dae_solver, model, s, lasolver, model->Nequations,
-                                                  model->Nequations_local,
-                                                  model->initValues,
-                                                  model->initDerivatives,
-                                                  model->absoluteTolerances,
-                                                  model->ids,
-                                                  model->relativeTolerance);
 }
 
-void simFinalize(daeSimulation_t* s)
+daeSimulation_t::~daeSimulation_t()
 {
-    solDestroy(s->m_pDAESolver);
+
 }
 
-void simReinitialize(daeSimulation_t* s)
+void daeSimulation_t::Initialize(daeModel_t* pmodel,
+                                 daeIDASolver_t* pdae_solver,
+                                 const std::string& strOutputDirectory,
+                                 bool bCalculateSensitivities)
 {
-    solReinitialize(s->m_pDAESolver, true, false);
+    double start = auxiliary::get_time_in_seconds();
+
+    outputDirectory        = strOutputDirectory;
+    calculateSensitivities = bCalculateSensitivities;
+    model                  = pmodel;
+    daesolver              = pdae_solver;
+    isInitialized          = true;
+    currentTime            = model->startTime;
+    timeHorizon            = model->timeHorizon;
+    reportingInterval      = model->reportingInterval;
+
+    daesolver->Initialize(model, this, model->Nequations,
+                                       model->Nequations_local,
+                                       model->initValues,
+                                       model->initDerivatives,
+                                       model->absoluteTolerances,
+                                       model->ids,
+                                       model->relativeTolerance);
+    real_t t = 0;
+    reportingTimes.clear();
+    while(t < timeHorizon)
+    {
+        t += reportingInterval;
+        if(t > timeHorizon)
+            t = timeHorizon;
+        reportingTimes.push_back(t);
+    }
+
+    initDuration = auxiliary::get_time_in_seconds() - start;
 }
 
-void simSolveInitial(daeSimulation_t* s)
+void daeSimulation_t::Finalize()
 {
-    int res = solSolveInitial(s->m_pDAESolver);
-    if(res < 0)
-        exit(res);
-    simReportData(s);
+    daesolver->PrintSolverStats();
+    daesolver->Free();
+    model->Free();
+}
+
+void daeSimulation_t::Reinitialize()
+{
+    daesolver->Reinitialize(true, false);
+}
+
+void daeSimulation_t::SolveInitial()
+{
+    double start = auxiliary::get_time_in_seconds();
+
+    daesolver->SolveInitial();
+    ReportData();
     printf("System successfuly initialised\n");
+
+    solveInitDuration = auxiliary::get_time_in_seconds() - start;
 }
 
-void simRun(daeSimulation_t* s)
+void daeSimulation_t::Run()
 {
     real_t t;
 
-    while(s->m_dCurrentTime < s->m_dTimeHorizon)
+    double start = auxiliary::get_time_in_seconds();
+
+    int step = 0;
+    while(currentTime < timeHorizon)
     {
-        t = s->m_dCurrentTime + s->m_dReportingInterval;
-        if(t > s->m_dTimeHorizon)
-            t = s->m_dTimeHorizon;
+        t = reportingTimes[step];
+        //t = currentTime + reportingInterval;
+        //if(t > timeHorizon)
+        //    t = timeHorizon;
 
         /* If discontinuity is found, loop until the end of the integration period
          * The data will be reported around discontinuities! */
-        while(t > s->m_dCurrentTime)
+        while(t > currentTime)
         {
-            printf("Integrating from [%f] to [%f]...\n", s->m_dCurrentTime, t);
-            simIntegrateUntilTime(s, t, eStopAtModelDiscontinuity, true);
+            printf("Integrating from [%f] to [%f]...\n", currentTime, t);
+            IntegrateUntilTime(t, eStopAtModelDiscontinuity, true);
         }
 
-        simReportData(s);
+        ReportData();
+        step++;
     }
 
+    integrationDuration = auxiliary::get_time_in_seconds() - start;
+
+    printf("\n");
+    printf("The simulation has finished successfully!\n");
+    printf("Initialization time = %.3f\n", initDuration);
+    printf("Integration time = %.3f\n", integrationDuration);
+    printf("Total run time = %.3f\n", initDuration + solveInitDuration + integrationDuration);
 }
 
-real_t simIntegrate(daeSimulation_t* s, daeeStopCriterion eStopCriterion, bool bReportDataAroundDiscontinuities)
+real_t daeSimulation_t::Integrate(daeeStopCriterion eStopCriterion, bool bReportDataAroundDiscontinuities)
 {
-    s->m_dCurrentTime = solSolve(s->m_pDAESolver, s->m_dTimeHorizon, eStopCriterion, bReportDataAroundDiscontinuities);
-    return s->m_dCurrentTime;
+    currentTime = daesolver->Solve(timeHorizon, eStopCriterion, bReportDataAroundDiscontinuities);
+    return currentTime;
 }
 
-real_t simIntegrateForTimeInterval(daeSimulation_t* s, real_t time_interval, bool bReportDataAroundDiscontinuities)
+real_t daeSimulation_t::IntegrateForTimeInterval(real_t time_interval, bool bReportDataAroundDiscontinuities)
 {
-    s->m_dCurrentTime = solSolve(s->m_pDAESolver, s->m_dCurrentTime + time_interval, eDoNotStopAtDiscontinuity, bReportDataAroundDiscontinuities);
-    return s->m_dCurrentTime;
+    currentTime = daesolver->Solve(currentTime + time_interval, eDoNotStopAtDiscontinuity, bReportDataAroundDiscontinuities);
+    return currentTime;
 }
 
-real_t simIntegrateUntilTime(daeSimulation_t* s, real_t time, daeeStopCriterion eStopCriterion, bool bReportDataAroundDiscontinuities)
+real_t daeSimulation_t::IntegrateUntilTime(real_t time, daeeStopCriterion eStopCriterion, bool bReportDataAroundDiscontinuities)
 {
-    s->m_dCurrentTime = solSolve(s->m_pDAESolver, time, eStopCriterion, bReportDataAroundDiscontinuities);
-    return s->m_dCurrentTime;
+    currentTime = daesolver->Solve(time, eStopCriterion, bReportDataAroundDiscontinuities);
+    return currentTime;
 }
 
-void simReportData(daeSimulation_t* s)
+void daeSimulation_t::ReportData_dx()
+{
+    static int counter_dx = 0;
+
+    std::ofstream ofs;
+    std::string filename = std::string("derivatives-node-") + std::to_string(model->mpi_rank) + ".csv";
+    boost::filesystem::path outputDataPath = boost::filesystem::weakly_canonical( boost::filesystem::path(outputDirectory) );
+    if(!boost::filesystem::is_directory(outputDataPath))
+        boost::filesystem::create_directories(outputDataPath);
+    std::string filePath = (outputDataPath / filename).string();
+
+    ofs << std::setiosflags(std::ios_base::fixed);
+    ofs << std::setprecision(15);
+
+    if(counter_dx == 0)
+    {
+        ofs.open(filePath, std::ofstream::out);
+        if(!ofs.is_open())
+            throw std::runtime_error("Cannot open " + filePath + " file");
+
+        ofs << " ";
+        for(int i = 0; i < daesolver->Nequations; i++)
+            ofs << "; " << i;
+        ofs << std::endl;
+
+        ofs << "time";
+        for(int i = 0; i < daesolver->Nequations; i++)
+            ofs << ";d" << model->variableNames[i] << "/dt";
+        ofs << std::endl;
+    }
+    else
+    {
+        ofs.open(filePath, std::ofstream::out|std::ofstream::app);
+        if(!ofs.is_open())
+            throw std::runtime_error("Cannot open " + filePath + " file");
+    }
+
+    ofs << daesolver->currentTime;
+    for(int i = 0; i < daesolver->Nequations; i++)
+        ofs << ";" << daesolver->ypval[i];
+    ofs << std::endl;
+
+    counter_dx++;
+}
+
+void daeSimulation_t::ReportData()
 {
     static int counter = 0;
 
-    daeModel_t* model = (daeModel_t*)s->m_pModel;
-
     std::ofstream ofs;
     std::string filename = std::string("results-node-") + std::to_string(model->mpi_rank) + ".csv";
-    boost::filesystem::path outputDataPath = boost::filesystem::weakly_canonical( boost::filesystem::path(s->m_outputDirectory) );
+    boost::filesystem::path outputDataPath = boost::filesystem::weakly_canonical( boost::filesystem::path(outputDirectory) );
     if(!boost::filesystem::is_directory(outputDataPath))
         boost::filesystem::create_directories(outputDataPath);
     std::string filePath = (outputDataPath / filename).string();
@@ -121,51 +207,53 @@ void simReportData(daeSimulation_t* s)
             throw std::runtime_error("Cannot open " + filePath + " file");
 
         ofs << " ";
-        for(int i = 0; i < s->m_pDAESolver->Nequations; i++)
-            ofs << "; " << i;
+        for(int i = 0; i < daesolver->Nequations; i++)
+            ofs << ";" << i;
         ofs << std::endl;
 
         ofs << "time";
-        for(int i = 0; i < s->m_pDAESolver->Nequations; i++)
-            ofs << "; " << model->variableNames[i];
+        for(int i = 0; i < daesolver->Nequations; i++)
+            ofs << ";" << model->variableNames[i];
         ofs << std::endl;
     }
     else
+
     {
         ofs.open(filePath, std::ofstream::out|std::ofstream::app);
         if(!ofs.is_open())
             throw std::runtime_error("Cannot open " + filePath + " file");
     }
 
-    ofs << s->m_pDAESolver->m_dCurrentTime;
-    for(int i = 0; i < s->m_pDAESolver->Nequations; i++)
-        ofs << "; " << s->m_pDAESolver->yval[i];
+    ofs << daesolver->currentTime;
+    for(int i = 0; i < daesolver->Nequations; i++)
+        ofs << ";" << daesolver->yval[i];
     ofs << std::endl;
 
     counter++;
 
+    ReportData_dx();
+
 /*
     int i;
     char* out;
-    daeModel_t* model = (daeModel_t*)s->m_pModel;
-    int* lengths = malloc(s->m_pDAESolver->Nequations * sizeof(int));
+    int* lengths = malloc(daesolver->Nequations * sizeof(int));
 
-    for(i = 0; i < s->m_pDAESolver->Nequations; i++)
+    for(i = 0; i < daesolver->Nequations; i++)
         lengths[i] = MAX(strlen(model->variableNames[i]) + 1, 21);
 
     printf("\n");
-    printf("Results at time: %.7f\n", s->m_pDAESolver->m_dCurrentTime);
-    for(i = 0; i < s->m_pDAESolver->Nequations; i++)
+    printf("Results at time: %.7f\n", daesolver->currentTime);
+    for(i = 0; i < daesolver->Nequations; i++)
     {
         out = calloc(lengths[i]+1, sizeof(char));
         memset(out, '-', lengths[i]);
         printf("+-%s-", out);
     }
     printf("+\n");
-    for(i = 0; i < s->m_pDAESolver->Nequations; i++)
+    for(i = 0; i < daesolver->Nequations; i++)
         printf("| %-*s ", lengths[i], model->variableNames[i]);
     printf("|\n");
-    for(i = 0; i < s->m_pDAESolver->Nequations; i++)
+    for(i = 0; i < daesolver->Nequations; i++)
     {
         out = calloc(lengths[i]+1, sizeof(char));
         memset(out, '-', lengths[i]);
@@ -173,10 +261,10 @@ void simReportData(daeSimulation_t* s)
     }
     printf("+\n");
 
-    for(i = 0; i < s->m_pDAESolver->Nequations; i++)
-        printf("| %-*.14e ", lengths[i], s->m_pDAESolver->yval[i]);
+    for(i = 0; i < daesolver->Nequations; i++)
+        printf("| %-*.14e ", lengths[i], daesolver->yval[i]);
     printf("|\n");
-    for(i = 0; i < s->m_pDAESolver->Nequations; i++)
+    for(i = 0; i < daesolver->Nequations; i++)
     {
         out = calloc(lengths[i]+1, sizeof(char));
         memset(out, '-', lengths[i]);
@@ -189,10 +277,12 @@ void simReportData(daeSimulation_t* s)
 */
 }
 
-void simStoreInitializationValues(daeSimulation_t* s, const char* strFileName)
+void daeSimulation_t::StoreInitializationValues(const char* strFileName)
 {
 }
 
-void simLoadInitializationValues(daeSimulation_t* s, const char* strFileName)
+void daeSimulation_t::LoadInitializationValues(const char* strFileName)
 {
+}
+
 }

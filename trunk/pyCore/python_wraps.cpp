@@ -4832,6 +4832,39 @@ boost::python::list daeEquationExecutionInfo_GetComputeStack(daeEquationExecutio
     return getListFromVectorByValue(self.GetComputeStack());
 }
 
+boost::python::tuple daeEquationExecutionInfo_GetComputeStackInfo(daeEquationExecutionInfo& self,
+                                                                  boost::python::dict dUnaryOps,
+                                                                  boost::python::dict dBinaryOps)
+{
+    std::map<daeeUnaryFunctions,size_t> unaryOps;
+    std::map<daeeBinaryFunctions,size_t> binaryOps;
+
+    {
+        boost::python::stl_input_iterator<boost::python::tuple> iter(dUnaryOps.items()), end;
+        for(; iter != end; iter++)
+        {
+            boost::python::tuple t = *iter;
+            daeeUnaryFunctions key = (daeeUnaryFunctions)((int)boost::python::extract<int>(t[0]));
+            size_t             val = boost::python::extract<size_t>(t[1]);
+            unaryOps[key] = val;
+        }
+    }
+    {
+        boost::python::stl_input_iterator<boost::python::tuple> iter(dBinaryOps.items()), end;
+        for(; iter != end; iter++)
+        {
+            boost::python::tuple t = *iter;
+            daeeBinaryFunctions key = (daeeBinaryFunctions)((int)boost::python::extract<int>(t[0]));
+            size_t              val = boost::python::extract<size_t>(t[1]);
+            binaryOps[key] = val;
+        }
+    }
+
+    std::pair<size_t,size_t> size_flops = self.GetComputeStackInfo(unaryOps, binaryOps);
+
+    return boost::python::make_tuple(size_flops.first, size_flops.second);
+}
+
 //void daeFiniteElementEquationExecutionInfo_SetNode(daeFiniteElementEquationExecutionInfo& self, adouble a)
 //{
 //    if(!a.node)
@@ -4849,6 +4882,22 @@ boost::python::list daeEquationExecutionInfo_GetVariableIndexes(daeEquationExecu
     std::vector<size_t> narr;
     self.GetVariableIndexes(narr);
     return getListFromVectorByValue(narr);
+}
+
+boost::python::list daeEquationExecutionInfo_GetDiffVariableIndexes(daeEquationExecutionInfo& self)
+{
+    std::vector<size_t> narr;
+    boost::python::list diffIndexes;
+    self.GetVariableIndexes(narr);
+
+    daeModel* pModel = dynamic_cast<daeModel*>(self.GetEquation()->GetModel());
+    boost::shared_ptr<daeDataProxy_t> dataProxy = pModel->GetDataProxy();
+    for(std::vector<size_t>::iterator it = narr.begin(); it != narr.end(); it++)
+    {
+        if(dataProxy->GetVariableTypeGathered( *it ) == cnDifferential)
+            diffIndexes.append( *it );
+    }
+    return diffIndexes;
 }
 
 boost::python::dict daeEquationExecutionInfo_JacobianExpressions(daeEquationExecutionInfo& self)

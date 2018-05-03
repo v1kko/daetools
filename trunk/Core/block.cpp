@@ -3,6 +3,7 @@
 #include "../IDAS_DAESolver/dae_array_matrix.h"
 #include <omp.h>
 #include "compute_stack_kernels_openmp.h"
+using namespace dae::solver;
 
 namespace dae
 {
@@ -309,9 +310,6 @@ void daeBlock::CalculateJacobian(real_t				dTime,
         real_t* values          = arrValues.Data();
         real_t* timeDerivatives = arrTimeDerivatives.Data();
 
-        daeDenseMatrix*            dense_mat = dynamic_cast< daeDenseMatrix*>(&matJacobian);
-        daeCSRMatrix<real_t, int>* crs_mat   = dynamic_cast< daeCSRMatrix<real_t, int>* >(&matJacobian);
-
         computestack::daeComputeStackEvaluationContext_t EC;
         EC.equationCalculationMode                       = eCalculateJacobian;
         EC.sensitivityParameterIndex                     = -1;
@@ -357,86 +355,6 @@ void daeBlock::CalculateJacobian(real_t				dTime,
                 const adJacobianMatrixItem_t& jacobianItem = m_arrComputeStackJacobianItems[ji];
                 matJacobian.SetItem(jacobianItem.equationIndex, jacobianItem.blockIndex, m_jacobian[ji]);
             }
-
-        /*
-            if(dense_mat)
-            {
-                // IDA solver uses the column wise data
-                if(dense_mat->data_access != eColumnWise)
-                    daeDeclareAndThrowException(exInvalidCall);
-
-                real_t** jacobian = dense_mat->data;
-
-                // Sequential run can be achieved by setting numThreads to 1.
-                if(m_omp_num_threads > 0)
-                    omp_set_num_threads(m_omp_num_threads);
-
-                #pragma omp parallel for firstprivate(EC)
-                for(int ji = 0; ji < noJacobianItems; ji++)
-                {
-                    calculate_cs_jacobian_dns(computeStacks,
-                                              ji,
-                                              activeEquationSetIndexes,
-                                              computeStackJacobianItems,
-                                              EC,
-                                              dofs,
-                                              values,
-                                              timeDerivatives,
-                                              jacobian);
-                }
-            }
-            else if(crs_mat)
-            {
-                int* IA   = crs_mat->IA;
-                int* JA   = crs_mat->JA;
-                real_t* A = crs_mat->A;
-
-                // Sequential run can be achieved by setting numThreads to 1.
-                if(m_omp_num_threads > 0)
-                    omp_set_num_threads(m_omp_num_threads);
-
-                #pragma omp parallel for firstprivate(EC)
-                for(int ji = 0; ji < noJacobianItems; ji++)
-                {
-                    calculate_cs_jacobian_csr(computeStacks,
-                                              ji,
-                                              activeEquationSetIndexes,
-                                              computeStackJacobianItems,
-                                              EC,
-                                              dofs,
-                                              values,
-                                              timeDerivatives,
-                                              IA,
-                                              JA,
-                                              A);
-                }
-            }
-            else
-            {
-                // For daeEpetraCSRMatrix and other no-CSR matrix storage types.
-                computestack::jacobian_fn jac_fn = &setJacobianMatrixItem;
-                void*                     matrix = (void*)&matJacobian;
-
-                // Sequential run can be achieved by setting numThreads to 1.
-                if(m_omp_num_threads > 0)
-                    omp_set_num_threads(m_omp_num_threads);
-
-                #pragma omp parallel for firstprivate(EC)
-                for(int ji = 0; ji < noJacobianItems; ji++)
-                {
-                    calculate_cs_jacobian_gen(computeStacks,
-                                              ji,
-                                              activeEquationSetIndexes,
-                                              computeStackJacobianItems,
-                                              EC,
-                                              dofs,
-                                              values,
-                                              timeDerivatives,
-                                              matrix,
-                                              jac_fn);
-                }
-            }
-        */
         }
         else if(m_pDataProxy->GetEvaluationMode() == eComputeStack_External)
         {
@@ -457,46 +375,6 @@ void daeBlock::CalculateJacobian(real_t				dTime,
                 const adJacobianMatrixItem_t& jacobianItem = m_arrComputeStackJacobianItems[ji];
                 matJacobian.SetItem(jacobianItem.equationIndex, jacobianItem.blockIndex, m_jacobian[ji]);
             }
-
-/*
-            if(crs_mat)
-            {
-                int* IA   = crs_mat->IA;
-                int* JA   = crs_mat->JA;
-                real_t* A = crs_mat->A;
-
-                m_computeStackEvaluator->calculate_cs_jacobian_csr(EC,
-                                                                   dofs,
-                                                                   values,
-                                                                   timeDerivatives,
-                                                                   IA,
-                                                                   JA,
-                                                                   A);
-                for(size_t ji = 0; ji < EC.numberOfJacobianItems; ji++)
-                {
-                    const adJacobianMatrixItem_t& jacobianItem = m_arrComputeStackJacobianItems[ji];
-                    if(fabs(A[ji] - m_jacobian[ji]) > 1e-13)
-                        printf("A[%d] = J(%d,%d) = %.12f (%.12f)\n", ji, jacobianItem.equationIndex, jacobianItem.blockIndex, A[ji], m_jacobian[ji]);
-                }
-                //for(size_t ji = 0; ji < EC.numberOfJacobianItems; ji++)
-                //{
-                //    adJacobianMatrixItem_t& jacobianItem = m_arrComputeStackJacobianItems[ji];
-                //    //crs_mat->SetItem(jacobianItem.equationIndex, jacobianItem.blockIndex, m_jacobian[ji]);
-                //    if(fabs(m_jacobian[ji] - A[ji]) > 1e-12)
-                //        printf("A[%d]     = J(%d,%d) = %.12f (%.12f)\n", ji, jacobianItem.equationIndex, jacobianItem.blockIndex, A[ji], m_jacobian[ji]);
-                //    //printf("A[%d]     = J(%d,%d) = %.12f\n", ji, jacobianItem.equationIndex, jacobianItem.blockIndex, A[ji]);
-                //    //printf("Acalc[%d] = J(%d,%d) = %.12f\n", ji, jacobianItem.equationIndex, jacobianItem.blockIndex, m_jacobian[ji]);
-                //    //crs_mat->Print();
-                //}
-            }
-            else
-            {
-                daeDeclareException(exInvalidCall);
-                e << "Jacobian evaluation using extern compute stacks evaluators is available "
-                  << "only for sparse matrix LA solvers using CSR matrix storage (except Trilinos solvers).";
-                throw e;
-            }
-*/
         }
     }
     else if(m_pDataProxy->GetEvaluationMode() == eEvaluationTree_OpenMP)
@@ -519,7 +397,6 @@ void daeBlock::CalculateJacobian(real_t				dTime,
         #pragma omp parallel for firstprivate(EC)
         for(int i = 0; i < m_ptrarrEquationExecutionInfos_ActiveSet.size(); i++)
         {
-            //std::cout << "  thread id " << omp_get_thread_num() << " calculating Jacobian for equation " << i << std::endl;
             daeEquationExecutionInfo* pEquationExecutionInfo = m_ptrarrEquationExecutionInfos_ActiveSet[i];
             pEquationExecutionInfo->Jacobian(EC);
         }
@@ -1350,6 +1227,362 @@ void daeBlock::ExportComputeStackStructs(const std::string& filenameComputeStack
         f.close();
     }
 }
+
+void daeBlock::ExportComputeStackStructs(const std::string& filenameComputeStacks,
+                                         const std::string& filenameJacobianIndexes,
+                                         const std::vector<uint32_t> &equationIndexes,
+                                         const std::map<uint32_t, uint32_t> &bi_to_bi_local)
+{
+    if(m_pDataProxy->GetEvaluationMode() != eComputeStack_OpenMP &&
+       m_pDataProxy->GetEvaluationMode() != eComputeStack_External)
+    {
+        daeDeclareException(exInvalidCall);
+        e << "ExportComputeStackStructs requires the equation evaluation mode eComputeStack_OpenMP or eComputeStack_External";
+        throw e;
+    }
+
+    std::map<uint32_t, uint32_t> ei_to_local_ei;
+    for(uint32_t i = 0; i < equationIndexes.size(); i++)
+    {
+        uint32_t ei = equationIndexes[i];
+        ei_to_local_ei[ei] = i;
+    }
+
+    uint32_t*               activeEquationSetIndexes  = NULL;
+    adComputeStackItem_t*   computeStacks             = NULL;
+    adJacobianMatrixItem_t* computeStackJacobianItems = NULL;
+    uint32_t Ncs;
+    uint32_t Nasi;
+    uint32_t Nji;
+
+    uint32_t numberOfComputeStacks = 0;
+    uint32_t numberOfJacobianItems = 0;
+    uint32_t numberOfEquations     = equationIndexes.size();
+
+    // Find the Jacobian matrix items.
+    numberOfJacobianItems = 0;
+    std::vector<int> jacobianItems;
+    {
+        std::map<uint32_t, uint32_t>::iterator eq_end = ei_to_local_ei.end();
+        for(int i = 0; i < m_arrComputeStackJacobianItems.size(); i++)
+        {
+            adJacobianMatrixItem_t jd = m_arrComputeStackJacobianItems[i];
+            // If jd.equationIndex is in the map with requested equation indexes add it to the list.
+            if( ei_to_local_ei.find(jd.equationIndex) != eq_end )
+                jacobianItems.push_back(i);
+        }
+        numberOfJacobianItems = jacobianItems.size();
+
+        //printf("numberOfJacobianItems = %d\n    ", (int)numberOfJacobianItems);
+        //for(int ei = 0; ei < numberOfJacobianItems; ei++)
+        //    printf("%d ", jacobianItems[ei]);
+        //printf("\n");
+    }
+
+    // Find the number of compute stack items and collect pointers to first items.
+    // Create a map <overallEquationIndex, localEquationIndex> to be used for updating jacobian items.
+    numberOfComputeStacks = 0;
+    std::vector<adComputeStackItem_t*> computeStackPointers;
+    for(int i = 0; i < numberOfEquations; i++)
+    {
+        uint32_t ei = equationIndexes[i];
+        uint32_t firstIndex = m_arrActiveEquationSetIndexes[ei];
+        adComputeStackItem_t* item0 = &m_arrAllComputeStacks[firstIndex];
+        uint32_t computeStackSize = item0->size;
+
+        computeStackPointers.push_back(item0);
+
+        numberOfComputeStacks += computeStackSize;
+    }
+    //printf("numberOfComputeStacks = %d\n", (int)numberOfComputeStacks);
+
+    // Before updating we need to copy all items so that the original data are not affected!
+    // Note: it requires extra memory - is that a problem?
+    std::vector<adComputeStackItem_t>   l_arrComputeStacks;
+    std::vector<adJacobianMatrixItem_t> l_arrComputeStackJacobianItems;
+    std::vector<uint32_t>               l_arrActiveEquationSetIndexes;
+
+    l_arrComputeStacks.reserve(numberOfComputeStacks);
+    l_arrActiveEquationSetIndexes.resize(numberOfEquations);
+    uint32_t counter = 0;
+    for(int i = 0; i < computeStackPointers.size(); i++)
+    {
+        adComputeStackItem_t* cs = computeStackPointers[i];
+        uint32_t computeStackSize = cs->size;
+        for(int j = 0; j < computeStackSize; j++)
+            l_arrComputeStacks.push_back(cs[j]);
+
+        // Update activeEquationSetIndexes to point to a zero-based array.
+        l_arrActiveEquationSetIndexes[i] = counter;
+        counter += computeStackSize;
+    }
+
+    l_arrComputeStackJacobianItems.resize(numberOfJacobianItems);
+    for(int i = 0; i < numberOfJacobianItems; i++)
+        l_arrComputeStackJacobianItems[i] = m_arrComputeStackJacobianItems[ jacobianItems[i] ];
+
+    // Set the pointers to point to the new arrays.
+    computeStacks             = &l_arrComputeStacks[0];
+    computeStackJacobianItems = &l_arrComputeStackJacobianItems[0];
+    activeEquationSetIndexes  = &l_arrActiveEquationSetIndexes[0];
+
+    //printf("%s numberOfJacobianItems = %d\n", filenameJacobianIndexes.c_str(), (int)numberOfJacobianItems);
+    //printf("file: %s\n", strFilename.c_str());
+    //printf("startComputeStackIndex = %d\n", (int)startComputeStackIndex);
+    //for(int ei = 0; ei < numberOfEquations; ei++)
+    //    printf("{%d, %d} ", (int)ei, (int)l_arrActiveEquationSetIndexes[ei]);
+    //printf("\n");
+
+    std::map<uint32_t, uint32_t>::const_iterator bi_end = bi_to_bi_local.end();
+    std::map<uint32_t, uint32_t>::const_iterator bi_cit;
+    for(int ei = 0; ei < numberOfEquations; ei++)
+    {
+        uint32_t firstIndex = l_arrActiveEquationSetIndexes[ei];
+
+        // Update block indexes in the compute stack to mpi-node block indexes.
+        adComputeStackItem_t* computeStack = &l_arrComputeStacks[firstIndex];
+        uint32_t computeStackSize = computeStack->size;
+        for(uint32_t i = 0; i < computeStackSize; i++)
+        {
+            adComputeStackItem_t& item = computeStack[i];
+
+            if(item.opCode == eOP_Variable)
+            {
+                bi_cit = bi_to_bi_local.find(item.data.indexes.blockIndex);
+                if(bi_cit == bi_end)
+                {
+                    daeDeclareException(exInvalidCall);
+                    e << "Block index " << item.data.indexes.blockIndex << " cannot be found in bi_to_bi_local map";
+                    throw e;
+                }
+                item.data.indexes.blockIndex = bi_cit->second;
+            }
+            else if(item.opCode == eOP_DegreeOfFreedom)
+            {
+                // Leave dofIndex as it is for we have all dofs in the model
+            }
+            else if(item.opCode == eOP_TimeDerivative)
+            {
+                bi_cit = bi_to_bi_local.find(item.data.indexes.blockIndex);
+                if(bi_cit == bi_end)
+                {
+                    daeDeclareException(exInvalidCall);
+                    e << "Block index " << item.data.indexes.blockIndex << " cannot be found in bi_to_bi_local map";
+                    throw e;
+                }
+                item.data.indexes.blockIndex = bi_cit->second;
+            }
+        }
+    }
+
+    // Update equationIndex in the computeStackJacobianItems to point to the mpi-node indexes.
+    for(int ji = 0; ji < numberOfJacobianItems; ji++)
+    {
+        adJacobianMatrixItem_t& jd = l_arrComputeStackJacobianItems[ji];
+
+        jd.equationIndex = ei_to_local_ei.at(jd.equationIndex);
+        jd.blockIndex    = bi_to_bi_local.at(jd.blockIndex);
+    }
+
+    Ncs  = numberOfComputeStacks;
+    Nasi = numberOfEquations;
+    Nji  = numberOfJacobianItems;
+
+    std::ofstream f;
+    f.open(filenameComputeStacks, std::ios_base::out | std::ios_base::trunc | std::ios_base::binary);
+    if(!f.is_open())
+    {
+        daeDeclareException(exInvalidCall);
+        e << "Cannot open " << filenameComputeStacks << " file.";
+        throw e;
+    }
+    f.write((char*)&Nasi,                     sizeof(uint32_t));
+    f.write((char*)&Ncs,                      sizeof(uint32_t));
+    f.write((char*)activeEquationSetIndexes,  sizeof(uint32_t)               * Nasi);
+    f.write((char*)computeStacks,             sizeof(adComputeStackItem_t)   * Ncs);
+    f.close();
+
+    f.open(filenameJacobianIndexes, std::ios_base::out | std::ios_base::trunc | std::ios_base::binary);
+    if(!f.is_open())
+    {
+        daeDeclareException(exInvalidCall);
+        e << "Cannot open " << filenameJacobianIndexes << " file.";
+        throw e;
+    }
+    f.write((char*)&Nji,                      sizeof(uint32_t));
+    f.write((char*)computeStackJacobianItems, sizeof(adJacobianMatrixItem_t) * Nji);
+    f.close();
+}
+
+/*
+void daeBlock::ExportComputeStackStructs(const std::string& filenameComputeStacks,
+                                         const std::string& filenameJacobianIndexes,
+                                         const std::vector<int>& equationIndexes,
+                                         const std::map<int,int>& bi_to_bi_local)
+{
+    if(m_pDataProxy->GetEvaluationMode() != eComputeStack_OpenMP &&
+       m_pDataProxy->GetEvaluationMode() != eComputeStack_External)
+    {
+        daeDeclareException(exInvalidCall);
+        e << "ExportComputeStackStructs requires the equation evaluation mode eComputeStack_OpenMP or eComputeStack_External";
+        throw e;
+    }
+
+    uint32_t*               activeEquationSetIndexes  = NULL;
+    adComputeStackItem_t*   computeStacks             = NULL;
+    adJacobianMatrixItem_t* computeStackJacobianItems = NULL;
+    uint32_t Ncs;
+    uint32_t Nasi;
+    uint32_t Nji;
+
+    uint32_t numberOfComputeStacks = 0;
+    uint32_t numberOfJacobianItems = 0;
+    uint32_t numberOfEquations     = equationIndexes.size();
+
+    // Find the Jacobian matrix items.
+    numberOfJacobianItems = 0;
+    std::vector<int> jacobianItems;
+    {
+        std::vector<int>::const_iterator eq_begin = equationIndexes.begin();
+        std::vector<int>::const_iterator eq_end   = equationIndexes.end();
+        for(int i = 0; i < m_arrComputeStackJacobianItems.size(); i++)
+        {
+            adJacobianMatrixItem_t jd = m_arrComputeStackJacobianItems[i];
+            if( std::find(eq_begin, eq_end, (int)jd.equationIndex) != eq_end )
+                jacobianItems.push_back(i);
+        }
+        numberOfJacobianItems = jacobianItems.size();
+
+        //printf("numberOfJacobianItems = %d\n    ", (int)numberOfJacobianItems);
+        //for(int ei = 0; ei < numberOfJacobianItems; ei++)
+        //    printf("%d ", jacobianItems[ei]);
+        //printf("\n");
+    }
+
+    // Find the number of compute stack items and collect pointers to first items.
+    // Create a map <overallEquationIndex, localEquationIndex> to be used for updating jacobian items.
+    numberOfComputeStacks = 0;
+    std::map<int,int> ei_to_local_ei;
+    std::vector<adComputeStackItem_t*> computeStackPointers;
+    for(int i = 0; i < numberOfEquations; i++)
+    {
+        int ei = equationIndexes[i];
+        uint32_t firstIndex = m_arrActiveEquationSetIndexes[ei];
+        adComputeStackItem_t* item0 = &m_arrAllComputeStacks[firstIndex];
+        uint32_t computeStackSize = item0->size;
+
+        ei_to_local_ei[ei] = i;
+        computeStackPointers.push_back(item0);
+
+        numberOfComputeStacks += computeStackSize;
+    }
+    //printf("numberOfComputeStacks = %d\n", (int)numberOfComputeStacks);
+
+    // Before updating we need to copy all items so that the original data are not affected!
+    // Note: it requires extra memory - is that a problem?
+    std::vector<adComputeStackItem_t>   l_arrComputeStacks;
+    std::vector<adJacobianMatrixItem_t> l_arrComputeStackJacobianItems;
+    std::vector<uint32_t>               l_arrActiveEquationSetIndexes;
+
+    l_arrComputeStacks.reserve(numberOfComputeStacks);
+    l_arrActiveEquationSetIndexes.resize(numberOfEquations);
+    uint32_t counter = 0;
+    for(int i = 0; i < computeStackPointers.size(); i++)
+    {
+        adComputeStackItem_t* cs = computeStackPointers[i];
+        uint32_t computeStackSize = cs->size;
+        for(int j = 0; j < computeStackSize; j++)
+            l_arrComputeStacks.push_back(cs[j]);
+
+        // Update activeEquationSetIndexes to point to a zero-based array.
+        l_arrActiveEquationSetIndexes[i] = counter;
+        counter += computeStackSize;
+    }
+
+    l_arrComputeStackJacobianItems.resize(numberOfJacobianItems);
+    for(int i = 0; i < numberOfJacobianItems; i++)
+        l_arrComputeStackJacobianItems[i] = m_arrComputeStackJacobianItems[ jacobianItems[i] ];
+
+    // Set the pointers to point to the new arrays.
+    computeStacks             = &l_arrComputeStacks[0];
+    computeStackJacobianItems = &l_arrComputeStackJacobianItems[0];
+    activeEquationSetIndexes  = &l_arrActiveEquationSetIndexes[0];
+
+    //printf("file: %s\n", strFilename.c_str());
+    //printf("startComputeStackIndex = %d\n", (int)startComputeStackIndex);
+    //for(int ei = 0; ei < numberOfEquations; ei++)
+    //    printf("{%d, %d} ", (int)ei, (int)l_arrActiveEquationSetIndexes[ei]);
+    //printf("\n");
+
+    for(int ei = 0; ei < numberOfEquations; ei++)
+    {
+        uint32_t firstIndex = l_arrActiveEquationSetIndexes[ei];
+
+        // Update block indexes in the compute stack to mpi-node block indexes.
+        adComputeStackItem_t* computeStack = &l_arrComputeStacks[firstIndex];
+        uint32_t computeStackSize = computeStack->size;
+        for(uint32_t i = 0; i < computeStackSize; i++)
+        {
+            adComputeStackItem_t& item = computeStack[i];
+
+            if(item.opCode == eOP_Variable)
+            {
+                uint32_t bi_local = bi_to_bi_local.at(item.data.indexes.blockIndex);
+                item.data.indexes.blockIndex = bi_local;
+            }
+            else if(item.opCode == eOP_DegreeOfFreedom)
+            {
+                // Leave dofIndex as it is for we have all dofs in the model
+            }
+            else if(item.opCode == eOP_TimeDerivative)
+            {
+                uint32_t bi_local = bi_to_bi_local.at(item.data.indexes.blockIndex);
+                item.data.indexes.blockIndex = bi_local;
+            }
+        }
+    }
+
+    // Update equationIndex in the computeStackJacobianItems to point to the mpi-node indexes.
+    for(int ji = 0; ji < numberOfJacobianItems; ji++)
+    {
+        adJacobianMatrixItem_t& jd = l_arrComputeStackJacobianItems[ji];
+
+        int ei = static_cast<int>(jd.equationIndex);
+        int bi = static_cast<int>(jd.blockIndex);
+        jd.equationIndex = static_cast<uint32_t>(ei_to_local_ei.at(ei));
+        jd.blockIndex    = static_cast<uint32_t>(bi_to_bi_local.at(bi));
+    }
+
+    Ncs  = numberOfComputeStacks;
+    Nasi = numberOfEquations;
+    Nji  = numberOfJacobianItems;
+
+    std::ofstream f;
+    f.open(filenameComputeStacks, std::ios_base::out | std::ios_base::trunc | std::ios_base::binary);
+    if(!f.is_open())
+    {
+        daeDeclareException(exInvalidCall);
+        e << "Cannot open " << filenameComputeStacks << " file.";
+        throw e;
+    }
+    f.write((char*)&Nasi,                     sizeof(uint32_t));
+    f.write((char*)&Ncs,                      sizeof(uint32_t));
+    f.write((char*)activeEquationSetIndexes,  sizeof(uint32_t)               * Nasi);
+    f.write((char*)computeStacks,             sizeof(adComputeStackItem_t)   * Ncs);
+    f.close();
+
+    f.open(filenameJacobianIndexes, std::ios_base::out | std::ios_base::trunc | std::ios_base::binary);
+    if(!f.is_open())
+    {
+        daeDeclareException(exInvalidCall);
+        e << "Cannot open " << filenameJacobianIndexes << " file.";
+        throw e;
+    }
+    f.write((char*)&Nji,                      sizeof(uint32_t));
+    f.write((char*)computeStackJacobianItems, sizeof(adJacobianMatrixItem_t) * Nji);
+    f.close();
+}
+*/
 
 bool daeBlock::CheckOverlappingAndAddVariables(const vector<size_t>& narrVariablesInEquation)
 {

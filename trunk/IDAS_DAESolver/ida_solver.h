@@ -35,6 +35,7 @@ public:
                                                    daeeInitialConditionMode eMode,
                                                    bool bCalculateSensitivities,
                                                    const std::vector<size_t>& narrParametersIndexes);
+    virtual void						Finalize(void);
     virtual void						SolveInitial(void);
     virtual real_t						Solve(real_t dTime, daeeStopCriterion eCriterion, bool bReportDataAroundDiscontinuities = true);
     virtual void						SetRelativeTolerance(real_t relTol);
@@ -111,6 +112,7 @@ public:
     daeDenseMatrix						m_matSResiduals;
 
     boost::shared_ptr<daeIDASolverData>	m_pIDASolverData;
+    boost::shared_ptr<daeBlockOfEquations_t> m_pBlockOfEquations;
     bool								m_bIsModelDynamic;
     bool								m_bCalculateSensitivities;
     std::vector<size_t>					m_narrParametersIndexes;

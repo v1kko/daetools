@@ -456,6 +456,63 @@ uint32_t adNode::GetComputeStackSize(adNode* adnode)
 }
 
 /***********************************************************************************
+   Estimate compute stack FLOPS reuired for evaluation
+***********************************************************************************/
+size_t adNode::EstimateComputeStackFlops(const adComputeStackItem_t* computeStack,
+                                         const std::map<daeeUnaryFunctions,size_t>& unaryOps,
+                                         const std::map<daeeBinaryFunctions,size_t>& binaryOps)
+{
+    size_t   flops = 0;
+    uint32_t size  = computeStack->size;
+    for(size_t i = 0; i < size; i++)
+    {
+        const adComputeStackItem_t& item = computeStack[i];
+
+        if(item.opCode == eOP_Constant)
+        {
+        }
+        else if(item.opCode == eOP_Time)
+        {
+        }
+        else if(item.opCode == eOP_InverseTimeStep)
+        {
+        }
+        else if(item.opCode == eOP_Variable)
+        {
+        }
+        else if(item.opCode == eOP_DegreeOfFreedom)
+        {
+        }
+        else if(item.opCode == eOP_TimeDerivative)
+        {
+        }
+        else if(item.opCode == eOP_Unary)
+        {
+            daeeUnaryFunctions uf = (daeeUnaryFunctions)item.function;
+            std::map<daeeUnaryFunctions,size_t>::const_iterator it = unaryOps.find(uf);
+            if(it != unaryOps.end())
+                flops += it->second;
+            else
+                flops += 1;
+        }
+        else if(item.opCode == eOP_Binary)
+        {
+            daeeBinaryFunctions bf = (daeeBinaryFunctions)item.function;
+            std::map<daeeBinaryFunctions,size_t>::const_iterator it = binaryOps.find(bf);
+            if(it != binaryOps.end())
+                flops += it->second;
+            else
+                flops += 1;
+        }
+        else
+        {
+            throw std::runtime_error("Invalid op code");
+        }
+    }
+    return flops;
+}
+
+/***********************************************************************************
    Estimate compute stack value/lvalue/rvalue sizes
 ***********************************************************************************/
 void adNode::EstimateComputeStackSizes(const std::vector<adComputeStackItem_t>& computeStack, size_t start, size_t end,

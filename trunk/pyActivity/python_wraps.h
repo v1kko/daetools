@@ -94,6 +94,23 @@ std::map<TYPE1,TYPE2> getMapFromDict(boost::python::dict d)
     return m;
 }
 
+template<typename TYPE>
+std::vector<TYPE> getVectorFromList(boost::python::list l)
+{
+    std::vector<TYPE> v;
+
+    // Get the list of pairs key:value
+    size_t n = boost::python::len(l);
+    v.resize(n);
+    for(size_t i = 0; i < n; i++)
+    {
+        TYPE val = boost::python::extract<TYPE>(l[i]);
+        v[i] = val;
+    }
+
+    return v;
+}
+
 class daeSimulationWrapper : public daeSimulation_t,
                              public boost::python::wrapper<daeSimulation_t>
 {
@@ -699,6 +716,16 @@ public:
    {
         std::map<int,int> bi_to_bi_local = getMapFromDict<int,int>(dict_bi_to_bi_local);
         ExportComputeStackStructs(filenameComputeStacks, filenameJacobianIndexes, startEquationIndex, endEquationIndex, bi_to_bi_local);
+   }
+
+    void dExportComputeStackStructs1(const std::string& filenameComputeStacks,
+                                     const std::string& filenameJacobianIndexes,
+                                     boost::python::list list_equationIndexes,
+                                     boost::python::dict dict_bi_to_bi_local)
+   {
+        std::map<uint32_t,uint32_t> bi_to_bi_local = getMapFromDict<uint32_t,uint32_t>(dict_bi_to_bi_local);
+        std::vector<uint32_t>  equationIndexes     = getVectorFromList<uint32_t>(list_equationIndexes);
+        ExportComputeStackStructs(filenameComputeStacks, filenameJacobianIndexes, equationIndexes, bi_to_bi_local);
    }
 
 public:

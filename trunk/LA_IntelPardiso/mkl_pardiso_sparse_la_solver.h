@@ -4,11 +4,11 @@
 #include "../IDAS_DAESolver/ida_la_solver_interface.h"
 #include "../IDAS_DAESolver/solver_class_factory.h"
 #include "../IDAS_DAESolver/dae_array_matrix.h"
-#include <idas/idas.h>
-#include <idas/idas_impl.h>
-#include <nvector/nvector_serial.h>
-#include <sundials/sundials_types.h>
-#include <sundials/sundials_math.h>
+//#include <idas/idas.h>
+//#include <idas/idas_impl.h>
+//#include <nvector/nvector_serial.h>
+//#include <sundials/sundials_types.h>
+//#include <sundials/sundials_math.h>
 #include <mkl_types.h>
 #include <mkl_pardiso.h>
 
@@ -27,12 +27,33 @@ public:
     ~daeIntelPardisoSolver();
 
 public:
-    int Create(void* ida, size_t n, daeDAESolver_t* pDAESolver);
-    int Reinitialize(void* ida);
-    int SaveAsXPM(const std::string& strFileName);
-    int SaveAsMatrixMarketFile(const std::string& strFileName, const std::string& strMatrixName, const std::string& strMatrixDescription);
-    string GetName(void) const;
+//    int Create(void* ida, size_t n, daeDAESolver_t* pDAESolver);
+//    int Reinitialize(void* ida);
 
+    virtual int Create(size_t n,
+                       size_t nnz,
+                       daeBlockOfEquations_t* block);
+    virtual int Reinitialize(size_t nnz);
+    virtual int Init();
+    virtual int Setup(real_t  time,
+                      real_t  inverseTimeStep,
+                      real_t* pdValues,
+                      real_t* pdTimeDerivatives,
+                      real_t* pdResiduals);
+    virtual int Solve(real_t  time,
+                      real_t  inverseTimeStep,
+                      real_t  cjratio,
+                      real_t* b,
+                      real_t* weight,
+                      real_t* pdValues,
+                      real_t* pdTimeDerivatives,
+                      real_t* pdResiduals);
+    virtual int Free();
+    virtual int SaveAsXPM(const std::string& strFileName);
+    virtual int SaveAsMatrixMarketFile(const std::string& strFileName, const std::string& strMatrixName, const std::string& strMatrixDescription);
+
+    string GetName(void) const;
+/*
     int Init(void* ida);
     int Setup(void* ida,
               N_Vector	vectorVariables,
@@ -48,18 +69,15 @@ public:
               N_Vector	vectorTimeDerivatives,
               N_Vector	vectorResiduals);
     int Free(void* ida);
-
+*/
     std::map<std::string, real_t> GetEvaluationCallsStats();
 
 protected:
     void InitializePardiso(size_t nnz);
     void ResetMatrix(size_t nnz);
     bool CheckData() const;
-    void FreeMemory(void);
 
 public:
-    daeBlock_t*			m_pBlock;
-
 // Intel Pardiso Solver Data
     void*				pt[64];
     MKL_INT				iparm[64];
@@ -71,11 +89,12 @@ public:
     MKL_INT				error;
     MKL_INT				msglvl;
 
-    int					m_nNoEquations;
-    real_t*				m_vecB;
-    daeDAESolver_t*		m_pDAESolver;
-    size_t				m_nJacobianEvaluations;
-    int                 m_no_threads;
+    int                     m_nNoEquations;
+    real_t*                 m_vecB;
+    daeBlockOfEquations_t*  m_pBlock;
+//    daeDAESolver_t*		m_pDAESolver;
+    size_t                  m_nJacobianEvaluations;
+    int                     m_no_threads;
 
     daeRawDataArray<real_t>	m_arrValues;
     daeRawDataArray<real_t>	m_arrTimeDerivatives;

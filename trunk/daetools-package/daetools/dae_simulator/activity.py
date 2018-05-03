@@ -11,7 +11,7 @@ PARTICULAR PURPOSE. See the GNU General Public License for more details.
 You should have received a copy of the GNU General Public License along with the
 DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 ********************************************************************************"""
-import sys
+import sys, json
 from time import localtime, strftime
 from daetools.pyDAE import *
 
@@ -43,6 +43,7 @@ class daeActivity(object):
                              run_before_simulation_fn       = None,
                              run_after_simulation_fn        = None,
                              initializeAndReturn            = False,
+                             printIntegratorStats           = False,
                              **kwargs):
         if reportingInterval <= 0.0:
             raise RuntimeError('Invalid reportingInterval specified: %fs')
@@ -146,6 +147,13 @@ class daeActivity(object):
             # Run
             try:
                 simulation.Run()
+                
+                # Print DAE solver stats
+                if printIntegratorStats:
+                    stats = daesolver.IntegratorStats
+                    log.Message('Integrator stats:', 0)
+                    for name, value in stats.items():
+                        log.Message('  %-22s = %.12f' % (name, value), 0)
             except Exception as e:
                 log.Message(str(e), 0)
             

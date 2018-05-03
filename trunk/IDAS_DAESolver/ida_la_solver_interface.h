@@ -10,29 +10,11 @@ namespace solver
 {
 enum daeeIDALASolverType
 {
-	eSundialsLU = 0,
-	eSundialsLapack,
-	eSundialsGMRES,
-	eThirdParty
+    eSundialsLU = 0,
+    eSundialsLapack,
+    eSundialsGMRES,
+    eThirdParty
 };
-
-class daeIDALASolver_t : public daeLASolver_t
-{
-public:
-	virtual ~daeIDALASolver_t(){}
-	
-public:
-	virtual int Create(void* ida, 
-					   size_t n, 
-					   daeDAESolver_t* pDAESolver)			= 0;
-	virtual int Reinitialize(void* ida)						= 0;
-	virtual int Init(void* ida)								= 0;
-	virtual int SaveAsXPM(const std::string& strFileName)	= 0;
-	virtual int SaveAsMatrixMarketFile(const std::string& strFileName, 
-									   const std::string& strMatrixName, 
-									   const std::string& strMatrixDescription) = 0;
-};
-
 }
 }
 

@@ -59,6 +59,16 @@ boost::python::list pydaeTrilinosSupportedSolvers(void)
     return l;
 }
 
+boost::python::list pydaeIfpackSupportedPreconditioners(void)
+{
+    std::vector<std::string> strarrPreconditioners = daeIfpackSupportedPreconditioners();
+    boost::python::list l;
+
+    for(size_t i = 0; i < strarrPreconditioners.size(); i++)
+        l.append(strarrPreconditioners[i]);
+    return l;
+}
+
 boost::python::dict GetEvaluationCallsStats_(daeTrilinosSolver& self)
 {
     std::map<std::string, real_t> stats = self.GetEvaluationCallsStats();
@@ -154,6 +164,7 @@ BOOST_PYTHON_MODULE(pyTrilinos)
         .add_property("AmesosOptions",		make_function(&daeTrilinosSolver::GetAmesosOptions,  return_internal_reference<>()), DOCSTR_daeTrilinosSolver_AmesosOptions)
         ;
 
-    def("daeCreateTrilinosSolver",      daeCreateTrilinosSolver, return_value_policy<manage_new_object>(), ( boost::python::arg("solverName"), boost::python::arg("preconditionerName") ), DOCSTR_daeCreateTrilinosSolver);
-    def("daeTrilinosSupportedSolvers",  pydaeTrilinosSupportedSolvers, DOCSTR_daeTrilinosSupportedSolvers);
+    def("daeCreateTrilinosSolver",            daeCreateTrilinosSolver, return_value_policy<manage_new_object>(), ( boost::python::arg("solverName"), boost::python::arg("preconditionerName") ), DOCSTR_daeCreateTrilinosSolver);
+    def("daeTrilinosSupportedSolvers",        pydaeTrilinosSupportedSolvers, DOCSTR_daeTrilinosSupportedSolvers);
+    def("daeIfpackSupportedPreconditioners",  pydaeIfpackSupportedPreconditioners);
 }

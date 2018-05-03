@@ -456,6 +456,8 @@ public:
     std::string GetName(void) const;
 
     const std::map< size_t, std::pair<size_t, adNodePtr> >& GetJacobianExpressions() const;
+    std::pair<size_t,size_t>          GetComputeStackInfo(const std::map<daeeUnaryFunctions, size_t> &unaryOps,
+                                                          const std::map<daeeBinaryFunctions, size_t> &binaryOps) const;
     std::vector<adComputeStackItem_t> GetComputeStack() const;
     uint8_t GetComputeStack_max_valueSize() const;
     uint8_t GetComputeStack_max_lvalueSize() const;
@@ -1700,6 +1702,10 @@ public:
                                    int startEquationIndex = 0,
                                    int endEquationIndex = -1,
                                    const std::map<int,int>& bi_to_bi_local = std::map<int,int>());
+    void ExportComputeStackStructs(const std::string& filenameComputeStacks,
+                                   const std::string& filenameJacobianIndexes,
+                                   const std::vector<uint32_t>& equationIndexes,
+                                   const std::map<uint32_t,uint32_t>& bi_to_bi_local);
 
 public:
 // Used internally by the block during calculation of Residuals/Jacobian/Hesian

@@ -272,6 +272,10 @@ BOOST_PYTHON_MODULE(pyActivity)
                                           (arg("self"), arg("filenameComputeStacks"), arg("filenameJacobianIndexes"),
                                            arg("startEquationIndex") = 0, arg("endEquationIndex") = -1, arg("bi_to_bi_local") = boost::python::dict()),
                                           DOCSTR_daeSimulation_ExportComputeStackStructs)
+        .def("ExportComputeStackStructs", &daepython::daeDefaultSimulationWrapper::dExportComputeStackStructs1,
+                                          (arg("self"), arg("filenameComputeStacks"), arg("filenameJacobianIndexes"),
+                                           arg("equationIndexes"), arg("bi_to_bi_local")),
+                                          DOCSTR_daeSimulation_ExportComputeStackStructs)
     ;
 
 /**************************************************************

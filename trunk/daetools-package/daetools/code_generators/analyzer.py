@@ -25,7 +25,7 @@ class daeCodeGeneratorAnalyzer(object):
         self.dictModels         = {}
         self.runtimeInformation = {}
 
-    def analyzeSimulation(self, simulation):
+    def analyzeSimulation(self, simulation, unaryFlops = {}, binaryFlops = {}):
         if not simulation:
             raise RuntimeError('Invalid simulation object')
 
@@ -42,7 +42,9 @@ class daeCodeGeneratorAnalyzer(object):
                                     'STNs'            : [],
                                     'PortConnections' : []
                                   }
-
+        self.unaryFlops  = unaryFlops
+        self.binaryFlops = binaryFlops
+        
         self._collectObjects(self._simulation.m)
         #print self.ports
         #print self.models
@@ -330,11 +332,13 @@ class daeCodeGeneratorAnalyzer(object):
                 
                 data['DistributedEquationDomainInfos'].append(dedi_data)
 
-            data['EquationExecutionInfos']         = []
+            data['EquationExecutionInfos'] = []
             for eeinfo in equation.EquationExecutionInfos:
                 eedata = {}
                 eedata['ResidualRuntimeNode'] = eeinfo.Node
                 eedata['VariableIndexes']     = eeinfo.VariableIndexes
+                # GetComputeStackInfo() returns tuple: CS.size, CS.flops
+                eedata['ComputeStackInfo']    = eeinfo.GetComputeStackInfo(self.unaryFlops, self.binaryFlops)
                 eedata['EquationType']        = str(eeinfo.EquationType)
 
                 data['EquationExecutionInfos'].append(eedata)

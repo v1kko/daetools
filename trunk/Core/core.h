@@ -902,6 +902,10 @@ public:
                                                                     int startEquationIndex = 0,
                                                                     int endEquationIndex = -1,
                                                                     const std::map<int,int>& bi_to_bi_local = std::map<int,int>()) = 0;
+    virtual void                          ExportComputeStackStructs(const std::string& filenameComputeStacks,
+                                                                    const std::string& filenameJacobianIndexes,
+                                                                    const std::vector<uint32_t>& equationIndexes,
+                                                                    const std::map<uint32_t,uint32_t>& bi_to_bi_local) = 0;
 
 //	virtual real_t* GetValuesPointer() = 0;
 //	virtual real_t* GetTimeDerivativesPointer() = 0;

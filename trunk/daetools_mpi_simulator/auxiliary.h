@@ -10,12 +10,13 @@ PARTICULAR PURPOSE. See the GNU General Public License for more details.
 You should have received a copy of the GNU General Public License along with the
 DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 ***********************************************************************************/
-#ifndef DAE_AUXILIARY_H
-#define DAE_AUXILIARY_H
+#ifndef DAE_MPI_AUXILIARY_H
+#define DAE_MPI_AUXILIARY_H
 
-#include "typedefs.h"
-
-bool _compare_strings_(const char* s1, const char* s2);
-void _log_message_(const char* msg);
-
+namespace auxiliary
+{
+bool   compare_strings(const char* s1, const char* s2);
+void   log_message(const char* msg);
+double get_time_in_seconds(); /* returns time in seconds. */
+}
 #endif

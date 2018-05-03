@@ -4,8 +4,8 @@
 #include "../IDAS_DAESolver/ida_la_solver_interface.h"
 #include "../IDAS_DAESolver/solver_class_factory.h"
 #include "../IDAS_DAESolver/dae_array_matrix.h"
-#include <idas/idas.h>
-#include <idas/idas_impl.h>
+//#include <idas/idas.h>
+//#include <idas/idas_impl.h>
 #include <nvector/nvector_serial.h>
 #include <sundials/sundials_types.h>
 #include <sundials/sundials_math.h>
@@ -47,14 +47,36 @@ public:
     ~daeSuperLUSolver();
 
 public:
+/*
     int Create(void* ida, size_t n, daeDAESolver_t* pDAESolver);
     int Reinitialize(void* ida);
-    int SaveAsXPM(const std::string& strFileName);
-    int SaveAsMatrixMarketFile(const std::string& strFileName, const std::string& strMatrixName, const std::string& strMatrixDescription);
+    int Init(void* ida);
+*/
+    virtual int Create(size_t n,
+                       size_t nnz,
+                       daeBlockOfEquations_t* block);
+    virtual int Reinitialize(size_t nnz);
+    virtual int Init();
+    virtual int Setup(real_t  time,
+                      real_t  inverseTimeStep,
+                      real_t* pdValues,
+                      real_t* pdTimeDerivatives,
+                      real_t* pdResiduals);
+    virtual int Solve(real_t  time,
+                      real_t  inverseTimeStep,
+                      real_t  cjratio,
+                      real_t* b,
+                      real_t* weight,
+                      real_t* pdValues,
+                      real_t* pdTimeDerivatives,
+                      real_t* pdResiduals);
+    virtual int Free();
+    virtual int SaveAsXPM(const std::string& strFileName);
+    virtual int SaveAsMatrixMarketFile(const std::string& strFileName, const std::string& strMatrixName, const std::string& strMatrixDescription);
+
     string GetName(void) const;
     void SetOpenBLASNoThreads(int n);
-
-    int Init(void* ida);
+/*
     int Setup(void* ida,
               N_Vector	vectorVariables,
               N_Vector	vectorTimeDerivatives,
@@ -69,7 +91,7 @@ public:
               N_Vector	vectorTimeDerivatives,
               N_Vector	vectorResiduals);
     int Free(void* ida);
-
+*/
     std::map<std::string, real_t> GetEvaluationCallsStats();
 
 #ifdef daeSuperLU_MT
@@ -86,12 +108,12 @@ protected:
     void PrintStats(void);
 
 public:
-    daeBlock_t*			m_pBlock;
-    int					m_nNoEquations;
-    real_t*				m_vecB;
-    real_t*				m_vecX;
-    daeDAESolver_t*		m_pDAESolver;
-    size_t				m_nJacobianEvaluations;
+    daeBlockOfEquations_t*	m_pBlock;
+    int                     m_nNoEquations;
+    real_t*                 m_vecB;
+    real_t*                 m_vecX;
+    size_t                  m_nJacobianEvaluations;
+    //daeDAESolver_t*		m_pDAESolver;
 
     daeRawDataArray<real_t>	m_arrValues;
     daeRawDataArray<real_t>	m_arrTimeDerivatives;

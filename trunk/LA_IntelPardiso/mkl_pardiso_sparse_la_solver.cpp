@@ -1,7 +1,7 @@
 #include "stdafx.h"
 #define PY_ARRAY_UNIQUE_SYMBOL dae_extension
 #include <boost/python.hpp>
-#include <idas/idas_impl.h>
+//#include <idas/idas_impl.h>
 #include "mkl_pardiso_sparse_la_solver.h"
 #include "mkl.h"
 #include <omp.h>
@@ -11,6 +11,7 @@ namespace dae
 {
 namespace solver
 {
+/*
 int init_la(IDAMem ida_mem);
 int setup_la(IDAMem ida_mem,
               N_Vector	vectorVariables,
@@ -26,6 +27,7 @@ int solve_la(IDAMem ida_mem,
               N_Vector	vectorTimeDerivatives,
               N_Vector	vectorResiduals);
 int free_la(IDAMem ida_mem);
+*/
 
 daeIDALASolver_t* daeCreateIntelPardisoSolver(void)
 {
@@ -86,11 +88,14 @@ daeIntelPardisoSolver::daeIntelPardisoSolver(void)
 
 daeIntelPardisoSolver::~daeIntelPardisoSolver(void)
 {
-    FreeMemory();
 }
 
-int daeIntelPardisoSolver::Create(void* ida, size_t n, daeDAESolver_t* pDAESolver)
+//int daeIntelPardisoSolver::Create(void* ida, size_t n, daeDAESolver_t* pDAESolver)
+int daeIntelPardisoSolver::Create(size_t n,
+                                  size_t nnz,
+                                  daeBlockOfEquations_t* block)
 {
+/*
     IDAMem ida_mem = (IDAMem)ida;
     if(!ida_mem)
         return IDA_MEM_NULL;
@@ -105,21 +110,22 @@ int daeIntelPardisoSolver::Create(void* ida, size_t n, daeDAESolver_t* pDAESolve
     m_pBlock->CalcNonZeroElements(nnz);
     if(nnz == 0)
         return IDA_ILL_INPUT;
-
-    m_nNoEquations	= n;
-    m_pDAESolver	= pDAESolver;
+*/
+    m_pBlock       = block;
+    m_nNoEquations = n;
+//    m_pDAESolver   = pDAESolver;
 
     InitializePardiso(nnz);
 
     if(!CheckData())
-        return IDA_MEM_NULL;
+        return -1; //IDA_MEM_NULL;
 
 // Initialize sparse matrix
     m_matJacobian.ResetCounters();
     m_pBlock->FillSparseMatrix(&m_matJacobian);
     m_matJacobian.Sort();
     //m_matJacobian.Print();
-
+/*
     ida_mem->ida_linit	= init_la;
     ida_mem->ida_lsetup = setup_la;
     ida_mem->ida_lsolve = solve_la;
@@ -128,20 +134,21 @@ int daeIntelPardisoSolver::Create(void* ida, size_t n, daeDAESolver_t* pDAESolve
 
     ida_mem->ida_lmem         = this;
     ida_mem->ida_setupNonNull = TRUE;
-
-    return IDA_SUCCESS;
+*/
+    return 0; //IDA_SUCCESS;
 }
 
-int daeIntelPardisoSolver::Reinitialize(void* ida)
+int daeIntelPardisoSolver::Reinitialize(size_t nnz)
 {
     _INTEGER_t res, idum;
     real_t ddum;
-
+/*
     IDAMem ida_mem = (IDAMem)ida;
     if(!ida_mem)
         return IDA_MEM_NULL;
+*/
     if(!m_pBlock)
-        return IDA_MEM_NULL;
+        return -1; //IDA_MEM_NULL;
 
 // Memory release
     phase = -1;
@@ -161,17 +168,18 @@ int daeIntelPardisoSolver::Reinitialize(void* ida)
              &ddum,
              &ddum,
              &res);
-
+/*
     int n   = m_nNoEquations;
     int nnz = 0;
     m_pBlock->CalcNonZeroElements(nnz);
+*/
     ResetMatrix(nnz);
     m_matJacobian.ResetCounters();
     m_pBlock->FillSparseMatrix(&m_matJacobian);
     m_matJacobian.Sort();
     //m_matJacobian.Print();
 
-    return IDA_SUCCESS;
+    return 0; //IDA_SUCCESS;
 }
 
 std::map<std::string, real_t> daeIntelPardisoSolver::GetEvaluationCallsStats()
@@ -215,14 +223,6 @@ bool daeIntelPardisoSolver::CheckData() const
         return false;
 }
 
-void daeIntelPardisoSolver::FreeMemory(void)
-{
-    m_matJacobian.Free();
-    if(m_vecB)
-        free(m_vecB);
-    m_vecB = NULL;
-}
-
 void daeIntelPardisoSolver::InitializePardiso(size_t nnz)
 {
     m_nJacobianEvaluations	= 0;
@@ -231,21 +231,20 @@ void daeIntelPardisoSolver::InitializePardiso(size_t nnz)
     m_matJacobian.Reset(m_nNoEquations, nnz, CSR_C_STYLE);
 }
 
-int daeIntelPardisoSolver::Init(void* ida)
+int daeIntelPardisoSolver::Init()
 {
-    return IDA_SUCCESS;
+    return 0; //IDA_SUCCESS;
 }
 
-int daeIntelPardisoSolver::Setup(void*		ida,
-                                 N_Vector	vectorVariables,
-                                 N_Vector	vectorTimeDerivatives,
-                                 N_Vector	vectorResiduals,
-                                 N_Vector	vectorTemp1,
-                                 N_Vector	vectorTemp2,
-                                 N_Vector	vectorTemp3)
+int daeIntelPardisoSolver::Setup(real_t  time,
+                                 real_t  inverseTimeStep,
+                                 real_t* pdValues,
+                                 real_t* pdTimeDerivatives,
+                                 real_t* pdResiduals)
 {
     _INTEGER_t res, idum;
     real_t ddum;
+/*
     realtype *pdValues, *pdTimeDerivatives, *pdResiduals;
 
     double timeStart = dae::GetTimeInSeconds();
@@ -263,7 +262,11 @@ int daeIntelPardisoSolver::Setup(void*		ida,
     pdValues			= NV_DATA_S(vectorVariables);
     pdTimeDerivatives	= NV_DATA_S(vectorTimeDerivatives);
     pdResiduals			= NV_DATA_S(vectorResiduals);
+*/
 
+    double timeStart = dae::GetTimeInSeconds();
+
+    size_t Neq = m_nNoEquations;
     m_nJacobianEvaluations++;
 
     m_arrValues.InitArray(Neq, pdValues);
@@ -273,11 +276,11 @@ int daeIntelPardisoSolver::Setup(void*		ida,
     m_matJacobian.ClearValues();
 
     m_pBlock->CalculateJacobian(time,
+                                inverseTimeStep,
                                 m_arrValues,
                                 m_arrResiduals,
                                 m_arrTimeDerivatives,
-                                m_matJacobian,
-                                dInverseTimeStep);
+                                m_matJacobian);
 
 // Reordering and Symbolic Factorization.
 // This step also allocates all memory
@@ -340,17 +343,20 @@ int daeIntelPardisoSolver::Setup(void*		ida,
     m_SetupTime += (timeEnd - timeStart);
     m_nNumberOfSetupCalls += 1;
 
-    return IDA_SUCCESS;
+    return 0; //IDA_SUCCESS;
 }
 
-int daeIntelPardisoSolver::Solve(void*		ida,
-                                 N_Vector	vectorB,
-                                 N_Vector	vectorWeight,
-                                 N_Vector	vectorVariables,
-                                 N_Vector	vectorTimeDerivatives,
-                                 N_Vector	vectorResiduals)
+int daeIntelPardisoSolver::Solve(real_t  time,
+                                 real_t  inverseTimeStep,
+                                 real_t  cjratio,
+                                 real_t* pdB,
+                                 real_t* weight,
+                                 real_t* pdValues,
+                                 real_t* pdTimeDerivatives,
+                                 real_t* pdResiduals)
 {
     _INTEGER_t res, idum;
+/*
     realtype* pdB;
 
     double timeStart = dae::GetTimeInSeconds();
@@ -363,7 +369,11 @@ int daeIntelPardisoSolver::Solve(void*		ida,
 
     size_t Neq = m_nNoEquations;
     pdB        = NV_DATA_S(vectorB);
+*/
 
+    double timeStart = dae::GetTimeInSeconds();
+
+    size_t Neq = m_nNoEquations;
     memcpy(m_vecB, pdB, Neq*sizeof(real_t));
 
 // Solve
@@ -394,21 +404,20 @@ int daeIntelPardisoSolver::Solve(void*		ida,
         throw e;
     }
 
-    if(ida_mem->ida_cjratio != 1.0)
+    if(cjratio != 1.0)
     {
         for(size_t i = 0; i < Neq; i++)
-            pdB[i] *= 2.0 / (1.0 + ida_mem->ida_cjratio);
-        //N_VScale(2.0 / (1.0 + ida_mem->ida_cjratio), vectorB, vectorB);
+            pdB[i] *= 2.0 / (1.0 + cjratio);
     }
 
     double timeEnd = dae::GetTimeInSeconds();
     m_SolveTime += (timeEnd - timeStart);
     m_nNumberOfSolveCalls += 1;
 
-    return IDA_SUCCESS;
+    return 0; //IDA_SUCCESS;
 }
 
-int daeIntelPardisoSolver::Free(void* ida)
+int daeIntelPardisoSolver::Free()
 {
     real_t ddum;
     _INTEGER_t res, idum;
@@ -434,10 +443,15 @@ int daeIntelPardisoSolver::Free(void* ida)
              &ddum,
              &res);
 
-    return IDA_SUCCESS;
+    m_matJacobian.Free();
+    if(m_vecB)
+        free(m_vecB);
+    m_vecB = NULL;
+
+    return 0; //IDA_SUCCESS;
 }
 
-
+/*
 int init_la(IDAMem ida_mem)
 {
     daeIntelPardisoSolver* pSolver = (daeIntelPardisoSolver*)ida_mem->ida_lmem;
@@ -504,7 +518,7 @@ int free_la(IDAMem ida_mem)
 
     return ret;
 }
-
+*/
 
 }
 }

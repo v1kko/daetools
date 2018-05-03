@@ -41,6 +41,12 @@ daeSimulation::daeSimulation(void)
     m_InitializationDuration  = 0;
     m_SolveInitalDuration     = 0;
     m_IntegrationDuration     = 0;
+    m_ProblemCreationStart    = 0;
+    m_ProblemCreationEnd      = 0;
+    m_InitializationStart     = 0;
+    m_InitializationEnd       = 0;
+    m_IntegrationStart        = 0;
+    m_IntegrationEnd          = 0;
 
     daeConfig& cfg = daeConfig::GetConfig();
     m_bReportTimeDerivatives = cfg.GetBoolean("daetools.activity.reportTimeDerivatives", false);
@@ -644,16 +650,16 @@ void daeSimulation::Run(void)
         throw e;
     }
 
-    if(m_dCurrentTime == 0)
-    {
-        m_IntegrationStart = dae::GetTimeInSeconds();
-    }
+    m_IntegrationStart = dae::GetTimeInSeconds();
+    m_pLog->Message(string("m_IntegrationStart time = ")    + toStringFormatted<real_t>(m_IntegrationStart,     -1, 3) + string(" s"), 0);
+
     if(m_dCurrentTime >= m_dTimeHorizon)
     {
         m_pLog->Message(string("The time horizon has been riched; exiting."), 0);
         return;
     }
     m_eActivityAction = eRunActivity;
+
 
     real_t t;
     while(m_dCurrentTime < m_dTimeHorizon)
@@ -688,7 +694,10 @@ void daeSimulation::Run(void)
             m_dCurrentTime = IntegrateUntilTime(t, m_eStopAtModelDiscontinuity, m_bReportDataAroundDiscontinuities);
         }
 
-        m_dCurrentTime = t;
+        // Purpose of this line?
+        // m_dCurrentTime is already set to the current time returned by IDA solver in Integrate... functions.
+        //m_dCurrentTime = t;
+
         ReportData(m_dCurrentTime);
         real_t newProgress = ceil(100.0 * m_dCurrentTime/m_dTimeHorizon);
         if(newProgress > m_pLog->GetProgress())
@@ -706,7 +715,7 @@ void daeSimulation::Run(void)
         double totalTime = m_InitializationDuration + m_SolveInitalDuration + m_IntegrationDuration;
 
         m_pLog->Message(string(" "), 0);
-        m_pLog->Message(string("The simulation has finished successfuly!"), 0);
+        m_pLog->Message(string("The simulation has finished successfully!"), 0);
         m_pLog->Message(string("Initialization time = ") + toStringFormatted<real_t>(m_InitializationDuration,  -1, 3) + string(" s"), 0);
         m_pLog->Message(string("Integration time = ")    + toStringFormatted<real_t>(m_IntegrationDuration,     -1, 3) + string(" s"), 0);
         m_pLog->Message(string("Total run time = ")      + toStringFormatted<real_t>(totalTime,                 -1, 3) + string(" s"), 0);
@@ -730,6 +739,11 @@ void daeSimulation::Finalize(void)
     if(m_computeStackEvaluator)
     {
         m_computeStackEvaluator->FreeResources();
+    }
+
+    if(m_pDAESolver)
+    {
+        m_pDAESolver->Finalize();
     }
 
     m_pModel		= NULL;
@@ -1396,6 +1410,17 @@ void daeSimulation::ExportComputeStackStructs(const std::string& filenameCompute
         daeDeclareAndThrowException(exInvalidPointer);
 
     m_ptrBlock->ExportComputeStackStructs(filenameComputeStacks, filenameJacobianIndexes, startEquationIndex, endEquationIndex, bi_to_bi_local);
+}
+
+void daeSimulation::ExportComputeStackStructs(const std::string& filenameComputeStacks,
+                                              const std::string& filenameJacobianIndexes,
+                                              const std::vector<uint32_t>& equationIndexes,
+                                              const std::map<uint32_t,uint32_t>& bi_to_bi_local)
+{
+    if(!m_ptrBlock)
+        daeDeclareAndThrowException(exInvalidPointer);
+
+    m_ptrBlock->ExportComputeStackStructs(filenameComputeStacks, filenameJacobianIndexes, equationIndexes, bi_to_bi_local);
 }
 
 void daeSimulation::EnterConditionalIntegrationMode(void)

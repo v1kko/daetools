@@ -16,7 +16,7 @@ BOOST_PYTHON_MODULE(pyPardiso)
 
     class_<daePardisoSolver, bases<daeIDALASolver_t>, boost::noncopyable>("daePardisoSolver")
         .add_property("Name",                   &daePardisoSolver::GetName)
-        .add_property("EvaluationCallsStats",   &daepython::GetEvaluationCallsStats_)
+        .add_property("EvaluationCallsStats",   &daepython::daePardisoSolver_GetEvaluationCallsStats_)
         .def("get_iparm",                       &daepython::daePardisoSolver_get_iparm)
         .def("set_iparm",                       &daepython::daePardisoSolver_set_iparm)
         .def("SaveAsXPM",                       &daePardisoSolver::SaveAsXPM)

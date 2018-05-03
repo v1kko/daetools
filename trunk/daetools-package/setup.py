@@ -31,7 +31,7 @@ Create wheel:
 import os, sys, platform, shutil
 from setuptools import setup, Distribution
 
-daetools_version = '1.8.0'
+daetools_version = '1.8.1'
 
 # Python version
 python_major = str(sys.version_info[0])
@@ -351,7 +351,7 @@ setup(name = 'daetools',
                                                    ],
                        'daetools.dae_plotter':     ['images/*.png'],
                        'daetools.code_generators': ['c99/*.h', 'c99/*.c', 'c99/*.pro', 'c99/*.vcproj', 'c99/Makefile-*',
-                                                    'cxx/*.h', 'cxx/*.cpp', 'cxx/*.pro', 'cxx/*.vcproj', 'cxx/Makefile-*',
+                                                    #'cxx/*.h', 'cxx/*.cpp', 'cxx/*.pro', 'cxx/*.vcproj', 'cxx/Makefile-*',
                                                     '*.css', '*.xsl', fmi_solibs
                                                    ],
                        'daetools.dae_simulator':   ['*.html',

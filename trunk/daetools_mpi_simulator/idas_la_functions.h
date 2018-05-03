@@ -10,23 +10,29 @@ PARTICULAR PURPOSE. See the GNU General Public License for more details.
 You should have received a copy of the GNU General Public License along with the
 DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 ***********************************************************************************/
-#ifndef DAE_SOLVER_H
-#define DAE_SOLVER_H
+#ifndef DAE_IDAS_LA_FUNCTIONS_H
+#define DAE_IDAS_LA_FUNCTIONS_H
 
-#include "typedefs.h"
+#include <idas/idas.h>
+#include <idas/idas_impl.h>
+#include <nvector/nvector_parallel.h>
 
-/* Sundials IDAS related functions */
-int solInitialize(daeIDASolver_t* s, void* model, void* simulation, daeLASolver_t* lasolver,
-                  long Neqns, long Neqns_local,
-                  const real_t*  initValues, const real_t* initDerivatives,
-                  const real_t*  absTolerances, const int* IDs, real_t  relativeTolerance);
-int solReinitialize(daeIDASolver_t* s, bool bCopyDataFromBlock, bool bResetSensitivities);
-int solDestroy(daeIDASolver_t* s);
+int init_la(IDAMem ida_mem);
+int setup_la(IDAMem ida_mem,
+             N_Vector	vectorVariables,
+             N_Vector	vectorTimeDerivatives,
+             N_Vector	vectorResiduals,
+             N_Vector	vectorTemp1,
+             N_Vector	vectorTemp2,
+             N_Vector	vectorTemp3);
+int solve_la(IDAMem ida_mem,
+             N_Vector	b,
+             N_Vector	weight,
+             N_Vector	vectorVariables,
+             N_Vector	vectorTimeDerivatives,
+             N_Vector	vectorResiduals);
+int free_la(IDAMem ida_mem);
 
-int solRefreshRootFunctions(daeIDASolver_t* s, int noRoots);
-int solResetIDASolver(daeIDASolver_t* s, bool bCopyDataFromBlock, real_t dCurrentTime, bool bResetSensitivities);
-real_t solSolve(daeIDASolver_t* s, real_t dTime, daeeStopCriterion eCriterion, bool bReportDataAroundDiscontinuities);
-int solSolveInitial(daeIDASolver_t* s);
 
 #endif
 

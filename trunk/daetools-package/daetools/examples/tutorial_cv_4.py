@@ -148,31 +148,31 @@ class modTutorial(daeModel):
         Sv       = lambda x,y: dvm_dt(x,y) + (dvmum_dx(x,y) + dvmvm_dy(x,y)) - ni * (d2vm_dx2(x,y) + d2vm_dy2(x,y))
 
         # Numerical solution
-        eq = self.CreateEquation("u", "Numerical solution")
+        eq = self.CreateEquation("u", "u velocity component")
         x = eq.DistributeOnDomain(self.x, eOpenOpen)
         y = eq.DistributeOnDomain(self.y, eOpenOpen)
         eq.Residual = du_dt(x,y) + (duu_dx(x,y) + duv_dy(x,y)) - ni * (d2u_dx2(x,y) + d2u_dy2(x,y)) - Su(x,y)
         eq.CheckUnitsConsistency = False
 
-        eq = self.CreateEquation("u(,0)", "Numerical solution")
+        eq = self.CreateEquation("u(,0)", "BCs u component")
         x = eq.DistributeOnDomain(self.x, eOpenOpen)
         y = eq.DistributeOnDomain(self.y, eLowerBound)
         eq.Residual = u(x,y) - um(x,y)
         eq.CheckUnitsConsistency = False
 
-        eq = self.CreateEquation("u(,1)", "Numerical solution")
+        eq = self.CreateEquation("u(,1)", "BCs u component")
         x = eq.DistributeOnDomain(self.x, eOpenOpen)
         y = eq.DistributeOnDomain(self.y, eUpperBound)
         eq.Residual = u(x,y) - um(x,y)
         eq.CheckUnitsConsistency = False
 
-        eq = self.CreateEquation("u(0,)", "Numerical solution")
+        eq = self.CreateEquation("u(0,)", "BCs u component")
         x = eq.DistributeOnDomain(self.x, eLowerBound)
         y = eq.DistributeOnDomain(self.y, eClosedClosed)
         eq.Residual = u(x,y) - um(x,y)
         eq.CheckUnitsConsistency = False
 
-        eq = self.CreateEquation("u(1,)", "Numerical solution")
+        eq = self.CreateEquation("u(1,)", "BCs u component")
         x = eq.DistributeOnDomain(self.x, eUpperBound)
         y = eq.DistributeOnDomain(self.y, eClosedClosed)
         eq.Residual = u(x,y) - um(x,y)
@@ -180,44 +180,44 @@ class modTutorial(daeModel):
 
 
         # v component
-        eq = self.CreateEquation("v", "Numerical solution")
+        eq = self.CreateEquation("v", "v velocity component")
         x = eq.DistributeOnDomain(self.x, eOpenOpen)
         y = eq.DistributeOnDomain(self.y, eOpenOpen)
         eq.Residual = dv_dt(x,y) + (dvu_dx(x,y) + dvv_dy(x,y)) - ni * (d2v_dx2(x,y) + d2v_dy2(x,y)) - Sv(x,y)
         eq.CheckUnitsConsistency = False
 
-        eq = self.CreateEquation("v(,0)", "Numerical solution")
+        eq = self.CreateEquation("v(,0)", "BCs v component")
         x = eq.DistributeOnDomain(self.x, eOpenOpen)
         y = eq.DistributeOnDomain(self.y, eLowerBound)
         eq.Residual = v(x,y) - vm(x,y)
         eq.CheckUnitsConsistency = False
 
-        eq = self.CreateEquation("v(,1)", "Numerical solution")
+        eq = self.CreateEquation("v(,1)", "BCs v component")
         x = eq.DistributeOnDomain(self.x, eOpenOpen)
         y = eq.DistributeOnDomain(self.y, eUpperBound)
         eq.Residual = v(x,y) - vm(x,y)
         eq.CheckUnitsConsistency = False
 
-        eq = self.CreateEquation("v(0,)", "Numerical solution")
+        eq = self.CreateEquation("v(0,)", "BCs v component")
         x = eq.DistributeOnDomain(self.x, eLowerBound)
         y = eq.DistributeOnDomain(self.y, eClosedClosed)
         eq.Residual = v(x,y) - vm(x,y)
         eq.CheckUnitsConsistency = False
 
-        eq = self.CreateEquation("v(1,)", "Numerical solution")
+        eq = self.CreateEquation("v(1,)", "BCs v component")
         x = eq.DistributeOnDomain(self.x, eUpperBound)
         y = eq.DistributeOnDomain(self.y, eClosedClosed)
         eq.Residual = v(x,y) - vm(x,y)
         eq.CheckUnitsConsistency = False
 
         # Manufactured solution
-        eq = self.CreateEquation("um", "Manufactured solution")
+        eq = self.CreateEquation("um", "u component manufactured solution")
         x = eq.DistributeOnDomain(self.x, eClosedClosed)
         y = eq.DistributeOnDomain(self.y, eClosedClosed)
         eq.Residual = self.um(x,y) - um(x,y)
         eq.CheckUnitsConsistency = False
 
-        eq = self.CreateEquation("vm", "Manufactured solution")
+        eq = self.CreateEquation("vm", "v component manufactured solution")
         x = eq.DistributeOnDomain(self.x, eClosedClosed)
         y = eq.DistributeOnDomain(self.y, eClosedClosed)
         eq.Residual = self.vm(x,y) - vm(x,y)

@@ -587,6 +587,9 @@ public:
     static uint32_t   GetComputeStackSize(adNode* node);
     static void       EstimateComputeStackSizes(const std::vector<adComputeStackItem_t>& computeStack, size_t start, size_t end,
                                                 int& max_valueSize, int& max_lvalueSize, int& max_rvalueSize);
+    static size_t     EstimateComputeStackFlops(const adComputeStackItem_t* computeStack,
+                                                const std::map<daeeUnaryFunctions,size_t>& unaryOps,
+                                                const std::map<daeeBinaryFunctions,size_t>& binaryOps);
 };
 
 // Originally, it has been cloning nodes every time. Now it just returns the existing node.
