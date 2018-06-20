@@ -10,7 +10,7 @@ PARTICULAR PURPOSE. See the GNU General Public License for more details.
 You should have received a copy of the GNU General Public License along with the
 DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 ***********************************************************************************/
-#include "typedefs.h"
+#include "cs_simulator.h"
 #include <string>
 #include <iostream>
 #include <vector>
@@ -20,7 +20,7 @@ DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 #define daeSuperLU
 #include "../LA_Trilinos_Amesos/trilinos_amesos_la_solver.h"
 
-namespace daetools_mpi
+namespace cs_simulator
 {
 /*
 static void setParameter_int(Teuchos::ParameterList& parameters, const std::string& paramName, int defValue)
@@ -59,7 +59,7 @@ static void setParameter_string(Teuchos::ParameterList& parameters, const std::s
 class daePreconditionerData_Ifpack : public daeMatrixAccess_t
 {
 public:
-    daePreconditionerData_Ifpack(size_t numVars, daetools_mpi::daeModel_t* mod) :
+    daePreconditionerData_Ifpack(size_t numVars, cs_simulator::daeModel_t* mod) :
         numberOfVariables(numVars), model(mod)
     {
         m_map.reset(new Epetra_Map((int)numberOfVariables, 0, m_Comm));
@@ -72,6 +72,8 @@ public:
         m_matJacobian.Sort(); // The function Sort will call FillComplete on Epetra matrix (required for Ifpack constructor).
 
         daeSimulationOptions& cfg = daeSimulationOptions::GetConfig();
+        printInfo = cfg.GetBoolean("LinearSolver.Preconditioner.PrintInfo", false);
+
         std::string strPreconditionerName = cfg.GetString("LinearSolver.Preconditioner.Name", "ILU");
 
         Ifpack factory;
@@ -189,12 +191,13 @@ public:
     }
 
 public:
+    bool                                                printInfo;
     int                                                 N;
     int                                                 NNZ;
     std::vector<int>                                    IA;
     std::vector<int>                                    JA;
     size_t                                              numberOfVariables;
-    daetools_mpi::daeModel_t*                           model;
+    cs_simulator::daeModel_t*                           model;
 
     boost::shared_ptr<Epetra_Map>                       m_map;
     boost::shared_ptr<Epetra_CrsMatrix>                 m_matEPETRA;
@@ -210,17 +213,17 @@ daePreconditioner_Ifpack::daePreconditioner_Ifpack()
 
 daePreconditioner_Ifpack::~daePreconditioner_Ifpack()
 {
-    daePreconditionerData_Ifpack* p_data = (daePreconditionerData_Ifpack*)this->data;
-    if(p_data)
-    {
-        printf("ComputeTime      = %.2f\n", p_data->m_pPreconditionerIfpack->ComputeTime());
-        printf("ApplyInverseTime = %.2f\n", p_data->m_pPreconditionerIfpack->ApplyInverseTime());
-        printf("InitializeTime   = %.2f\n", p_data->m_pPreconditionerIfpack->InitializeTime());
-    }
+    //daePreconditionerData_Ifpack* p_data = (daePreconditionerData_Ifpack*)this->data;
+    //if(p_data)
+    //{
+    //    printf("ComputeTime      = %.2f\n", p_data->m_pPreconditionerIfpack->ComputeTime());
+    //    printf("ApplyInverseTime = %.2f\n", p_data->m_pPreconditionerIfpack->ApplyInverseTime());
+    //    printf("InitializeTime   = %.2f\n", p_data->m_pPreconditionerIfpack->InitializeTime());
+    //}
     Free();
 }
 
-int daePreconditioner_Ifpack::Initialize(daetools_mpi::daeModel_t *model, size_t numberOfVariables)
+int daePreconditioner_Ifpack::Initialize(cs_simulator::daeModel_t *model, size_t numberOfVariables)
 {
     daePreconditionerData_Ifpack* p_data = new daePreconditionerData_Ifpack(numberOfVariables, model);
     this->data = p_data;
@@ -238,10 +241,17 @@ int daePreconditioner_Ifpack::Setup(real_t  time,
 
     p_data->m_matJacobian.ClearMatrix();
     daeMatrixAccess_t* ma = p_data;
-    p_data->model->EvaluateJacobian(p_data->numberOfVariables, time,  inverseTimeStep, values, timeDerivatives, residuals, ma);
+    p_data->model->EvaluateJacobian(time, inverseTimeStep, values, timeDerivatives, residuals, ma);
 
     int ret = p_data->m_pPreconditionerIfpack->Compute();
-    printf("    t = %.15f compute preconditioner (condest = %.2e)\n", time, p_data->m_pPreconditionerIfpack->Condest());
+
+    if(p_data->printInfo)
+    {
+        static double prev_c_time = 0.0;
+        double c_time = p_data->m_pPreconditionerIfpack->ComputeTime();
+        printf("    t = %.15f compute preconditioner (condest = %.2e, time = %.6f)\n", time, p_data->m_pPreconditionerIfpack->Condest(), c_time-prev_c_time);
+        prev_c_time = c_time;
+    }
 
     return ret;
 }
@@ -253,7 +263,17 @@ int daePreconditioner_Ifpack::Solve(real_t  time, real_t* r, real_t* z)
     Epetra_MultiVector vecR(View, *p_data->m_map.get(), &r, 1);
     Epetra_MultiVector vecZ(View, *p_data->m_map.get(), &z, 1);
 
-    return p_data->m_pPreconditionerIfpack->ApplyInverse(vecR, vecZ);
+    int ret = p_data->m_pPreconditionerIfpack->ApplyInverse(vecR, vecZ);
+
+    if(p_data->printInfo)
+    {
+        static double prev_ap_time = 0.0;
+        double ap_time = p_data->m_pPreconditionerIfpack->ApplyInverseTime();
+        printf("    t = %.15f apply preconditioner (time = %.6f)\n", time, ap_time - prev_ap_time);
+        prev_ap_time = ap_time;
+    }
+
+    return ret;
 }
 
 int daePreconditioner_Ifpack::JacobianVectorMultiply(real_t  time, real_t* v, real_t* Jv)

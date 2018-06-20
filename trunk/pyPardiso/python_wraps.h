@@ -22,9 +22,9 @@ using namespace dae::solver;
 
 namespace daepython
 {
-boost::python::list daePardisoSolver_get_iparm(daePardisoSolver& self);
-void daePardisoSolver_set_iparm(daePardisoSolver& self, boost::python::list l_iparm);
-boost::python::dict daePardisoSolver_GetEvaluationCallsStats_(daePardisoSolver& self);
+boost::python::list get_iparm(daePardisoSolver& self);
+void                set_iparm(daePardisoSolver& self, boost::python::list l_iparm);
+boost::python::dict GetCallStats(daePardisoSolver& self);
 }
 
 #endif

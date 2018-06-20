@@ -15,7 +15,7 @@ namespace boost
 
 POINTER_CONVERSION(daeLog_t)
 POINTER_CONVERSION(daeLASolver_t)
-POINTER_CONVERSION(daeIDALASolver_t)
+POINTER_CONVERSION(daeLASolver_t)
 POINTER_CONVERSION(daeMatrix<real_t>)
 POINTER_CONVERSION(daeDenseMatrix)
 POINTER_CONVERSION(daeRawDataArray<real_t>)
@@ -102,9 +102,10 @@ BOOST_PYTHON_MODULE(pyIDAS)
         .add_property("EstLocalErrors",		    &daepython::daeIDASolverWrapper::GetEstLocalErrors_,  DOCSTR_daeIDAS_EstLocalErrors)
         .add_property("ErrWeights",		   	    &daepython::daeIDASolverWrapper::GetErrWeights_,      DOCSTR_daeIDAS_ErrWeights)
         .add_property("IntegratorStats",		&daepython::daeIDASolverWrapper::GetIntegratorStats_, DOCSTR_daeIDAS_IntegratorStats)
+        .add_property("CallStats",       &daepython::GetCallStats)
 
-        .def("SetLASolver",		&daepython::daeIDASolverWrapper::SetLASolver1, ( arg("self"), arg("laSolverType") ), DOCSTR_daeIDAS_SetLASolver1)
-        .def("SetLASolver",		&daepython::daeIDASolverWrapper::SetLASolver2, ( arg("self"), arg("laSolver") ),     DOCSTR_daeIDAS_SetLASolver2)
+        .def("SetLASolver",		&daepython::daeIDASolverWrapper::SetLASolver1, ( arg("self"), arg("solverType"), arg("preconditioner") = boost::python::object() ), DOCSTR_daeIDAS_SetLASolver1)
+        .def("SetLASolver",		&daepython::daeIDASolverWrapper::SetLASolver2, ( arg("self"), arg("lasolver") ),     DOCSTR_daeIDAS_SetLASolver2)
         .def("SaveMatrixAsXPM",	&daeIDASolver::SaveMatrixAsXPM,                ( arg("self"), arg("xpmFilename") ),  DOCSTR_daeIDAS_SaveMatrixAsXPM)
 
         .def("OnCalculateResiduals",		    &daeDAESolver_t::OnCalculateResiduals, &daepython::daeIDASolverWrapper::def_OnCalculateResiduals,

@@ -43,7 +43,6 @@ class daeActivity(object):
                              run_before_simulation_fn       = None,
                              run_after_simulation_fn        = None,
                              initializeAndReturn            = False,
-                             printIntegratorStats           = False,
                              **kwargs):
         if reportingInterval <= 0.0:
             raise RuntimeError('Invalid reportingInterval specified: %fs')
@@ -108,7 +107,14 @@ class daeActivity(object):
             if not daesolver:
                 daesolver = daeIDAS()
             if lasolver:
-                daesolver.SetLASolver(lasolver)
+                if isinstance(lasolver, tuple):
+                    if len(lasolver) != 2:
+                        raise RuntimeError('Invalid linear solver specified: %s' % lasolver)
+                    lasolverType   = lasolver[0]
+                    preconditioner = lasolver[1]
+                    daesolver.SetLASolver(lasolverType, preconditioner)
+                else:
+                    daesolver.SetLASolver(lasolver)
                 
             if relativeTolerance > 0.0:
                 daesolver.RelativeTolerance = relativeTolerance
@@ -148,21 +154,15 @@ class daeActivity(object):
             try:
                 simulation.Run()
                 
-                # Print DAE solver stats
-                if printIntegratorStats:
-                    stats = daesolver.IntegratorStats
-                    log.Message('Integrator stats:', 0)
-                    for name, value in stats.items():
-                        log.Message('  %-22s = %.12f' % (name, value), 0)
             except Exception as e:
                 log.Message(str(e), 0)
-            
-            # Finalize
-            simulation.Finalize()
             
             # Should it be called before or after simulation.Finalize()??
             if run_after_simulation_fn:
                 run_after_simulation_fn(simulation, log)
+            
+            # Finalize
+            simulation.Finalize()
             
         return simulation
 
@@ -260,7 +260,14 @@ class daeActivity(object):
             if not daesolver:
                 daesolver = daeIDAS()
             if lasolver:
-                daesolver.SetLASolver(lasolver)
+                if isinstance(lasolver, tuple):
+                    if len(lasolver) != 2:
+                        raise RuntimeError('Invalid linear solver specified: %s' % lasolver)
+                    lasolverType   = lasolver[0]
+                    preconditioner = lasolver[1]
+                    daesolver.SetLASolver(lasolverType, preconditioner)
+                else:
+                    daesolver.SetLASolver(lasolver)
             
             if relativeTolerance > 0.0:
                 daesolver.RelativeTolerance = relativeTolerance

@@ -137,31 +137,29 @@ def run(**kwargs):
     # You can place the above command at the end of $HOME/.bashrc (or type it in shell, before simulation).
 
     # Import desired solver module (uncomment it from below) and set it using SetLASolver function:
-    #print("Supported Trilinos 3rd party LA solvers:", str(pyTrilinos.daeTrilinosSupportedSolvers()))
-    lasolver     = pyTrilinos.daeCreateTrilinosSolver("Amesos_Klu", "")
-    #lasolver     = pyTrilinos.daeCreateTrilinosSolver("Amesos_Lapack", "")
-    #lasolver     = pyTrilinos.daeCreateTrilinosSolver("Amesos_Umfpack", "")
-    #lasolver     = pyIntelPardiso.daeCreateIntelPardisoSolver()
-    #lasolver     = pyPardiso.daeCreatePardisoSolver()
+    print("Supported Trilinos 3rd party LA solvers:", str(pyTrilinos.daeTrilinosSupportedSolvers()))
+    lasolver  = pyTrilinos.daeCreateTrilinosSolver("Amesos_Klu", "")
+    #lasolver = pyTrilinos.daeCreateTrilinosSolver("Amesos_Umfpack", "")
+    #lasolver = pyIntelPardiso.daeCreateIntelPardisoSolver()
+    #lasolver = pyPardiso.daeCreatePardisoSolver()
 
-    """
-    # Get Pardiso/IntelPardiso parameters (iparm[64] list of integers)
-    iparm = lasolver.get_iparm()
-    iparm_def = list(iparm) # Save it for comparison
-    # Change some options
-    # Achtung, Achtung!!
-    # The meaning of items in iparm[64] is NOT identical in Pardiso and IntelPardiso solvers!!
-    iparm[ 7] = 2 # Max. number of iterative refinement steps (common for both Pardiso and IntelPardiso)
-    #iparm[27] = 1 # in Pardiso it means:      use METIS parallel reordering
-                   # in IntelPardiso it means: use single precision (do not change it!)
-    # Set them back
-    lasolver.set_iparm(iparm)    
-    iparm = lasolver.get_iparm()
-    # Print the side by side comparison
-    print('iparm     default new')
-    for i in range(64):
-        print 'iparm[%2d] %7d %3d' % (i, iparm_def[i], iparm[i])
-    """
+    if lasolver.Name == 'Intel Pardiso':
+        # Get Pardiso/IntelPardiso parameters (iparm[64] list of integers)
+        iparm = lasolver.get_iparm()
+        iparm_def = list(iparm) # Save it for comparison
+        # Change some options
+        # Achtung, Achtung!!
+        # The meaning of items in iparm[64] is NOT identical in Pardiso and IntelPardiso solvers!!
+        iparm[ 7] = 2 # Max. number of iterative refinement steps (common for both Pardiso and IntelPardiso)
+        #iparm[27] = 1 # in Pardiso it means:      use METIS parallel reordering
+                       # in IntelPardiso it means: use single precision (do not change it!)
+        # Set them back
+        lasolver.set_iparm(iparm)    
+        iparm = lasolver.get_iparm()
+        # Print the side by side comparison
+        print('iparm     default new')
+        for i in range(64):
+            print('iparm[%2d] %7d %3d' % (i, iparm_def[i], iparm[i]))    
 
     return daeActivity.simulate(simulation, reportingInterval = 10, 
                                             timeHorizon       = 1000,

@@ -22,6 +22,7 @@ DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 #include "../config.h"
 #include "io_impl.h"
 #include "helpers.h"
+#include "call_stats.h"
 #include "core.h"
 #include "class_factory.h"
 #include "adouble.h"
@@ -458,7 +459,7 @@ public:
     const std::map< size_t, std::pair<size_t, adNodePtr> >& GetJacobianExpressions() const;
     std::pair<size_t,size_t>          GetComputeStackInfo(const std::map<daeeUnaryFunctions, size_t> &unaryOps,
                                                           const std::map<daeeBinaryFunctions, size_t> &binaryOps) const;
-    std::vector<adComputeStackItem_t> GetComputeStack() const;
+    std::vector<csComputeStackItem_t> GetComputeStack() const;
     uint8_t GetComputeStack_max_valueSize() const;
     uint8_t GetComputeStack_max_lvalueSize() const;
     uint8_t GetComputeStack_max_rvalueSize() const;
@@ -477,7 +478,7 @@ protected:
     std::map< size_t, std::pair<size_t, adNodePtr> > m_mapJacobianExpressions;
 
     uint32_t                            m_nComputeStackIndex;
-    //std::vector<adComputeStackItem_t>   m_EquationComputeStack;
+    //std::vector<csComputeStackItem_t>   m_EquationComputeStack;
     uint8_t                             m_nComputeStack_max_valueSize;
     uint8_t                             m_nComputeStack_max_lvalueSize;
     uint8_t                             m_nComputeStack_max_rvalueSize;
@@ -1649,6 +1650,8 @@ public:
     virtual std::vector<size_t>           GetActiveEquationSetMemory() const;
     virtual std::map<std::string, size_t> GetActiveEquationSetNodeCount() const;
 
+    virtual std::map<std::string, call_stats::TimeAndCount> GetCallStats() const;
+
 //	virtual real_t* GetValuesPointer();
 //	virtual real_t* GetTimeDerivativesPointer();
 //	virtual real_t* GetAbsoluteTolerancesPointer();
@@ -1692,8 +1695,8 @@ public:
     // first - index in block;   second - index in core
     std::map<size_t, size_t>& GetVariableIndexesMap(void);
 
-    adComputeStackEvaluator_t* GetComputeStackEvaluator();
-    void SetComputeStackEvaluator(adComputeStackEvaluator_t* computeStackEvaluator);
+    csComputeStackEvaluator_t* GetComputeStackEvaluator();
+    void SetComputeStackEvaluator(csComputeStackEvaluator_t* computeStackEvaluator);
 
     void BuildComputeStackStructs();
     void CleanComputeStackStructs();
@@ -1745,11 +1748,12 @@ public:
     // It changes after every discontinuity that causes a change in active states.
     std::vector<daeEquationExecutionInfo*>	m_ptrarrEquationExecutionInfos_ActiveSet;
 
-    std::vector<adComputeStackItem_t>   m_arrAllComputeStacks;
-    std::vector<adJacobianMatrixItem_t> m_arrComputeStackJacobianItems;
+    std::vector<csComputeStackItem_t>   m_arrAllComputeStacks;
+    std::vector<csJacobianMatrixItem_t> m_arrComputeStackJacobianItems;
     std::vector<uint32_t>               m_arrActiveEquationSetIndexes;
     std::vector<real_t>                 m_jacobian;
 
+    std::map<std::string, call_stats::TimeAndCount> m_stats;
 
     // Contains STNs from all models; they may contain nested STNs/IFs.
     // It can be used to colect currently active equations in STNs/IFs.
@@ -1763,7 +1767,7 @@ public:
 
     size_t	m_nCurrentVariableIndexForJacobianEvaluation;
 
-    adComputeStackEvaluator_t* m_computeStackEvaluator;
+    csComputeStackEvaluator_t* m_computeStackEvaluator;
 
     int           m_omp_num_threads;
     //std::string m_omp_schedule;
@@ -3006,7 +3010,7 @@ public:
     const std::vector<daePortArray*>& PortArrays() const;
     const std::vector<daeModelArray*>& ModelArrays() const;
 
-    const std::vector<adComputeStackItem_t>& GetComputeStack() const;
+    const std::vector<csComputeStackItem_t>& GetComputeStack() const;
 
 // Overridables
 public:

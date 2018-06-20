@@ -10,8 +10,8 @@ PARTICULAR PURPOSE. See the GNU General Public License for more details.
 You should have received a copy of the GNU General Public License along with the
 DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 ***********************************************************************************/
-#include "typedefs.h"
-using namespace daetools_mpi;
+#include "cs_simulator.h"
+using namespace cs_simulator;
 
 #include <boost/mpi.hpp>
 #include <boost/filesystem.hpp>
@@ -43,12 +43,17 @@ int main(int argc, char *argv[])
         boost::filesystem::path inputDirectoryPath = boost::filesystem::weakly_canonical( boost::filesystem::path(inputDirectory) );
 
         daeSimulationOptions& cfg = daeSimulationOptions::GetConfig();
-        boost::filesystem::path solverOptionsPath = inputDirectoryPath / "solver_options.json";
-        cfg.Load(solverOptionsPath.string());
+        boost::filesystem::path simulationOptionsPath = inputDirectoryPath / "simulation_options.json";
+        cfg.Load(simulationOptionsPath.string());
         printf("Loaded options from '%s':\n%s\n", cfg.configFile.c_str(), cfg.ToString().c_str());
 
         // Results are stored in: inputDirectory/results
         boost::filesystem::path outputDirectoryPath = inputDirectoryPath / cfg.GetString("OutputDirectory");
+
+        real_t startTime         = cfg.GetFloat("StartTime");
+        real_t timeHorizon       = cfg.GetFloat("TimeHorizon");
+        real_t reportingInterval = cfg.GetFloat("ReportingInterval");
+        real_t relativeTolerance = cfg.GetFloat("RelativeTolerance");
 
         daeModel_t      model;
         daeIDASolver_t  daesolver;
@@ -61,7 +66,7 @@ int main(int argc, char *argv[])
         model.Load(inputDirectoryPath.string());
 
         /* Initialize the simulation and the dae solver */
-        simulation.Initialize(&model, &daesolver, outputDirectoryPath.string());
+        simulation.Initialize(&model, &daesolver, startTime, timeHorizon, reportingInterval, relativeTolerance, outputDirectoryPath.string());
 
         /* Solve the system at time = 0.0 */
         simulation.SolveInitial();
@@ -70,6 +75,7 @@ int main(int argc, char *argv[])
         simulation.Run();
 
         /* Finalize the simulation */
+        simulation.PrintStats();
         simulation.Finalize();
     }
     catch(std::exception& e)

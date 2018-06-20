@@ -11,20 +11,20 @@ unix::QMAKE_LFLAGS    += -std=c++11
 win32::QMAKE_CXXFLAGS += /std:c++11
 win32::QMAKE_LFLAGS   += /std:c++11
 
-INCLUDEPATH += $${INTEL_OPENCL_INCLUDE}
+INCLUDEPATH += $${INTEL_OPENCL_INCLUDE} \
+               $${OPEN_CS_DIR}
 
 LIBS +=	$${INTEL_OPENCL_LIBS}
 
 SOURCES += stdafx.cpp \
            dllmain.cpp \
-           compute_stack_opencl.cpp \
-           compute_stack_opencl_multi.cpp \
-           cs_opencl.cpp
+           ../opencs/opencl/cs_evaluator_opencl.cpp \
+           ../opencs/opencl/cs_evaluator_opencl_multidevice.cpp \
+           ../opencs/opencl/cs_evaluator_opencl_factory.cpp
 
 HEADERS += stdafx.h \
-           cs_opencl.h \
-           compute_stack_opencl.h \
-           compute_stack_opencl_multi.h
+           ../opencs/opencl/cs_evaluator_opencl.h \
+           ../opencs/opencl/cs_evaluator_opencl_multidevice.h \
+           ../opencs/opencl/cs_evaluator_opencl_factory.h
 
-OTHER_FILES += compute_stack_opencl_kernel_source.cl
-
+OTHER_FILES += ../opencs/opencl/cs_machine_kernels.cl

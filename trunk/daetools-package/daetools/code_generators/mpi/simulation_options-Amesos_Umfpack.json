@@ -1,0 +1,49 @@
+{
+    "StartTime":         __startTime__,
+    "TimeHorizon":       __timeHorizon__,
+    "ReportingInterval": __reportingInterval__,
+    "OutputDirectory":   "results",
+    "DAEModel" : {
+        "ComputeStackEvaluator" : {
+            "Library" : "Sequential",
+            "Name": "",
+            "Parameters": {
+            }
+        }
+    },
+    "DAESolver" : {
+        "Library" : "Sundials",
+        "Name": "IDAS",
+        "PrintInfo": false,
+        "Parameters": {
+            "RelativeTolerance":  __relativeTolerance__,
+            "IntegrationMode":    "Normal",
+            "MaxOrd":             5,
+            "MaxNumSteps":        500,
+            "InitStep":           0.0,
+            "MaxStep":            0.0,
+            "MaxErrTestFails":    10,
+            "MaxNonlinIters":     4,
+            "MaxConvFails":       10,
+            "NonlinConvCoef":     0.33,
+            "SuppressAlg":        false,
+            "NoInactiveRootWarn": false,
+            "NonlinConvCoefIC":   0.0033,
+            "MaxNumStepsIC":      5,
+            "MaxNumJacsIC":       4,
+            "MaxNumItersIC":      10,
+            "LineSearchOffIC":    false
+        }
+    },
+    "LinearSolver" : {
+        "Library" : "Trilinos",
+        "Name": "Amesos_Umfpack",
+        "PrintInfo": false,
+        "Parameters": {
+            "OutputLevel": 0,
+            "DebugLevel": 0,
+            "PrintTiming": false,
+            "PrintStatus": false
+        }
+    }
+}

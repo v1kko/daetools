@@ -92,7 +92,7 @@ HEADERS +=  xmlfunctions.h \
             event_handling.h \
             simplify_node.h \
             thermo_package.h \
-            compute_stack.h \
+            call_stats.h \
             compute_stack_kernels_openmp.h
 
 #win32{

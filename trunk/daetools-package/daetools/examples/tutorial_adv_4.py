@@ -124,8 +124,8 @@ class simTutorial(daeSimulation):
         self.m.Description = __doc__
 
     def SetUpParametersAndDomains(self):
-        self.m.x.CreateStructuredGrid(199, 0, 10.0)
-        self.m.y.CreateStructuredGrid(199, 0, 10.0)
+        self.m.x.CreateStructuredGrid(99, 0, 10.0)
+        self.m.y.CreateStructuredGrid(99, 0, 10.0)
 
         self.m.k.SetValue(401 * W/(m*K))
         self.m.cp.SetValue(385 * J/(kg*K))
@@ -142,7 +142,7 @@ def run_code_generators(simulation, log):
     # Demonstration of daetools c++/MPI code-generator:
     import tempfile
     tmp_folder = tempfile.mkdtemp(prefix = 'daetools-code_generator-cxx-')
-    msg = 'Generated c++/MPI code will be located in: \n%s' % tmp_folder
+    msg = 'Generated input files for the daetools_mpi_simulator will be located in: \n%s' % tmp_folder
     log.Message(msg, 0)
 
     try:
@@ -150,31 +150,38 @@ def run_code_generators(simulation, log):
     except Exception as e:
         log.Message(str(e), 0)
 
-    # Generate c++ MPI code for 4 nodes
-    from daetools.code_generators.cxx_mpi import daeCodeGenerator_cxx_mpi
-    cg = daeCodeGenerator_cxx_mpi()
-    cg.generateSimulation(simulation, tmp_folder, 4)
+    # Generate input files for 4 nodes
+    from daetools.code_generators.mpi import daeCodeGenerator_MPI
+    cg = daeCodeGenerator_MPI()
+    
+    constraints = ['Ncs','Nnz','Nflops','Nflops_j'] # use all available constraints
+    cg.generateSimulation(simulation, tmp_folder, 4, balancingConstraints = constraints)
 
 def setupLASolver():
     lasolver = pyTrilinos.daeCreateTrilinosSolver("AztecOO", "")
 
-    paramListAztec = lasolver.AztecOOOptions
+    parameterList = lasolver.ParameterList
+    
     lasolver.NumIters  = 1000
     lasolver.Tolerance = 1e-3
-    paramListAztec.set_int("AZ_solver",    daeAztecOptions.AZ_gmres)
-    paramListAztec.set_int("AZ_kspace",    500)
-    paramListAztec.set_int("AZ_scaling",   daeAztecOptions.AZ_none)
-    paramListAztec.set_int("AZ_reorder",   0)
-    paramListAztec.set_int("AZ_conv",      daeAztecOptions.AZ_r0)
-    paramListAztec.set_int("AZ_keep_info", 1)
-    paramListAztec.set_int("AZ_output",    daeAztecOptions.AZ_none) # {AZ_all, AZ_none, AZ_last, AZ_summary, AZ_warnings}
+    
+    parameterList.set_int("AZ_solver",    daeAztecOptions.AZ_gmres)
+    parameterList.set_int("AZ_kspace",    500)
+    parameterList.set_int("AZ_scaling",   daeAztecOptions.AZ_none)
+    parameterList.set_int("AZ_reorder",   0)
+    parameterList.set_int("AZ_conv",      daeAztecOptions.AZ_r0)
+    parameterList.set_int("AZ_keep_info", 1)
+    parameterList.set_int("AZ_output",    daeAztecOptions.AZ_none) # {AZ_all, AZ_none, AZ_last, AZ_summary, AZ_warnings}
 
-    paramListAztec.set_int("AZ_precond",         daeAztecOptions.AZ_Jacobi)
-    #paramListAztec.set_int("AZ_subdomain_solve", daeAztecOptions.AZ_ilut)
-    #paramListAztec.set_int("AZ_overlap",         daeAztecOptions.AZ_none)
-    #paramListAztec.set_int("AZ_graph_fill",      1)
+    # Preconditioner options
+    parameterList.set_int  ("AZ_precond",         daeAztecOptions.AZ_dom_decomp)
+    parameterList.set_int  ("AZ_subdomain_solve", daeAztecOptions.AZ_ilu)
+    parameterList.set_int  ("AZ_orthog",          daeAztecOptions.AZ_modified)
+    parameterList.set_int  ("AZ_graph_fill",      1)    # default: 0
+    parameterList.set_float("AZ_athresh",         1E-5) # default: 0.0
+    parameterList.set_float("AZ_rthresh",         1.0)  # default: 0.0
 
-    paramListAztec.Print()
+    parameterList.Print()
 
     return lasolver
 
@@ -185,8 +192,7 @@ def run(**kwargs):
                                             timeHorizon              = 100,
                                             lasolver                 = lasolver,
                                             relativeTolerance        = 1e-3,
-                                            run_after_simulation_init_fn = run_code_generators,
-                                            #run_before_simulation_fn = run_code_generators,
+                                            run_before_simulation_fn = run_code_generators,
                                             **kwargs)
 
 if __name__ == "__main__":

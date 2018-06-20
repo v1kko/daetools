@@ -284,24 +284,24 @@ BOOST_PYTHON_MODULE(pyCore)
         .export_values()
     ;
 
-    enum_<computestack::daeeOpCode>("daeeOpCode")
-        .value("eOP_Unknown",           computestack::eOP_Unknown)
-        .value("eOP_Constant",          computestack::eOP_Constant)
-        .value("eOP_Time",              computestack::eOP_Time)
-        .value("eOP_InverseTimeStep",   computestack::eOP_InverseTimeStep)
-        .value("eOP_Variable",          computestack::eOP_Variable)
-        .value("eOP_DegreeOfFreedom",   computestack::eOP_DegreeOfFreedom)
-        .value("eOP_TimeDerivative",    computestack::eOP_TimeDerivative)
-        .value("eOP_Unary",             computestack::eOP_Unary)
-        .value("eOP_Binary",            computestack::eOP_Binary)
+    enum_<cs::csOpCode>("csOpCode")
+        .value("eOP_Unknown",           cs::eOP_Unknown)
+        .value("eOP_Constant",          cs::eOP_Constant)
+        .value("eOP_Time",              cs::eOP_Time)
+        .value("eOP_InverseTimeStep",   cs::eOP_InverseTimeStep)
+        .value("eOP_Variable",          cs::eOP_Variable)
+        .value("eOP_DegreeOfFreedom",   cs::eOP_DegreeOfFreedom)
+        .value("eOP_TimeDerivative",    cs::eOP_TimeDerivative)
+        .value("eOP_Unary",             cs::eOP_Unary)
+        .value("eOP_Binary",            cs::eOP_Binary)
         .export_values()
     ;
 
-    enum_<computestack::daeeOpResultLocation>("daeeOpResultLocation")
-        .value("eOP_Result_Unknown",    computestack::eOP_Result_Unknown)
-        .value("eOP_Result_to_value",   computestack::eOP_Result_to_value)
-        .value("eOP_Result_to_lvalue",  computestack::eOP_Result_to_lvalue)
-        .value("eOP_Result_to_rvalue",  computestack::eOP_Result_to_rvalue)
+    enum_<cs::csOpResultLocation>("csOpResultLocation")
+        .value("eOP_Result_Unknown",    cs::eOP_Result_Unknown)
+        .value("eOP_Result_to_value",   cs::eOP_Result_to_value)
+        .value("eOP_Result_to_lvalue",  cs::eOP_Result_to_lvalue)
+        .value("eOP_Result_to_rvalue",  cs::eOP_Result_to_rvalue)
         .export_values()
     ;
 
@@ -338,6 +338,15 @@ BOOST_PYTHON_MODULE(pyCore)
     ;
     class_< std::map< size_t,std::vector<size_t> > >("map_ulong_vector_ulong")
         .def(map_indexing_suite< std::map< size_t,std::vector<size_t> > >())
+    ;
+
+
+    class_<call_stats::TimeAndCount>("TimeAndCount")
+        .def_readonly("Count",    &call_stats::TimeAndCount::count)
+        .def_readonly("Duration", &call_stats::TimeAndCount::duration)
+    ;
+    class_< std::map<std::string,call_stats::TimeAndCount> >("map_string_TimeCount")
+        .def(map_indexing_suite< std::map<std::string,call_stats::TimeAndCount> >())
     ;
 
 /**************************************************************
@@ -418,7 +427,7 @@ BOOST_PYTHON_MODULE(pyCore)
         .def_readwrite("Model",	&daeNodeSaveAsContext::m_pModel)
     ;
 
-    class_<adComputeStackItem_t>("adComputeStackItem_t", no_init)
+    class_<csComputeStackItem_t>("csComputeStackItem_t", no_init)
         .add_property("opCode",         &daepython::adComputeStackItem_opCode)
         .add_property("function",       &daepython::adComputeStackItem_function)
         .add_property("value",          &daepython::adComputeStackItem_data_value)
@@ -639,7 +648,7 @@ BOOST_PYTHON_MODULE(pyCore)
         .add_property("RNode",          make_function(&condExpressionNode::getRightRawPtr, return_internal_reference<>()))
     ;
 
-    class_<computestack::adComputeStackEvaluator_t, boost::noncopyable>("adComputeStackEvaluator_t", no_init)
+    class_<cs::csComputeStackEvaluator_t, boost::noncopyable>("csComputeStackEvaluator_t", no_init)
     ;
 
     class_<daeCondition>("daeCondition", DOCSTR_daeCondition, no_init)

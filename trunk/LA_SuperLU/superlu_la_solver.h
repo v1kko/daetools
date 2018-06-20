@@ -4,11 +4,6 @@
 #include "../IDAS_DAESolver/ida_la_solver_interface.h"
 #include "../IDAS_DAESolver/solver_class_factory.h"
 #include "../IDAS_DAESolver/dae_array_matrix.h"
-//#include <idas/idas.h>
-//#include <idas/idas_impl.h>
-#include <nvector/nvector_serial.h>
-#include <sundials/sundials_types.h>
-#include <sundials/sundials_math.h>
 #include "superlu_solvers.h"
 
 #ifdef daeSuperLU_MT
@@ -39,7 +34,7 @@ namespace superlu_mt
 {
 #endif
 
-class DAE_SOLVER_API daeSuperLUSolver : public dae::solver::daeIDALASolver_t
+class DAE_SOLVER_API daeSuperLUSolver : public dae::solver::daeLASolver_t
 {
     typedef daeCSRMatrix<real_t, int> daeSuperLUMatrix;
 public:
@@ -47,11 +42,6 @@ public:
     ~daeSuperLUSolver();
 
 public:
-/*
-    int Create(void* ida, size_t n, daeDAESolver_t* pDAESolver);
-    int Reinitialize(void* ida);
-    int Init(void* ida);
-*/
     virtual int Create(size_t n,
                        size_t nnz,
                        daeBlockOfEquations_t* block);
@@ -74,25 +64,19 @@ public:
     virtual int SaveAsXPM(const std::string& strFileName);
     virtual int SaveAsMatrixMarketFile(const std::string& strFileName, const std::string& strMatrixName, const std::string& strMatrixDescription);
 
-    string GetName(void) const;
-    void SetOpenBLASNoThreads(int n);
-/*
-    int Setup(void* ida,
-              N_Vector	vectorVariables,
-              N_Vector	vectorTimeDerivatives,
-              N_Vector	vectorResiduals,
-              N_Vector	vectorTemp1,
-              N_Vector	vectorTemp2,
-              N_Vector	vectorTemp3);
-    int Solve(void* ida,
-              N_Vector	b,
-              N_Vector	weight,
-              N_Vector	vectorVariables,
-              N_Vector	vectorTimeDerivatives,
-              N_Vector	vectorResiduals);
-    int Free(void* ida);
-*/
-    std::map<std::string, real_t> GetEvaluationCallsStats();
+    virtual string GetName(void) const;
+
+    virtual std::map<std::string, call_stats::TimeAndCount> GetCallStats() const;
+
+    virtual void        SetOption_string(const std::string& strName, const std::string& Value);
+    virtual void        SetOption_float(const std::string& strName, double Value);
+    virtual void        SetOption_int(const std::string& strName, int Value);
+    virtual void        SetOption_bool(const std::string& strName, bool Value);
+
+    virtual std::string GetOption_string(const std::string& strName);
+    virtual double      GetOption_float(const std::string& strName);
+    virtual int         GetOption_int(const std::string& strName);
+    virtual bool        GetOption_bool(const std::string& strName);
 
 #ifdef daeSuperLU_MT
     superlumt_options_t& GetOptions(void);
@@ -112,8 +96,6 @@ public:
     int                     m_nNoEquations;
     real_t*                 m_vecB;
     real_t*                 m_vecX;
-    size_t                  m_nJacobianEvaluations;
-    //daeDAESolver_t*		m_pDAESolver;
 
     daeRawDataArray<real_t>	m_arrValues;
     daeRawDataArray<real_t>	m_arrTimeDerivatives;
@@ -121,12 +103,9 @@ public:
     daeSuperLUMatrix        m_matJacobian;
     bool                    m_bFactorizationDone;
 
-    size_t m_nNumberOfSetupCalls;
-    size_t m_nNumberOfSolveCalls;
-    real_t m_SetupTime;
-    real_t m_SolveTime;
-
     int m_omp_num_threads;
+
+    std::map<std::string, call_stats::TimeAndCount>  m_stats;
 
 #ifdef daeSuperLU_MT
     SuperMatrix			m_matA;

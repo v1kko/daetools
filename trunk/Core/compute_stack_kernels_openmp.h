@@ -10,37 +10,37 @@ PARTICULAR PURPOSE. See the GNU General Public License for more details.
 You should have received a copy of the GNU General Public License along with the
 DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 ***********************************************************************************/
-#include "compute_stack.h"
-using namespace computestack;
+#include "../opencs/cs_evaluator.h"
+using namespace cs;
 
 namespace openmp_evaluator
 {
 /* Residual kernel function. */
-void EvaluateResiduals(const adComputeStackItem_t*         computeStacks,
+void EvaluateResiduals(const csComputeStackItem_t*         computeStacks,
                        uint32_t                            equationIndex,
                        const uint32_t*                     activeEquationSetIndexes,
-                       daeComputeStackEvaluationContext_t  EC,
+                       csEvaluationContext_t               EC,
                        const real_t*                       dofs,
                        const real_t*                       values,
                        const real_t*                       timeDerivatives,
                        real_t*                             residuals);
 
 /* Jacobian kernel functions. */
-void EvaluateJacobian(const adComputeStackItem_t*         computeStacks,
+void EvaluateJacobian(const csComputeStackItem_t*         computeStacks,
                       uint32_t                            jacobianItemIndex,
                       const uint32_t*                     activeEquationSetIndexes,
-                      const adJacobianMatrixItem_t*       computeStackJacobianItems,
-                      daeComputeStackEvaluationContext_t  EC,
+                      const csJacobianMatrixItem_t*       computeStackJacobianItems,
+                      csEvaluationContext_t               EC,
                       const real_t*                       dofs,
                       const real_t*                       values,
                       const real_t*                       timeDerivatives,
                       real_t*                             jacobian);
 
 /* Sensitivity residual kernel function. */
-void EvaluateSensitivityResiduals(const adComputeStackItem_t*         computeStacks,
+void EvaluateSensitivityResiduals(const csComputeStackItem_t*         computeStacks,
                                   uint32_t                            equationIndex,
                                   const uint32_t*                     activeEquationSetIndexes,
-                                  daeComputeStackEvaluationContext_t  EC,
+                                  csEvaluationContext_t               EC,
                                   const real_t*                       dofs,
                                   const real_t*                       values,
                                   const real_t*                       timeDerivatives,

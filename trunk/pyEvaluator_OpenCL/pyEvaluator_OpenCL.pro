@@ -12,7 +12,8 @@ CONFIG += shared
 
 INCLUDEPATH += $${BOOSTDIR} \
                $${PYTHON_INCLUDE_DIR} \
-               $${PYTHON_SITE_PACKAGES_DIR}
+               $${PYTHON_SITE_PACKAGES_DIR} \
+               $${OPEN_CS_DIR}
 
 QMAKE_LIBDIR += $${PYTHON_LIB_DIR}
 

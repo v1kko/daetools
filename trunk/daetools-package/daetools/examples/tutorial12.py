@@ -112,22 +112,25 @@ def createLASolver():
 
     if lasolver.Name == 'SuperLU':
         # SuperLU options:
-        options.PrintStat       = superlu.YES       # {YES, NO}
         options.ColPerm         = superlu.COLAMD    # {NATURAL, MMD_ATA, MMD_AT_PLUS_A, COLAMD}
-        options.RowPerm         = superlu.NOROWPERM # {NOROWPERM, LargeDiag}
-        options.DiagPivotThresh = 1.0               # Between 0.0 and 1.0
+        #options.RowPerm         = superlu.NOROWPERM # {NOROWPERM, LargeDiag}
+        #options.PrintStat       = superlu.YES       # {YES, NO}
+        #options.DiagPivotThresh = 1.0               # Between 0.0 and 1.0
+        #options.Equil           = superlu.NO        # {YES, NO}
+        #options.PivotGrowth     = superlu.NO        # {YES, NO}
+        #options.ConditionNumber = superlu.NO        # {YES, NO}
 
     elif lasolver.Name == 'SuperLU_MT':
         # SuperLU_MT options:
         # Leave nprocs to default (specified in daetools.cfg) or specify it manually
         #options.nprocs           = 4                 # No. of threads (= no. of CPUs/Cores)
         print('SuperLU_MT numThreads = %d' % options.nprocs)
-        options.PrintStat         = superlu.YES       # {YES, NO}
-        options.ColPerm           = superlu.COLAMD    # {NATURAL, MMD_ATA, MMD_AT_PLUS_A, COLAMD}
-        options.diag_pivot_thresh = 1.0               # Between 0.0 and 1.0
-        options.panel_size        = 8                 # Integer value
-        options.relax             = 6                 # Integer value
-        options.drop_tol          = 0.0               # Floating point value
+        #options.PrintStat         = superlu.YES       # {YES, NO}
+        #options.ColPerm           = superlu.COLAMD    # {NATURAL, MMD_ATA, MMD_AT_PLUS_A, COLAMD}
+        #options.diag_pivot_thresh = 1.0               # Between 0.0 and 1.0
+        #options.panel_size        = 8                 # Integer value
+        #options.relax             = 6                 # Integer value
+        #options.drop_tol          = 0.0               # Floating point value
 
     return lasolver
 

@@ -68,7 +68,7 @@ PROJECT:
         deal.ii                 Build deal.II FEM library and its python extension module (pyDealII).
         cape_open_thermo        Build Cape Open thermo-physical property package library (cdaeCapeOpenThermoPackage.dll, Windows only).
         opencl_evaluator        Build Evaluator_OpenCL library and its python extension module (pyEvaluator_OpenCL).
-        daetools_mpi_simulator  Build the generic DAE Tools parallel simulator that use MPI interface.
+        cs_dae_simulator        Build the generic DAE Tools parallel simulator based on Compute Stack interface.
                                 Requires boost_static and idas_mpi to be compiled.
 EOF
 }
@@ -302,7 +302,7 @@ do
     deal.ii)          ;; 
     cape_open_thermo) ;; 
     opencl_evaluator) ;;
-    daetools_mpi_simulator) ;;
+    cs_dae_simulator) ;;
     *) echo Unrecognized project: "$project"
        exit
        ;;
@@ -482,7 +482,7 @@ do
         opencl_evaluator) compile Evaluator_OpenCL   "-j1"
                           compile pyEvaluator_OpenCL "-j1"
                           ;;
-        daetools_mpi_simulator) compile daetools_mpi_simulator
+        cs_dae_simulator) compile cs_dae_simulator
                                 ;;
         
         *) echo "??????????????????????"

@@ -10,17 +10,19 @@ PARTICULAR PURPOSE. See the GNU General Public License for more details.
 You should have received a copy of the GNU General Public License along with the
 DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 ***********************************************************************************/
-#include "typedefs.h"
-#include "runtime_information.h"
+#include "cs_simulator.h"
+#include "cs_evaluator_sequential.h"
+#include "auxiliary.h"
+#include "mpi_data_exchange.h"
 #include <exception>
 #include <fstream>
 #include <iomanip>
-#include "compute_stack_openmp.h"
 #include <boost/format.hpp>
 #include <boost/filesystem.hpp>
 #include <boost/filesystem/operations.hpp>
 #include <boost/container/flat_map.hpp>
 using boost::container::flat_map;
+using namespace cs;
 
 /* Internal storage containers for evaluation of equations. */
 std::vector<real_t>                 g_values;
@@ -33,33 +35,27 @@ flat_map<int, real_t*>              g_mapValues;
 flat_map<int, real_t*>              g_mapTimeDerivatives;
 
 /* Initialisation data (loaded from files). */
-partitionData_t                     g_partitionData;
-runtimeInformationData_t            g_rtData;
+csPartitionData_t                   g_partitionData;
 
 /* ComputeStack-related data. */
-std::vector<adComputeStackItem_t>   g_arrAllComputeStacks;
-std::vector<adJacobianMatrixItem_t> g_arrJacobianMatrixItems;
+std::vector<csComputeStackItem_t>   g_arrAllComputeStacks;
+std::vector<csJacobianMatrixItem_t> g_arrJacobianMatrixItems;
 std::vector<uint32_t>               g_arrActiveEquationSetIndexes;
 uint32_t*                           g_activeEquationSetIndexes  = NULL;
-adComputeStackItem_t*               g_computeStacks             = NULL;
-adJacobianMatrixItem_t*             g_jacobianMatrixItems       = NULL;
+csComputeStackItem_t*               g_computeStacks             = NULL;
+csJacobianMatrixItem_t*             g_jacobianMatrixItems       = NULL;
 uint32_t                            g_numberOfJacobianItems     = -1;
 uint32_t                            g_numberOfComputeStackItems = -1;
-adComputeStackEvaluator_t*          g_pEvaluator                = NULL;
+csComputeStackEvaluator_t*          g_pEvaluator                = NULL;
 
-namespace daetools_mpi
+namespace cs_simulator
 {
-static void loadRuntimeData(daeModel_t* model, const std::string& inputDirectory);
-static void loadPartitionData(daeModel_t* model, const std::string& inputDirectory);
-static void loadModelEquations(daeModel_t* model, const std::string& inputDirectory);
-static void loadJacobianData(daeModel_t* model, const std::string& inputDirectory);
-
 daeModel_t::daeModel_t()
 {
     mpi_world = NULL;
     mpi_rank  = -1;
     mpi_comm  = NULL;
-
+/*
     Nequations_local  = 0;
     Ntotal_vars       = 0;
     Nequations        = 0;
@@ -75,6 +71,7 @@ daeModel_t::daeModel_t()
     initDerivatives    = NULL;
     absoluteTolerances = NULL;
     variableNames      = NULL;
+*/
 }
 
 daeModel_t::~daeModel_t()
@@ -86,10 +83,10 @@ void daeModel_t::Load(const std::string& input_directory)
 {
     inputDirectory = input_directory;
 
-    loadRuntimeData(this, inputDirectory);
+    loadModelVariables(this, inputDirectory);
 
     loadPartitionData(this, inputDirectory);
-
+/*
     Nequations_local   = g_rtData.Nequations_local;
     Ntotal_vars        = g_rtData.Ntotal_vars;
     Nequations         = g_rtData.Nequations;
@@ -113,16 +110,17 @@ void daeModel_t::Load(const std::string& input_directory)
         absoluteTolerances[i] = g_rtData.absolute_tolerances[i];
         variableNames[i]      = g_rtData.variable_names[i].c_str();
     }
+*/
 
     g_dofs.resize(Ndofs, 0.0);
     for(int i = 0; i < Ndofs; i++)
-        g_dofs[i] = g_rtData.dofs[i];
+        g_dofs[i] = dofs[i];
 
     loadModelEquations(this, inputDirectory);
 
     loadJacobianData(this, inputDirectory);
 
-    g_pEvaluator = new daeComputeStackEvaluator_OpenMP();
+    g_pEvaluator = new cs::csComputeStackEvaluator_Sequential();
     g_pEvaluator->Initialize(false,
                              Nequations_local,
                              Nequations_local,
@@ -167,7 +165,7 @@ void daeModel_t::Load(const std::string& input_directory)
         ofs << "g_jacobianMatrixItems equationIndexes = [";
         for(int ji = 0; ji < g_numberOfJacobianItems; ji++)
         {
-            adJacobianMatrixItem_t& jd = g_jacobianMatrixItems[ji];
+            csJacobianMatrixItem_t& jd = g_jacobianMatrixItems[ji];
             ofs << jd.equationIndex << ", ";
         }
         ofs << "]" << std::endl;
@@ -211,6 +209,7 @@ void daeModel_t::Free()
         g_pEvaluator = NULL;
     }
 
+/*
 // These are not needed anymore
     if(ids)
         delete[] ids;
@@ -228,25 +227,26 @@ void daeModel_t::Free()
     initDerivatives    = NULL;
     absoluteTolerances = NULL;
     variableNames      = NULL;
+*/
 }
 
 void daeModel_t::InitializeValuesReferences()
 {
     // Reserve the size for internal vectors/maps
-    size_t Nforeign = g_partitionData.foreign_indexes.size();
-    size_t Ntot     = g_rtData.Nequations_local + Nforeign;
+    size_t Nforeign = g_partitionData.foreignIndexes.size();
+    size_t Ntot     = Nequations_local + Nforeign;
 
     g_values.resize(Ntot, 0.0);
     g_timeDerivatives.resize(Ntot, 0.0);
     g_mapValues.reserve(Ntot);
     g_mapTimeDerivatives.reserve(Ntot);
 
-    if(g_partitionData.bi_to_bi_local.size() != Ntot)
+    if(g_partitionData.biToBiLocal.size() != Ntot)
         throw std::runtime_error("Invalid number of items in bi_to_bi_local map");
 
     // Insert the pointers to the owned and the foreign values
     // Owned data are always in the range: [0, Nequations_local)
-    for(flat_map<int32_t,int32_t>::iterator iter = g_partitionData.bi_to_bi_local.begin(); iter != g_partitionData.bi_to_bi_local.end(); iter++)
+    for(std::map<int32_t,int32_t>::iterator iter = g_partitionData.biToBiLocal.begin(); iter != g_partitionData.biToBiLocal.end(); iter++)
     {
         int bi = iter->first;  // global block index
         int li = iter->second; // local index
@@ -256,7 +256,7 @@ void daeModel_t::InitializeValuesReferences()
     }
 
     // Initialize pointer maps
-    for(nodeIndexesMap::iterator it = g_partitionData.send_to.begin(); it != g_partitionData.send_to.end(); it++)
+    for(csPartitionIndexMap::iterator it = g_partitionData.sendToIndexes.begin(); it != g_partitionData.sendToIndexes.end(); it++)
     {
         // it->first is int (rank)
         // it->second is vector<int>
@@ -274,11 +274,11 @@ void daeModel_t::InitializeValuesReferences()
             pderivs_arr[i] = g_mapTimeDerivatives.at( indexes[i] );
         }
 
-        mapValuesData.send_to[rank]   = make_pair(values_arr,  derivs_arr);
-        mapPointersData.send_to[rank] = make_pair(pvalues_arr, pderivs_arr);
+        mapValuesData.sendToIndexes[rank]   = make_pair(values_arr,  derivs_arr);
+        mapPointersData.sendToIndexes[rank] = make_pair(pvalues_arr, pderivs_arr);
     }
 
-    for(nodeIndexesMap::iterator it = g_partitionData.receive_from.begin(); it != g_partitionData.receive_from.end(); it++)
+    for(csPartitionIndexMap::iterator it = g_partitionData.receiveFromIndexes.begin(); it != g_partitionData.receiveFromIndexes.end(); it++)
     {
         // it->first is int (rank)
         // it->second is vector<int>
@@ -296,8 +296,8 @@ void daeModel_t::InitializeValuesReferences()
             pderivs_arr[i] = g_mapTimeDerivatives.at( indexes[i] );
         }
 
-        mapValuesData.receive_from[rank]   = make_pair(values_arr,  derivs_arr);
-        mapPointersData.receive_from[rank] = make_pair(pvalues_arr, pderivs_arr);
+        mapValuesData.receiveFromIndexes[rank]   = make_pair(values_arr,  derivs_arr);
+        mapPointersData.receiveFromIndexes[rank] = make_pair(pvalues_arr, pderivs_arr);
     }
 
     CheckSynchronisationIndexes(mpi_world, mpi_rank);
@@ -340,28 +340,31 @@ int daeModel_t::EvaluateResiduals(real_t current_time,
                                   real_t* time_derivatives,
                                   real_t* residuals)
 {
+    auxiliary::daeTimesAndCounters& tcs = auxiliary::daeTimesAndCounters::GetTimesAndCounters();
+    call_stats::TimerCounter tc(tcs.ResidualsEvaluation);
+
     /* The values and timeDerivatives have been copied in modSynchroniseData function. */
 
     real_t* pdofs            = (g_dofs.size() > 0 ? &g_dofs[0] : NULL);
     real_t* pvalues          = &g_values[0];
     real_t* ptimeDerivatives = &g_timeDerivatives[0];
 
-    daeComputeStackEvaluationContext_t EC;
-    EC.equationCalculationMode                       = eCalculate;
-    EC.sensitivityParameterIndex                     = -1;
-    EC.jacobianIndex                                 = -1;
-    EC.numberOfVariables                             = Nequations_local;
-    EC.numberOfEquations                             = Nequations_local; // ???
-    EC.numberOfDOFs                                  = g_dofs.size();
-    EC.numberOfComputeStackItems                     = g_numberOfComputeStackItems;
-    EC.numberOfJacobianItems                         = 0;
-    EC.valuesStackSize                               = 5;
-    EC.lvaluesStackSize                              = 20;
-    EC.rvaluesStackSize                              = 5;
-    EC.currentTime                                   = current_time;
-    EC.inverseTimeStep                               = 0; // Should not be needed here. Double check...
-    EC.startEquationIndex                            = 0; // !!!
-    EC.startJacobianIndex                            = 0; // !!!
+    csEvaluationContext_t EC;
+    EC.equationEvaluationMode    = cs::eEvaluateResidual;
+    EC.sensitivityParameterIndex = -1;
+    EC.jacobianIndex             = -1;
+    EC.numberOfVariables         = Nequations_local;
+    EC.numberOfEquations         = Nequations_local; // ???
+    EC.numberOfDOFs              = g_dofs.size();
+    EC.numberOfComputeStackItems = g_numberOfComputeStackItems;
+    EC.numberOfJacobianItems     = 0;
+    EC.valuesStackSize           = 5;
+    EC.lvaluesStackSize          = 20;
+    EC.rvaluesStackSize          = 5;
+    EC.currentTime               = current_time;
+    EC.inverseTimeStep           = 0; // Should not be needed here. Double check...
+    EC.startEquationIndex        = 0; // !!!
+    EC.startJacobianIndex        = 0; // !!!
 
     g_pEvaluator->EvaluateResiduals(EC, pdofs, pvalues, ptimeDerivatives, residuals);
 
@@ -394,14 +397,16 @@ int daeModel_t::EvaluateResiduals(real_t current_time,
     return 0;
 }
 
-int daeModel_t::EvaluateJacobian(int                number_of_equations,
-                                 real_t             current_time,
+int daeModel_t::EvaluateJacobian(real_t             current_time,
                                  real_t             inverse_time_step,
                                  real_t*            values,
                                  real_t*            time_derivatives,
                                  real_t*            residuals,
                                  daeMatrixAccess_t* ma)
 {
+    auxiliary::daeTimesAndCounters& tcs = auxiliary::daeTimesAndCounters::GetTimesAndCounters();
+    call_stats::TimerCounter tc(tcs.JacobianEvaluation);
+
     /* The values and timeDerivatives have been copied in modSynchroniseData function. */
 
     real_t* pdofs            = (g_dofs.size() > 0 ? const_cast<real_t*>(&g_dofs[0]) : NULL);
@@ -410,29 +415,29 @@ int daeModel_t::EvaluateJacobian(int                number_of_equations,
 
     g_jacobian.resize(g_numberOfJacobianItems, 0.0);
 
-    daeComputeStackEvaluationContext_t EC;
-    EC.equationCalculationMode                       = eCalculateJacobian;
-    EC.sensitivityParameterIndex                     = -1;
-    EC.jacobianIndex                                 = -1;
-    EC.numberOfVariables                             = Nequations_local;
-    EC.numberOfEquations                             = Nequations_local; // ???
-    EC.numberOfDOFs                                  = g_dofs.size();
-    EC.numberOfComputeStackItems                     = g_numberOfComputeStackItems;
-    EC.numberOfJacobianItems                         = g_numberOfJacobianItems;
-    EC.valuesStackSize                               = 5;
-    EC.lvaluesStackSize                              = 20;
-    EC.rvaluesStackSize                              = 5;
-    EC.currentTime                                   = current_time;
-    EC.inverseTimeStep                               = inverse_time_step;
-    EC.startEquationIndex                            = 0; // !!!
-    EC.startJacobianIndex                            = 0; // !!!
+    csEvaluationContext_t EC;
+    EC.equationEvaluationMode    = cs::eEvaluateJacobian;
+    EC.sensitivityParameterIndex = -1;
+    EC.jacobianIndex             = -1;
+    EC.numberOfVariables         = Nequations_local;
+    EC.numberOfEquations         = Nequations_local; // ???
+    EC.numberOfDOFs              = g_dofs.size();
+    EC.numberOfComputeStackItems = g_numberOfComputeStackItems;
+    EC.numberOfJacobianItems     = g_numberOfJacobianItems;
+    EC.valuesStackSize           = 5;
+    EC.lvaluesStackSize          = 20;
+    EC.rvaluesStackSize          = 5;
+    EC.currentTime               = current_time;
+    EC.inverseTimeStep           = inverse_time_step;
+    EC.startEquationIndex        = 0; // !!!
+    EC.startJacobianIndex        = 0; // !!!
 
     g_pEvaluator->EvaluateJacobian(EC, pdofs, pvalues, ptimeDerivatives, &g_jacobian[0]);
 
     // Evaluated Jacobian values need to be copied to the Jacobian matrix.
     for(size_t ji = 0; ji < g_numberOfJacobianItems; ji++)
     {
-        const adJacobianMatrixItem_t& jacobianItem = g_jacobianMatrixItems[ji];
+        const csJacobianMatrixItem_t& jacobianItem = g_jacobianMatrixItems[ji];
         size_t ei_local = jacobianItem.equationIndex;
         size_t bi_local = jacobianItem.blockIndex; // it is already updated to local blockIndex in loadComputeStack
 
@@ -473,7 +478,7 @@ int daeModel_t::EvaluateJacobian(int                number_of_equations,
         for(size_t jdi = 0; jdi < g_numberOfJacobianItems; jdi++)
         {
             int ji = startJacobianIndex + jdi;
-            const adJacobianMatrixItem_t& jacobianItem = g_jacobianMatrixItems[ji];
+            const csJacobianMatrixItem_t& jacobianItem = g_jacobianMatrixItems[ji];
             size_t ei_local = jacobianItem.equationIndex - startEquationIndex;
             size_t bi_local = g_partitionData.bi_to_bi_local[jacobianItem.blockIndex];
             if(bi_local >= Nequations_local)
@@ -532,7 +537,7 @@ void daeModel_t::GetDAESystemStructure(int& N, int& NNZ, std::vector<int>& IA, s
     int removed = 0;
     for(size_t ji = 0; ji < g_numberOfJacobianItems; ji++)
     {
-        const adJacobianMatrixItem_t& jacobianItem = g_jacobianMatrixItems[ji];
+        const csJacobianMatrixItem_t& jacobianItem = g_jacobianMatrixItems[ji];
         size_t ei_local = jacobianItem.equationIndex;
         size_t bi_local = jacobianItem.blockIndex;
 
@@ -569,16 +574,16 @@ void daeModel_t::CheckSynchronisationIndexes(void* mpi_world, int mpi_rank)
     mpi::communicator& world = *(mpi::communicator*)mpi_world;
 
     std::vector<mpi::request> requests;
-    nodeIndexesMap received_indexes;
+    csPartitionIndexMap received_indexes;
 
     // Send the data to the other nodes
-    for(nodeIndexesMap::iterator it = g_partitionData.send_to.begin(); it != g_partitionData.send_to.end(); it++)
+    for(csPartitionIndexMap::iterator it = g_partitionData.sendToIndexes.begin(); it != g_partitionData.sendToIndexes.end(); it++)
     {
         requests.push_back( world.isend(it->first, 0, it->second) );
     }
 
     // Receive the data from the other nodes
-    for(nodeIndexesMap::iterator it = g_partitionData.receive_from.begin(); it != g_partitionData.receive_from.end(); it++)
+    for(csPartitionIndexMap::iterator it = g_partitionData.receiveFromIndexes.begin(); it != g_partitionData.receiveFromIndexes.end(); it++)
     {
         received_indexes[it->first] = std::vector<int>();
         requests.push_back( world.irecv(it->first, 0, received_indexes[it->first]) );
@@ -588,9 +593,9 @@ void daeModel_t::CheckSynchronisationIndexes(void* mpi_world, int mpi_rank)
     mpi::wait_all(requests.begin(), requests.end());
 
     // Check if we received the correct indexes
-    for(nodeIndexesMap::iterator it = g_partitionData.receive_from.begin(); it != g_partitionData.receive_from.end(); it++)
+    for(csPartitionIndexMap::iterator it = g_partitionData.receiveFromIndexes.begin(); it != g_partitionData.receiveFromIndexes.end(); it++)
     {
-        if(g_partitionData.receive_from[it->first] != received_indexes[it->first])
+        if(g_partitionData.receiveFromIndexes[it->first] != received_indexes[it->first])
             throw std::runtime_error(std::string("The received indexes do not match the requested ones, node: ") + std::to_string(mpi_rank));
     }
 
@@ -601,11 +606,11 @@ void daeModel_t::CheckSynchronisationIndexes(void* mpi_world, int mpi_rank)
     ofs.open(filename, std::ofstream::out);
 
     ofs << "Node " << mpi_rank << std::endl;
-    for(nodeIndexesMap::iterator it = g_partitionData.receive_from.begin(); it != g_partitionData.receive_from.end(); it++)
+    for(csPartitionIndexMap::iterator it = g_partitionData.receiveFromIndexes.begin(); it != g_partitionData.receiveFromIndexes.end(); it++)
     {
         ofs << "Expected from " << it->first << ": " << std::endl;
-        for(size_t i = 0; i < g_partitionData.receive_from[it->first].size(); i++)
-            ofs << g_partitionData.receive_from[it->first][i] << ", ";
+        for(size_t i = 0; i < g_partitionData.receiveFromIndexes[it->first].size(); i++)
+            ofs << g_partitionData.receiveFromIndexes[it->first][i] << ", ";
         ofs << std::endl;
 
         ofs << "Received from " << it->first << ": "  << std::endl;
@@ -619,6 +624,9 @@ void daeModel_t::CheckSynchronisationIndexes(void* mpi_world, int mpi_rank)
 
 void daeModel_t::SynchroniseData(real_t time, real_t* daesolver_values, real_t* daesolver_time_derivatives)
 {
+    auxiliary::daeTimesAndCounters& tcs = auxiliary::daeTimesAndCounters::GetTimesAndCounters();
+    call_stats::TimerCounter tc(tcs.IPCDataExchange);
+
     mpi::communicator& world = *(mpi::communicator*)mpi_world;
 
     // Copy values/derivatives from DAE solver into the local storage.
@@ -632,16 +640,16 @@ void daeModel_t::SynchroniseData(real_t time, real_t* daesolver_values, real_t* 
     std::vector<mpi::request> requests;
 
     // Send the data to the other nodes
-    for(nodeIndexesMap::iterator it = g_partitionData.send_to.begin(); it != g_partitionData.send_to.end(); it++)
+    for(csPartitionIndexMap::iterator it = g_partitionData.sendToIndexes.begin(); it != g_partitionData.sendToIndexes.end(); it++)
     {
         int               send_to_mpi_rank = it->first;
         std::vector<int>& indexes          = it->second;
         size_t i_size = indexes.size();
 
-        std::vector<real_t*>& pvalues = mapPointersData.send_to[send_to_mpi_rank].first;
-        std::vector<real_t*>& pderivs = mapPointersData.send_to[send_to_mpi_rank].second;
-        std::vector<real_t>&  values  = mapValuesData.send_to[send_to_mpi_rank].first;
-        std::vector<real_t>&  derivs  = mapValuesData.send_to[send_to_mpi_rank].second;
+        std::vector<real_t*>& pvalues = mapPointersData.sendToIndexes[send_to_mpi_rank].first;
+        std::vector<real_t*>& pderivs = mapPointersData.sendToIndexes[send_to_mpi_rank].second;
+        std::vector<real_t>&  values  = mapValuesData.sendToIndexes[send_to_mpi_rank].first;
+        std::vector<real_t>&  derivs  = mapValuesData.sendToIndexes[send_to_mpi_rank].second;
 
         for(size_t i = 0; i < i_size; i++)
         {
@@ -654,12 +662,12 @@ void daeModel_t::SynchroniseData(real_t time, real_t* daesolver_values, real_t* 
     }
 
     // Receive the data from the other nodes
-    for(nodeIndexesMap::iterator it = g_partitionData.receive_from.begin(); it != g_partitionData.receive_from.end(); it++)
+    for(csPartitionIndexMap::iterator it = g_partitionData.receiveFromIndexes.begin(); it != g_partitionData.receiveFromIndexes.end(); it++)
     {
         int receive_from_mpi_rank = it->first;
 
-        std::vector<real_t>& values  = mapValuesData.receive_from[receive_from_mpi_rank].first;
-        std::vector<real_t>& derivs  = mapValuesData.receive_from[receive_from_mpi_rank].second;
+        std::vector<real_t>& values  = mapValuesData.receiveFromIndexes[receive_from_mpi_rank].first;
+        std::vector<real_t>& derivs  = mapValuesData.receiveFromIndexes[receive_from_mpi_rank].second;
 
         requests.push_back( world.irecv(receive_from_mpi_rank, 1, values) );
         requests.push_back( world.irecv(receive_from_mpi_rank, 2, derivs) );
@@ -669,16 +677,16 @@ void daeModel_t::SynchroniseData(real_t time, real_t* daesolver_values, real_t* 
     mpi::wait_all(requests.begin(), requests.end());
 
     // Copy the data from the pointer arrays to values arrays
-    for(nodeIndexesMap::iterator it = g_partitionData.receive_from.begin(); it != g_partitionData.receive_from.end(); it++)
+    for(csPartitionIndexMap::iterator it = g_partitionData.receiveFromIndexes.begin(); it != g_partitionData.receiveFromIndexes.end(); it++)
     {
         int               receive_from_mpi_rank = it->first;
         std::vector<int>& indexes               = it->second;
         size_t i_size = indexes.size();
 
-        std::vector<real_t*>& pvalues = mapPointersData.receive_from[receive_from_mpi_rank].first;
-        std::vector<real_t*>& pderivs = mapPointersData.receive_from[receive_from_mpi_rank].second;
-        std::vector<real_t>&  values  = mapValuesData.receive_from[receive_from_mpi_rank].first;
-        std::vector<real_t>&  derivs  = mapValuesData.receive_from[receive_from_mpi_rank].second;
+        std::vector<real_t*>& pvalues = mapPointersData.receiveFromIndexes[receive_from_mpi_rank].first;
+        std::vector<real_t*>& pderivs = mapPointersData.receiveFromIndexes[receive_from_mpi_rank].second;
+        std::vector<real_t>&  values  = mapValuesData.receiveFromIndexes[receive_from_mpi_rank].first;
+        std::vector<real_t>&  derivs  = mapValuesData.receiveFromIndexes[receive_from_mpi_rank].second;
 
         if(indexes.size() != values.size()  ||
            indexes.size() != derivs.size()  ||
@@ -756,31 +764,44 @@ void daeModel_t::SynchroniseData(real_t time, real_t* daesolver_values, real_t* 
     */
 }
 
-
-
-void loadRuntimeData(daeModel_t* model, const std::string& inputDirectory)
+/*
+void loadSimulationData(daeSimulation_t* simulation, const std::string& inputDirectory)
 {
     std::ifstream f;
 
     // Get runtime data for the current node.
-    std::string filename = (boost::format("runtime_data-%05d.bin") % model->mpi_rank).str();
+    std::string filename = (boost::format("simulation_data-%05d.bin") % simulation->model->mpi_rank).str();
     boost::filesystem::path inputDataPath = boost::filesystem::weakly_canonical( boost::filesystem::path(inputDirectory) );
     std::string filePath = (inputDataPath / filename).string();
     f.open(filePath, std::ios_base::binary);
     if(!f.is_open())
         throw std::runtime_error("Cannot open " + filePath + " file");
 
-    f.read((char*)&g_rtData.Ntotal_vars,        sizeof(uint32_t));
-    f.read((char*)&g_rtData.Nequations,         sizeof(uint32_t));
-    f.read((char*)&g_rtData.Nequations_local,   sizeof(uint32_t));
-    f.read((char*)&g_rtData.Ndofs,              sizeof(uint32_t));
+    f.read((char*)&simulation->startTime,          sizeof(real_t));
+    f.read((char*)&simulation->timeHorizon,        sizeof(real_t));
+    f.read((char*)&simulation->reportingInterval,  sizeof(real_t));
+    f.read((char*)&simulation->relativeTolerance,  sizeof(real_t));
 
-    f.read((char*)&g_rtData.startTime,          sizeof(real_t));
-    f.read((char*)&g_rtData.timeHorizon,        sizeof(real_t));
-    f.read((char*)&g_rtData.reportingInterval,  sizeof(real_t));
-    f.read((char*)&g_rtData.relativeTolerance,  sizeof(real_t));
+    f.close();
+}
+*/
 
-    f.read((char*)&g_rtData.quasiSteadyState,   sizeof(bool));
+void loadModelVariables(daeModel_t* model, const std::string& inputDirectory)
+{
+    std::ifstream f;
+
+    // Get runtime data for the current node.
+    std::string filename = (boost::format("model_variables-%05d.bin") % model->mpi_rank).str();
+    boost::filesystem::path inputDataPath = boost::filesystem::weakly_canonical( boost::filesystem::path(inputDirectory) );
+    std::string filePath = (inputDataPath / filename).string();
+    f.open(filePath, std::ios_base::binary);
+    if(!f.is_open())
+        throw std::runtime_error("Cannot open " + filePath + " file");
+
+    f.read((char*)&model->Nequations,         sizeof(uint32_t));
+    f.read((char*)&model->Nequations_local,   sizeof(uint32_t));
+    f.read((char*)&model->Ndofs,              sizeof(uint32_t));
+    f.read((char*)&model->quasiSteadyState,   sizeof(bool));
 
     int32_t Nitems;
 
@@ -788,55 +809,55 @@ void loadRuntimeData(daeModel_t* model, const std::string& inputDirectory)
     f.read((char*)&Nitems,  sizeof(int32_t));
     if(Nitems > 0)
     {
-        g_rtData.dofs.resize(Nitems);
-        f.read((char*)(&g_rtData.dofs[0]), sizeof(real_t) * Nitems);
+        model->dofs.resize(Nitems);
+        f.read((char*)(&model->dofs[0]), sizeof(real_t) * Nitems);
     }
 
     // init_values
     f.read((char*)&Nitems,  sizeof(int32_t));
     if(Nitems > 0)
     {
-        g_rtData.init_values.resize(Nitems);
-        f.read((char*)(&g_rtData.init_values[0]), sizeof(real_t) * Nitems);
+        model->variableValues.resize(Nitems);
+        f.read((char*)(&model->variableValues[0]), sizeof(real_t) * Nitems);
     }
 
     // init_derivatives
     f.read((char*)&Nitems,  sizeof(int32_t));
     if(Nitems > 0)
     {
-        g_rtData.init_derivatives.resize(Nitems);
-        f.read((char*)(&g_rtData.init_derivatives[0]), sizeof(real_t) * Nitems);
+        model->variableDerivatives.resize(Nitems);
+        f.read((char*)(&model->variableDerivatives[0]), sizeof(real_t) * Nitems);
     }
 
     // absolute_tolerances
     f.read((char*)&Nitems,  sizeof(int32_t));
     if(Nitems > 0)
     {
-        g_rtData.absolute_tolerances.resize(Nitems);
-        f.read((char*)(&g_rtData.absolute_tolerances[0]), sizeof(real_t) * Nitems);
+        model->absoluteTolerances.resize(Nitems);
+        f.read((char*)(&model->absoluteTolerances[0]), sizeof(real_t) * Nitems);
     }
 
     // ids
     f.read((char*)&Nitems,  sizeof(int32_t));
     if(Nitems > 0)
     {
-        g_rtData.ids.resize(Nitems);
-        f.read((char*)(&g_rtData.ids[0]), sizeof(int32_t) * Nitems);
+        model->ids.resize(Nitems);
+        f.read((char*)(&model->ids[0]), sizeof(int32_t) * Nitems);
     }
 
     // variable_names (skipped)
     f.read((char*)&Nitems,  sizeof(int32_t));
     if(Nitems == 0)
     {
-        g_rtData.variable_names.resize(g_rtData.Nequations_local);
-        for(int i = 0; i < g_rtData.Nequations_local; i++)
+        model->variableNames.resize(model->Nequations_local);
+        for(int i = 0; i < model->Nequations_local; i++)
         {
-            g_rtData.variable_names[i] = (boost::format("y(%d)") % i).str();
+            model->variableNames[i] = (boost::format("y(%d)") % i).str();
         }
     }
     else
     {
-        g_rtData.variable_names.resize(Nitems);
+        model->variableNames.resize(Nitems);
 
         int32_t length;
         char name[4096];
@@ -849,7 +870,7 @@ void loadRuntimeData(daeModel_t* model, const std::string& inputDirectory)
             f.read((char*)(&name[0]), sizeof(char) * length);
             name[length] = '\0';
 
-            g_rtData.variable_names[i] = std::string(name);
+            model->variableNames[i] = std::string(name);
         }
     }
 
@@ -877,22 +898,22 @@ void loadPartitionData(daeModel_t* model, const std::string& inputDirectory)
     f.read((char*)&Nforeign,  sizeof(int32_t));
     if(Nforeign > 0)
     {
-        g_partitionData.foreign_indexes.resize(Nforeign);
-        f.read((char*)(&g_partitionData.foreign_indexes[0]), sizeof(int32_t) * Nforeign);
+        g_partitionData.foreignIndexes.resize(Nforeign);
+        f.read((char*)(&g_partitionData.foreignIndexes[0]), sizeof(int32_t) * Nforeign);
     }
 
     // bi_to_bi_local
     int32_t Nbi_to_bi_local_pairs, bi, bi_local;
     f.read((char*)&Nbi_to_bi_local_pairs,  sizeof(int32_t));
-    g_partitionData.bi_to_bi_local.reserve(Nbi_to_bi_local_pairs);
+    //g_partitionData.bi_to_bi_local.reserve(Nbi_to_bi_local_pairs);
     for(int32_t i = 0; i < Nbi_to_bi_local_pairs; i++)
     {
         f.read((char*)&bi,       sizeof(int32_t));
         f.read((char*)&bi_local, sizeof(int32_t));
-        g_partitionData.bi_to_bi_local[bi] = bi_local;
+        g_partitionData.biToBiLocal[bi] = bi_local;
     }
 
-    // send_to
+    // sendToIndexes
     int32_t Nsend_to;
     f.read((char*)&Nsend_to,  sizeof(int32_t));
     for(int32_t i = 0; i < Nsend_to; i++)
@@ -904,13 +925,13 @@ void loadPartitionData(daeModel_t* model, const std::string& inputDirectory)
         f.read((char*)&Nindexes, sizeof(int32_t));
         indexes.resize(Nindexes);
         f.read((char*)(&indexes[0]), sizeof(int32_t) * Nindexes);
-        g_partitionData.send_to[rank] = indexes;
+        g_partitionData.sendToIndexes[rank] = indexes;
 
         if(!std::is_sorted(indexes.begin(), indexes.end()))
-            throw std::runtime_error( (boost::format("send_to[%d][%d] indexes are not sorted") % model->mpi_rank % rank).str() );
+            throw std::runtime_error( (boost::format("sendToIndexes[%d][%d] indexes are not sorted") % model->mpi_rank % rank).str() );
     }
 
-    // receive_from
+    // receiveFromIndexes
     int32_t Nreceive_from;
     f.read((char*)&Nreceive_from,  sizeof(int32_t));
     for(int32_t i = 0; i < Nreceive_from; i++)
@@ -922,10 +943,10 @@ void loadPartitionData(daeModel_t* model, const std::string& inputDirectory)
         f.read((char*)&Nindexes, sizeof(int32_t));
         indexes.resize(Nindexes);
         f.read((char*)(&indexes[0]), sizeof(int32_t) * Nindexes);
-        g_partitionData.receive_from[rank] = indexes;
+        g_partitionData.receiveFromIndexes[rank] = indexes;
 
         if(!std::is_sorted(indexes.begin(), indexes.end()))
-            throw std::runtime_error( (boost::format("receive_from[%d][%d] indexes are not sorted") % model->mpi_rank % rank).str() );
+            throw std::runtime_error( (boost::format("receiveFromIndexes[%d][%d] indexes are not sorted") % model->mpi_rank % rank).str() );
     }
     f.close();
 }
@@ -951,7 +972,7 @@ void loadModelEquations(daeModel_t* model, const std::string& inputDirectory)
     g_arrAllComputeStacks.resize(Ncs);
 
     f.read((char*)(&g_arrActiveEquationSetIndexes[0]), sizeof(uint32_t)             * Nasi);
-    f.read((char*)(&g_arrAllComputeStacks[0]),         sizeof(adComputeStackItem_t) * Ncs);
+    f.read((char*)(&g_arrAllComputeStacks[0]),         sizeof(csComputeStackItem_t) * Ncs);
     f.close();
 
     g_activeEquationSetIndexes = &g_arrActiveEquationSetIndexes[0];
@@ -977,7 +998,7 @@ void loadJacobianData(daeModel_t* model, const std::string& inputDirectory)
 
     g_arrJacobianMatrixItems.resize(Nji);
 
-    f.read((char*)(&g_arrJacobianMatrixItems[0]), sizeof(adJacobianMatrixItem_t) * Nji);
+    f.read((char*)(&g_arrJacobianMatrixItems[0]), sizeof(csJacobianMatrixItem_t) * Nji);
     f.close();
 
     g_jacobianMatrixItems   = &g_arrJacobianMatrixItems[0];

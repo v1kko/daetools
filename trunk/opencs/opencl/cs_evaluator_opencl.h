@@ -1,8 +1,8 @@
 /***********************************************************************************
-*                 DAE Tools Project: www.daetools.com
-*                 Copyright (C) Dragan Nikolic
+                 OpenCS Project: www.daetools.com
+                 Copyright (C) Dragan Nikolic
 ************************************************************************************
-DAE Tools is free software; you can redistribute it and/or modify it under the
+OpenCS is free software; you can redistribute it and/or modify it under the
 terms of the GNU General Public License version 3 as published by the Free Software
 Foundation. DAE Tools is distributed in the hope that it will be useful, but WITHOUT
 ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
@@ -10,15 +10,15 @@ PARTICULAR PURPOSE. See the GNU General Public License for more details.
 You should have received a copy of the GNU General Public License along with the
 DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 ***********************************************************************************/
-#if !defined(COMPUTE_STACK_OPENCL_H)
-#define COMPUTE_STACK_OPENCL_H
+#if !defined(CS_EVALUATOR_OPENCL_H)
+#define CS_EVALUATOR_OPENCL_H
 
 #include <stdlib.h>
 #include <stdio.h>
 #include <stdexcept>
-#include "../Core/compute_stack.h"
-using namespace computestack;
-#include "cs_opencl.h"
+
+#include <cs_evaluator.h>
+#include "cs_opencl_platforms.h"
 
 #ifdef __APPLE__
 #include <OpenCL/opencl.h>
@@ -26,7 +26,9 @@ using namespace computestack;
 #include <CL/cl.h>
 #endif
 
-class daeComputeStackEvaluator_OpenCL : public adComputeStackEvaluator_t
+namespace cs
+{
+class daeComputeStackEvaluator_OpenCL : public csComputeStackEvaluator_t
 {
 public:
     daeComputeStackEvaluator_OpenCL(int platformID, int deviceID, std::string buildProgramOptions = "");
@@ -42,32 +44,32 @@ public:
                     size_t                  numberOfComputeStackItems,
                     size_t                  numberOfJacobianItems,
                     size_t                  numberOfJacobianItemsToProcess,
-                    adComputeStackItem_t*   computeStacks,
+                    csComputeStackItem_t*   computeStacks,
                     uint32_t*               activeEquationSetIndexes,
-                    adJacobianMatrixItem_t* computeStackJacobianItems);
+                    csJacobianMatrixItem_t* computeStackJacobianItems);
 
     /* Residual kernel function. */
-    void EvaluateResiduals(daeComputeStackEvaluationContext_t EC,
-                           real_t*                            dofs,
-                           real_t*                            values,
-                           real_t*                            timeDerivatives,
-                           real_t*                            residuals);
+    void EvaluateResiduals(csEvaluationContext_t EC,
+                           real_t*               dofs,
+                           real_t*               values,
+                           real_t*               timeDerivatives,
+                           real_t*               residuals);
 
     /* Jacobian kernel function (generic version). */
-    void EvaluateJacobian(daeComputeStackEvaluationContext_t EC,
-                          real_t*                            dofs,
-                          real_t*                            values,
-                          real_t*                            timeDerivatives,
-                          real_t*                            jacobianItems);
+    void EvaluateJacobian(csEvaluationContext_t EC,
+                          real_t*               dofs,
+                          real_t*               values,
+                          real_t*               timeDerivatives,
+                          real_t*               jacobianItems);
 
     /* Sensitivity residual kernel function. */
-    void EvaluateSensitivityResiduals(daeComputeStackEvaluationContext_t EC,
-                                      real_t*                            dofs,
-                                      real_t*                            values,
-                                      real_t*                            timeDerivatives,
-                                      real_t*                            svalues,
-                                      real_t*                            sdvalues,
-                                      real_t*                            sresiduals);
+    void EvaluateSensitivityResiduals(csEvaluationContext_t EC,
+                                      real_t*               dofs,
+                                      real_t*               values,
+                                      real_t*               timeDerivatives,
+                                      real_t*               svalues,
+                                      real_t*               sdvalues,
+                                      real_t*               sresiduals);
 
 public:
     cl_context       context;
@@ -188,5 +190,5 @@ static inline const char* getErrorString(cl_int error)
 
 #define clCheck(ret_code) if(ret_code != CL_SUCCESS) clDeclareAndThrowException(ret_code)
 
-
+}
 #endif

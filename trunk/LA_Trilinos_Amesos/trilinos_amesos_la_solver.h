@@ -4,11 +4,6 @@
 #include "../IDAS_DAESolver/ida_la_solver_interface.h"
 #include "../IDAS_DAESolver/solver_class_factory.h"
 #include "../IDAS_DAESolver/dae_array_matrix.h"
-//#include <idas/idas.h>
-//#include <idas/idas_impl.h>
-//#include <nvector/nvector_serial.h>
-//#include <sundials/sundials_types.h>
-//#include <sundials/sundials_math.h>
 #include <Epetra_SerialComm.h>
 
 #include <Amesos.h>
@@ -32,12 +27,6 @@
 #include <Ifpack.h>
 #include <Ifpack_AdditiveSchwarz.h>
 #include <Ifpack_Amesos.h>
-#include <Ifpack_ILU.h>
-#include <Ifpack_ILUT.h>
-#include <Ifpack_IC.h>
-#include <Ifpack_ICT.h>
-#include <Ifpack_PointRelaxation.h>
-#include <Ifpack_BlockRelaxation.h>
 #include <ml_include.h>
 #include <ml_MultiLevelPreconditioner.h>
 #include "base_solvers.h"
@@ -225,7 +214,83 @@ protected:
     Epetra_CrsMatrix*	matrix;
 };
 
-class DAE_SOLVER_API daeTrilinosSolver : public dae::solver::daeIDALASolver_t
+class DAE_SOLVER_API daePreconditioner_Ifpack : public daePreconditioner_t
+{
+public:
+    daePreconditioner_Ifpack(const std::string& preconditionerName);
+    virtual ~daePreconditioner_Ifpack();
+
+    virtual std::string GetName() const;
+    virtual int Initialize(size_t numberOfVariables, daeBlockOfEquations_t* block);
+    virtual int Reinitialize();
+    virtual int Setup(real_t  time,
+                      real_t  inverseTimeStep,
+                      real_t* values,
+                      real_t* timeDerivatives,
+                      real_t* residuals);
+    virtual int Solve(real_t  time, real_t* r, real_t* z);
+    virtual int JacobianVectorMultiply(real_t  time, real_t* v, real_t* Jv);
+    virtual int Free();
+    virtual std::map<std::string, call_stats::TimeAndCount> GetCallStats() const;
+
+    virtual void        SetOption_string(const std::string& strName, const std::string& Value);
+    virtual void        SetOption_float(const std::string& strName, double Value);
+    virtual void        SetOption_int(const std::string& strName, int Value);
+    virtual void        SetOption_bool(const std::string& strName, bool Value);
+
+    virtual std::string GetOption_string(const std::string& strName);
+    virtual double      GetOption_float(const std::string& strName);
+    virtual int         GetOption_int(const std::string& strName);
+    virtual bool        GetOption_bool(const std::string& strName);
+
+    Teuchos::ParameterList& GetParameterList();
+
+public:
+    void* data;
+    std::string strPreconditionerName;
+    Teuchos::ParameterList m_parameterList;
+    std::map<std::string, call_stats::TimeAndCount>  m_stats;
+};
+
+class DAE_SOLVER_API daePreconditioner_ML : public daePreconditioner_t
+{
+public:
+    daePreconditioner_ML(const std::string& preconditionerName);
+    virtual ~daePreconditioner_ML();
+
+    virtual std::string GetName() const;
+    virtual int Initialize(size_t numberOfVariables, daeBlockOfEquations_t* block);
+    virtual int Reinitialize();
+    virtual int Setup(real_t  time,
+                      real_t  inverseTimeStep,
+                      real_t* values,
+                      real_t* timeDerivatives,
+                      real_t* residuals);
+    virtual int Solve(real_t  time, real_t* r, real_t* z);
+    virtual int JacobianVectorMultiply(real_t  time, real_t* v, real_t* Jv);
+    virtual int Free();
+    virtual std::map<std::string, call_stats::TimeAndCount> GetCallStats() const;
+
+    virtual void        SetOption_string(const std::string& strName, const std::string& Value);
+    virtual void        SetOption_float(const std::string& strName, double Value);
+    virtual void        SetOption_int(const std::string& strName, int Value);
+    virtual void        SetOption_bool(const std::string& strName, bool Value);
+
+    virtual std::string GetOption_string(const std::string& strName);
+    virtual double      GetOption_float(const std::string& strName);
+    virtual int         GetOption_int(const std::string& strName);
+    virtual bool        GetOption_bool(const std::string& strName);
+
+    Teuchos::ParameterList& GetParameterList();
+
+public:
+    void* data;
+    std::string strPreconditionerName;
+    Teuchos::ParameterList m_parameterList;
+    std::map<std::string, call_stats::TimeAndCount>  m_stats;
+};
+
+class DAE_SOLVER_API daeTrilinosSolver : public dae::solver::daeLASolver_t
 {
 public:
     daeTrilinosSolver(const std::string& strSolverName, const std::string& strPreconditionerName);
@@ -252,13 +317,27 @@ public:
     virtual int Free();
     virtual int SaveAsXPM(const std::string& strFileName);
     virtual int SaveAsMatrixMarketFile(const std::string& strFileName, const std::string& strMatrixName, const std::string& strMatrixDescription);
+    virtual std::map<std::string, call_stats::TimeAndCount> GetCallStats() const;
 
-    string GetName(void) const;
+    virtual void        SetOption_string(const std::string& strName, const std::string& Value);
+    virtual void        SetOption_float(const std::string& strName, double Value);
+    virtual void        SetOption_int(const std::string& strName, int Value);
+    virtual void        SetOption_bool(const std::string& strName, bool Value);
+
+    virtual std::string GetOption_string(const std::string& strName);
+    virtual double      GetOption_float(const std::string& strName);
+    virtual int         GetOption_int(const std::string& strName);
+    virtual bool        GetOption_bool(const std::string& strName);
+
+    virtual string GetName(void) const;
     string GetPreconditionerName(void) const;
-    std::map<std::string, real_t> GetEvaluationCallsStats();
 
     bool SetupLinearProblem(void);
     void PrintPreconditionerInfo(void);
+
+    Teuchos::ParameterList& GetParameterList(void);
+/*
+    void SetOptions(Teuchos::ParameterList& paramList);
 
     void SetAmesosOptions(Teuchos::ParameterList& paramList);
     void SetAztecOOOptions(Teuchos::ParameterList& paramList);
@@ -269,12 +348,9 @@ public:
     Teuchos::ParameterList& GetAztecOOOptions(void);
     Teuchos::ParameterList& GetIfpackOptions(void);
     Teuchos::ParameterList& GetMLOptions(void);
-
-    void SetOpenBLASNoThreads(int n);
+*/
 
 protected:
-    bool CheckData() const;
-    void AllocateMemory(void);
     void FreeMemory(void);
 
 public:
@@ -287,6 +363,8 @@ public:
     boost::shared_ptr<Epetra_Vector>		m_vecX;
     boost::shared_ptr<Epetra_Map>			m_map;
     boost::shared_ptr<Epetra_CrsMatrix>		m_matEPETRA;
+
+    std::map<std::string, call_stats::TimeAndCount>  m_stats;
 
 #ifdef HAVE_MPI
     Epetra_MpiComm		m_Comm;
@@ -304,31 +382,25 @@ public:
 
     daeeTrilinosSolverType	m_eTrilinosSolver;
     int						m_nNoEquations;
-    //daeDAESolver_t*			m_pDAESolver;
     daeRawDataArray<real_t>	m_arrValues;
     daeRawDataArray<real_t> m_arrTimeDerivatives;
     daeRawDataArray<real_t> m_arrResiduals;
     daeEpetraCSRMatrix		m_matJacobian;
-    size_t					m_nJacobianEvaluations;
     bool					m_bMatrixStructureChanged;
 
-    size_t m_nNumberOfSetupCalls;
-    size_t m_nNumberOfSolveCalls;
-    real_t m_SetupTime;
-    real_t m_SolveTime;
-
+    Teuchos::ParameterList	m_parameterList;
 /* AMESOS */
     boost::shared_ptr<Amesos_BaseSolver>	m_pAmesosSolver;
-    Teuchos::ParameterList					m_parameterListAmesos;
+    //Teuchos::ParameterList				m_parameterListAmesos;
 
 /* AZTECOO */
     std::string												m_strPreconditionerName;
     boost::shared_ptr<AztecOO>								m_pAztecOOSolver;
     boost::shared_ptr<Ifpack_Preconditioner>				m_pPreconditionerIfpack;
     boost::shared_ptr<ML_Epetra::MultiLevelPreconditioner>	m_pPreconditionerML;
-    Teuchos::ParameterList									m_parameterListAztec;
-    Teuchos::ParameterList									m_parameterListIfpack;
-    Teuchos::ParameterList									m_parameterListML;
+    //Teuchos::ParameterList									m_parameterListAztec;
+    //Teuchos::ParameterList									m_parameterListIfpack;
+    //Teuchos::ParameterList									m_parameterListML;
     int														m_nNumIters;
     double													m_dTolerance;
     bool													m_bIsPreconditionerConstructed;

@@ -21,7 +21,7 @@ boost::python::dict getDictFromMapByValue(std::map<KEY,VALUE>& mapItems)
     return res;
 }
 
-boost::python::list daePardisoSolver_get_iparm(daePardisoSolver& self)
+boost::python::list get_iparm(daePardisoSolver& self)
 {
     boost::python::list l;
 
@@ -31,7 +31,7 @@ boost::python::list daePardisoSolver_get_iparm(daePardisoSolver& self)
     return l;
 }
 
-void daePardisoSolver_set_iparm(daePardisoSolver& self, boost::python::list l_iparm)
+void set_iparm(daePardisoSolver& self, boost::python::list l_iparm)
 {
     int option;
     boost::python::ssize_t n = boost::python::len(l_iparm);
@@ -46,9 +46,9 @@ void daePardisoSolver_set_iparm(daePardisoSolver& self, boost::python::list l_ip
         self.iparm[i] = extract<int>(l_iparm[i]);
 }
 
-boost::python::dict daePardisoSolver_GetEvaluationCallsStats_(daePardisoSolver& self)
+boost::python::dict GetCallStats(daePardisoSolver& self)
 {
-    std::map<std::string, real_t> stats = self.GetEvaluationCallsStats();
+    std::map<std::string, call_stats::TimeAndCount> stats = self.GetCallStats();
     return getDictFromMapByValue(stats);
 }
 

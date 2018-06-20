@@ -10,7 +10,7 @@ PARTICULAR PURPOSE. See the GNU General Public License for more details.
 You should have received a copy of the GNU General Public License along with the
 DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 ***********************************************************************************/
-#include "typedefs.h"
+#include "cs_simulator.h"
 #include <boost/numeric/ublas/vector.hpp>
 #include <boost/numeric/ublas/vector_proxy.hpp>
 #include <boost/numeric/ublas/matrix.hpp>
@@ -28,12 +28,12 @@ DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 #define daeSuperLU
 #include "../LA_Trilinos_Amesos/trilinos_amesos_la_solver.h"
 
-namespace daetools_mpi
+namespace cs_simulator
 {
 class daePreconditionerData_ML : public daeMatrixAccess_t
 {
 public:
-    daePreconditionerData_ML(size_t numVars, daetools_mpi::daeModel_t* mod) :
+    daePreconditionerData_ML(size_t numVars, cs_simulator::daeModel_t* mod) :
         numberOfVariables(numVars), model(mod)
     {
         m_map.reset(new Epetra_Map((int)numberOfVariables, 0, m_Comm));
@@ -46,6 +46,8 @@ public:
         m_matJacobian.Sort(); // The function Sort will call FillComplete on Epetra matrix (required for Ifpack constructor).
 
         daeSimulationOptions& cfg = daeSimulationOptions::GetConfig();
+        printInfo = cfg.GetBoolean("LinearSolver.Preconditioner.PrintInfo", false);
+
         std::string strPreconditionerName = cfg.GetString("LinearSolver.Preconditioner.Name", "SA");
 
         if(strPreconditionerName != "SA"       &&
@@ -145,12 +147,13 @@ public:
     }
 
 public:
+    bool                                                printInfo;
     int                                                 N;
     int                                                 NNZ;
     std::vector<int>                                    IA;
     std::vector<int>                                    JA;
     size_t                                              numberOfVariables;
-    daetools_mpi::daeModel_t*                           model;
+    cs_simulator::daeModel_t*                           model;
 
     boost::shared_ptr<Epetra_Map>                           m_map;
     boost::shared_ptr<Epetra_CrsMatrix>                     m_matEPETRA;
@@ -168,7 +171,7 @@ daePreconditioner_ML::~daePreconditioner_ML()
     Free();
 }
 
-int daePreconditioner_ML::Initialize(daetools_mpi::daeModel_t *model, size_t numberOfVariables)
+int daePreconditioner_ML::Initialize(cs_simulator::daeModel_t *model, size_t numberOfVariables)
 {
     daePreconditionerData_ML* p_data = new daePreconditionerData_ML(numberOfVariables, model);
     this->data = p_data;
@@ -186,14 +189,18 @@ int daePreconditioner_ML::Setup(real_t  time,
 
     p_data->m_matJacobian.ClearMatrix();
     daeMatrixAccess_t* ma = p_data;
-    p_data->model->EvaluateJacobian(p_data->numberOfVariables, time,  inverseTimeStep, values, timeDerivatives, residuals, ma);
+    p_data->model->EvaluateJacobian(time, inverseTimeStep, values, timeDerivatives, residuals, ma);
 
     if(p_data->m_pPreconditionerML->IsPreconditionerComputed())
         p_data->m_pPreconditionerML->DestroyPreconditioner();
 
     int ret = p_data->m_pPreconditionerML->ComputePreconditioner();
 
-    //p_data->m_pPreconditionerML->AnalyzeCoarse();
+    if(p_data->printInfo)
+    {
+        Teuchos::ParameterList& l = p_data->m_pPreconditionerML->GetList();
+        l.print(std::cout, 2, true, true);
+    }
     return ret;
 }
 

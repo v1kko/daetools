@@ -28,9 +28,9 @@
 #include "../Core/nodes.h"
 #include "../Core/nodes_array.h"
 
-using computestack::daeeOpCode;
-using computestack::daeeOpResultLocation;
-using computestack::adComputeStackItem_t;
+using cs::csOpCode;
+using cs::csOpResultLocation;
+using cs::csComputeStackItem_t;
 
 namespace daepython
 {
@@ -168,8 +168,8 @@ string adNode__str__(const adNode& self);
 string adNode__repr__(const adNode& self);
 string adouble_array__str__(const adouble_array& self);
 string adouble_array__repr__(const adouble_array& self);
-string adComputeStackItem__str__(const adComputeStackItem_t& self);
-string adComputeStackItem__repr__(const adComputeStackItem_t& self);
+string adComputeStackItem__str__(const csComputeStackItem_t& self);
+string adComputeStackItem__repr__(const csComputeStackItem_t& self);
 
 string daeOptimizationVariable__str__(const daeOptimizationVariable& self);
 string daeOptimizationVariable__repr__(const daeOptimizationVariable& self);
@@ -207,15 +207,15 @@ string daeScalarExternalFunction__repr__(daeScalarExternalFunction& self);
 string daeVectorExternalFunction__str__(daeVectorExternalFunction& self);
 string daeVectorExternalFunction__repr__(daeVectorExternalFunction& self);
 
-string adComputeStackItem_variableName(adComputeStackItem_t& self);
-daeeOpCode adComputeStackItem_opCode(adComputeStackItem_t& self);
-boost::python::object adComputeStackItem_function(adComputeStackItem_t& self);
-daeeOpResultLocation adComputeStackItem_resultLocation(adComputeStackItem_t& self);
-int adComputeStackItem_tag(adComputeStackItem_t& self);
-double adComputeStackItem_data_value(adComputeStackItem_t& self);
-uint32_t adComputeStackItem_data_dofIndex(adComputeStackItem_t& self);
-uint32_t adComputeStackItem_data_blockIndex(adComputeStackItem_t& self);
-uint32_t adComputeStackItem_data_overallIndex(adComputeStackItem_t& self);
+string adComputeStackItem_variableName(csComputeStackItem_t& self);
+csOpCode adComputeStackItem_opCode(csComputeStackItem_t& self);
+boost::python::object adComputeStackItem_function(csComputeStackItem_t& self);
+csOpResultLocation adComputeStackItem_resultLocation(csComputeStackItem_t& self);
+int adComputeStackItem_tag(csComputeStackItem_t& self);
+double adComputeStackItem_data_value(csComputeStackItem_t& self);
+uint32_t adComputeStackItem_data_dofIndex(csComputeStackItem_t& self);
+uint32_t adComputeStackItem_data_blockIndex(csComputeStackItem_t& self);
+uint32_t adComputeStackItem_data_overallIndex(csComputeStackItem_t& self);
 
 /*******************************************************
     Common functions

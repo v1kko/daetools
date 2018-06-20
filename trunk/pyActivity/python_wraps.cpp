@@ -8,5 +8,9 @@ using namespace boost::python;
 
 namespace daepython
 {
-
+boost::python::dict GetCallStats(daeSimulation& self)
+{
+    std::map<std::string, call_stats::TimeAndCount> stats = self.GetCallStats();
+    return getDictFromMapByValue(stats);
+}
 }

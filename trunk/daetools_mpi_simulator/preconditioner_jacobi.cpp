@@ -10,7 +10,7 @@ PARTICULAR PURPOSE. See the GNU General Public License for more details.
 You should have received a copy of the GNU General Public License along with the
 DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 ***********************************************************************************/
-#include "typedefs.h"
+#include "cs_simulator.h"
 #include <boost/numeric/ublas/vector.hpp>
 #include <boost/numeric/ublas/vector_proxy.hpp>
 #include <boost/numeric/ublas/matrix.hpp>
@@ -21,12 +21,12 @@ DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 #include <iostream>
 #include <vector>
 
-namespace daetools_mpi
+namespace cs_simulator
 {
 class daePreconditionerData : public daeMatrixAccess_t
 {
 public:
-    daePreconditionerData(size_t numVars, daetools_mpi::daeModel_t* mod) :
+    daePreconditionerData(size_t numVars, cs_simulator::daeModel_t* mod) :
         numberOfVariables(numVars), model(mod)
     {
         pp.resize(numberOfVariables, false);
@@ -42,7 +42,7 @@ public:
 
 public:
     size_t                    numberOfVariables;
-    daetools_mpi::daeModel_t* model;
+    cs_simulator::daeModel_t* model;
 
     boost::numeric::ublas::vector<real_t> pp;    // Diagonal preconditioner
     boost::numeric::ublas::vector<real_t> jacob; // Jacobian matrix (only diagonal items)
@@ -60,7 +60,7 @@ daePreconditioner_Jacobi::~daePreconditioner_Jacobi()
     Free();
 }
 
-int daePreconditioner_Jacobi::Initialize(daetools_mpi::daeModel_t *model, size_t numberOfVariables)
+int daePreconditioner_Jacobi::Initialize(cs_simulator::daeModel_t *model, size_t numberOfVariables)
 {
     daePreconditionerData* p_data = new daePreconditionerData(numberOfVariables, model);
     this->data = p_data;
@@ -78,7 +78,7 @@ int daePreconditioner_Jacobi::Setup(real_t  time,
 
     /* The values and timeDerivatives have been copied in mpiSynchroniseData function. */
     p_data->jacob.clear();
-    p_data->model->EvaluateJacobian(p_data->numberOfVariables, time,  inverseTimeStep, values, timeDerivatives, residuals, p_data);
+    p_data->model->EvaluateJacobian(time, inverseTimeStep, values, timeDerivatives, residuals, p_data);
 
     /* Simple Jacobi preconditioner. */
     for(size_t i = 0; i < p_data->numberOfVariables; i++)

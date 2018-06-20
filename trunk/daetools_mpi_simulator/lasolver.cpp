@@ -10,13 +10,16 @@ PARTICULAR PURPOSE. See the GNU General Public License for more details.
 You should have received a copy of the GNU General Public License along with the
 DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 ***********************************************************************************/
-#include "typedefs.h"
+#include "cs_simulator.h"
+#include "auxiliary.h"
 #include <boost/numeric/ublas/vector.hpp>
 #include <boost/numeric/ublas/vector_proxy.hpp>
 #include <boost/numeric/ublas/matrix.hpp>
 #include <boost/numeric/ublas/triangular.hpp>
 #include <boost/numeric/ublas/lu.hpp>
 #include <boost/numeric/ublas/io.hpp>
+#include <boost/foreach.hpp>
+#include <boost/lexical_cast.hpp>
 #include "idas_la_functions.h"
 
 #include <string>
@@ -27,20 +30,65 @@ DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 #define daeSuperLU
 #include "../LA_Trilinos_Amesos/base_solvers.h"
 
-namespace daetools_mpi
+namespace cs_simulator
 {
 class daeLASolverData : public dae::solver::daeBlockOfEquations_t,
                         public daeMatrixAccess_t
 {
 public:
-    daeLASolverData(size_t numVars, daetools_mpi::daeModel_t* mod) :
+    daeLASolverData(size_t numVars, cs_simulator::daeModel_t* mod) :
         numberOfVariables(numVars), model(mod)
     {
-        model->GetDAESystemStructure(N, NNZ, IA, JA);
-        dae::solver::daeIDALASolver_t* lasolver = dae::solver::daeCreateTrilinosSolver("AztecOO_Ifpack", "ILU");
-        //dae::solver::daeIDALASolver_t* lasolver = dae::solver::daeCreateTrilinosSolver("AztecOO", "");
-        m_pLASolver.reset(lasolver);
+        dae::solver::daeLASolver_t* lasolver = NULL;
 
+        daeSimulationOptions& cfg = daeSimulationOptions::GetConfig();
+        std::string solverName = cfg.GetString("LinearSolver.Name", "Not specified");
+
+        if(solverName == "Amesos_Superlu" || solverName == "Amesos_Umfpack" || solverName == "Amesos_Klu")
+        {
+            lasolver = dae::solver::daeCreateTrilinosSolver(solverName, "");
+            m_pLASolver.reset(lasolver);
+
+            printf("Processing linear solver parameters from '%s' ...\n", cfg.configFile.c_str());
+            SetParameters(lasolver, cfg.pt.get_child("LinearSolver.Parameters"));
+        }
+        else if(solverName == "AztecOO")
+        {
+            std::string preconditionerLibrary = cfg.GetString("LinearSolver.Preconditioner.Library", "Not specified");
+            std::string preconditionerName    = cfg.GetString("LinearSolver.Preconditioner.Name", "Not specified");
+
+            if(preconditionerLibrary == "AztecOO") // Native AztecOO preconditioners
+            {
+                lasolver = dae::solver::daeCreateTrilinosSolver("AztecOO", preconditionerName);
+                m_pLASolver.reset(lasolver);
+            }
+            else if(preconditionerLibrary == "Ifpack")
+            {
+                lasolver = dae::solver::daeCreateTrilinosSolver("AztecOO_Ifpack", preconditionerName);
+                m_pLASolver.reset(lasolver);
+            }
+            else if(preconditionerLibrary == "AztecOO_ML")
+            {
+                lasolver = dae::solver::daeCreateTrilinosSolver("AztecOO_ML", preconditionerName);
+                m_pLASolver.reset(lasolver);
+            }
+            else
+            {
+                daeThrowException("Unsupported preconditioner specified: " + preconditionerName);
+            }
+
+            printf("Processing linear solver parameters from '%s' ...\n", cfg.configFile.c_str());
+            SetParameters(lasolver, cfg.pt.get_child("LinearSolver.Parameters"));
+
+            printf("Processing preconditioner parameters from '%s' ...\n", cfg.configFile.c_str());
+            SetParameters(lasolver, cfg.pt.get_child("LinearSolver.Preconditioner.Parameters"));
+        }
+        else
+        {
+            daeThrowException("Unsupported linear solver specified: " + solverName);
+        }
+
+        model->GetDAESystemStructure(N, NNZ, IA, JA);
         lasolver->Create(N, NNZ, this);
 
         pmatJacobian = NULL;
@@ -49,6 +97,56 @@ public:
     virtual int CalcNonZeroElements()
     {
         return NNZ;
+    }
+
+    void SetParameters(dae::solver::daeLASolver_t* lasolver, boost::property_tree::ptree& pt)
+    {
+        BOOST_FOREACH(boost::property_tree::ptree::value_type& pt_child, pt)
+        {
+            if(pt_child.second.size() == 0) // It is a leaf
+            {
+                std::cout << "  Set parameter: " << pt_child.first << " = " << pt_child.second.data() << " (";
+
+                bool bValue;
+                int iValue;
+                double dValue;
+                std::string sValue;
+
+                std::string data = pt_child.second.data();
+                if(data == "true" || data == "True")
+                {
+                    std::cout << "bool)" << std::endl;
+                    lasolver->SetOption_bool(pt_child.first, true);
+                }
+                else if(data == "false" || data == "False")
+                {
+                    std::cout << "bool)" << std::endl;
+                    lasolver->SetOption_bool(pt_child.first, true);
+                }
+                else if(boost::conversion::try_lexical_convert<int>(data, iValue))
+                {
+                    std::cout << "integer)" << std::endl;
+                    lasolver->SetOption_int(pt_child.first, iValue);
+                }
+                else if(boost::conversion::try_lexical_convert<double>(data, dValue))
+                {
+                    std::cout << "float)" << std::endl;
+                    lasolver->SetOption_float(pt_child.first, dValue);
+                }
+                else if(boost::conversion::try_lexical_convert<bool>(data, bValue))
+                {
+                    std::cout << "bool)" << std::endl;
+                    lasolver->SetOption_bool(pt_child.first, bValue);
+                }
+                else
+                {
+                    std::cout << "string)" << std::endl;
+                    sValue = data;
+                    lasolver->SetOption_string(pt_child.first, sValue);
+                }
+
+            }
+        }
     }
 
     virtual void FillSparseMatrix(dae::daeSparseMatrix<real_t>* pmatrix)
@@ -90,6 +188,7 @@ public:
     {
         real_t* values          = arrValues.Data();
         real_t* timeDerivatives = arrTimeDerivatives.Data();
+        real_t* residuals       = arrResiduals.Data();
 
         // Calling mpiSynchroniseData is not required here since it has previously been called by residuals function.
         //model->SynchroniseData(time, values, timeDerivatives);
@@ -97,7 +196,7 @@ public:
 
         pmatJacobian = &matJacobian;
 
-        int res = model->EvaluateJacobian(numberOfVariables, time, inverseTimeStep, values, timeDerivatives, NULL, this);
+        int res = model->EvaluateJacobian(time, inverseTimeStep, values, timeDerivatives, residuals, this);
 
         pmatJacobian = NULL;
     }
@@ -111,13 +210,13 @@ public:
 
 public:
     dae::daeMatrix<real_t>*                          pmatJacobian;
-    boost::shared_ptr<dae::solver::daeIDALASolver_t> m_pLASolver;
+    boost::shared_ptr<dae::solver::daeLASolver_t>    m_pLASolver;
     int                                              N;
     int                                              NNZ;
     std::vector<int>                                 IA;
     std::vector<int>                                 JA;
     size_t                                           numberOfVariables;
-    daetools_mpi::daeModel_t*                        model;
+    cs_simulator::daeModel_t*                        model;
 };
 
 daeLASolver_t::daeLASolver_t()
@@ -193,12 +292,13 @@ int daeLASolver_t::Free()
     int ret = la_data->m_pLASolver->Free();
     return ret;
 }
+
 }
 
 
 int init_la(IDAMem ida_mem)
 {
-    daetools_mpi::daeLASolver_t* pLASolver = (daetools_mpi::daeLASolver_t*)ida_mem->ida_lmem;
+    cs_simulator::daeLASolver_t* pLASolver = (cs_simulator::daeLASolver_t*)ida_mem->ida_lmem;
     if(!pLASolver)
         return IDA_MEM_NULL;
     return IDA_SUCCESS;
@@ -212,7 +312,10 @@ int setup_la(IDAMem	    ida_mem,
              N_Vector	vectorTemp2,
              N_Vector	vectorTemp3)
 {
-    daetools_mpi::daeLASolver_t* pLASolver = (daetools_mpi::daeLASolver_t*)ida_mem->ida_lmem;
+    auxiliary::daeTimesAndCounters& tcs = auxiliary::daeTimesAndCounters::GetTimesAndCounters();
+    call_stats::TimerCounter tc(tcs.LASetup);
+
+    cs_simulator::daeLASolver_t* pLASolver = (cs_simulator::daeLASolver_t*)ida_mem->ida_lmem;
     if(!pLASolver)
         return IDA_MEM_NULL;
 
@@ -243,7 +346,10 @@ int solve_la(IDAMem	  ida_mem,
              N_Vector vectorTimeDerivatives,
              N_Vector vectorResiduals)
 {
-    daetools_mpi::daeLASolver_t* pLASolver = (daetools_mpi::daeLASolver_t*)ida_mem->ida_lmem;
+    auxiliary::daeTimesAndCounters& tcs = auxiliary::daeTimesAndCounters::GetTimesAndCounters();
+    call_stats::TimerCounter tc(tcs.LASolve);
+
+    cs_simulator::daeLASolver_t* pLASolver = (cs_simulator::daeLASolver_t*)ida_mem->ida_lmem;
     if(!pLASolver)
         return IDA_MEM_NULL;
 
@@ -274,7 +380,7 @@ int solve_la(IDAMem	  ida_mem,
 
 int free_la(IDAMem ida_mem)
 {
-    daetools_mpi::daeLASolver_t* pLASolver = (daetools_mpi::daeLASolver_t*)ida_mem->ida_lmem;
+    cs_simulator::daeLASolver_t* pLASolver = (cs_simulator::daeLASolver_t*)ida_mem->ida_lmem;
     if(!pLASolver)
         return IDA_MEM_NULL;
 

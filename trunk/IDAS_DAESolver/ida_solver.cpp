@@ -56,18 +56,18 @@ public:
 
 int init_la(IDAMem ida_mem);
 int setup_la(IDAMem ida_mem,
-              N_Vector	vectorVariables,
-              N_Vector	vectorTimeDerivatives,
-              N_Vector	vectorResiduals,
-              N_Vector	vectorTemp1,
-              N_Vector	vectorTemp2,
-              N_Vector	vectorTemp3);
+             N_Vector	vectorVariables,
+             N_Vector	vectorTimeDerivatives,
+             N_Vector	vectorResiduals,
+             N_Vector	vectorTemp1,
+             N_Vector	vectorTemp2,
+             N_Vector	vectorTemp3);
 int solve_la(IDAMem ida_mem,
-              N_Vector	b,
-              N_Vector	weight,
-              N_Vector	vectorVariables,
-              N_Vector	vectorTimeDerivatives,
-              N_Vector	vectorResiduals);
+             N_Vector	b,
+             N_Vector	weight,
+             N_Vector	vectorVariables,
+             N_Vector	vectorTimeDerivatives,
+             N_Vector	vectorResiduals);
 int free_la(IDAMem ida_mem);
 
 int residuals(realtype	time,
@@ -152,6 +152,7 @@ daeIDASolver::daeIDASolver(void)
     m_pIDA					         = NULL;
     m_eLASolver				         = eSundialsLU;
     m_pLASolver				         = NULL;
+    m_pPreconditioner                = NULL;
     m_dCurrentTime			         = 0;
     m_nNumberOfEquations	         = 0;
     m_timeStart				         = 0;
@@ -180,26 +181,42 @@ daeIDASolver::~daeIDASolver(void)
     Finalize();
 }
 
-daeIDALASolver_t* daeIDASolver::GetLASolver() const
+daeLASolver_t* daeIDASolver::GetLASolver() const
 {
     return m_pLASolver;
 }
 
 void daeIDASolver::SetLASolver(daeLASolver_t* pLASolver)
 {
-    daeIDALASolver_t* la_solver = static_cast<daeIDALASolver_t*>(pLASolver);
+    daeLASolver_t* la_solver = static_cast<daeLASolver_t*>(pLASolver);
     if(!la_solver)
         daeDeclareAndThrowException(exInvalidCall);
 
-    m_eLASolver = eThirdParty;
-    m_pLASolver = la_solver;
+    m_eLASolver       = eThirdParty;
+    m_pLASolver       = la_solver;
+    m_pPreconditioner = NULL;
 }
 
-void daeIDASolver::SetLASolver(daeeIDALASolverType eLASolverType)
+daePreconditioner_t* daeIDASolver::GetPreconditioner() const
+{
+    return m_pPreconditioner;
+}
+
+void daeIDASolver::SetLASolver(daeeIDALASolverType eLASolverType, daePreconditioner_t* preconditioner)
 {
     if(eLASolverType == eThirdParty)
         daeDeclareAndThrowException(exInvalidCall);
 
+    if(eLASolverType == eSundialsGMRES)
+    {
+        if(!preconditioner)
+        {
+            daeDeclareException(exInvalidPointer);
+            e << "Sundials GMRES linear solver: preconditioner is not specified";
+            throw e;
+        }
+        m_pPreconditioner = preconditioner;
+    }
     m_eLASolver = eLASolverType;
     m_pLASolver = NULL;
 }
@@ -301,6 +318,8 @@ void daeIDASolver::Initialize(daeBlock_t* pBlock,
 
 void daeIDASolver::Finalize()
 {
+    GetIntegratorStats();
+
     if(m_pIDA)
         IDAFree(&m_pIDA);
 
@@ -308,6 +327,7 @@ void daeIDASolver::Finalize()
     m_pBlock    = NULL;
     m_pIDA      = NULL;
     m_pLASolver = NULL;
+    m_pPreconditioner = NULL;
     m_pIDASolverData.reset();
     m_pBlockOfEquations.reset();
 }
@@ -600,26 +620,58 @@ void daeIDASolver::CreateLinearSolver(void)
     }
     else if(m_eLASolver == eSundialsLapack)
     {
-    // Lapack dense LU LA Solver
-//		retval = IDALapackDense(m_pIDA, (long)m_nNumberOfEquations);
-//		if(!CheckFlag(retval))
-//		{
-//			daeDeclareException(exRuntimeCheck);
-//			e << "Sundials IDAS solver ignobly refused to create Sundials dense linear solver; " << CreateIDAErrorMessage(retval);
-//			throw e;
-//		}
-
-        retval = IDADlsSetDenseJacFn(m_pIDA, jacobian);
-        if(!CheckFlag(retval))
-        {
-            daeDeclareException(exRuntimeCheck);
-            e << "Sundials IDAS solver ignobly refused to set Jacobian function for Sundials dense linear solver; " << CreateIDAErrorMessage(retval);
-            throw e;
-        }
+        daeDeclareException(exNotImplemented);
     }
     else if(m_eLASolver == eSundialsGMRES)
     {
-        daeDeclareAndThrowException(exNotImplemented);
+        retval = m_pPreconditioner->Initialize(m_nNumberOfEquations, m_pBlockOfEquations.get());
+        if(retval < 0)
+        {
+            daeDeclareException(exRuntimeCheck);
+            e << "Preconditioner initialize failed: " << IDAGetReturnFlagName(retval);
+            throw e;
+        }
+
+        daeConfig& cfg = daeConfig::GetConfig();
+
+        // Maximum dimension of the Krylov subspace to be used (if 0 use the default value MAXL = 5)
+        int kspace = cfg.GetInteger("daetools.IDAS.gmres.kspace", 0);
+        retval = IDASpgmr(m_pIDA, kspace);
+        if(retval < 0)
+        {
+            daeDeclareException(exRuntimeCheck);
+            e << "IDASpgmr failed: " << IDAGetReturnFlagName(retval);
+            throw e;
+        }
+
+        IDASpilsSetEpsLin(m_pIDA,      cfg.GetFloat  ("daetools.IDAS.gmres.EpsLin",      0.05));
+        IDASpilsSetMaxRestarts(m_pIDA, cfg.GetInteger("daetools.IDAS.gmres.MaxRestarts",    5));
+        std::string gstype = cfg.GetString("daetools.IDAS.gmres.GSType", "MODIFIED_GS");
+        if(gstype == "MODIFIED_GS")
+            IDASpilsSetGSType(m_pIDA, MODIFIED_GS);
+        else if(gstype == "CLASSICAL_GS")
+            IDASpilsSetGSType(m_pIDA, CLASSICAL_GS);
+
+        retval = IDASpilsSetPreconditioner(m_pIDA, setup_preconditioner, solve_preconditioner);
+
+        // This is very important for overall performance!!
+        // For some reasons works very slow if jacobian_vector_multiply is used for Npe > 1.
+        std::string jtimes = cfg.GetString("daetools.IDAS.gmres.JacTimesVecFn", "DifferenceQuotient");
+        if(jtimes == "DifferenceQuotient")
+        {
+            IDASpilsSetIncrementFactor(m_pIDA, cfg.GetFloat("daetools.IDAS.gmres.DQIncrementFactor",   1.0));
+        }
+        else if(jtimes == "JacobianVectorMultiply")
+        {
+            IDASpilsSetJacTimesVecFn(m_pIDA, jac_times_vector);
+        }
+        else
+        {
+            daeDeclareException(exRuntimeCheck);
+            e << "Not supported daetools.IDAS.gmres.JacTimesVecFn option: " << jtimes;
+            throw e;
+        }
+
 /*
     // Sundials dense GMRES LA Solver
         retval = IDASpgmr(m_pIDA, 20);
@@ -977,6 +1029,13 @@ void daeIDASolver::ResetIDASolver(bool bCopyDataFromBlock, real_t t0, bool bRese
             m_pLASolver->Reinitialize(nnz);
         }
     }
+    else if(m_eLASolver == eSundialsGMRES)
+    {
+        if(m_bResetLAMatrixAfterDiscontinuity)
+        {
+            m_pPreconditioner->Reinitialize();
+        }
+    }
 
 // ReInit IDA
     retval = IDAReInit(m_pIDA,
@@ -1189,38 +1248,59 @@ std::vector<real_t> daeIDASolver::GetErrWeights()
 
 std::map<std::string, real_t> daeIDASolver::GetIntegratorStats()
 {
-    std::map<std::string, real_t> stats;
+    if(!m_pIDA)
+        return m_integratorStats;
+
+    m_integratorStats.clear();
+
+    long int nst, nni, nre, nli, nreLS, nge, npe, nps, njvtimes;
+    nst = nni = nre = nli = nreLS = nge = npe = nps = njvtimes = 0;
+
+    if(m_eLASolver == eSundialsGMRES)
+    {
+        //IDAGetNumSteps(m_pIDA, &nst);
+        //IDAGetNumResEvals(m_pIDA, &nre);
+        //IDAGetNumNonlinSolvIters(m_pIDA, &nni);
+        IDASpilsGetNumLinIters(m_pIDA, &nli);
+        IDASpilsGetNumResEvals(m_pIDA, &nreLS);
+        IDASpilsGetNumPrecEvals(m_pIDA, &npe);
+        IDASpilsGetNumPrecSolves(m_pIDA, &nps);
+        IDASpilsGetNumJtimesEvals(m_pIDA, &njvtimes);
+    }
+    m_integratorStats["NumLinIters"]    = nli;
+    m_integratorStats["NumResEvals"]    = nreLS;
+    m_integratorStats["NumPrecEvals"]   = npe;
+    m_integratorStats["NumPrecSolves"]  = nps;
+    m_integratorStats["NumJtimesEvals"] = njvtimes;
 
     long int nsteps, nrevals, nlinsetups, netfails;
     int klast, kcur;
     realtype hinused, hlast, hcur, tcur;
+    nsteps = nrevals = nlinsetups = netfails = 0;
+    klast = kcur = 0;
+    hinused = hlast = hcur = tcur = 0.0;
 
-    int retval = IDAGetIntegratorStats(m_pIDA, &nsteps, &nrevals, &nlinsetups,
-                                               &netfails, &klast, &kcur, &hinused,
-                                               &hlast, &hcur, &tcur);
-    if(!CheckFlag(retval))
-        daeDeclareAndThrowException(exMiscellanous);
-
-    stats["NumSteps"]           = nsteps;
-    stats["NumResEvals"]        = nrevals;
-    stats["NumLinSolvSetups"]   = nlinsetups;
-    stats["NumErrTestFails"]    = netfails;
-    stats["LastOrder"]          = klast;
-    stats["CurrentOrder"]       = kcur;
-    stats["ActualInitStep"]     = hinused;
-    stats["LastStep"]           = hlast;
-    stats["CurrentStep"]        = hcur;
-    stats["CurrentTime"]        = tcur;
+    IDAGetIntegratorStats(m_pIDA, &nsteps, &nrevals, &nlinsetups,
+                                  &netfails, &klast, &kcur, &hinused,
+                                  &hlast, &hcur, &tcur);
+    m_integratorStats["NumSteps"]         = nsteps;
+    m_integratorStats["NumResEvals"]      = nrevals;
+    m_integratorStats["NumLinSolvSetups"] = nlinsetups;
+    m_integratorStats["NumErrTestFails"]  = netfails;
+    m_integratorStats["LastOrder"]        = klast;
+    m_integratorStats["CurrentOrder"]     = kcur;
+    m_integratorStats["ActualInitStep"]   = hinused;
+    m_integratorStats["LastStep"]         = hlast;
+    m_integratorStats["CurrentStep"]      = hcur;
+    m_integratorStats["CurrentTime"]      = tcur;
 
     long int nniters, nncfails;
-    retval = IDAGetNonlinSolvStats(m_pIDA, &nniters, &nncfails);
-    if(!CheckFlag(retval))
-        daeDeclareAndThrowException(exMiscellanous);
+    nniters = nncfails = 0;
+    IDAGetNonlinSolvStats(m_pIDA, &nniters, &nncfails);
+    m_integratorStats["NumNonlinSolvIters"]     = nniters;
+    m_integratorStats["NumNonlinSolvConvFails"] = nncfails;
 
-    stats["NumNonlinSolvIters"]     = nniters;
-    stats["NumNonlinSolvConvFails"] = nncfails;
-
-    return stats;
+    return m_integratorStats;
 }
 
 std::string daeIDASolver::CreateIDAErrorMessage(int flag)
@@ -1230,94 +1310,6 @@ std::string daeIDASolver::CreateIDAErrorMessage(int flag)
     std::string strError = flagName;
     free(flagName);
     return strError;
-
-/*
-    switch(flag)
-    {
-        case IDA_MEM_NULL:
-            strError = "IDA_MEM_NULL";
-            break;
-        case IDA_ILL_INPUT:
-            strError = "IDA_ILL_INPUT";
-            break;
-        case IDA_NO_MALLOC:
-            strError = "IDA_NO_MALLOC";
-            break;
-        case IDA_TOO_MUCH_WORK:
-            strError = "IDA_TOO_MUCH_WORK";
-            break;
-        case IDA_TOO_MUCH_ACC:
-            strError = "IDA_TOO_MUCH_ACC";
-            break;
-        case IDA_ERR_FAIL:
-            strError = "IDA_ERR_FAIL";
-            break;
-        case IDA_CONV_FAIL:
-            strError = "IDA_CONV_FAIL";
-            break;
-        case IDA_LINIT_FAIL:
-            strError = "IDA_LINIT_FAIL";
-            break;
-        case IDA_LSETUP_FAIL:
-            strError = "IDA_LSETUP_FAIL";
-            break;
-        case IDA_LSOLVE_FAIL:
-            strError = "IDA_LSOLVE_FAIL";
-            break;
-        case IDA_RES_FAIL:
-            strError = "IDA_RES_FAIL";
-            break;
-        case IDA_CONSTR_FAIL:
-            strError = "IDA_CONSTR_FAIL";
-            break;
-        case IDA_REP_RES_ERR:
-            strError = "IDA_REP_RES_ERR";
-            break;
-        case IDA_MEM_FAIL:
-            strError = "IDA_MEM_FAIL";
-            break;
-        case IDA_FIRST_RES_FAIL:
-            strError = "IDA_FIRST_RES_FAIL";
-            break;
-        case IDA_LINESEARCH_FAIL:
-            strError = "IDA_LINESEARCH_FAIL";
-            break;
-        case IDA_NO_RECOVERY:
-            strError = "IDA_NO_RECOVERY";
-            break;
-        case IDA_RTFUNC_FAIL:
-            strError = "IDA_RTFUNC_FAIL";
-            break;
-        case IDA_BAD_EWT:
-            strError = "IDA_BAD_EWT";
-            break;
-        case IDA_BAD_K:
-            strError = "IDA_BAD_K";
-            break;
-        case IDA_BAD_T:
-            strError = "IDA_BAD_T";
-            break;
-        case IDA_BAD_DKY:
-            strError = "IDA_BAD_DKY";
-            break;
-        case IDA_NO_SENS:
-            strError = "IDA_NO_SENS";
-            break;
-        case IDA_SRES_FAIL:
-            strError = "IDA_SRES_FAIL";
-            break;
-        case IDA_REP_SRES_ERR:
-            strError = "IDA_REP_SRES_ERR";
-            break;
-        case IDA_BAD_IS:
-            strError = "IDA_BAD_IS";
-            break;
-
-        default:
-            strError = "Unknown error";
-    }
-    return strError;
-*/
 }
 
 void daeIDASolver::SaveMatrixAsXPM(const std::string& strFilename)
@@ -1403,11 +1395,16 @@ void daeIDASolver::OnCalculateSensitivityResiduals()
 
 }
 
+std::map<std::string, call_stats::TimeAndCount> daeIDASolver::GetCallStats() const
+{
+    return m_stats;
+}
+
 
 
 int init_la(IDAMem ida_mem)
 {
-    daeIDALASolver_t* pLASolver = (daeIDALASolver_t*)ida_mem->ida_lmem;
+    daeLASolver_t* pLASolver = (daeLASolver_t*)ida_mem->ida_lmem;
     if(!pLASolver)
         return IDA_MEM_NULL;
 
@@ -1426,9 +1423,14 @@ int setup_la(IDAMem	    ida_mem,
              N_Vector	vectorTemp2,
              N_Vector	vectorTemp3)
 {
-    daeIDALASolver_t* pLASolver = (daeIDALASolver_t*)ida_mem->ida_lmem;
+    daeLASolver_t* pLASolver = (daeLASolver_t*)ida_mem->ida_lmem;
     if(!pLASolver)
         return IDA_MEM_NULL;
+
+    daeIDASolver* pSolver = (daeIDASolver*)ida_mem->ida_user_data;
+    if(!pSolver)
+        return IDA_MEM_NULL;
+    call_stats::TimerCounter tc(pSolver->m_stats["LASetup"]);
 
     realtype *pdValues, *pdTimeDerivatives, *pdResiduals;
 
@@ -1458,9 +1460,14 @@ int solve_la(IDAMem	  ida_mem,
              N_Vector vectorTimeDerivatives,
              N_Vector vectorResiduals)
 {
-    daeIDALASolver_t* pLASolver = (daeIDALASolver_t*)ida_mem->ida_lmem;
+    daeLASolver_t* pLASolver = (daeLASolver_t*)ida_mem->ida_lmem;
     if(!pLASolver)
         return IDA_MEM_NULL;
+
+    daeIDASolver* pSolver = (daeIDASolver*)ida_mem->ida_user_data;
+    if(!pSolver)
+        return IDA_MEM_NULL;
+    call_stats::TimerCounter tc(pSolver->m_stats["LASolve"]);
 
     realtype *pdValues, *pdTimeDerivatives, *pdResiduals, *pdWeight, *pdB;
 
@@ -1490,7 +1497,7 @@ int solve_la(IDAMem	  ida_mem,
 
 int free_la(IDAMem ida_mem)
 {
-    daeIDALASolver_t* pLASolver = (daeIDALASolver_t*)ida_mem->ida_lmem;
+    daeLASolver_t* pLASolver = (daeLASolver_t*)ida_mem->ida_lmem;
     if(!pLASolver)
         return IDA_MEM_NULL;
 
@@ -1521,6 +1528,8 @@ int residuals(realtype	time,
     daeBlock_t* pBlock = pSolver->m_pBlock;
     if(!pBlock)
         return -1;
+
+    call_stats::TimerCounter tc(pSolver->m_stats["Residuals"]);
 
     size_t N = pBlock->GetNumberOfEquations();
 
@@ -1594,6 +1603,8 @@ int roots(realtype	time,
     if(!pBlock)
         return -1;
 
+    call_stats::TimerCounter tc(pSolver->m_stats["Roots"]);
+
     size_t Nroots = pBlock->GetNumberOfRoots();
     size_t N      = pBlock->GetNumberOfEquations();
 
@@ -1647,6 +1658,8 @@ int jacobian(long int    Neq,
     daeBlock_t* pBlock = pSolver->m_pBlock;
     if(!pBlock)
         return -1;
+
+    call_stats::TimerCounter tc(pSolver->m_stats["Jacobian"]);
 
     size_t N = pBlock->GetNumberOfEquations();
 
@@ -1708,6 +1721,8 @@ int sens_residuals(int		 Ns,
     if(!pBlock)
         return -1;
 
+    call_stats::TimerCounter tc(pSolver->m_stats["SensitivityResiduals"]);
+
     size_t N  = pBlock->GetNumberOfEquations();
     if(N == 0 || Ns == 0)
         return -1;
@@ -1767,54 +1782,27 @@ int setup_preconditioner(realtype	time,
                          N_Vector	vectorVariables,
                          N_Vector	vectorTimeDerivatives,
                          N_Vector	vectorResiduals,
-                         realtype	dInverseTimeStep,
+                         realtype	inverseTimeStep,
                          void*		pUserData,
                          N_Vector	vectorTemp1,
                          N_Vector	vectorTemp2,
                          N_Vector	vectorTemp3)
 {
-/*
-    realtype *pdValues, *pdTimeDerivatives, *pdResiduals, **ppdJacobian;
-
     daeIDASolver* pSolver = (daeIDASolver*)pUserData;
     if(!pSolver || !pSolver->m_pIDASolverData)
         return -1;
-    if(!pSolver->m_pIDASolverData->m_matKrylov || !pSolver->m_pIDASolverData->m_vectorPivot)
+    daePreconditioner_t* preconditioner = pSolver->m_pPreconditioner;
+    if(!preconditioner)
         return -1;
 
-    daeBlock_t* pBlock = pSolver->m_pBlock;
-    if(!pBlock)
-        return -1;
+    call_stats::TimerCounter tc(pSolver->m_stats["PreconditionerSetup"]);
 
-    size_t Neq = pBlock->GetNumberOfEquations();
+    realtype* yval  = NV_DATA_S(vectorVariables);
+    realtype* ypval = NV_DATA_S(vectorTimeDerivatives);
+    realtype* res   = NV_DATA_S(vectorResiduals);
 
-    pdValues			= NV_DATA_S(vectorVariables);
-    pdTimeDerivatives	= NV_DATA_S(vectorTimeDerivatives);
-    pdResiduals			= NV_DATA_S(vectorResiduals);
-    ppdJacobian			= JACOBIAN(pSolver->m_pIDASolverData->m_matKrylov);
-
-    pSolver->m_arrValues.InitArray(Neq, pdValues);
-    pSolver->m_arrTimeDerivatives.InitArray(Neq, pdTimeDerivatives);
-    pSolver->m_arrResiduals.InitArray(Neq, pdResiduals);
-    pSolver->m_matJacobian.InitMatrix(Neq, Neq, ppdJacobian, eColumnWise);
-
-    SetToZero(pSolver->m_pIDASolverData->m_matKrylov);
-
-    pBlock->CalculateJacobian(time,
-                              pSolver->m_arrValues,
-                              pSolver->m_arrResiduals,
-                              pSolver->m_arrTimeDerivatives,
-                              pSolver->m_matJacobian,
-                              dInverseTimeStep);
-    pSolver->m_pIDASolverData->SetMaxElements();
-    //pSolver->m_matJacobian.Print();
-
-    daeArray<real_t> arr;
-    arr.InitArray(Neq, pSolver->m_pIDASolverData->m_vectorInvMaxElements);
-    std::cout << "setup_preconditioner" << std::endl;
-    arr.Print();
-*/
-    return 0;
+    //printf("    setup_preconditioner (time = %.15f)\n", time);
+    return preconditioner->Setup(time, inverseTimeStep, yval, ypval, res);
 }
 
 int solve_preconditioner(realtype	time,
@@ -1828,68 +1816,22 @@ int solve_preconditioner(realtype	time,
                          void*		pUserData,
                          N_Vector	vectorTemp)
 {
-//	realtype *pdR, *pdZ;
-
-//	daeIDASolver* pSolver = (daeIDASolver*)pUserData;
-//	if(!pSolver || !pSolver->m_pIDASolverData)
-//		return -1;
-
-//	daeBlock_t* pBlock = pSolver->m_pBlock;
-//	if(!pBlock)
-//		return -1;
-
-//	size_t Neq = pBlock->GetNumberOfEquations();
-
-//	pdR			= NV_DATA_S(vectorR);
-//	pdZ			= NV_DATA_S(vectorZ);
-
-//	daeArray<real_t> r, z;
-//	r.InitArray(Neq, pdR);
-
-//	for(size_t i = 0; i < Neq; i++)
-//	{
-//		int k = pSolver->m_pIDASolverData->matJacobian.BTF[i];
-//		double val = pSolver->m_pIDASolverData->matJacobian.GetItem(k, i);
-//		std::cout << "val = " << val << std::endl;
-//		pdZ[i] = pdR[i] / val;
-//	}
-//	std::cout << "z" << std::endl;
-//	z.InitArray(Neq, pdZ);
-//	z.Print();
-
-/*
-    realtype *pdR, *pdZ;
-
     daeIDASolver* pSolver = (daeIDASolver*)pUserData;
     if(!pSolver || !pSolver->m_pIDASolverData)
         return -1;
-    if(!pSolver->m_pIDASolverData->m_matKrylov || !pSolver->m_pIDASolverData->m_vectorPivot)
+    daePreconditioner_t* preconditioner = pSolver->m_pPreconditioner;
+    if(!preconditioner)
         return -1;
 
-    daeBlock_t* pBlock = pSolver->m_pBlock;
-    if(!pBlock)
-        return -1;
+    call_stats::TimerCounter tc(pSolver->m_stats["PreconditionerSolve"]);
 
-    size_t Neq = pBlock->GetNumberOfEquations();
+    realtype* r = NV_DATA_S(vectorR);
+    realtype* z = NV_DATA_S(vectorZ);
 
-    pdR			= NV_DATA_S(vectorR);
-    pdZ			= NV_DATA_S(vectorZ);
-
-    daeArray<real_t> r, z;
-    r.InitArray(Neq, pdR);
-    std::cout << "r" << std::endl;
-    r.Print();
-
-    for(size_t i = 0; i < Neq; i++)
-        pdZ[i] = pdR[i] * pSolver->m_pIDASolverData->m_vectorInvMaxElements[i];
-    std::cout << "z" << std::endl;
-    z.InitArray(Neq, pdZ);
-    z.Print();
-*/
+    //printf("    solve_preconditioner (time = %.15f)\n", tt);
+    return preconditioner->Solve(time, r, z);
     return 0;
 }
-
-//extern "C" void dgemv_(char*, int*, int*, double*, double*, int*, double*, int*, double*, double*, int*);
 
 int jac_times_vector(realtype time,
                      N_Vector vectorVariables,
@@ -1902,64 +1844,20 @@ int jac_times_vector(realtype time,
                      N_Vector tmp1,
                      N_Vector tmp2)
 {
-/*
-    realtype *pV, *pJV;
-    realtype *pdValues, *pdTimeDerivatives, *pdResiduals, **ppdJacobian;
-
     daeIDASolver* pSolver = (daeIDASolver*)pUserData;
     if(!pSolver || !pSolver->m_pIDASolverData)
         return -1;
-    if(!pSolver->m_pIDASolverData->m_matKrylov || !pSolver->m_pIDASolverData->m_vectorPivot)
+    daePreconditioner_t* preconditioner = pSolver->m_pPreconditioner;
+    if(!preconditioner)
         return -1;
 
-    daeBlock_t* pBlock = pSolver->m_pBlock;
-    if(!pBlock)
-        return -1;
+    call_stats::TimerCounter tc(pSolver->m_stats["JacobianVectorMultiply"]);
 
-    size_t Neq = pBlock->GetNumberOfEquations();
+    realtype* v  = NV_DATA_S(vectorV);
+    realtype* Jv = NV_DATA_S(vectorJV);
 
-    pV	= NV_DATA_S(vectorV);
-    pJV	= NV_DATA_S(vectorJV);
-
-    pdValues			= NV_DATA_S(vectorVariables);
-    pdTimeDerivatives	= NV_DATA_S(vectorTimeDerivatives);
-    pdResiduals			= NV_DATA_S(vectorResiduals);
-    ppdJacobian			= JACOBIAN(pSolver->m_pIDASolverData->m_matKrylov);
-
-    pSolver->m_arrValues.InitArray(Neq, pdValues);
-    pSolver->m_arrTimeDerivatives.InitArray(Neq, pdTimeDerivatives);
-    pSolver->m_arrResiduals.InitArray(Neq, pdResiduals);
-    pSolver->m_matJacobian.InitMatrix(Neq, Neq, ppdJacobian, eColumnWise);
-
-    SetToZero(pSolver->m_pIDASolverData->m_matKrylov);
-
-    pBlock->CalculateJacobian(time,
-                              pSolver->m_arrValues,
-                              pSolver->m_arrResiduals,
-                              pSolver->m_arrTimeDerivatives,
-                              pSolver->m_matJacobian,
-                              dInverseTimeStep);
-    //pSolver->m_matJacobian.Print();
-
-    daeArray<real_t> arr;
-    arr.InitArray(Neq, pV);
-    std::cout << "V vector:" << std::endl;
-    arr.Print();
-
-    char op = 'N';
-    double alpha = 1;
-    double beta = 0;
-    int n = Neq;
-    int lda = n;
-    int incx = 1;
-    int incy = 1;
-    //dgemv_(&op, &n, &n, &alpha, pSolver->m_pIDASolverData->m_matKrylov->data, &lda, pV, &incx, &beta, pJV, &incy);
-
-    arr.InitArray(Neq, pJV);
-    std::cout << "JV vector:" << std::endl;
-    arr.Print();
-*/
-    return 0;
+    //printf("    jacobian_x_vector    (time = %.15f)\n", tt);
+    return preconditioner->JacobianVectorMultiply(time, v, Jv);
 }
 
 void error_function(int error_code,

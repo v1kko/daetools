@@ -19,14 +19,14 @@ namespace dae
 {
 namespace core
 {
-using namespace computestack;
+using namespace cs;
 
 /***********************************************************************************
    Create compute stack functions
 ***********************************************************************************/
 inline void processFCVP(const size_t overallIndex,
                         const daeFloatCoefficientVariableProduct& fcvp,
-                        std::vector<adComputeStackItem_t>& computeStack,
+                        std::vector<csComputeStackItem_t>& computeStack,
                         daeBlock* block,
                         daeDataProxy_t* dataProxy,
                         const std::map<size_t, size_t>& mapAssignedVarsIndexes)
@@ -34,16 +34,16 @@ inline void processFCVP(const size_t overallIndex,
     // Add compute items for coefficient * Variable[blockIndex] expressions.
 
     // 1. Add coefficient as left item.
-    adComputeStackItem_t coeffitem;
-    memset(&coeffitem, 0, sizeof(adComputeStackItem_t));
+    csComputeStackItem_t coeffitem;
+    memset(&coeffitem, 0, sizeof(csComputeStackItem_t));
     coeffitem.opCode         = eOP_Constant;
     coeffitem.resultLocation = eOP_Result_to_lvalue;
     coeffitem.data.value = fcvp.coefficient;
     computeStack.push_back(coeffitem);
 
     // 2. Add variable value as right item.
-    adComputeStackItem_t varitem;
-    memset(&varitem, 0, sizeof(adComputeStackItem_t));
+    csComputeStackItem_t varitem;
+    memset(&varitem, 0, sizeof(csComputeStackItem_t));
     varitem.resultLocation = eOP_Result_to_rvalue;
 #ifdef ComputeStackDebug
     varitem.variableName = fcvp.variable->GetName();
@@ -68,15 +68,15 @@ inline void processFCVP(const size_t overallIndex,
     computeStack.push_back(varitem);
 
     // 3. Add the * binary operation and store it in the right value.
-    adComputeStackItem_t item;
-    memset(&item, 0, sizeof(adComputeStackItem_t));
+    csComputeStackItem_t item;
+    memset(&item, 0, sizeof(csComputeStackItem_t));
     item.opCode         = eOP_Binary;
     item.function       = eMulti;
     item.resultLocation = eOP_Result_to_rvalue;
     computeStack.push_back(item);
 }
 
-void adNode::CreateComputeStack(adNode* adnode, std::vector<adComputeStackItem_t>& computeStack, daeBlock_t* pBlock, real_t scaling)
+void adNode::CreateComputeStack(adNode* adnode, std::vector<csComputeStackItem_t>& computeStack, daeBlock_t* pBlock, real_t scaling)
 {
     if(!adnode)
         daeDeclareAndThrowException(exInvalidPointer);
@@ -90,8 +90,8 @@ void adNode::CreateComputeStack(adNode* adnode, std::vector<adComputeStackItem_t
     {
         adConstantNode* cnode = dynamic_cast<adConstantNode*>(adnode);
 
-        adComputeStackItem_t item;
-        memset(&item, 0, sizeof(adComputeStackItem_t));
+        csComputeStackItem_t item;
+        memset(&item, 0, sizeof(csComputeStackItem_t));
         item.opCode         = eOP_Constant;
         item.resultLocation = eOP_Result_to_value;
         item.data.value     = cnode->m_quantity.getValue();
@@ -101,8 +101,8 @@ void adNode::CreateComputeStack(adNode* adnode, std::vector<adComputeStackItem_t
     {
         adRuntimeParameterNode* pnode = dynamic_cast<adRuntimeParameterNode*>(adnode);
 
-        adComputeStackItem_t item;
-        memset(&item, 0, sizeof(adComputeStackItem_t));
+        csComputeStackItem_t item;
+        memset(&item, 0, sizeof(csComputeStackItem_t));
         item.opCode         = eOP_Constant;
         item.resultLocation = eOP_Result_to_value;
         item.data.value     = *pnode->m_pdValue;
@@ -112,8 +112,8 @@ void adNode::CreateComputeStack(adNode* adnode, std::vector<adComputeStackItem_t
     {
         adDomainIndexNode* dinode = dynamic_cast<adDomainIndexNode*>(adnode);
 
-        adComputeStackItem_t item;
-        memset(&item, 0, sizeof(adComputeStackItem_t));
+        csComputeStackItem_t item;
+        memset(&item, 0, sizeof(csComputeStackItem_t));
         item.opCode         = eOP_Constant;
         item.resultLocation = eOP_Result_to_value;
         item.data.value     = *dinode->m_pdPointValue;
@@ -121,16 +121,16 @@ void adNode::CreateComputeStack(adNode* adnode, std::vector<adComputeStackItem_t
     }
     else if( dynamic_cast<adTimeNode*>(adnode) )
     {
-        adComputeStackItem_t item;
-        memset(&item, 0, sizeof(adComputeStackItem_t));
+        csComputeStackItem_t item;
+        memset(&item, 0, sizeof(csComputeStackItem_t));
         item.opCode         = eOP_Time;
         item.resultLocation = eOP_Result_to_value;
         computeStack.push_back(item);
     }
     else if( dynamic_cast<adInverseTimeStepNode*>(adnode) )
     {
-        adComputeStackItem_t item;
-        memset(&item, 0, sizeof(adComputeStackItem_t));
+        csComputeStackItem_t item;
+        memset(&item, 0, sizeof(csComputeStackItem_t));
         item.opCode         = eOP_InverseTimeStep;
         item.resultLocation = eOP_Result_to_value;
         computeStack.push_back(item);
@@ -144,8 +144,8 @@ void adNode::CreateComputeStack(adNode* adnode, std::vector<adComputeStackItem_t
          */
         adRuntimeVariableNode* vnode = dynamic_cast<adRuntimeVariableNode*>(adnode);
 
-        adComputeStackItem_t item;
-        memset(&item, 0, sizeof(adComputeStackItem_t));
+        csComputeStackItem_t item;
+        memset(&item, 0, sizeof(csComputeStackItem_t));
         item.resultLocation = eOP_Result_to_value;
 #ifdef ComputeStackDebug
         item.variableName = vnode->m_pVariable->GetName();
@@ -173,8 +173,8 @@ void adNode::CreateComputeStack(adNode* adnode, std::vector<adComputeStackItem_t
     {
         adRuntimeTimeDerivativeNode* tdnode = dynamic_cast<adRuntimeTimeDerivativeNode*>(adnode);
 
-        adComputeStackItem_t item;
-        memset(&item, 0, sizeof(adComputeStackItem_t));
+        csComputeStackItem_t item;
+        memset(&item, 0, sizeof(csComputeStackItem_t));
         item.opCode         = eOP_TimeDerivative;
         item.resultLocation = eOP_Result_to_value;
 #ifdef ComputeStackDebug
@@ -189,8 +189,8 @@ void adNode::CreateComputeStack(adNode* adnode, std::vector<adComputeStackItem_t
         adFloatCoefficientVariableSumNode* fcvsnode = dynamic_cast<adFloatCoefficientVariableSumNode*>(adnode);
 
         // Base
-        adComputeStackItem_t item;
-        memset(&item, 0, sizeof(adComputeStackItem_t));
+        csComputeStackItem_t item;
+        memset(&item, 0, sizeof(csComputeStackItem_t));
         item.opCode         = eOP_Constant;
         item.resultLocation = eOP_Result_to_lvalue;
         item.data.value     = fcvsnode->m_base;
@@ -206,8 +206,8 @@ void adNode::CreateComputeStack(adNode* adnode, std::vector<adComputeStackItem_t
             processFCVP(overallIndex, fcvp, computeStack, block, dataProxy, mapAssignedVarsIndexes);
 
             // Add the + binary operation
-            adComputeStackItem_t plusitem;
-            memset(&plusitem, 0, sizeof(adComputeStackItem_t));
+            csComputeStackItem_t plusitem;
+            memset(&plusitem, 0, sizeof(csComputeStackItem_t));
             plusitem.opCode   = eOP_Binary;
             plusitem.function = ePlus;
             // Always place the result into the lvalue.
@@ -219,7 +219,7 @@ void adNode::CreateComputeStack(adNode* adnode, std::vector<adComputeStackItem_t
         // The last item must always place the result to the values stack.
         if(computeStack.size() == 0)
             daeDeclareAndThrowException(exInvalidCall);
-        adComputeStackItem_t& last_item = computeStack.back();
+        csComputeStackItem_t& last_item = computeStack.back();
         last_item.resultLocation = eOP_Result_to_value;
     }
     else if( dynamic_cast<adUnaryNode*>(adnode) )
@@ -228,8 +228,8 @@ void adNode::CreateComputeStack(adNode* adnode, std::vector<adComputeStackItem_t
 
         adNode::CreateComputeStack(unode->node.get(), computeStack, block);
 
-        adComputeStackItem_t item;
-        memset(&item, 0, sizeof(adComputeStackItem_t));
+        csComputeStackItem_t item;
+        memset(&item, 0, sizeof(csComputeStackItem_t));
         item.opCode         = eOP_Unary;
         item.resultLocation = eOP_Result_to_value;
         item.function       = unode->eFunction;
@@ -246,7 +246,7 @@ void adNode::CreateComputeStack(adNode* adnode, std::vector<adComputeStackItem_t
         adNode::CreateComputeStack(bnode->left.get(), computeStack, block);
         if(computeStack.size() == 0)
             daeDeclareAndThrowException(exInvalidCall);
-        adComputeStackItem_t& litem = computeStack.back();
+        csComputeStackItem_t& litem = computeStack.back();
         litem.resultLocation = eOP_Result_to_lvalue;
 
         // 2. Process right node:
@@ -254,12 +254,12 @@ void adNode::CreateComputeStack(adNode* adnode, std::vector<adComputeStackItem_t
         adNode::CreateComputeStack(bnode->right.get(), computeStack, block);
         if(computeStack.size() == 0)
             daeDeclareAndThrowException(exInvalidCall);
-        adComputeStackItem_t& ritem = computeStack.back();
+        csComputeStackItem_t& ritem = computeStack.back();
         ritem.resultLocation = eOP_Result_to_rvalue;
 
         // 3. Add the binary operation
-        adComputeStackItem_t item;
-        memset(&item, 0, sizeof(adComputeStackItem_t));
+        csComputeStackItem_t item;
+        memset(&item, 0, sizeof(csComputeStackItem_t));
         item.opCode         = eOP_Binary;
         item.resultLocation = eOP_Result_to_value;
         item.function       = bnode->eFunction;
@@ -275,8 +275,8 @@ void adNode::CreateComputeStack(adNode* adnode, std::vector<adComputeStackItem_t
     // Will be added only for the top level call if scaling is not 1.0.
     if(scaling != 1.0)
     {
-        adComputeStackItem_t item;
-        memset(&item, 0, sizeof(adComputeStackItem_t));
+        csComputeStackItem_t item;
+        memset(&item, 0, sizeof(csComputeStackItem_t));
         item.opCode         = eOP_Unary;
         item.resultLocation = eOP_Result_to_value;
         item.function       = eScaling;
@@ -458,7 +458,7 @@ uint32_t adNode::GetComputeStackSize(adNode* adnode)
 /***********************************************************************************
    Estimate compute stack FLOPS reuired for evaluation
 ***********************************************************************************/
-size_t adNode::EstimateComputeStackFlops(const adComputeStackItem_t* computeStack,
+size_t adNode::EstimateComputeStackFlops(const csComputeStackItem_t* computeStack,
                                          const std::map<daeeUnaryFunctions,size_t>& unaryOps,
                                          const std::map<daeeBinaryFunctions,size_t>& binaryOps)
 {
@@ -466,7 +466,7 @@ size_t adNode::EstimateComputeStackFlops(const adComputeStackItem_t* computeStac
     uint32_t size  = computeStack->size;
     for(size_t i = 0; i < size; i++)
     {
-        const adComputeStackItem_t& item = computeStack[i];
+        const csComputeStackItem_t& item = computeStack[i];
 
         if(item.opCode == eOP_Constant)
         {
@@ -515,7 +515,7 @@ size_t adNode::EstimateComputeStackFlops(const adComputeStackItem_t* computeStac
 /***********************************************************************************
    Estimate compute stack value/lvalue/rvalue sizes
 ***********************************************************************************/
-void adNode::EstimateComputeStackSizes(const std::vector<adComputeStackItem_t>& computeStack, size_t start, size_t end,
+void adNode::EstimateComputeStackSizes(const std::vector<csComputeStackItem_t>& computeStack, size_t start, size_t end,
                                       int& max_valueSize, int& max_lvalueSize, int& max_rvalueSize)
 {
     int  valueSize = 0;
@@ -528,7 +528,7 @@ void adNode::EstimateComputeStackSizes(const std::vector<adComputeStackItem_t>& 
 
     for(size_t i = start; i < end; i++)
     {
-        const adComputeStackItem_t& item = computeStack[i];
+        const csComputeStackItem_t& item = computeStack[i];
 
         if(item.opCode == eOP_Constant)
         {

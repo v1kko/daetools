@@ -817,7 +817,7 @@ string daeAction__repr__(daeAction& self)
     return daeGetStrippedRelativeName(NULL, &self);
 }
 
-string adComputeStackItem_variableName(adComputeStackItem_t& self)
+string adComputeStackItem_variableName(csComputeStackItem_t& self)
 {
 #ifdef ComputeStackDebug
     return self.variableName;
@@ -826,107 +826,107 @@ string adComputeStackItem_variableName(adComputeStackItem_t& self)
 #endif
 }
 
-daeeOpCode adComputeStackItem_opCode(adComputeStackItem_t& self)
+csOpCode adComputeStackItem_opCode(csComputeStackItem_t& self)
 {
-    return (daeeOpCode)self.opCode;
+    return (csOpCode)self.opCode;
 }
 
-boost::python::object adComputeStackItem_function(adComputeStackItem_t& self)
+boost::python::object adComputeStackItem_function(csComputeStackItem_t& self)
 {
-    if(self.opCode == computestack::eOP_Unary)
+    if(self.opCode == cs::eOP_Unary)
         return boost::python::object((daeeUnaryFunctions)self.function);
-    else if(self.opCode == computestack::eOP_Binary)
+    else if(self.opCode == cs::eOP_Binary)
         return boost::python::object((daeeBinaryFunctions)self.function);
     else
         return boost::python::object(-1);
 }
 
-daeeOpResultLocation adComputeStackItem_resultLocation(adComputeStackItem_t& self)
+csOpResultLocation adComputeStackItem_resultLocation(csComputeStackItem_t& self)
 {
-    return (daeeOpResultLocation)self.resultLocation;
+    return (csOpResultLocation)self.resultLocation;
 }
 
-int adComputeStackItem_tag(adComputeStackItem_t& self)
+int adComputeStackItem_tag(csComputeStackItem_t& self)
 {
     return (int)self.data.value;
 }
 
 
-double adComputeStackItem_data_value(adComputeStackItem_t& self)
+double adComputeStackItem_data_value(csComputeStackItem_t& self)
 {
     return self.data.value;
 }
 
-uint32_t adComputeStackItem_data_dofIndex(adComputeStackItem_t& self)
+uint32_t adComputeStackItem_data_dofIndex(csComputeStackItem_t& self)
 {
     return self.data.dof_indexes.dofIndex;
 }
 
-uint32_t adComputeStackItem_data_blockIndex(adComputeStackItem_t& self)
+uint32_t adComputeStackItem_data_blockIndex(csComputeStackItem_t& self)
 {
     return self.data.indexes.blockIndex;
 }
 
-uint32_t adComputeStackItem_data_overallIndex(adComputeStackItem_t& self)
+uint32_t adComputeStackItem_data_overallIndex(csComputeStackItem_t& self)
 {
-    if(self.opCode == computestack::eOP_DegreeOfFreedom)
+    if(self.opCode == cs::eOP_DegreeOfFreedom)
         return self.data.dof_indexes.overallIndex;
     else
         return self.data.indexes.overallIndex;
 }
 
-string adComputeStackItem__str__(const adComputeStackItem_t& self)
+string adComputeStackItem__str__(const csComputeStackItem_t& self)
 {
     return adComputeStackItem__repr__(self);
 }
 
-string adComputeStackItem__repr__(const adComputeStackItem_t& self)
+string adComputeStackItem__repr__(const csComputeStackItem_t& self)
 {
     std::string res;
-    if(self.opCode == computestack::eOP_Constant)
-        res += "adComputeStackItem_t(opCode = eOP_Constant";
-    else if(self.opCode == computestack::eOP_Time)
-        res += "adComputeStackItem_t(opCode = eOP_Time";
-    else if(self.opCode == computestack::eOP_InverseTimeStep)
-        res += "adComputeStackItem_t(opCode = eOP_InverseTimeStep";
-    else if(self.opCode == computestack::eOP_Variable)
-        res += "adComputeStackItem_t(opCode = eOP_Variable";
-    else if(self.opCode == computestack::eOP_DegreeOfFreedom)
-        res += "adComputeStackItem_t(opCode = eOP_DegreeOfFreedom";
-    else if(self.opCode == computestack::eOP_TimeDerivative)
-        res += "adComputeStackItem_t(opCode = eOP_TimeDerivative";
-    else if(self.opCode == computestack::eOP_Unary)
-        res += "adComputeStackItem_t(opCode = eOP_Unary";
-    else if(self.opCode == computestack::eOP_Binary)
-        res += "adComputeStackItem_t(opCode = eOP_Binary";
+    if(self.opCode == cs::eOP_Constant)
+        res += "csComputeStackItem_t(opCode = eOP_Constant";
+    else if(self.opCode == cs::eOP_Time)
+        res += "csComputeStackItem_t(opCode = eOP_Time";
+    else if(self.opCode == cs::eOP_InverseTimeStep)
+        res += "csComputeStackItem_t(opCode = eOP_InverseTimeStep";
+    else if(self.opCode == cs::eOP_Variable)
+        res += "csComputeStackItem_t(opCode = eOP_Variable";
+    else if(self.opCode == cs::eOP_DegreeOfFreedom)
+        res += "csComputeStackItem_t(opCode = eOP_DegreeOfFreedom";
+    else if(self.opCode == cs::eOP_TimeDerivative)
+        res += "csComputeStackItem_t(opCode = eOP_TimeDerivative";
+    else if(self.opCode == cs::eOP_Unary)
+        res += "csComputeStackItem_t(opCode = eOP_Unary";
+    else if(self.opCode == cs::eOP_Binary)
+        res += "csComputeStackItem_t(opCode = eOP_Binary";
     else
-        res += "adComputeStackItem_t(opCode = eOP_Unknown";
+        res += "csComputeStackItem_t(opCode = eOP_Unknown";
 
-    if(self.resultLocation == computestack::eOP_Result_to_value)
+    if(self.resultLocation == cs::eOP_Result_to_value)
         res += ", resultLocation = eOP_Result_to_value";
-    else if(self.resultLocation == computestack::eOP_Result_to_lvalue)
+    else if(self.resultLocation == cs::eOP_Result_to_lvalue)
         res += ", resultLocation = eOP_Result_to_lvalue";
-    else if(self.resultLocation == computestack::eOP_Result_to_rvalue)
+    else if(self.resultLocation == cs::eOP_Result_to_rvalue)
         res += ", resultLocation = eOP_Result_to_rvalue";
     else
         res += ", resultLocation = eOP_Result_Unknown";
 
-    if(self.opCode == computestack::eOP_Constant)
+    if(self.opCode == cs::eOP_Constant)
     {
         res += ", value = " + toString<double>(self.data.value);
     }
-    else if(self.opCode == computestack::eOP_Variable || self.opCode == computestack::eOP_TimeDerivative)
+    else if(self.opCode == cs::eOP_Variable || self.opCode == cs::eOP_TimeDerivative)
     {
         res += ", blockIndex = "   + toString<uint32_t>(self.data.indexes.blockIndex);
         res += ", overallIndex = " + toString<uint32_t>(self.data.indexes.overallIndex);
         //res += ", isAssigned = " + toString<bool>(bool(self.isAssigned));
     }
-    else if(self.opCode == computestack::eOP_DegreeOfFreedom)
+    else if(self.opCode == cs::eOP_DegreeOfFreedom)
     {
         res += ", overallIndex = " + toString<uint32_t>(self.data.dof_indexes.overallIndex);
         res += ", dofIndex = "     + toString<uint32_t>(self.data.dof_indexes.dofIndex);
     }
-    else if(self.opCode == computestack::eOP_Unary)
+    else if(self.opCode == cs::eOP_Unary)
     {
         res += ", function = ";
         daeeUnaryFunctions eValue = daeeUnaryFunctions(self.function);
@@ -977,7 +977,7 @@ string adComputeStackItem__repr__(const adComputeStackItem_t& self)
         else
             res += string("unknown");
     }
-    else if(self.opCode == computestack::eOP_Binary)
+    else if(self.opCode == cs::eOP_Binary)
     {
         res += ", function = ";
         daeeBinaryFunctions eValue = daeeBinaryFunctions(self.function);

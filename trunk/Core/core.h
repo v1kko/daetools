@@ -15,6 +15,7 @@ DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 
 #include "definitions.h"
 #include "log.h"
+#include "call_stats.h"
 #include "../Units/units.h"
 using namespace dae::logging;
 using namespace units;
@@ -906,6 +907,8 @@ public:
                                                                     const std::string& filenameJacobianIndexes,
                                                                     const std::vector<uint32_t>& equationIndexes,
                                                                     const std::map<uint32_t,uint32_t>& bi_to_bi_local) = 0;
+
+    virtual std::map<std::string, call_stats::TimeAndCount> GetCallStats() const = 0;
 
 //	virtual real_t* GetValuesPointer() = 0;
 //	virtual real_t* GetTimeDerivativesPointer() = 0;

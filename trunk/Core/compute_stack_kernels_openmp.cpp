@@ -15,10 +15,10 @@ DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 namespace openmp_evaluator
 {
 /* Residual kernel function .*/
-void EvaluateResiduals(const adComputeStackItem_t*         computeStacks,
+void EvaluateResiduals(const csComputeStackItem_t*         computeStacks,
                        uint32_t                            equationIndex,
                        const uint32_t*                     activeEquationSetIndexes,
-                       daeComputeStackEvaluationContext_t  EC,
+                       csEvaluationContext_t               EC,
                        const real_t*                       dofs,
                        const real_t*                       values,
                        const real_t*                       timeDerivatives,
@@ -26,7 +26,7 @@ void EvaluateResiduals(const adComputeStackItem_t*         computeStacks,
 {
     /* Locate the current equation stack in the array of all compute stacks. */
     uint32_t firstIndex                      = activeEquationSetIndexes[equationIndex];
-    const adComputeStackItem_t* computeStack = &computeStacks[firstIndex];
+    const csComputeStackItem_t* computeStack = &computeStacks[firstIndex];
 
     /* Evaluate the compute stack (scaling is included). */
     adouble_t res_cs = evaluateComputeStack(computeStack,
@@ -42,20 +42,20 @@ void EvaluateResiduals(const adComputeStackItem_t*         computeStacks,
 }
 
 /* Jacobian kernel functions. */
-void EvaluateJacobian(const adComputeStackItem_t*        computeStacks,
+void EvaluateJacobian(const csComputeStackItem_t*        computeStacks,
                       uint32_t                           jacobianItemIndex,
                       const uint32_t*                    activeEquationSetIndexes,
-                      const adJacobianMatrixItem_t*      computeStackJacobianItems,
-                      daeComputeStackEvaluationContext_t EC,
+                      const csJacobianMatrixItem_t*      computeStackJacobianItems,
+                      csEvaluationContext_t              EC,
                       const real_t*                      dofs,
                       const real_t*                      values,
                       const real_t*                      timeDerivatives,
                       real_t*                            jacobian)
 {
     /* Locate the current equation stack in the array of all compute stacks. */
-    adJacobianMatrixItem_t jacobianItem      = computeStackJacobianItems[jacobianItemIndex];
+    csJacobianMatrixItem_t jacobianItem      = computeStackJacobianItems[jacobianItemIndex];
     uint32_t firstIndex                      = activeEquationSetIndexes[jacobianItem.equationIndex];
-    const adComputeStackItem_t* computeStack = &computeStacks[firstIndex];
+    const csComputeStackItem_t* computeStack = &computeStacks[firstIndex];
 
     /* Set the overall index for jacobian evaluation. */
     EC.jacobianIndex = jacobianItem.overallIndex;
@@ -74,10 +74,10 @@ void EvaluateJacobian(const adComputeStackItem_t*        computeStacks,
 }
 
 /* Residual kernel function .*/
-void EvaluateSensitivityResiduals(const adComputeStackItem_t*        computeStacks,
+void EvaluateSensitivityResiduals(const csComputeStackItem_t*        computeStacks,
                                   uint32_t                           equationIndex,
                                   const uint32_t*                    activeEquationSetIndexes,
-                                  daeComputeStackEvaluationContext_t EC,
+                                  csEvaluationContext_t              EC,
                                   const real_t*                      dofs,
                                   const real_t*                      values,
                                   const real_t*                      timeDerivatives,
@@ -87,7 +87,7 @@ void EvaluateSensitivityResiduals(const adComputeStackItem_t*        computeStac
 {
     /* Locate the current equation stack in the array of all compute stacks. */
     uint32_t firstIndex                      = activeEquationSetIndexes[equationIndex];
-    const adComputeStackItem_t* computeStack = &computeStacks[firstIndex];
+    const csComputeStackItem_t* computeStack = &computeStacks[firstIndex];
 
     /* Evaluate the compute stack (scaling is included). */
     adouble_t res_cs = evaluateComputeStack(computeStack,

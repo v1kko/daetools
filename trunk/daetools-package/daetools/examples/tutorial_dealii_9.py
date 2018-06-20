@@ -196,7 +196,7 @@ def run(**kwargs):
     simulation = simTutorial()
 
     # Create SuperLU LA solver
-    lasolver = pySuperLU.daeCreateSuperLUSolver()
+    lasolver = superlu.daeCreateSuperLUSolver()
 
     # Create and setup two data reporters:
     datareporter = daeDelegateDataReporter()

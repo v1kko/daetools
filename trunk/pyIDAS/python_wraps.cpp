@@ -5,13 +5,13 @@
 using namespace std;
 using namespace boost;
 using namespace boost::python;
-  
+
 namespace daepython
 {
 boost::python::list daeArray_GetValues(daeArray<real_t>& self)
 {
     boost::python::list l;
-   
+
     for(size_t i = 0; i < self.GetSize(); i++)
         l.append(self.GetItem(i));
 
@@ -51,6 +51,12 @@ boost::python::object daeDenseMatrix_ndarray(daeDenseMatrix& self)
     boost::python::object ndarray = numpy.attr("array")(*args, **kwargs);
 
     return ndarray;
+}
+
+boost::python::dict GetCallStats(daeIDASolver& self)
+{
+    std::map<std::string, call_stats::TimeAndCount> stats = self.GetCallStats();
+    return getDictFromMapByValue(stats);
 }
 
 }

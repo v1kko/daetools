@@ -116,11 +116,6 @@ BOOST_PYTHON_MODULE(pyActivity)
         .add_property("ActiveEquationSetMemory",    &daepython::daeDefaultSimulationWrapper::lGetActiveEquationSetMemory)
         .add_property("ActiveEquationSetNodeCount", &daepython::daeDefaultSimulationWrapper::dGetActiveEquationSetNodeCount)
 
-        .def_readonly("InitializationDuration", &daeSimulation::m_InitializationDuration)
-        .def_readonly("SolveInitialDuration",   &daeSimulation::m_SolveInitalDuration)
-        .def_readonly("IntegrationDuration",    &daeSimulation::m_IntegrationDuration)
-
-
         .add_property("EvaluationMode",         &daeSimulation::GetEvaluationMode,
                                                 &daeSimulation::SetEvaluationMode,                          DOCSTR_daeSimulation_EvaluationMode)
 
@@ -177,7 +172,11 @@ BOOST_PYTHON_MODULE(pyActivity)
         .add_property("StopAtModelDiscontinuity",        &daeSimulation::GetStopAtModelDiscontinuity,        &daeSimulation::SetStopAtModelDiscontinuity)
         .add_property("ReportDataAroundDiscontinuities", &daeSimulation::GetReportDataAroundDiscontinuities, &daeSimulation::SetReportDataAroundDiscontinuities)
 
-        .add_property("EvaluationCallsStats",           &daepython::daeDefaultSimulationWrapper::GetEvaluationCallsStats_)
+        .add_property("ComputeStackEvaluator",           make_function(&daeSimulation::GetComputeStackEvaluator, return_internal_reference<>()),
+                                                         &daeSimulation::SetComputeStackEvaluator)
+        .add_property("CallStats",                &daepython::GetCallStats)
+
+        .def("PrintStats",                  &daeSimulation::PrintStats)
 
         .def("SetComputeStackEvaluator",    &daeSimulation::SetComputeStackEvaluator,
                                             ( arg("self"), arg("computeStackEvaluator") ), DOCSTR_daeSimulation_SetComputeStackEvaluator)

@@ -1,8 +1,8 @@
 /***********************************************************************************
-*                 DAE Tools Project: www.daetools.com
-*                 Copyright (C) Dragan Nikolic
+                 OpenCS Project: www.daetools.com
+                 Copyright (C) Dragan Nikolic
 ************************************************************************************
-DAE Tools is free software; you can redistribute it and/or modify it under the
+OpenCS is free software; you can redistribute it and/or modify it under the
 terms of the GNU General Public License version 3 as published by the Free Software
 Foundation. DAE Tools is distributed in the hope that it will be useful, but WITHOUT
 ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
@@ -10,17 +10,19 @@ PARTICULAR PURPOSE. See the GNU General Public License for more details.
 You should have received a copy of the GNU General Public License along with the
 DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 ***********************************************************************************/
-#include "compute_stack_opencl_multi.h"
+#include "cs_evaluator_opencl_multidevice.h"
 #include <iostream>
 #include <sstream>
 #include <numeric>
 #include <functional>
 #include <omp.h>
 
-daeComputeStackEvaluator_OpenCL_multi::daeComputeStackEvaluator_OpenCL_multi(const std::vector<int>&    platforms,
-                                                                             const std::vector<int>&    devices,
-                                                                             const std::vector<double>& taskPortions,
-                                                                             std::string                buildProgramOptions)
+namespace cs
+{
+daeComputeStackEvaluator_OpenCL_MultiDevice::daeComputeStackEvaluator_OpenCL_MultiDevice(const std::vector<int>&    platforms,
+                                                                                         const std::vector<int>&    devices,
+                                                                                         const std::vector<double>& taskPortions,
+                                                                                         std::string                buildProgramOptions)
 {
     if(platforms.size() != devices.size() || platforms.size() != taskPortions.size())
         throw std::runtime_error("Invalid number of platforms/devices/taskPortions specifed");
@@ -50,7 +52,7 @@ daeComputeStackEvaluator_OpenCL_multi::daeComputeStackEvaluator_OpenCL_multi(con
     }
 }
 
-daeComputeStackEvaluator_OpenCL_multi::~daeComputeStackEvaluator_OpenCL_multi()
+daeComputeStackEvaluator_OpenCL_MultiDevice::~daeComputeStackEvaluator_OpenCL_MultiDevice()
 {
     for(size_t i = 0; i < m_evaluators.size(); i++)
     {
@@ -60,16 +62,16 @@ daeComputeStackEvaluator_OpenCL_multi::~daeComputeStackEvaluator_OpenCL_multi()
     m_evaluators.clear();
 }
 
-void daeComputeStackEvaluator_OpenCL_multi::Initialize(bool calculateSensitivities,
-                                                       size_t numberOfVariables,
-                                                       size_t numberOfEquationsToProcess,
-                                                       size_t numberOfDOFs,
-                                                       size_t numberOfComputeStackItems,
-                                                       size_t numberOfJacobianItems,
-                                                       size_t numberOfJacobianItemsToProcess,
-                                                       adComputeStackItem_t*    computeStacks,
-                                                       uint32_t*                activeEquationSetIndexes,
-                                                       adJacobianMatrixItem_t*  computeStackJacobianItems)
+void daeComputeStackEvaluator_OpenCL_MultiDevice::Initialize(bool calculateSensitivities,
+                                                             size_t numberOfVariables,
+                                                             size_t numberOfEquationsToProcess,
+                                                             size_t numberOfDOFs,
+                                                             size_t numberOfComputeStackItems,
+                                                             size_t numberOfJacobianItems,
+                                                             size_t numberOfJacobianItemsToProcess,
+                                                             csComputeStackItem_t*    computeStacks,
+                                                             uint32_t*                activeEquationSetIndexes,
+                                                             csJacobianMatrixItem_t*  computeStackJacobianItems)
 {
     bool                    calculateSensitivities_i;
     size_t                  numberOfVariables_i;
@@ -78,9 +80,9 @@ void daeComputeStackEvaluator_OpenCL_multi::Initialize(bool calculateSensitiviti
     size_t                  numberOfComputeStackItems_i;
     size_t                  numberOfJacobianItems_i;
     size_t                  numberOfJacobianItemsToProcess_i;
-    adComputeStackItem_t*   computeStacks_i;
+    csComputeStackItem_t*   computeStacks_i;
     uint32_t*               activeEquationSetIndexes_i;
-    adJacobianMatrixItem_t* computeStackJacobianItems_i;
+    csJacobianMatrixItem_t* computeStackJacobianItems_i;
 
     size_t noEvaluators = m_evaluators.size();
 
@@ -144,7 +146,7 @@ void daeComputeStackEvaluator_OpenCL_multi::Initialize(bool calculateSensitiviti
     }
 }
 
-void daeComputeStackEvaluator_OpenCL_multi::FreeResources()
+void daeComputeStackEvaluator_OpenCL_MultiDevice::FreeResources()
 {
     size_t noEvaluators = m_evaluators.size();
     for(size_t i = 0; i < noEvaluators; i++)
@@ -155,11 +157,11 @@ void daeComputeStackEvaluator_OpenCL_multi::FreeResources()
 }
 
 /* Residual kernel function. */
-void daeComputeStackEvaluator_OpenCL_multi::EvaluateResiduals(daeComputeStackEvaluationContext_t EC,
-                                                              real_t*                            dofs,
-                                                              real_t*                            values,
-                                                              real_t*                            timeDerivatives,
-                                                              real_t*                            residuals)
+void daeComputeStackEvaluator_OpenCL_MultiDevice::EvaluateResiduals(csEvaluationContext_t EC,
+                                                                    real_t*               dofs,
+                                                                    real_t*               values,
+                                                                    real_t*               timeDerivatives,
+                                                                    real_t*               residuals)
 {
     size_t noEvaluators = m_evaluators.size();
     if(noEvaluators > 0)
@@ -184,11 +186,11 @@ void daeComputeStackEvaluator_OpenCL_multi::EvaluateResiduals(daeComputeStackEva
 }
 
 /* Jacobian kernel function (generic version). */
-void daeComputeStackEvaluator_OpenCL_multi::EvaluateJacobian(daeComputeStackEvaluationContext_t EC,
-                                                             real_t*                            dofs,
-                                                             real_t*                            values,
-                                                             real_t*                            timeDerivatives,
-                                                             real_t*                            jacobianItems)
+void daeComputeStackEvaluator_OpenCL_MultiDevice::EvaluateJacobian(csEvaluationContext_t EC,
+                                                                   real_t*               dofs,
+                                                                   real_t*               values,
+                                                                   real_t*               timeDerivatives,
+                                                                   real_t*               jacobianItems)
 {
     size_t noEvaluators = m_evaluators.size();
     if(noEvaluators > 0)
@@ -214,13 +216,13 @@ void daeComputeStackEvaluator_OpenCL_multi::EvaluateJacobian(daeComputeStackEval
 }
 
 /* Sensitivity residual kernel function. */
-void daeComputeStackEvaluator_OpenCL_multi::EvaluateSensitivityResiduals(daeComputeStackEvaluationContext_t    EC,
-                                                                         real_t*                               dofs,
-                                                                         real_t*                               values,
-                                                                         real_t*                               timeDerivatives,
-                                                                         real_t*                               svalues,
-                                                                         real_t*                               sdvalues,
-                                                                         real_t*                               sresiduals)
+void daeComputeStackEvaluator_OpenCL_MultiDevice::EvaluateSensitivityResiduals(csEvaluationContext_t    EC,
+                                                                               real_t*                  dofs,
+                                                                               real_t*                  values,
+                                                                               real_t*                  timeDerivatives,
+                                                                               real_t*                  svalues,
+                                                                               real_t*                  sdvalues,
+                                                                               real_t*                  sresiduals)
 {
     size_t noEvaluators = m_evaluators.size();
     if(noEvaluators > 0)
@@ -246,3 +248,17 @@ void daeComputeStackEvaluator_OpenCL_multi::EvaluateSensitivityResiduals(daeComp
     }
 }
 
+// std::map<std::string, call_stats::TimeAndCount> daeComputeStackEvaluator_OpenCL_MultiDevice::GetCallStats() const
+// {
+//     // What returns this function? For all evaluators combined?
+//     std::map<std::string, call_stats::TimeAndCount> stats;
+//     //size_t noEvaluators = m_evaluators.size();
+//     //for(int i = 0; i < noEvaluators; i++)
+//     //{
+//     //    daeComputeStackEvaluator_OpenCL* evaluator = m_evaluators[i];
+//     //    std::map<std::string, call_stats::TimeAndCount> stats_i = evaluator->GetCallStats();
+//     //}
+//
+//     return stats;
+// }
+}

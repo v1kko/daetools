@@ -111,6 +111,8 @@ std::vector<TYPE> getVectorFromList(boost::python::list l)
     return v;
 }
 
+boost::python::dict GetCallStats(daeSimulation& self);
+
 class daeSimulationWrapper : public daeSimulation_t,
                              public boost::python::wrapper<daeSimulation_t>
 {
@@ -700,12 +702,6 @@ public:
         }
 
         daeSimulation::SetReportingTimes(darrReportingTimes);
-    }
-
-    boost::python::dict GetEvaluationCallsStats_()
-    {
-        std::map<std::string, real_t> stats = GetEvaluationCallsStats();
-        return getDictFromMapByValue(stats);
     }
 
     void dExportComputeStackStructs(const std::string& filenameComputeStacks,

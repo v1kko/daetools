@@ -17,7 +17,7 @@ namespace boost
 {
 #define POINTER_CONVERSION(CLASS_NAME)   template <> CLASS_NAME const volatile * get_pointer(class CLASS_NAME const volatile *c) {return c;}
 
-POINTER_CONVERSION(daeIDALASolver_t)
+POINTER_CONVERSION(daeLASolver_t)
 }
 #endif
 #endif
@@ -40,9 +40,9 @@ boost::python::dict getDictFromMapByValue(std::map<KEY,VALUE>& mapItems)
 
 #ifdef daeSuperLU
 using namespace dae::solver::superlu;
-static boost::python::dict GetEvaluationCallsStats_(superlu::daeSuperLUSolver& self)
+static boost::python::dict GetCallStats(superlu::daeSuperLUSolver& self)
 {
-    std::map<std::string, real_t> stats = self.GetEvaluationCallsStats();
+    std::map<std::string, call_stats::TimeAndCount> stats = self.GetCallStats();
     return getDictFromMapByValue(stats);
 }
 
@@ -51,9 +51,9 @@ BOOST_PYTHON_MODULE(pySuperLU)
 
 #ifdef daeSuperLU_MT
 using namespace dae::solver::superlu_mt;
-static boost::python::dict GetEvaluationCallsStats_(superlu_mt::daeSuperLUSolver& self)
+static boost::python::dict GetCallStats(superlu_mt::daeSuperLUSolver& self)
 {
-    std::map<std::string, real_t> stats = self.GetEvaluationCallsStats();
+    std::map<std::string, call_stats::TimeAndCount> stats = self.GetCallStats();
     return getDictFromMapByValue(stats);
 }
 
@@ -65,9 +65,19 @@ BOOST_PYTHON_MODULE(pySuperLU_MT)
 /**************************************************************
     LA Solver
 ***************************************************************/
-    class_<daeIDALASolver_t, boost::noncopyable>("daeIDALASolver_t", no_init)
-        .def("SaveAsXPM",	pure_virtual(&daeIDALASolver_t::SaveAsXPM))
-        ;
+    class_<daeLASolver_t, boost::noncopyable>("daeLASolver_t", no_init)
+        .def("SaveAsXPM",	pure_virtual(&daeLASolver_t::SaveAsXPM))
+
+        .def("GetOption_bool",   pure_virtual(&daeLASolver_t::GetOption_bool))
+        .def("GetOption_int",    pure_virtual(&daeLASolver_t::GetOption_int))
+        .def("GetOption_float",	 pure_virtual(&daeLASolver_t::GetOption_float))
+        .def("GetOption_string", pure_virtual(&daeLASolver_t::GetOption_string))
+
+        .def("SetOption_bool",   pure_virtual(&daeLASolver_t::SetOption_bool))
+        .def("SetOption_int",    pure_virtual(&daeLASolver_t::SetOption_int))
+        .def("SetOption_float",  pure_virtual(&daeLASolver_t::SetOption_float))
+        .def("SetOption_string", pure_virtual(&daeLASolver_t::SetOption_string))
+    ;
 
 #ifndef daeSuperLU_CUDA
     enum_<yes_no_t>("yes_no_t")
@@ -95,43 +105,22 @@ BOOST_PYTHON_MODULE(pySuperLU_MT)
         .def_readwrite("diag_pivot_thresh",	&superlumt_options_t::diag_pivot_thresh)
         .def_readwrite("drop_tol",			&superlumt_options_t::drop_tol)
         .def_readwrite("PrintStat",			&superlumt_options_t::PrintStat)
-        ;
+    ;
 
-    class_<daeSuperLUSolver, bases<daeIDALASolver_t>, boost::noncopyable>("daeSuperLU_MT_Solver")
-        .add_property("Name",                   &daeSuperLUSolver::GetName, DOCSTR_daeSuperLUSolver_Name)
-        .add_property("Options",                make_function(&daeSuperLUSolver::GetOptions, return_internal_reference<>()), DOCSTR_daeSuperLUSolver_Options)
-        .add_property("EvaluationCallsStats",   &GetEvaluationCallsStats_)
+    class_<daeSuperLUSolver, bases<daeLASolver_t>, boost::noncopyable>("daeSuperLU_MT_Solver")
+        .add_property("Name",               &daeSuperLUSolver::GetName, DOCSTR_daeSuperLUSolver_Name)
+        .add_property("Options",            make_function(&daeSuperLUSolver::GetOptions, return_internal_reference<>()), DOCSTR_daeSuperLUSolver_Options)
+        .add_property("CallStats",   &GetCallStats)
 
         .def("SaveAsXPM",				&daeSuperLUSolver::SaveAsXPM,
                                         ( arg("self"), arg("xpmFilename") ), DOCSTR_daeSuperLUSolver_SaveAsXPM)
         .def("SaveAsMatrixMarketFile",	&daeSuperLUSolver::SaveAsMatrixMarketFile,
                                         ( arg("self"), arg("filename"), arg("matrixName"), arg("description") ), DOCSTR_daeSuperLUSolver_SaveAsMatrixMarketFile)
-        .def("SetOpenBLASNoThreads",	&daeSuperLUSolver::SetOpenBLASNoThreads,
-                                        ( boost::python::arg("self"), boost::python::arg("noThreads") ))
-        ;
-#endif
-
-#ifdef daeSuperLU_CUDA
-    class_<daeSuperLUSolver, bases<daeIDALASolver_t>, boost::noncopyable>("daeSuperLU_CUDA_Solver")
-        .add_property("Name",			&daeSuperLUSolver::GetName, DOCSTR_daeSuperLUSolver_Name)
-        .def("SaveAsXPM",				&daeSuperLUSolver::SaveAsXPM,
-                                        ( arg("self"), arg("xpmFilename") ), DOCSTR_daeSuperLUSolver_SaveAsXPM)
-        .def("SaveAsMatrixMarketFile",	&daeSuperLUSolver::SaveAsMatrixMarketFile,
-                                        ( arg("self"), arg("filename"), arg("matrixName"), arg("description") ), DOCSTR_daeSuperLUSolver_SaveAsMatrixMarketFile)
-        ;
+    ;
 #endif
 
 
 #ifdef daeSuperLU
-/*
-    enum_<IterRefine_t>("IterRefine_t")
-        .value("NOREFINE",	NOREFINE)
-        //.value("SINGLE",	SINGLE)
-        //.value("DOUBLE",	DOUBLE)
-        //.value("EXTRA",	EXTRA)
-        .export_values()
-    ;
-*/
     enum_<rowperm_t>("rowperm_t")
         .value("NOROWPERM",	NOROWPERM)
         .value("LargeDiag",	LargeDiag)
@@ -140,26 +129,35 @@ BOOST_PYTHON_MODULE(pySuperLU_MT)
     ;
 
     class_<superlu_options_t, boost::noncopyable>("superlu_options_t", no_init)
+        .def_readwrite("Equil",             &superlu_options_t::Equil)
         .def_readwrite("ColPerm",			&superlu_options_t::ColPerm)
-        .def_readwrite("DiagPivotThresh",	&superlu_options_t::DiagPivotThresh)
-        .def_readwrite("RowPerm",			&superlu_options_t::RowPerm)
-        .def_readwrite("PrintStat",			&superlu_options_t::PrintStat)
-        //.def_readwrite("IterRefine",		&superlu_options_t::IterRefine)
-        //.def_readwrite("Equil",			&superlu_options_t::Equil)
-        ;
+        .def_readwrite("DiagPivotThresh",   &superlu_options_t::DiagPivotThresh)
+        .def_readwrite("RowPerm",           &superlu_options_t::RowPerm)
+        .def_readwrite("PivotGrowth",	    &superlu_options_t::PivotGrowth)
+        .def_readwrite("ConditionNumber",   &superlu_options_t::ConditionNumber)
+        .def_readwrite("PrintStat",	        &superlu_options_t::PrintStat)
+    ;
 
-    class_<daeSuperLUSolver, bases<daeIDALASolver_t>, boost::noncopyable>("daeSuperLU_Solver")
-        .add_property("Name",                   &daeSuperLUSolver::GetName, DOCSTR_daeSuperLUSolver_Name)
-        .add_property("Options",                make_function(&daeSuperLUSolver::GetOptions, return_internal_reference<>()), DOCSTR_daeSuperLUMTSolver_Options)
-        .add_property("EvaluationCallsStats",   &GetEvaluationCallsStats_)
+    class_<daeSuperLUSolver, bases<daeLASolver_t>, boost::noncopyable>("daeSuperLU_Solver")
+        .add_property("Name",             &daeSuperLUSolver::GetName, DOCSTR_daeSuperLUSolver_Name)
+        .add_property("Options",          make_function(&daeSuperLUSolver::GetOptions, return_internal_reference<>()), DOCSTR_daeSuperLUMTSolver_Options)
+        .add_property("CallStats", &GetCallStats)
 
         .def("SaveAsXPM",				&daeSuperLUSolver::SaveAsXPM,
                                         ( arg("self"), arg("xpmFilename") ), DOCSTR_daeSuperLUSolver_SaveAsXPM)
         .def("SaveAsMatrixMarketFile",	&daeSuperLUSolver::SaveAsMatrixMarketFile,
                                         ( arg("self"), arg("filename"), arg("matrixName"), arg("description") ), DOCSTR_daeSuperLUSolver_SaveAsMatrixMarketFile)
-        .def("SetOpenBLASNoThreads",	&daeSuperLUSolver::SetOpenBLASNoThreads,
-                                        ( boost::python::arg("self"), boost::python::arg("noThreads") ))
-        ;
+
+        .def("GetOption_bool",   &daeSuperLUSolver::GetOption_bool,   ( boost::python::arg("self"), boost::python::arg("name") ))
+        .def("GetOption_int",    &daeSuperLUSolver::GetOption_int,    ( boost::python::arg("self"), boost::python::arg("name") ))
+        .def("GetOption_float",	 &daeSuperLUSolver::GetOption_float,  ( boost::python::arg("self"), boost::python::arg("name") ))
+        .def("GetOption_string", &daeSuperLUSolver::GetOption_string, ( boost::python::arg("self"), boost::python::arg("name") ))
+
+        .def("SetOption_bool",   &daeSuperLUSolver::SetOption_bool,   ( boost::python::arg("self"), boost::python::arg("name"), boost::python::arg("value") ))
+        .def("SetOption_int",    &daeSuperLUSolver::SetOption_int,    ( boost::python::arg("self"), boost::python::arg("name"), boost::python::arg("value") ))
+        .def("SetOption_float",  &daeSuperLUSolver::SetOption_float,  ( boost::python::arg("self"), boost::python::arg("name"), boost::python::arg("value") ))
+        .def("SetOption_string", &daeSuperLUSolver::SetOption_string, ( boost::python::arg("self"), boost::python::arg("name"), boost::python::arg("value") ))
+    ;
 
 #endif
 

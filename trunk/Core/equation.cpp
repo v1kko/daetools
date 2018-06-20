@@ -179,8 +179,8 @@ std::pair<size_t,size_t> daeEquationExecutionInfo::GetComputeStackInfo(const std
     std::pair<size_t,size_t> cssize_flops = std::make_pair<size_t,size_t>(0, 0);
     if(m_nComputeStackIndex >= 0)
     {
-        std::vector<adComputeStackItem_t>& all_cs = m_pEquation->m_pModel->GetDataProxy()->GetBlock()->m_arrAllComputeStacks;
-        adComputeStackItem_t* cs = &all_cs[m_nComputeStackIndex];
+        std::vector<csComputeStackItem_t>& all_cs = m_pEquation->m_pModel->GetDataProxy()->GetBlock()->m_arrAllComputeStacks;
+        csComputeStackItem_t* cs = &all_cs[m_nComputeStackIndex];
 
         cssize_flops.first  = cs->size;
         cssize_flops.second = adNode::EstimateComputeStackFlops(cs, unaryOps, binaryOps);
@@ -188,7 +188,7 @@ std::pair<size_t,size_t> daeEquationExecutionInfo::GetComputeStackInfo(const std
     return cssize_flops;
 }
 
-std::vector<adComputeStackItem_t> daeEquationExecutionInfo::GetComputeStack() const
+std::vector<csComputeStackItem_t> daeEquationExecutionInfo::GetComputeStack() const
 {
     if(!m_pEquation->m_pModel)
         daeDeclareAndThrowException(exInvalidPointer);
@@ -197,11 +197,11 @@ std::vector<adComputeStackItem_t> daeEquationExecutionInfo::GetComputeStack() co
     if(!m_pEquation->m_pModel->GetDataProxy()->GetBlock())
         daeDeclareAndThrowException(exInvalidPointer);
 
-    std::vector<adComputeStackItem_t> cs;
+    std::vector<csComputeStackItem_t> cs;
     if(m_nComputeStackIndex >= 0)
     {
-        std::vector<adComputeStackItem_t>& all_cs = m_pEquation->m_pModel->GetDataProxy()->GetBlock()->m_arrAllComputeStacks;
-        adComputeStackItem_t item0 = all_cs[m_nComputeStackIndex];
+        std::vector<csComputeStackItem_t>& all_cs = m_pEquation->m_pModel->GetDataProxy()->GetBlock()->m_arrAllComputeStacks;
+        csComputeStackItem_t item0 = all_cs[m_nComputeStackIndex];
         size_t n = item0.size;
         cs.resize(n);
         for(size_t i = 0; i < n; i++)
@@ -293,7 +293,7 @@ void daeEquationExecutionInfo::Residual(daeExecutionContext& EC)
         __ad = m_EquationEvaluationNode->Evaluate(&EC) * m_dScaling;
 
     /* ComputeStack evaluation
-        adComputeStackItem_t* computeStack = &EC.m_pBlock->m_arrAllComputeStacks[m_nComputeStackIndex];
+        csComputeStackItem_t* computeStack = &EC.m_pBlock->m_arrAllComputeStacks[m_nComputeStackIndex];
         adouble __ad1 = adNode::EvaluateComputeStack(computeStack, &EC) * m_dScaling;
         if(__ad.getValue() != __ad1.getValue())
         {
@@ -383,7 +383,7 @@ void daeEquationExecutionInfo::Jacobian(daeExecutionContext& EC)
                 __ad = m_EquationEvaluationNode->Evaluate(&EC) * m_dScaling;
 
             /* ComputeStack evaluation
-                adComputeStackItem_t* computeStack = &EC.m_pBlock->m_arrAllComputeStacks[m_nComputeStackIndex];
+                csComputeStackItem_t* computeStack = &EC.m_pBlock->m_arrAllComputeStacks[m_nComputeStackIndex];
                 adouble __ad1 = adNode::EvaluateComputeStack(computeStack, &EC) * m_dScaling;
                 if(__ad.getValue() != __ad1.getValue())
                 {
@@ -486,7 +486,7 @@ void daeEquationExecutionInfo::SensitivityResiduals(daeExecutionContext& EC, con
             __ad = m_EquationEvaluationNode->Evaluate(&EC) * m_dScaling;
 
         /*  ComputeStack evaluation
-            adComputeStackItem_t* computeStack = &EC.m_pBlock->m_arrAllComputeStacks[m_nComputeStackIndex];
+            csComputeStackItem_t* computeStack = &EC.m_pBlock->m_arrAllComputeStacks[m_nComputeStackIndex];
             adouble __ad1 = adNode::EvaluateComputeStack(computeStack, &EC) * m_dScaling;
             if(__ad.getValue() != __ad1.getValue())
             {
@@ -558,7 +558,7 @@ void daeEquationExecutionInfo::CreateComputeStack(daeBlock* pBlock)
     // Create compute stack array.
     m_nComputeStackIndex = pBlock->m_arrAllComputeStacks.size();
     adNode::CreateComputeStack(m_EquationEvaluationNode.get(), pBlock->m_arrAllComputeStacks, pBlock, m_dScaling);
-    //adComputeStackItem_t item = pBlock->m_arrAllComputeStacks[m_nComputeStackIndex];
+    //csComputeStackItem_t item = pBlock->m_arrAllComputeStacks[m_nComputeStackIndex];
     //int stackSize = item.tag;
     //printf("  stackSize = %d\n", stackSize);
 
@@ -590,7 +590,7 @@ void daeEquationExecutionInfo::CreateComputeStack(daeBlock* pBlock)
     // In runtime nodes they won't get updated until the first call to evaluate.
     for(size_t i = 0; i < m_EquationComputeStack.size(); i++)
     {
-        adComputeStackItem_t& item = m_EquationComputeStack[i];
+        csComputeStackItem_t& item = m_EquationComputeStack[i];
         if(item.opCode == eOP_Variable || item.opCode == eOP_TimeDerivative)
         {
             item.data.indexes.blockIndex = pBlock->FindVariableBlockIndex(item.data.indexes.overallIndex);

@@ -38,16 +38,6 @@ daeSimulation::daeSimulation(void)
     m_bEvaluationModeSet    = false;
     m_computeStackEvaluator = NULL;
 
-    m_InitializationDuration  = 0;
-    m_SolveInitalDuration     = 0;
-    m_IntegrationDuration     = 0;
-    m_ProblemCreationStart    = 0;
-    m_ProblemCreationEnd      = 0;
-    m_InitializationStart     = 0;
-    m_InitializationEnd       = 0;
-    m_IntegrationStart        = 0;
-    m_IntegrationEnd          = 0;
-
     daeConfig& cfg = daeConfig::GetConfig();
     m_bReportTimeDerivatives = cfg.GetBoolean("daetools.activity.reportTimeDerivatives", false);
     m_bReportSensitivities   = cfg.GetBoolean("daetools.activity.reportSensitivities",   false);
@@ -142,6 +132,8 @@ void daeSimulation::Initialize(daeDAESolver_t* pDAESolver,
                                bool bCalculateSensitivities,
                                const std::string& strJSONRuntimeSettings)
 {
+    call_stats::TimerCounter tc(m_stats["Initialization"]);
+
     if(!m_pModel)
         daeDeclareAndThrowException(exInvalidPointer);
     if(!pDAESolver)
@@ -166,8 +158,6 @@ void daeSimulation::Initialize(daeDAESolver_t* pDAESolver,
     m_pDataReporter	= pDataReporter;
     m_pLog			= pLog;
 
-    m_ProblemCreationStart = dae::GetTimeInSeconds();
-
     daeConfig& cfg = daeConfig::GetConfig();
     bool bPrintHeader = cfg.GetBoolean("daetools.activity.printHeader", true);
     bool bPrintInfo   = cfg.GetBoolean("daetools.core.printInfo",       false);
@@ -176,7 +166,7 @@ void daeSimulation::Initialize(daeDAESolver_t* pDAESolver,
     {
         m_pLog->Message(string("***********************************************************************"), 0);
         m_pLog->Message(string("                                 Version:   ") + daeVersion(true),         0);
-        m_pLog->Message(string("                                 Copyright: Dragan Nikolic, 2017       "), 0);
+        m_pLog->Message(string("                                 Copyright: Dragan Nikolic, 2018       "), 0);
         m_pLog->Message(string("                                 Homepage:  http://www.daetools.com    "), 0);
         m_pLog->Message(string("       @                       @                                       "), 0);
         m_pLog->Message(string("       @   @@@@@     @@@@@   @@@@@    @@@@@    @@@@@   @      @@@@@    "), 0);
@@ -351,29 +341,7 @@ void daeSimulation::Initialize(daeDAESolver_t* pDAESolver,
     m_bIsInitialized = true;
 
 // Announce success
-    m_ProblemCreationEnd = dae::GetTimeInSeconds();
-    m_pLog->Message(string("The system created successfully in: ") +
-                    toStringFormatted<real_t>(m_ProblemCreationEnd - m_ProblemCreationStart, -1, 3) +
-                    string(" s"), 0);
-}
-
-std::map<std::string, real_t> daeSimulation::GetEvaluationCallsStats()
-{
-    std::map<std::string, real_t> stats;
-
-    daeBlock* pBlock = dynamic_cast<daeBlock*>(m_ptrBlock);
-    if(!pBlock)
-        daeDeclareAndThrowException(exInvalidPointer);
-    stats["nuberOfResidualsCalls"]              = pBlock->m_nNuberOfResidualsCalls;
-    stats["nuberOfJacobianCalls"]               = pBlock->m_nNuberOfJacobianCalls;
-    stats["nuberOfSensitivityResidualsCalls"]   = pBlock->m_nNuberOfSensitivityResidualsCalls;
-    stats["totalTimeForResiduals"]              = pBlock->m_dTotalTimeForResiduals;
-    stats["totalTimeForJacobian"]               = pBlock->m_dTotalTimeForJacobian;
-    stats["totalTimeForSensitivityResiduals"]   = pBlock->m_dTotalTimeForSensitivityResiduals;
-    stats["initializationTime"]                 = m_InitializationDuration;
-    stats["solveInitialTime"]                   = m_SolveInitalDuration;
-    stats["integrationTime"]                    = m_IntegrationDuration;
-    return stats;
+    m_pLog->Message(string("The system created successfully."), 0);
 }
 
 std::vector<daeEquationExecutionInfo*> daeSimulation::GetEquationExecutionInfos(void) const
@@ -553,6 +521,8 @@ void daeSimulation::SetupSolver(void)
 
 void daeSimulation::SolveInitial(void)
 {
+    call_stats::TimerCounter tc(m_stats["SolveInitial"]);
+
 // Check if initialized
     if(!m_bIsInitialized)
     {
@@ -570,9 +540,6 @@ void daeSimulation::SolveInitial(void)
         daeDeclareAndThrowException(exInvalidPointer);
     if(!m_pLog)
         daeDeclareAndThrowException(exInvalidPointer);
-
-// Start initialization
-    m_InitializationStart = dae::GetTimeInSeconds();
 
     daeConfig& cfg = daeConfig::GetConfig();
     bool bPrintInfo = cfg.GetBoolean("daetools.core.printInfo", false);
@@ -601,7 +568,6 @@ void daeSimulation::SolveInitial(void)
     m_bIsSolveInitial = true;
 
 // Announce success
-    m_InitializationEnd = dae::GetTimeInSeconds();
     m_pLog->Message(string("Starting the initialization of the system... Done."), 0);
     m_pLog->SetProgress(0);
 }
@@ -650,16 +616,12 @@ void daeSimulation::Run(void)
         throw e;
     }
 
-    m_IntegrationStart = dae::GetTimeInSeconds();
-    m_pLog->Message(string("m_IntegrationStart time = ")    + toStringFormatted<real_t>(m_IntegrationStart,     -1, 3) + string(" s"), 0);
-
     if(m_dCurrentTime >= m_dTimeHorizon)
     {
         m_pLog->Message(string("The time horizon has been riched; exiting."), 0);
         return;
     }
     m_eActivityAction = eRunActivity;
-
 
     real_t t;
     while(m_dCurrentTime < m_dTimeHorizon)
@@ -707,18 +669,8 @@ void daeSimulation::Run(void)
 // Print the end of the simulation info if not in the optimization mode
     if(m_eSimulationMode == eSimulation)
     {
-        m_IntegrationEnd = dae::GetTimeInSeconds();
-
-        m_InitializationDuration = m_ProblemCreationEnd - m_ProblemCreationStart;
-        m_SolveInitalDuration    = m_InitializationEnd  - m_InitializationStart;
-        m_IntegrationDuration    = m_IntegrationEnd     - m_IntegrationStart;
-        double totalTime = m_InitializationDuration + m_SolveInitalDuration + m_IntegrationDuration;
-
         m_pLog->Message(string(" "), 0);
         m_pLog->Message(string("The simulation has finished successfully!"), 0);
-        m_pLog->Message(string("Initialization time = ") + toStringFormatted<real_t>(m_InitializationDuration,  -1, 3) + string(" s"), 0);
-        m_pLog->Message(string("Integration time = ")    + toStringFormatted<real_t>(m_IntegrationDuration,     -1, 3) + string(" s"), 0);
-        m_pLog->Message(string("Total run time = ")      + toStringFormatted<real_t>(totalTime,                 -1, 3) + string(" s"), 0);
     }
 }
 
@@ -730,6 +682,11 @@ void daeSimulation::CleanUpSetupData(void)
 
 void daeSimulation::Finalize(void)
 {
+    daeConfig& cfg = daeConfig::GetConfig();
+    bool printStats = cfg.GetBoolean("daetools.activity.printStats", true);
+    if(printStats)
+        PrintStats();
+
 // Notify the receiver that there is no more data, and disconnect it
     if(m_pDataReporter)
     {
@@ -754,6 +711,112 @@ void daeSimulation::Finalize(void)
 
     m_bIsInitialized	 = false;
     m_bIsSolveInitial	 = false;
+}
+
+void daeSimulation::PrintStats()
+{
+    std::map<std::string, call_stats::TimeAndCount>::iterator it;
+    std::map<std::string, call_stats::TimeAndCount> b_stats, la_stats, p_stats, dae_stats ;
+    std::map<std::string, real_t> int_stats;
+
+    daeLASolver_t* pLASolver = m_pDAESolver->GetLASolver();
+    if(pLASolver)
+        la_stats = pLASolver->GetCallStats();
+
+    daePreconditioner_t* pPreconditioner = m_pDAESolver->GetPreconditioner();
+    if(pPreconditioner)
+        p_stats = pPreconditioner->GetCallStats();
+
+    if(m_pDAESolver)
+    {
+        dae_stats = m_pDAESolver->GetCallStats();
+        int_stats = m_pDAESolver->GetIntegratorStats();
+    }
+
+    if(m_ptrBlock)
+        b_stats = m_ptrBlock->GetCallStats();
+
+    double residuals = b_stats["Residuals"].duration;
+    double integration  = m_stats["SolveInitial"].duration + m_stats["Integration"].duration;
+    double totalRunTime = m_stats["Initialization"].duration + m_stats["SolveInitial"].duration + m_stats["Integration"].duration;
+    double latotal = 0.0;
+    if(pLASolver)
+        latotal = dae_stats["LASetup"].duration + dae_stats["LASolve"].duration;
+    else if(pPreconditioner)
+        latotal = p_stats["Setup"].duration + p_stats["Solve"].duration;
+    else
+        latotal = 0.0; // No way to measure times for Sundials LU
+
+    { // Header
+        m_pLog->Message(string(" "), 0);
+        m_pLog->Message("--------------------------------------------------------------", 0);
+        m_pLog->Message((boost::format("                      %15s %14s %8s") % "Time (s)" %  "Rel.time (%)" % "Count").str(), 0);
+        m_pLog->Message("--------------------------------------------------------------", 0);
+    }
+
+    { // Overall simulation
+        m_pLog->Message("Simulation:", 0);
+        m_pLog->Message((boost::format("  Initialization      %15.3f %14s %8d") % m_stats["Initialization"].duration % "-"                                                    % "-").str(), 0);
+        m_pLog->Message((boost::format("  Solve initial       %15.3f %14.2f %8d") % m_stats["SolveInitial"].duration % (100.0*m_stats["SolveInitial"].duration / integration) % "-").str(), 0);
+        m_pLog->Message((boost::format("  Integration         %15.3f %14.2f %8d") % m_stats["Integration"].duration  % (100.0*m_stats["Integration"].duration  / integration) % "-").str(), 0);
+        m_pLog->Message((boost::format("  Integ. + solve init.%15.3f %14.2f %8d") % integration                      % 100.0                                                  % "-").str(), 0);
+        if(pPreconditioner)
+            m_pLog->Message((boost::format("  Precond. + Resid.   %15.3f %14.2f %8s") % (latotal+residuals) % (100.0*(latotal+residuals) / integration)                       %  "-").str(), 0);
+        else
+            m_pLog->Message((boost::format("  Lin.sol. + Resid.   %15.3f %14.2f %8s") % (latotal+residuals) % (100.0*(latotal+residuals) / integration)                       %  "-").str(), 0);
+        m_pLog->Message("  ------------------------------------------------------------", 0);
+        m_pLog->Message((boost::format("  Total               %15.3f %14s %8d")   % totalRunTime                     % "-"                                                    % "-").str(), 0);
+        m_pLog->Message("--------------------------------------------------------------", 0);
+    }
+
+    { // DAE solver
+        m_pLog->Message("DAE solver [Sundials IDAS]:", 0);
+        m_pLog->Message((boost::format("  Steps               %15s %14s %8d")     % "-"                           % "-"                                                 % (int)int_stats["NumSteps"]).str(),        0);
+        m_pLog->Message((boost::format("  Error test fails    %15s %14s %8d")     % "-"                           % "-"                                                 % (int)int_stats["NumErrTestFails"]).str(), 0);
+        m_pLog->Message((boost::format("  Residuals (DAE)     %15s %14s %8d")     % "-"                           % "-"                                                 % (int)int_stats["NumResEvals"]).str(),     0);
+        m_pLog->Message((boost::format("  Residuals (total)   %15.3f %14.2f %8d") % b_stats["Residuals"].duration % (100.0*b_stats["Residuals"].duration / integration) % b_stats["Residuals"].count).str(),        0);
+        m_pLog->Message("--------------------------------------------------------------", 0);
+    }
+
+    { // Non-linear solver
+        m_pLog->Message("Non-linear solver [Sundials modified Newton]:", 0);
+        m_pLog->Message((boost::format("  Iterations          %15s %14s %8d") % "-" % "-" % (int)int_stats["NumNonlinSolvIters"]).str(),     0);
+        m_pLog->Message((boost::format("  Conv. fails         %15s %14s %8d") % "-" % "-" % (int)int_stats["NumNonlinSolvConvFails"]).str(), 0);
+        m_pLog->Message("--------------------------------------------------------------", 0);
+    }
+
+    if(pLASolver) // Third party LA solvers
+    {
+        m_pLog->Message((boost::format("Linear solver [%s]:") % pLASolver->GetName().c_str()).str(), 0);
+        m_pLog->Message((boost::format("  Create              %15.3f %14.2f %8d") % la_stats["Create"].duration %       (100.0*la_stats["Create"].duration       / integration) % la_stats["Create"].count).str(),       0);
+        m_pLog->Message((boost::format("  Reinitialize        %15.3f %14.2f %8d") % la_stats["Reinitialize"].duration % (100.0*la_stats["Reinitialize"].duration / integration) % la_stats["Reinitialize"].count).str(), 0);
+        m_pLog->Message((boost::format("  Setup               %15.3f %14.2f %8d") % la_stats["Setup"].duration %        (100.0*la_stats["Setup"].duration        / integration) % la_stats["Setup"].count).str(),        0);
+        m_pLog->Message((boost::format("  Jacobian            %15.3f %14.2f %8d") % la_stats["Jacobian"].duration %     (100.0*la_stats["Jacobian"].duration     / integration) % la_stats["Jacobian"].count).str(),     0);
+        m_pLog->Message((boost::format("  Solve               %15.3f %14.2f %8d") % la_stats["Solve"].duration %        (100.0*la_stats["Solve"].duration        / integration) % la_stats["Solve"].count).str(),        0);
+        m_pLog->Message((boost::format("  Total LA            %15.3f %14.2f %8d") % latotal % (100.0*latotal / integration) % "-").str(), 0);
+        m_pLog->Message("--------------------------------------------------------------", 0);
+    }
+    else if(pPreconditioner) // Sundials gmres + third party preconditioners
+    {
+        m_pLog->Message((boost::format("Sundials gmres + preconditioner [%s]:")   % pPreconditioner->GetName().c_str()).str(), 0);
+        m_pLog->Message((boost::format("  Iterations          %15s %14s %8d")     % "-"                                     % "-" % (int)int_stats["NumLinIters"]).str(), 0);
+        m_pLog->Message((boost::format("  Create              %15.3f %14.2f %8d") % p_stats["Create"].duration              % (100.0*p_stats["Create"].duration       / integration) % p_stats["Create"].count).str(),       0);
+        m_pLog->Message((boost::format("  Reinitialize        %15.3f %14.2f %8d") % p_stats["Reinitialize"].duration        % (100.0*p_stats["Reinitialize"].duration / integration) % p_stats["Reinitialize"].count).str(), 0);
+        m_pLog->Message((boost::format("  Setup               %15.3f %14.2f %8d") % p_stats["Setup"].duration               % (100.0*p_stats["Setup"].duration        / integration) % p_stats["Setup"].count).str(),        0);
+        m_pLog->Message((boost::format("  Jacobian            %15.3f %14.2f %8d") % p_stats["Jacobian"].duration            % (100.0*p_stats["Jacobian"].duration     / integration) % p_stats["Jacobian"].count).str(),     0);
+        m_pLog->Message((boost::format("  Solve               %15.3f %14.2f %8d") % p_stats["Solve"].duration               % (100.0*p_stats["Solve"].duration        / integration) % p_stats["Solve"].count).str(),        0);
+        m_pLog->Message((boost::format("  Total LA            %15.3f %14.2f %8d") % latotal % (100.0*latotal / integration) % "-").str(), 0);
+        m_pLog->Message("--------------------------------------------------------------", 0);
+    }
+    else // Sundials LU (dense)
+    {
+        m_pLog->Message("Linear solver [Sundials LU]:", 0);
+        m_pLog->Message((boost::format("  Setup               %15.3f %14.2f %8d") % dae_stats["LASetup"].duration   % (100.0*dae_stats["LASetup"].duration  / integration) % dae_stats["LASetup"].count).str(),  0);
+        m_pLog->Message((boost::format("  Jacobian            %15.3f %14.2f %8d") % dae_stats["Jacobian"].duration  % (100.0*dae_stats["Jacobian"].duration / integration) % dae_stats["Jacobian"].count).str(), 0);
+        m_pLog->Message((boost::format("  Solve               %15.3f %14.2f %8d") % dae_stats["LASolve"].duration   % (100.0*dae_stats["LASolve"].duration  / integration) % dae_stats["LASolve"].count).str(),  0);
+        m_pLog->Message((boost::format("  Total LA            %15.3f %14.2f %8d") % latotal                         % (100.0*latotal / integration)                        % "-").str(),                         0);
+        m_pLog->Message("--------------------------------------------------------------", 0);
+    }
 }
 
 void daeSimulation::Reset(void)
@@ -1155,9 +1218,14 @@ real_t daeSimulation::GetCurrentTime_() const
     return m_dCurrentTime;
 }
 
-void daeSimulation::SetComputeStackEvaluator(computestack::adComputeStackEvaluator_t* computeStackEvaluator)
+void daeSimulation::SetComputeStackEvaluator(cs::csComputeStackEvaluator_t* computeStackEvaluator)
 {
     m_computeStackEvaluator = computeStackEvaluator;
+}
+
+cs::csComputeStackEvaluator_t* daeSimulation::GetComputeStackEvaluator() const
+{
+    return m_computeStackEvaluator;
 }
 
 daeeEvaluationMode daeSimulation::GetEvaluationMode()
@@ -1278,6 +1346,8 @@ real_t daeSimulation::GetReportingInterval(void) const
 // Integrates until the stopping criterion is reached or the time horizon of simulation
 real_t daeSimulation::Integrate(daeeStopCriterion eStopCriterion, bool bReportDataAroundDiscontinuities)
 {
+    call_stats::TimerCounter tc(m_stats["Integration"]);
+
     if(!m_pModel)
         daeDeclareAndThrowException(exInvalidPointer);
     if(!m_pDAESolver)
@@ -1322,6 +1392,8 @@ real_t daeSimulation::IntegrateForTimeInterval(real_t time_interval, daeeStopCri
 // Integrates until the stopping criterion or time is reached
 real_t daeSimulation::IntegrateUntilTime(real_t time, daeeStopCriterion eStopCriterion, bool bReportDataAroundDiscontinuities)
 {
+    call_stats::TimerCounter tc(m_stats["Integration"]);
+
     if(!m_pModel)
         daeDeclareAndThrowException(exInvalidPointer);
     if(!m_pDAESolver)
@@ -1481,6 +1553,11 @@ bool daeSimulation::GetCalculateSensitivities() const
 void daeSimulation::SetCalculateSensitivities(bool bCalculateSensitivities)
 {
     m_bCalculateSensitivities = bCalculateSensitivities;
+}
+
+std::map<std::string, call_stats::TimeAndCount> daeSimulation::GetCallStats() const
+{
+    return m_stats;
 }
 
 void CollectAllDomains(daeModel* pModel, std::map<string, daeDomain*>& mapDomains);

@@ -1,11 +1,16 @@
 #include "stdafx.h"
-#include "../Evaluator_OpenCL/cs_opencl.h"
 #if defined(__MACH__) || defined(__APPLE__)
 #include <python.h>
 #endif
 #include <string>
+#include <vector>
+#include <map>
 #include <boost/python.hpp>
 using namespace boost::python;
+
+#include "../opencs/opencl/cs_opencl_platforms.h"
+#include "../opencs/opencl/cs_evaluator_opencl_factory.h"
+using namespace cs;
 
 template<typename ITEM>
 boost::python::list getListFromVectorByValue(std::vector<ITEM>& arrItems)
@@ -16,6 +21,22 @@ boost::python::list getListFromVectorByValue(std::vector<ITEM>& arrItems)
         l.append(arrItems[i]);
 
     return l;
+}
+
+template<typename KEY, typename VALUE>
+boost::python::dict getDictFromMapByValue(std::map<KEY,VALUE>& mapItems)
+{
+    boost::python::dict res;
+    typename std::map<KEY,VALUE>::iterator iter;
+
+    for(iter = mapItems.begin(); iter != mapItems.end(); iter++)
+    {
+        KEY   key = iter->first;
+        VALUE val = iter->second;
+        res[key] = val;
+    }
+
+    return res;
 }
 
 static boost::python::list lAvailableOpenCLDevices()
@@ -30,7 +51,7 @@ static boost::python::list lAvailableOpenCLPlatforms()
     return getListFromVectorByValue(arrPlatforms);
 }
 
-static adComputeStackEvaluator_t* CreateComputeStackEvaluator_m(boost::python::list ldevices,
+static csComputeStackEvaluator_t* CreateComputeStackEvaluator_m(boost::python::list ldevices,
                                                                 std::string buildProgramOptions = "")
 {
     std::vector<int>    platforms;
@@ -54,9 +75,8 @@ static adComputeStackEvaluator_t* CreateComputeStackEvaluator_m(boost::python::l
         taskPortions.push_back(taskPortion);
     }
 
-    return CreateComputeStackEvaluator_multi(platforms, devices, taskPortions, buildProgramOptions);
+    return CreateComputeStackEvaluator_MultiDevice(platforms, devices, taskPortions, buildProgramOptions);
 }
-
 
 // Temporary workaround for Visual Studio 2015 update 3
 //  Error   LNK2019 unresolved external symbol "class ClassName const volatile * __cdecl boost::get_pointer<class ClassName const volatile *>(...)
@@ -76,7 +96,7 @@ BOOST_PYTHON_MODULE(pyEvaluator_OpenCL)
 {
     docstring_options doc_options(true, true, false);
 
-    class_<computestack::adComputeStackEvaluator_t, boost::noncopyable>("adComputeStackEvaluator_t", no_init)
+    class_<cs::csComputeStackEvaluator_t, boost::noncopyable>("csComputeStackEvaluator_t", no_init)
     ;
 
     class_<openclPlatform_t>("openclPlatform_t", no_init)

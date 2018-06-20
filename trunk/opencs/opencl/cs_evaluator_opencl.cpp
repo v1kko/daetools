@@ -1,8 +1,8 @@
 /***********************************************************************************
-*                 DAE Tools Project: www.daetools.com
-*                 Copyright (C) Dragan Nikolic
+                 OpenCS Project: www.daetools.com
+                 Copyright (C) Dragan Nikolic
 ************************************************************************************
-DAE Tools is free software; you can redistribute it and/or modify it under the
+OpenCS is free software; you can redistribute it and/or modify it under the
 terms of the GNU General Public License version 3 as published by the Free Software
 Foundation. DAE Tools is distributed in the hope that it will be useful, but WITHOUT
 ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
@@ -10,16 +10,20 @@ PARTICULAR PURPOSE. See the GNU General Public License for more details.
 You should have received a copy of the GNU General Public License along with the
 DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 ***********************************************************************************/
-#include "compute_stack_opencl.h"
+#include "cs_evaluator_opencl.h"
 #include <iostream>
 #include <sstream>
 
 const char* opencl_kernels_source =
-#include "compute_stack_opencl_kernel_source.cl"
+#include "cs_machine_kernels.cl"
 ;
 
+namespace cs
+{
 daeComputeStackEvaluator_OpenCL::daeComputeStackEvaluator_OpenCL(int platformID, int deviceID, std::string buildProgramOptions)
 {
+    //call_stats::TimerCounter tc(m_stats["Create"]);
+
     cl_uint num_devices;
     cl_uint num_platforms;
     cl_uint ret_num_devices;
@@ -102,7 +106,7 @@ daeComputeStackEvaluator_OpenCL::daeComputeStackEvaluator_OpenCL(int platformID,
     clCheck(ret);
 
     /* Create OpenCL command queue. */
-    command_queue = clCreateCommandQueue(context, device_id, 0, &ret);
+    command_queue = clCreateCommandQueue(context, device_id, CL_QUEUE_PROFILING_ENABLE, &ret);
     clCheck(ret);
 
     /* Create OpenCL program from the source(s). */
@@ -226,10 +230,12 @@ void daeComputeStackEvaluator_OpenCL::Initialize(bool calculateSensitivities,
                                                  size_t numberOfComputeStackItems,
                                                  size_t numberOfJacobianItems,
                                                  size_t numberOfJacobianItemsToProcess,
-                                                 adComputeStackItem_t*    computeStacks,
+                                                 csComputeStackItem_t*    computeStacks,
                                                  uint32_t*                activeEquationSetIndexes,
-                                                 adJacobianMatrixItem_t*  computeStackJacobianItems)
+                                                 csJacobianMatrixItem_t*  computeStackJacobianItems)
 {
+    //call_stats::TimerCounter tc(m_stats["Initialize"]);
+
     if(mem_computeStacks || mem_activeEquationSetIndexes || mem_computeStackJacobianItems ||
        mem_dofs || mem_values || mem_timeDerivatives ||
        mem_residuals || mem_jacobianItems || mem_sresiduals || mem_svalues || mem_sdvalues)
@@ -257,7 +263,7 @@ void daeComputeStackEvaluator_OpenCL::Initialize(bool calculateSensitivities,
     //printf("numberOfComputeStackItems  = %d\n", numberOfComputeStackItems);
     //printf("numberOfJacobianItems      = %d\n", numberOfJacobianItems);
 
-    size_t bufferSize = numberOfComputeStackItems*sizeof(adComputeStackItem_t);
+    size_t bufferSize = numberOfComputeStackItems*sizeof(csComputeStackItem_t);
     mem_computeStacks = clCreateBuffer(context, CL_MEM_READ_ONLY, bufferSize, NULL, &ret);
     clCheck(ret);
     ret = clEnqueueWriteBuffer(command_queue, mem_computeStacks, CL_TRUE, 0, bufferSize, computeStacks, 0, NULL, NULL);
@@ -269,7 +275,7 @@ void daeComputeStackEvaluator_OpenCL::Initialize(bool calculateSensitivities,
     ret = clEnqueueWriteBuffer(command_queue, mem_activeEquationSetIndexes, CL_TRUE, 0, bufferSize, activeEquationSetIndexes, 0, NULL, NULL);
     clCheck(ret);
 
-    bufferSize = numberOfJacobianItems*sizeof(adJacobianMatrixItem_t);
+    bufferSize = numberOfJacobianItems*sizeof(csJacobianMatrixItem_t);
     mem_computeStackJacobianItems = clCreateBuffer(context, CL_MEM_READ_ONLY, bufferSize, NULL, &ret);
     clCheck(ret);
     ret = clEnqueueWriteBuffer(command_queue, mem_computeStackJacobianItems, CL_TRUE, 0, bufferSize, computeStackJacobianItems, 0, NULL, NULL);
@@ -323,71 +329,102 @@ void daeComputeStackEvaluator_OpenCL::Initialize(bool calculateSensitivities,
     clCheck(ret);
 }
 
+// Returns time in seconds
+// inline double getTimeFromEvent(cl_event& event)
+// {
+//     cl_ulong t_start, t_end;
+//     clGetEventProfilingInfo(event, CL_PROFILING_COMMAND_START, sizeof(t_start), &t_start, NULL);
+//     clGetEventProfilingInfo(event, CL_PROFILING_COMMAND_END,   sizeof(t_end),   &t_end,   NULL);
+//     return (t_end-t_start)/1E9; // convert from ns to s
+// }
+
 /* Residual kernel function. */
-void daeComputeStackEvaluator_OpenCL::EvaluateResiduals(daeComputeStackEvaluationContext_t EC,
-                                                        real_t*                            dofs,
-                                                        real_t*                            values,
-                                                        real_t*                            timeDerivatives,
-                                                        real_t*                            residuals)
+void daeComputeStackEvaluator_OpenCL::EvaluateResiduals(csEvaluationContext_t EC,
+                                                        real_t*               dofs,
+                                                        real_t*               values,
+                                                        real_t*               timeDerivatives,
+                                                        real_t*               residuals)
 {
+    //call_stats::TimerCounter tc(m_stats["Residuals"]);
+
     size_t bufferSize;
     cl_int ret;
 
     /* Copy input arrays to cl_mem buffers. */
-    if(EC.numberOfDOFs > 0)
     {
-        bufferSize = EC.numberOfDOFs*sizeof(real_t);
-        ret = clEnqueueWriteBuffer(command_queue, mem_dofs, CL_TRUE, 0, bufferSize, dofs, 0, NULL, NULL);
+        //call_stats::TimerCounter tcci(m_stats["ResidualsCopyInputs"]);
+
+        if(EC.numberOfDOFs > 0)
+        {
+            bufferSize = EC.numberOfDOFs*sizeof(real_t);
+            ret = clEnqueueWriteBuffer(command_queue, mem_dofs, CL_TRUE, 0, bufferSize, dofs, 0, NULL, NULL);
+            clCheck(ret);
+        }
+
+        bufferSize = EC.numberOfVariables*sizeof(real_t);
+        ret = clEnqueueWriteBuffer(command_queue, mem_values, CL_TRUE, 0, bufferSize, values, 0, NULL, NULL);
+        clCheck(ret);
+
+        bufferSize = EC.numberOfVariables*sizeof(real_t);
+        ret = clEnqueueWriteBuffer(command_queue, mem_timeDerivatives, CL_TRUE, 0, bufferSize, timeDerivatives, 0, NULL, NULL);
+        clCheck(ret);
+
+        /* Wait for the commands to finish. */
+        ret = clFinish(command_queue);
         clCheck(ret);
     }
 
-    bufferSize = EC.numberOfVariables*sizeof(real_t);
-    ret = clEnqueueWriteBuffer(command_queue, mem_values, CL_TRUE, 0, bufferSize, values, 0, NULL, NULL);
-    clCheck(ret);
+    {
+        //call_stats::TimerCounter tck(m_stats["ResidualsKernel"]);
 
-    bufferSize = EC.numberOfVariables*sizeof(real_t);
-    ret = clEnqueueWriteBuffer(command_queue, mem_timeDerivatives, CL_TRUE, 0, bufferSize, timeDerivatives, 0, NULL, NULL);
-    clCheck(ret);
+        /* Set OpenCL kernel arguments. */
+        ret = clSetKernelArg(kernel_residual, 0, sizeof(cl_mem),                             (void *)&mem_computeStacks);
+        clCheck(ret);
+        ret = clSetKernelArg(kernel_residual, 1, sizeof(cl_mem),                             (void *)&mem_activeEquationSetIndexes);
+        clCheck(ret);
+        ret = clSetKernelArg(kernel_residual, 2, sizeof(csEvaluationContext_t), (void *)&EC);
+        clCheck(ret);
+        ret = clSetKernelArg(kernel_residual, 3, sizeof(cl_mem),                             (void *)&mem_dofs);
+        clCheck(ret);
+        ret = clSetKernelArg(kernel_residual, 4, sizeof(cl_mem),                             (void *)&mem_values);
+        clCheck(ret);
+        ret = clSetKernelArg(kernel_residual, 5, sizeof(cl_mem),                             (void *)&mem_timeDerivatives);
+        clCheck(ret);
+        ret = clSetKernelArg(kernel_residual, 6, sizeof(cl_mem),                             (void *)&mem_residuals);
+        clCheck(ret);
 
-    /* Set OpenCL kernel arguments. */
-    ret = clSetKernelArg(kernel_residual, 0, sizeof(cl_mem),                             (void *)&mem_computeStacks);
-    clCheck(ret);
-    ret = clSetKernelArg(kernel_residual, 1, sizeof(cl_mem),                             (void *)&mem_activeEquationSetIndexes);
-    clCheck(ret);
-    ret = clSetKernelArg(kernel_residual, 2, sizeof(daeComputeStackEvaluationContext_t), (void *)&EC);
-    clCheck(ret);
-    ret = clSetKernelArg(kernel_residual, 3, sizeof(cl_mem),                             (void *)&mem_dofs);
-    clCheck(ret);
-    ret = clSetKernelArg(kernel_residual, 4, sizeof(cl_mem),                             (void *)&mem_values);
-    clCheck(ret);
-    ret = clSetKernelArg(kernel_residual, 5, sizeof(cl_mem),                             (void *)&mem_timeDerivatives);
-    clCheck(ret);
-    ret = clSetKernelArg(kernel_residual, 6, sizeof(cl_mem),                             (void *)&mem_residuals);
-    clCheck(ret);
+        /* Execute OpenCL kernel. */
+        size_t global_item_size = EC.numberOfEquations;
+        size_t* plocal_item_size = NULL;
 
-    /* Execute OpenCL kernel. */
-    size_t global_item_size = EC.numberOfEquations;
-    size_t* plocal_item_size = NULL;
+        ret = clEnqueueNDRangeKernel(command_queue, kernel_residual, 1, NULL, &global_item_size, plocal_item_size, 0, NULL, NULL);
+        clCheck(ret);
 
-    ret = clEnqueueNDRangeKernel(command_queue, kernel_residual, 1, NULL, &global_item_size, plocal_item_size, 0, NULL, NULL);
-    clCheck(ret);
+        /* Wait for the commands to finish. */
+        ret = clFinish(command_queue);
+        clCheck(ret);
+    }
 
-    /* Copy results from the memory buffer. */
-    bufferSize = EC.numberOfEquations*sizeof(real_t);
-    ret = clEnqueueReadBuffer(command_queue, mem_residuals, CL_TRUE, 0, bufferSize, residuals, 0, NULL, NULL);
-    clCheck(ret);
+    {
+        //call_stats::TimerCounter tcco(m_stats["ResidualsCopyOutputs"]);
 
-    /* Wait for the commands to finish. */
-    ret = clFinish(command_queue);
-    clCheck(ret);
+        /* Copy results from the memory buffer. */
+        bufferSize = EC.numberOfEquations*sizeof(real_t);
+        ret = clEnqueueReadBuffer(command_queue, mem_residuals, CL_TRUE, 0, bufferSize, residuals, 0, NULL, NULL);
+        clCheck(ret);
+
+        /* Wait for the commands to finish. */
+        ret = clFinish(command_queue);
+        clCheck(ret);
+    }
 }
 
 /* Jacobian kernel function (generic version). */
-void daeComputeStackEvaluator_OpenCL::EvaluateJacobian(daeComputeStackEvaluationContext_t EC,
-                                                       real_t*                            dofs,
-                                                       real_t*                            values,
-                                                       real_t*                            timeDerivatives,
-                                                       real_t*                            jacobianItems)
+void daeComputeStackEvaluator_OpenCL::EvaluateJacobian(csEvaluationContext_t EC,
+                                                       real_t*               dofs,
+                                                       real_t*               values,
+                                                       real_t*               timeDerivatives,
+                                                       real_t*               jacobianItems)
 {
     size_t bufferSize;
     cl_int ret;
@@ -415,7 +452,7 @@ void daeComputeStackEvaluator_OpenCL::EvaluateJacobian(daeComputeStackEvaluation
     clCheck(ret);
     ret = clSetKernelArg(kernel_jacobian, 2, sizeof(cl_mem),                             (void *)&mem_computeStackJacobianItems);
     clCheck(ret);
-    ret = clSetKernelArg(kernel_jacobian, 3, sizeof(daeComputeStackEvaluationContext_t), (void *)&EC);
+    ret = clSetKernelArg(kernel_jacobian, 3, sizeof(csEvaluationContext_t), (void *)&EC);
     clCheck(ret);
     ret = clSetKernelArg(kernel_jacobian, 4, sizeof(cl_mem),                             (void *)&mem_dofs);
     clCheck(ret);
@@ -444,13 +481,13 @@ void daeComputeStackEvaluator_OpenCL::EvaluateJacobian(daeComputeStackEvaluation
 }
 
 /* Sensitivity residual kernel function. */
-void daeComputeStackEvaluator_OpenCL::EvaluateSensitivityResiduals(daeComputeStackEvaluationContext_t EC,
-                                                                   real_t*                            dofs,
-                                                                   real_t*                            values,
-                                                                   real_t*                            timeDerivatives,
-                                                                   real_t*                            svalues,
-                                                                   real_t*                            sdvalues,
-                                                                   real_t*                            sresiduals)
+void daeComputeStackEvaluator_OpenCL::EvaluateSensitivityResiduals(csEvaluationContext_t EC,
+                                                                   real_t*               dofs,
+                                                                   real_t*               values,
+                                                                   real_t*               timeDerivatives,
+                                                                   real_t*               svalues,
+                                                                   real_t*               sdvalues,
+                                                                   real_t*               sresiduals)
 {
     size_t bufferSize;
     cl_int ret;
@@ -484,7 +521,7 @@ void daeComputeStackEvaluator_OpenCL::EvaluateSensitivityResiduals(daeComputeSta
     clCheck(ret);
     ret = clSetKernelArg(kernel_sens_residual, 1, sizeof(cl_mem),                             (void *)&mem_activeEquationSetIndexes);
     clCheck(ret);
-    ret = clSetKernelArg(kernel_sens_residual, 2, sizeof(daeComputeStackEvaluationContext_t), (void *)&EC);
+    ret = clSetKernelArg(kernel_sens_residual, 2, sizeof(csEvaluationContext_t), (void *)&EC);
     clCheck(ret);
     ret = clSetKernelArg(kernel_sens_residual, 3, sizeof(cl_mem),                             (void *)&mem_dofs);
     clCheck(ret);
@@ -515,4 +552,4 @@ void daeComputeStackEvaluator_OpenCL::EvaluateSensitivityResiduals(daeComputeSta
     ret = clFinish(command_queue);
     clCheck(ret);
 }
-
+}

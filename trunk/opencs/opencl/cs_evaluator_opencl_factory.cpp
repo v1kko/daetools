@@ -1,18 +1,29 @@
-#include "cs_opencl.h"
-#include "compute_stack_opencl_multi.h"
+#include "cs_opencl_platforms.h"
+#include "cs_evaluator_opencl_multidevice.h"
 
-adComputeStackEvaluator_t* CreateComputeStackEvaluator(int platformID, int deviceID, std::string buildProgramOptions)
+namespace cs
+{
+csComputeStackEvaluator_t* CreateComputeStackEvaluator(int platformID, int deviceID, std::string buildProgramOptions)
 {
     return new daeComputeStackEvaluator_OpenCL(platformID, deviceID, buildProgramOptions);
 }
 
-adComputeStackEvaluator_t* CreateComputeStackEvaluator_multi(const std::vector<int>&    platforms,
-                                                             const std::vector<int>&    devices,
-                                                             const std::vector<double>& taskPortions,
-                                                             std::string                buildProgramOptions)
+csComputeStackEvaluator_t* CreateComputeStackEvaluator_MultiDevice(const std::vector<int>&    platforms,
+                                                                   const std::vector<int>&    devices,
+                                                                   const std::vector<double>& taskPortions,
+                                                                   std::string                buildProgramOptions)
 {
-    return new daeComputeStackEvaluator_OpenCL_multi(platforms, devices, taskPortions, buildProgramOptions);
+    return new daeComputeStackEvaluator_OpenCL_MultiDevice(platforms, devices, taskPortions, buildProgramOptions);
 }
+
+// std::map<std::string, call_stats::TimeAndCount> GetEvaluatorCallStats(csComputeStackEvaluator_t* cse)
+// {
+//     std::map<std::string, call_stats::TimeAndCount> stats;
+//     //daeComputeStackEvaluator_OpenCL* cse_opencl = dynamic_cast<daeComputeStackEvaluator_OpenCL*>(cse);
+//     //if(cse_opencl)
+//     //    stats = cse_opencl->GetCallStats();
+//     return stats;
+// }
 
 std::vector<openclDevice_t> AvailableOpenCLDevices()
 {
@@ -196,4 +207,5 @@ std::vector<openclPlatform_t> AvailableOpenCLPlatforms()
     free(platforms);
 
     return arrPlatforms;
+}
 }

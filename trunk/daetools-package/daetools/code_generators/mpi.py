@@ -13,7 +13,7 @@ You should have received a copy of the GNU General Public License along with the
 DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 ************************************************************************************
 """
-import os, shutil, sys, numpy, math, traceback, pprint, struct, json
+import os, shutil, sys, numpy, math, traceback, pprint, struct, json, gc
 from daetools.pyDAE import *
 from .formatter import daeExpressionFormatter
 from .analyzer import daeCodeGeneratorAnalyzer
@@ -65,7 +65,7 @@ class daeInterProcessCommGraph(object):
                                    stats['Ncs'][pe], 
                                    stats['Nflops'][pe], 
                                    stats['Nnz'][pe], 
-                                   stats['Nflops_jacobian'][pe])
+                                   stats['Nflops_j'][pe])
             nodes[pe] = self._addNode(label, color='blue', fontcolor='blue')
             
         for pe, data in partitionData.items():
@@ -107,7 +107,7 @@ class daeCodeGenerator_MPI(daeCodeGenerator):
         self.topLevelModel = simulation.m
         
         for constraint in balancingConstraints:
-            if constraint != 'Ncs' and constraint != 'Nflops' and constraint != 'Nnz' and constraint != 'Nflops_jacobian':
+            if constraint != 'Ncs' and constraint != 'Nflops' and constraint != 'Nnz' and constraint != 'Nflops_j':
                 raise RuntimeError('Invalid balancing constraint: %s' % constraint)
         self.balancingConstraints = balancingConstraints
         
@@ -123,15 +123,11 @@ class daeCodeGenerator_MPI(daeCodeGenerator):
         - Binary functions:
             ePlus eMinus eMulti eDivide ePower eMin eMax eArcTan2
         """ 
-        if not unaryOperationsFlops or len(unaryOperationsFlops) == 0:
-            d_unaryFlops = {eSqrt : 6,
-                            eExp  : 9}
-        else:
+        d_unaryFlops  = {}
+        d_binaryFlops = {}
+        if unaryOperationsFlops and len(unaryOperationsFlops) > 0:
             d_unaryFlops = unaryOperationsFlops
-        if not binaryOperationsFlops or len(binaryOperationsFlops) == 0:
-            d_binaryFlops = {eMulti  : 2,
-                             eDivide : 4}
-        else:
+        if binaryOperationsFlops and len(binaryOperationsFlops) > 0:
             d_binaryFlops = binaryOperationsFlops
 
         self.analyzer.analyzeSimulation(simulation, d_unaryFlops, d_binaryFlops)
@@ -157,10 +153,10 @@ class daeCodeGenerator_MPI(daeCodeGenerator):
         latexModelName = self.wrapperInstanceName.replace('_', '\\_')
 
         if len(self.balancingConstraints) == 0:
-            filename_objectives = '%s-%dpe-edge_cut' % (modelName, Npe)
+            filename_objectives = 'edge_cut'
         else:
             objectives_s        = '_'.join(self.balancingConstraints)
-            filename_objectives = '%s-%dpe-edge_cut-%s' % (modelName, Npe, objectives_s)
+            filename_objectives = 'edge_cut-%s' % objectives_s
         
         try:
             ipcGraph = daeInterProcessCommGraph(partitionData, statsData)
@@ -169,56 +165,31 @@ class daeCodeGenerator_MPI(daeCodeGenerator):
         except Exception as e:
             print(str(e))            
 
-        # Generate json file with DAE and LA solver/preconditioner options.
-        solver_options = """{
-    "OutputDirectory": "results",
-    "DAESolver" : {
-        "Library" : "Sundials",
-        "Name": "IDAS",
-        "Parameters": {
-            "MaxOrd":             5,
-            "MaxNumSteps":        500,
-            "InitStep":           0.0,
-            "MaxStep":            0.0,
-            "MaxErrTestFails":    10,
-            "MaxNonlinIters":     4,
-            "MaxConvFails":       10,
-            "NonlinConvCoef":     0.33,
-            "SuppressAlg":        false,
-            "NoInactiveRootWarn": false,
-            "NonlinConvCoefIC":   0.0033,
-            "MaxNumStepsIC":      5,
-            "MaxNumJacsIC":       4,
-            "MaxNumItersIC":      10,
-            "LineSearchOffIC":    false
-        }
-    },
-    "LinearSolver" : {
-        "Library" : "Sundials",
-        "Name": "gmres",
-        "Parameters": {
-            "kspace":            30,
-            "EpsLin":            0.05,
-            "JacTimesVecFn":     "DQ",
-            "DQIncrementFactor": 1.0,
-            "MaxRestarts":       5,
-            "GSType":            "MODIFIED_GS"
-        },
-        "Preconditioner" : {
-            "Library" : "Ifpack",
-            "Name": "ILU",
-            "Parameters": {
-                "fact: level-of-fill":      3,
-                "fact: relax value":        0.0,
-                "fact: absolute threshold": 1e-5,
-                "fact: relative threshold": 1.0
-            }
-        }
-    }
-}"""
-        solver_options_filename = os.path.join(directory, 'solver_options.json')
-        f = open(solver_options_filename, 'w')
-        f.write(solver_options) #json.dumps(solver_options, indent = 4))
+        # Add simulation data to the .json file with DAE and LA solver/preconditioner options.
+        cg_py_dir = os.path.dirname(os.path.abspath(__file__))
+        mpi_py_dir = os.path.join(cg_py_dir, 'mpi')
+        sim_options_filename_in  = os.path.join(mpi_py_dir, 'simulation_options-Sundials_Ifpack_ILU.json')
+        sim_options_filename_out = os.path.join(directory,  'simulation_options.json')
+
+        f = open(sim_options_filename_in, 'r')
+        simulation_options = f.read()
+        f.close()
+
+        startTime = 0.0
+        if self.analyzer.runtimeInformation['ModelType'] == eSteadyState:
+            timeHorizon = 0.0
+        else:
+            timeHorizon = self.analyzer.runtimeInformation['TimeHorizon']
+        reportingInterval = self.analyzer.runtimeInformation['ReportingInterval']
+        relativeTolerance = self.analyzer.runtimeInformation['RelativeTolerance']        
+
+        simulation_options = simulation_options.replace('__startTime__',         '%.16f' % startTime)
+        simulation_options = simulation_options.replace('__timeHorizon__',       '%.16f' % timeHorizon)
+        simulation_options = simulation_options.replace('__reportingInterval__', '%.16f' % reportingInterval)
+        simulation_options = simulation_options.replace('__relativeTolerance__', '%.16f' % relativeTolerance)
+
+        f = open(sim_options_filename_out, 'w')
+        f.write(simulation_options)
         f.close()
 
         # Generate Latex table
@@ -232,8 +203,8 @@ class daeCodeGenerator_MPI(daeCodeGenerator):
                     constraints.append('$N_{flops}$')
                 elif constraint == 'Nnz':
                     constraints.append('$N_{nz}$')
-                elif constraint == 'Nflops_jacobian':
-                    constraints.append('$N_{flops\\_jacobian}$')
+                elif constraint == 'Nflops_j':
+                    constraints.append('$N_{flops\\_j}$')
             caption_objs = ', '.join(constraints)
         
         label_objs = 'none'
@@ -246,7 +217,7 @@ class daeCodeGenerator_MPI(daeCodeGenerator):
         latexTable += '\\label{table:PartitioningResults-%s-%dpe-%s} \n' % (modelName, Npe, label_objs)
         latexTable += '  \\begin{tabular}{lrrrrrrrr} \n'
         latexTable += '    \\hline \n'
-        latexTable += '            PE &   $N_{eq}$ &  $N_{adj}$ &    $N_{eq}^{dev}$ &   $N_{adj}^{dev}$ &    $N_{cs}^{dev}$ & $N_{flops}^{dev}$ &    $N_{nz}^{dev}$ & $N_{flops\\_jacobian}^{dev}$ \\\\ \n'
+        latexTable += '            PE &   $N_{eq}$ &  $N_{adj}$ &    $N_{eq}^{dev}$ &   $N_{adj}^{dev}$ &    $N_{cs}^{dev}$ & $N_{flops}^{dev}$ &    $N_{nz}^{dev}$ & $N_{flops\\_j}^{dev}$ \\\\ \n'
         latexTable += '    \\hline \n'
         for pe, data in partitionData.items():
             latexTable += '    %10d & %10d & %10d & %17.2f & %17.2f & %17.2f & %17.2f & %17.2f & %27.2f \\\\ \n' % (pe, 
@@ -257,14 +228,14 @@ class daeCodeGenerator_MPI(daeCodeGenerator):
                                                                                                                     stats['Ncs'][pe], 
                                                                                                                     stats['Nflops'][pe], 
                                                                                                                     stats['Nnz'][pe], 
-                                                                                                                    stats['Nflops_jacobian'][pe])
+                                                                                                                    stats['Nflops_j'][pe])
         latexTable += '    \\hline \n'
         latexTable += '    \\multicolumn{3}{r}{Max abs dev:    } & %17.2f & %17.2f & %17.2f & %17.2f & %17.2f & %27.2f \\\\ \n' % (numpy.max(numpy.abs(stats['Nequations'])), 
                                                                                                                                    numpy.max(numpy.abs(stats['Nadjacent'])), 
                                                                                                                                    numpy.max(numpy.abs(stats['Ncs'])), 
                                                                                                                                    numpy.max(numpy.abs(stats['Nflops'])), 
                                                                                                                                    numpy.max(numpy.abs(stats['Nnz'])), 
-                                                                                                                                   numpy.max(numpy.abs(stats['Nflops_jacobian'])))
+                                                                                                                                   numpy.max(numpy.abs(stats['Nflops_j'])))
         latexTable += '    \\hline \n'
         latexTable += '  \\end{tabular} \n'
         latexTable += '\\end{table} \n'
@@ -305,13 +276,13 @@ class daeCodeGenerator_MPI(daeCodeGenerator):
                                                                                                stats['Ncs'][pe], 
                                                                                                stats['Nflops'][pe], 
                                                                                                stats['Nnz'][pe], 
-                                                                                               stats['Nflops_jacobian'][pe])
+                                                                                               stats['Nflops_j'][pe])
         csvTable += '     ,            ,Max abs dev:, %11.2f, %11.2f, %11.2f, %11.2f, %11.2f, %14.2f\n' % (numpy.max(numpy.abs(stats['Nequations'])), 
                                                                                                            numpy.max(numpy.abs(stats['Nadjacent'])), 
                                                                                                            numpy.max(numpy.abs(stats['Ncs'])), 
                                                                                                            numpy.max(numpy.abs(stats['Nflops'])), 
                                                                                                            numpy.max(numpy.abs(stats['Nnz'])), 
-                                                                                                           numpy.max(numpy.abs(stats['Nflops_jacobian'])))
+                                                                                                           numpy.max(numpy.abs(stats['Nflops_j'])))
         #print(csvTable)
         
         csv_filename = os.path.join(directory, 'partition_stats-%s.csv' % filename_objectives)
@@ -322,6 +293,8 @@ class daeCodeGenerator_MPI(daeCodeGenerator):
         return partitionData, statsData
     
     def _generateRuntimeInformation(self, runtimeInformation, directory):
+        gc.enable()
+
         # Returns part_results, stats_results
         Ntotal             = runtimeInformation['TotalNumberOfVariables']
         Neq                = runtimeInformation['NumberOfEquations']
@@ -378,7 +351,7 @@ class daeCodeGenerator_MPI(daeCodeGenerator):
                     ID           = int(variable['IDs'][domIndexes])         # cnDifferential, cnAssigned or cnAlgebraic
                     value        = float(variable['Values'][domIndexes])    # numpy float
                     overallIndex = variable['OverallIndex'] + i
-                    fullName     = relativeName + '(' + ','.join(str(di) for di in domIndexes) + ')'
+                    fullName     = relativeName + '(' + ','.join('%06d'%di for di in domIndexes) + ')'
 
                     blockIndex = None
                     if ID != cnAssigned:
@@ -387,6 +360,7 @@ class daeCodeGenerator_MPI(daeCodeGenerator):
         
         interprocess_sync_map, equationBlockIndexes = self._partitionDAESystem(blockIDs, directory)
         
+        gc.collect()
         # Generate partitioning results (to be returned by this function)
         part_results = {}
         for pe,data in interprocess_sync_map.items():
@@ -406,14 +380,17 @@ class daeCodeGenerator_MPI(daeCodeGenerator):
                 receive_from[pe_receive_from] = len(indexes)
             pe_data['receive_from'] = receive_from
                 
-            pe_data['Ncs']             = data['Ncs_load']
-            pe_data['Nflops']          = data['FLOPS_load']
-            pe_data['Nnz']             = data['NNZ_load']
-            pe_data['Nflops_jacobian'] = data['FLOPS_Jacob_Load']
+            pe_data['Ncs']      = data['Ncs_load']
+            pe_data['Nflops']   = data['FLOPS_load']
+            pe_data['Nnz']      = data['NNZ_load']
+            pe_data['Nflops_j'] = data['FLOPS_Jacob_Load']
         
+        gc.collect()
+
         # Statisticl data (deviations from average, in %)
         stats_results = self._generateStatistics(part_results)
                         
+        gc.collect()
         #################################################
         # Generate:                                     #
         #  - runtime_data-%05d.bin                      #
@@ -450,18 +427,28 @@ class daeCodeGenerator_MPI(daeCodeGenerator):
             absolute_tolerances = absTolerances[owned_indexes]
             ids                 = blockIDs[owned_indexes]
             variable_names      = variableNames[owned_indexes]
-                        
+            
+            """
             buff = bytes()
-            buff += struct.pack('I', Ntotal)
+            buff += struct.pack('d', 0.0)
+            if runtimeInformation['ModelType'] == eSteadyState:
+                buff += struct.pack('d', 0.0)
+            else:
+                buff += struct.pack('d', runtimeInformation['TimeHorizon'])
+            buff += struct.pack('d', runtimeInformation['ReportingInterval'])
+            buff += struct.pack('d', runtimeInformation['RelativeTolerance'])        
+
+            filename = os.path.join(directory, 'simulation_data-%05d.bin' % pe)
+            f = open(filename, 'wb')
+            f.write(buff)
+            f.close()
+            """
+
+            buff = bytes()
             buff += struct.pack('I', Neq)
             buff += struct.pack('I', Neq_local)
             buff += struct.pack('I', len(dofs))
-            buff += struct.pack('d', 0.0)
-            buff += struct.pack('d', runtimeInformation['TimeHorizon'])
-            buff += struct.pack('d', runtimeInformation['ReportingInterval'])
-            buff += struct.pack('d', runtimeInformation['RelativeTolerance'])        
-            buff += struct.pack('?', runtimeInformation['QuasiSteadyState'])
-            
+            buff += struct.pack('?', runtimeInformation['QuasiSteadyState'])            
             buff += packDoubleArray(dofs)
             buff += packDoubleArray(init_values)
             buff += packDoubleArray(init_derivatives)
@@ -469,11 +456,12 @@ class daeCodeGenerator_MPI(daeCodeGenerator):
             buff += packIntegerArray(ids)
             buff += packStringArray(variable_names)
             
-            filename = os.path.join(directory, 'runtime_data-%05d.bin' % pe)
+            filename = os.path.join(directory, 'model_variables-%05d.bin' % pe)
             f = open(filename, 'wb')
             f.write(buff)
             f.close()
             
+            """"
             # Incidence matrix images.
             try:
                 import png
@@ -496,7 +484,8 @@ class daeCodeGenerator_MPI(daeCodeGenerator):
                 f.close()
             except Exception as e:
                 print(str(e))
-
+			"""
+        gc.collect()
         #################################################
         # Generate:                                     #
         #  - interprocess_comm_data-%05d.bin            #
@@ -546,6 +535,8 @@ class daeCodeGenerator_MPI(daeCodeGenerator):
             f.write(buff)
             f.close()
         
+        gc.collect()
+
         return part_results, stats_results
 
     def _generateStatistics(self, partitionData):
@@ -576,7 +567,7 @@ class daeCodeGenerator_MPI(daeCodeGenerator):
             totalNcsLoad        += data['Ncs']
             totalFLOPSLoad      += data['Nflops']
             totalNNZLoad        += data['Nnz']
-            totalFLOPSJacobLoad += data['Nflops_jacobian']
+            totalFLOPSJacobLoad += data['Nflops_j']
 
         averageEquations        = totalEquations        / len(partitionData)
         averageAdjacent         = totalAdjacent         / len(partitionData)
@@ -585,22 +576,22 @@ class daeCodeGenerator_MPI(daeCodeGenerator):
         averageNNZLoad          = totalNNZLoad          / len(partitionData)
         averageFLOPSJacobLoad   = totalFLOPSJacobLoad   / len(partitionData)
 
-        statistics['Nequations']      = []
-        statistics['Nadjacent']       = []
-        statistics['Ncs']             = []
-        statistics['Nflops']          = []
-        statistics['Nnz']             = []
-        statistics['Nflops_jacobian'] = []        
+        statistics['Nequations'] = []
+        statistics['Nadjacent']  = []
+        statistics['Ncs']        = []
+        statistics['Nflops']     = []
+        statistics['Nnz']        = []
+        statistics['Nflops_j']   = []        
         for pe, data in partitionData.items():
             statistics['Nequations'].append(      (100.0 * (data['Nequations']      - averageEquations)      / averageEquations) )
             if averageAdjacent == 0:
                 statistics['Nadjacent'].append(   0.0 )
             else:
                 statistics['Nadjacent'].append(   (100.0 * (data['Nadjacent']       - averageAdjacent)       / averageAdjacent) )
-            statistics['Ncs'].append(             (100.0 * (data['Ncs']             - averageNcsLoad)        / averageNcsLoad) )
-            statistics['Nflops'].append(          (100.0 * (data['Nflops']          - averageFLOPSLoad)      / averageFLOPSLoad) )
-            statistics['Nnz'].append(             (100.0 * (data['Nnz']             - averageNNZLoad)        / averageNNZLoad) )
-            statistics['Nflops_jacobian'].append( (100.0 * (data['Nflops_jacobian'] - averageFLOPSJacobLoad) / averageFLOPSJacobLoad) )
+            statistics['Ncs'].append(      (100.0 * (data['Ncs']             - averageNcsLoad)        / averageNcsLoad) )
+            statistics['Nflops'].append(   (100.0 * (data['Nflops']          - averageFLOPSLoad)      / averageFLOPSLoad) )
+            statistics['Nnz'].append(      (100.0 * (data['Nnz']             - averageNNZLoad)        / averageNNZLoad) )
+            statistics['Nflops_j'].append( (100.0 * (data['Nflops_j']        - averageFLOPSJacobLoad) / averageFLOPSJacobLoad) )
         
         return statistics
     
@@ -655,13 +646,13 @@ class daeCodeGenerator_MPI(daeCodeGenerator):
                     vweights += weights_Nflops
                 elif objective == 'Nnz':
                     vweights += weights_Nnz
-                elif objective == 'Nflops_jacobian':
+                elif objective == 'Nflops_j':
                     vweights += weights_Nflops_jacob
                 else:
                     raise RuntimeError('Invalid partitioning objective: %s' % objective)
         
         # Index sets for all processing elements (PE)
-        loads_oi        = numpy.zeros((4, Npe)) # Ncs, Nflops, Nnz, Nflops_jacobian
+        loads_oi        = numpy.zeros((4, Npe)) # Ncs, Nflops, Nnz, Nflops_j
         all_oi          = [set() for i in range(Npe)]
         owned_oi        = [set() for i in range(Npe)]
         foreign_oi      = [set() for i in range(Npe)]

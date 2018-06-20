@@ -9,10 +9,14 @@ const char* DOCSTR_daeTrilinosSolver = "";
     const char* DOCSTR_daeTrilinosSolver_SaveAsXPM = "";
     const char* DOCSTR_daeTrilinosSolver_SaveAsMatrixMarketFile = "";
     const char* DOCSTR_daeTrilinosSolver_PrintPreconditionerInfo = "";
+    const char* DOCSTR_daeTrilinosSolver_Options = "";
     const char* DOCSTR_daeTrilinosSolver_AztecOOOptions = "";
     const char* DOCSTR_daeTrilinosSolver_IfpackOptions = "";
     const char* DOCSTR_daeTrilinosSolver_MLOptions = "";
     const char* DOCSTR_daeTrilinosSolver_AmesosOptions = "";
+
+const char* DOCSTR_daePreconditioner_Ifpack = "";
+const char* DOCSTR_daePreconditioner_ML = "";
 
 const char* DOCSTR_daeCreateTrilinosSolver = "";
 const char* DOCSTR_daeTrilinosSupportedSolvers = "";

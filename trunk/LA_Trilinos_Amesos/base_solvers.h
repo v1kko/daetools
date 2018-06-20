@@ -8,7 +8,7 @@ namespace dae
 {
 namespace solver
 {
-daeIDALASolver_t*   daeCreateTrilinosSolver(const std::string& strSolverName, const std::string& strPreconditionerName);
+daeLASolver_t*   daeCreateTrilinosSolver(const std::string& strSolverName, const std::string& strPreconditionerName);
 std::vector<string> daeTrilinosSupportedSolvers();
 std::vector<string> daeIfpackSupportedPreconditioners();
 }

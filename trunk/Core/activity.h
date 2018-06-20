@@ -120,6 +120,8 @@ public:
 
     virtual size_t GetNumberOfObjectiveFunctions(void) const													 = 0;
     virtual void   SetNumberOfObjectiveFunctions(size_t n)														 = 0;
+
+    virtual std::map<std::string, call_stats::TimeAndCount> GetCallStats() const                                   = 0;
 };
 
 /******************************************************************

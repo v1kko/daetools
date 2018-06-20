@@ -45,6 +45,8 @@ public:
     virtual void						SetInitialConditionMode(daeeInitialConditionMode eMode);
     virtual daeBlock_t*					GetBlock(void) const;
     virtual daeLog_t*					GetLog(void) const;
+    virtual daeLASolver_t*				GetLASolver(void) const;
+    virtual daePreconditioner_t*        GetPreconditioner() const;
     virtual void						RefreshEquationSetAndRootFunctions(void);
     virtual void						Reinitialize(bool bCopyDataFromBlock, bool bResetSensitivities = false);
     virtual void						Reset(void);
@@ -57,12 +59,13 @@ public:
     virtual void OnCalculateJacobian();
     virtual void OnCalculateSensitivityResiduals();
 
+    virtual std::map<std::string, call_stats::TimeAndCount> GetCallStats() const;
+    virtual std::map<std::string, real_t> GetIntegratorStats();
+
     std::vector<real_t>           GetEstLocalErrors();
     std::vector<real_t>           GetErrWeights();
-    std::map<std::string, real_t> GetIntegratorStats();
 
-    daeIDALASolver_t* GetLASolver() const;
-    void SetLASolver(daeeIDALASolverType eLASolverType);
+    void SetLASolver(daeeIDALASolverType eLASolverType, daePreconditioner_t* preconditioner);
     void SetLASolver(daeLASolver_t* pLASolver);
 
     void SetLastIDASError(const string& strLastError);
@@ -91,7 +94,8 @@ public:
     daeBlock_t*							m_pBlock;
     daeSimulation_t*					m_pSimulation;
     daeeIDALASolverType					m_eLASolver;
-    daeIDALASolver_t*					m_pLASolver;
+    daeLASolver_t*                      m_pLASolver;
+    daePreconditioner_t*                m_pPreconditioner;
     size_t								m_nNumberOfEquations;
     real_t								m_dRelTolerance;
     real_t								m_dSensRelTolerance;
@@ -100,6 +104,9 @@ public:
     real_t								m_dCurrentTime;
     real_t								m_dTargetTime;
     real_t								m_dNextTimeAfterReinitialization;
+
+    std::map<std::string, call_stats::TimeAndCount> m_stats;
+    std::map<std::string, real_t>          m_integratorStats;
 
     daeRawDataArray<real_t>				m_arrValues;
     daeRawDataArray<real_t>				m_arrTimeDerivatives;

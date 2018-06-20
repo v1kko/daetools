@@ -10,13 +10,46 @@ PARTICULAR PURPOSE. See the GNU General Public License for more details.
 You should have received a copy of the GNU General Public License along with the
 DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 ***********************************************************************************/
-#ifndef DAE_MPI_AUXILIARY_H
-#define DAE_MPI_AUXILIARY_H
+#ifndef CS_SIMULATOR_AUXILIARY_H
+#define CS_SIMULATOR_AUXILIARY_H
+
+#include <cs_call_stats.h>
 
 namespace auxiliary
 {
-bool   compare_strings(const char* s1, const char* s2);
-void   log_message(const char* msg);
-double get_time_in_seconds(); /* returns time in seconds. */
+class daeTimesAndCounters
+{
+public:
+    daeTimesAndCounters()
+    {
+    }
+
+    virtual ~daeTimesAndCounters(void)
+    {
+    }
+
+    static daeTimesAndCounters& GetTimesAndCounters()
+    {
+        static daeTimesAndCounters tcs;
+        return tcs;
+    }
+
+public:
+    call_stats::TimeAndCount SimulationInitialise;
+    call_stats::TimeAndCount SimulationSolveInitial;
+    call_stats::TimeAndCount SimulationIntegration;
+    call_stats::TimeAndCount DAESolverSolveInitial;
+    call_stats::TimeAndCount DAESolverIntegration;
+    call_stats::TimeAndCount LASetup;
+    call_stats::TimeAndCount LASolve;
+    call_stats::TimeAndCount PSetup;
+    call_stats::TimeAndCount PSolve;
+    call_stats::TimeAndCount Jvtimes;
+    call_stats::TimeAndCount JvtimesDQ;
+    call_stats::TimeAndCount ResidualsEvaluation;
+    call_stats::TimeAndCount JacobianEvaluation;
+    call_stats::TimeAndCount IPCDataExchange;
+};
+
 }
 #endif

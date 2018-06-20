@@ -1,8 +1,8 @@
 /***********************************************************************************
-                 DAE Tools Project: www.daetools.com
-                 Copyright (C) Dragan Nikolic, 2017
+                 OpenCS Project: www.daetools.com
+                 Copyright (C) Dragan Nikolic
 ************************************************************************************
-DAE Tools is free software; you can redistribute it and/or modify it under the
+OpenCS is free software; you can redistribute it and/or modify it under the
 terms of the GNU General Public License version 3 as published by the Free Software
 Foundation. DAE Tools is distributed in the hope that it will be useful, but WITHOUT
 ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
@@ -10,8 +10,8 @@ PARTICULAR PURPOSE. See the GNU General Public License for more details.
 You should have received a copy of the GNU General Public License along with the
 DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 ***********************************************************************************/
-#ifndef DAE_COMPUTE_STACK_H
-#define DAE_COMPUTE_STACK_H
+#ifndef CS_COMPUTE_STACK_MACHINE_H
+#define CS_COMPUTE_STACK_MACHINE_H
 
 #include <stdint.h>
 #include <string.h>
@@ -19,7 +19,7 @@ DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 
 #ifdef __cplusplus
 #include <stdexcept>
-namespace computestack
+namespace cs
 {
 extern "C" {
 #endif
@@ -42,7 +42,6 @@ typedef unsigned int   uint32_t;
 #define real_t double
 #endif
 
-/* Copies of the enum types defined in "core.h" with the addition of eScaling. */
 typedef enum
 {
     eUFUnknown = 0,
@@ -68,7 +67,7 @@ typedef enum
     eArcTanh,
     eErf,
     eScaling
-}daeeUnaryFunctions;
+}csUnaryFunctions;
 
 typedef enum
 {
@@ -81,17 +80,15 @@ typedef enum
     eMin,
     eMax,
     eArcTan2
-}daeeBinaryFunctions;
+}csBinaryFunctions;
 
 typedef enum
 {
-    eECMUnknown = 0,
-    eGatherInfo,
-    eCalculate,
-    eCreateFunctionsIFsSTNs,
-    eCalculateJacobian,
-    eCalculateSensitivityResiduals
-}daeeEquationCalculationMode;
+    eEEMUnknown = 0,
+    eEvaluateResidual,
+    eEvaluateJacobian,
+    eEvaluateSensitivityResiduals
+}csEquationEvaluationMode;
 
 /* Compute stack only related enums. */
 typedef enum
@@ -105,7 +102,7 @@ typedef enum
     eOP_TimeDerivative,
     eOP_Unary,
     eOP_Binary
-}daeeOpCode;
+}csOpCode;
 
 typedef enum
 {
@@ -113,9 +110,9 @@ typedef enum
     eOP_Result_to_value,
     eOP_Result_to_lvalue,
     eOP_Result_to_rvalue,
-}daeeOpResultLocation;
+}csOpResultLocation;
 
-typedef struct adComputeStackItem_
+typedef struct csComputeStackItem_
 {
     uint8_t  opCode;
     uint8_t  function;
@@ -137,7 +134,7 @@ typedef struct adComputeStackItem_
             uint32_t blockIndex;
         }indexes;
     }data;
-}adComputeStackItem_t;
+}csComputeStackItem_t;
 
 typedef struct adouble_
 {
@@ -145,11 +142,11 @@ typedef struct adouble_
     real_t m_dDeriv;
 } adouble_t;
 
-typedef struct daeComputeStackEvaluationContext_
+typedef struct csEvaluationContext_
 {
     real_t   currentTime;
     real_t   inverseTimeStep;
-    uint32_t equationCalculationMode;
+    uint32_t equationEvaluationMode;
     /* Indexes used for evaluation of Jacobian/sensitivities. */
     uint32_t sensitivityParameterIndex;
     uint32_t jacobianIndex;
@@ -173,14 +170,14 @@ typedef struct daeComputeStackEvaluationContext_
     uint32_t valuesStackSize;
     uint32_t lvaluesStackSize;
     uint32_t rvaluesStackSize;
-}daeComputeStackEvaluationContext_t;
+}csEvaluationContext_t;
 
-typedef struct adJacobianMatrixItem_
+typedef struct csJacobianMatrixItem_
 {
     uint32_t equationIndex;
     uint32_t overallIndex;
     uint32_t blockIndex;
-} adJacobianMatrixItem_t;
+} csJacobianMatrixItem_t;
 
 typedef struct lifo_stack_
 {
@@ -188,8 +185,6 @@ typedef struct lifo_stack_
     adouble_t data[20];
     int       top;
 } lifo_stack_t;
-
-typedef void (*jacobian_fn)(void*, uint32_t, uint32_t, real_t);
 
 
 /*************************************************************************************************
@@ -787,8 +782,8 @@ CS_DECL void lifo_push(lifo_stack_t* stack, adouble_t* item)
 /*************************************************************************************************
  *  Evaluate function
 **************************************************************************************************/
-CS_DECL adouble_t evaluateComputeStack(CS_KERNEL_FLAG const adComputeStackItem_t*  computeStack,
-                                       daeComputeStackEvaluationContext_t          EC,
+CS_DECL adouble_t evaluateComputeStack(CS_KERNEL_FLAG const csComputeStackItem_t*  computeStack,
+                                       csEvaluationContext_t                       EC,
                                        CS_KERNEL_FLAG const real_t*                dofs,
                                        CS_KERNEL_FLAG const real_t*                values,
                                        CS_KERNEL_FLAG const real_t*                timeDerivatives,
@@ -801,13 +796,13 @@ CS_DECL adouble_t evaluateComputeStack(CS_KERNEL_FLAG const adComputeStackItem_t
     lifo_init(&rvalue, EC.rvaluesStackSize);
 
     /* Get the length of the compute stack (it is always in the 'size' member in the adComputeStackItem_t struct). */
-    adComputeStackItem_t item0 = computeStack[0];
+    csComputeStackItem_t item0 = computeStack[0];
     uint32_t computeStackSize  = item0.size;
 
     adouble_t result, scaling;
     for(uint32_t i = 0; i < computeStackSize; i++)
     {
-        const adComputeStackItem_t item = computeStack[i];
+        const csComputeStackItem_t item = computeStack[i];
 
         adouble_init(&result, 0.0, 0.0);
 
@@ -828,13 +823,13 @@ CS_DECL adouble_t evaluateComputeStack(CS_KERNEL_FLAG const adComputeStackItem_t
             /* Take the value from the values array. */
             result.m_dValue = values[item.data.indexes.blockIndex];
 
-            if(EC.equationCalculationMode == eCalculateSensitivityResiduals)
+            if(EC.equationEvaluationMode == eEvaluateSensitivityResiduals)
             {
                 if(EC.sensitivityParameterIndex == item.data.indexes.overallIndex)
                 {
                     /* We should never reach this point, since the variable must be a degree of freedom. */
 #ifdef __cplusplus
-                    throw std::runtime_error("eOP_Variable invalid call (eCalculateSensitivityResiduals)");
+                    throw std::runtime_error("eOP_Variable invalid call (eEvaluateSensitivityResiduals)");
 #endif
                 }
                 else
@@ -843,7 +838,7 @@ CS_DECL adouble_t evaluateComputeStack(CS_KERNEL_FLAG const adComputeStackItem_t
                     result.m_dDeriv = svalues[item.data.indexes.blockIndex];
                 }
             }
-            else /* eCalculate or eCalculateJacobian. */
+            else /* eEvaluateResidual or eEvaluateJacobian */
             {
                 result.m_dDeriv = (EC.jacobianIndex == item.data.indexes.overallIndex ? 1 : 0 );
             }
@@ -854,7 +849,7 @@ CS_DECL adouble_t evaluateComputeStack(CS_KERNEL_FLAG const adComputeStackItem_t
             result.m_dValue = dofs[item.data.dof_indexes.dofIndex];
 
             /* DOFs can have derivatives only when calculating sensitivities. */
-            if(EC.equationCalculationMode == eCalculateSensitivityResiduals)
+            if(EC.equationEvaluationMode == eEvaluateSensitivityResiduals)
             {
                 /* The derivative is non-zero only if the DOF overall index is equal to the requested sensitivity parameter index. */
                 if(EC.sensitivityParameterIndex == item.data.dof_indexes.overallIndex)
@@ -868,18 +863,18 @@ CS_DECL adouble_t evaluateComputeStack(CS_KERNEL_FLAG const adComputeStackItem_t
             /* Take the value from the time derivatives array. */
             result.m_dValue = timeDerivatives[item.data.indexes.blockIndex];
 
-            if(EC.equationCalculationMode == eCalculateSensitivityResiduals)
+            if(EC.equationEvaluationMode == eEvaluateSensitivityResiduals)
             {
                 /* Index for the sensitivity residual can never be equal to an overallIndex
                  * since it would be a degree of freedom. */
 #ifdef __cplusplus
                 if(EC.sensitivityParameterIndex == item.data.indexes.overallIndex)
-                    throw std::runtime_error("eOP_TimeDerivative invalid call (eCalculateSensitivityResiduals)");
+                    throw std::runtime_error("eOP_TimeDerivative invalid call (eEvaluateSensitivityResiduals)");
 #endif
 
                 result.m_dDeriv = sdvalues[item.data.indexes.blockIndex];
             }
-            else /* eCalculate or eCalculateJacobian */
+            else /* eEvaluateResidual or eEvaluateJacobian */
             {
                 result.m_dDeriv = (EC.jacobianIndex == item.data.indexes.overallIndex ? EC.inverseTimeStep : 0);
             }
@@ -1059,71 +1054,11 @@ CS_DECL adouble_t evaluateComputeStack(CS_KERNEL_FLAG const adComputeStackItem_t
     return result_final;
 }
 
-CS_DECL void setCSRMatrixItem(int row, int col, real_t value, CS_KERNEL_FLAG const int* IA, CS_KERNEL_FLAG const int* JA, CS_KERNEL_FLAG real_t* A)
-{
-    /* IA contains number of column indexes in the row: Ncol_indexes = IA[row+1] - IA[row]
-     * Column indexes start at JA[ IA[row] ] and end at JA[ IA[row+1] ] */
-    for(int k = IA[row]; k < IA[row+1]; k++)
-    {
-        if(col == JA[k])
-        {
-            A[k] = value;
-            return;
-        }
-    }
-
-#ifdef __cplusplus
-    throw std::runtime_error("Invalid element in CRS matrix");
-#endif
-}
-
 /* End of declarations for inclusion into kernel sources. */
-
 
 #ifdef __cplusplus
 } /* End of extern "C" */
-
-class adComputeStackEvaluator_t
-{
-public:
-    virtual ~adComputeStackEvaluator_t(){}
-
-    /* Initialisation function (can be called repeatedly after every change in the active equation set). */
-    virtual void Initialize(bool                    calculateSensitivities,
-                            size_t                  numberOfVariables,
-                            size_t                  numberOfEquationsToProcess,
-                            size_t                  numberOfDOFs,
-                            size_t                  numberOfComputeStackItems,
-                            size_t                  numberOfJacobianItems,
-                            size_t                  numberOfJacobianItemsToProcess,
-                            adComputeStackItem_t*   computeStacks,
-                            uint32_t*               activeEquationSetIndexes,
-                            adJacobianMatrixItem_t* computeStackJacobianItems) = 0;
-
-    virtual void FreeResources() = 0;
-
-    virtual void EvaluateResiduals(daeComputeStackEvaluationContext_t EC,
-                                   real_t*                            dofs,
-                                   real_t*                            values,
-                                   real_t*                            timeDerivatives,
-                                   real_t*                            residuals) = 0;
-
-    virtual void EvaluateJacobian(daeComputeStackEvaluationContext_t EC,
-                                  real_t*                            dofs,
-                                  real_t*                            values,
-                                  real_t*                            timeDerivatives,
-                                  real_t*                            jacobianItems) = 0;
-
-    virtual void EvaluateSensitivityResiduals(daeComputeStackEvaluationContext_t EC,
-                                              real_t*                            dofs,
-                                              real_t*                            values,
-                                              real_t*                            timeDerivatives,
-                                              real_t*                            svalues,
-                                              real_t*                            sdvalues,
-                                              real_t*                            sresiduals) = 0;
-};
-
-} /* End of namespace commputestack */
+} /* End of namespace cs */
 #endif
 
 #endif

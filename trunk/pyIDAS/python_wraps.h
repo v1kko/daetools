@@ -45,6 +45,7 @@ boost::python::dict getDictFromMapByValue(std::map<KEY,VALUE>& mapItems)
 
 boost::python::list daeArray_GetValues(daeArray<real_t>& self);
 boost::python::object daeDenseMatrix_ndarray(daeDenseMatrix& self);
+boost::python::dict GetCallStats(daeIDASolver& self);
 
 /*******************************************************
     daeDAESolver
@@ -125,15 +126,23 @@ public:
         return lasolver;
     }
 
-    void SetLASolver1(daeeIDALASolverType eLASolverType)
+    void SetLASolver1(daeeIDALASolverType eLASolverType, boost::python::object prec = boost::python::object())
     {
-        daeIDASolver::SetLASolver(eLASolverType);
+        daePreconditioner_t* pPreconditioner = NULL;
+        if(eLASolverType == eSundialsGMRES)
+        {
+            preconditioner = prec;
+            boost::python::extract<daePreconditioner_t*> ex_prec(prec);
+            if(ex_prec.check())
+                pPreconditioner = ex_prec();
+        }
+        daeIDASolver::SetLASolver(eLASolverType, pPreconditioner);
     }
 
     void SetLASolver2(boost::python::object LASolver)
     {
         lasolver = LASolver;
-        daeIDALASolver_t* pLASolver = boost::python::extract<daeIDALASolver_t*>(LASolver);
+        daeLASolver_t* pLASolver = boost::python::extract<daeLASolver_t*>(LASolver);
         daeIDASolver::SetLASolver(pLASolver);
     }
 
@@ -205,6 +214,7 @@ public:
 
 protected:
     boost::python::object lasolver;
+    boost::python::object preconditioner;
 };
 
 }

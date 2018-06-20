@@ -88,9 +88,15 @@ public:
     virtual void GetObjectiveFunctions(std::vector<daeObjectiveFunction_t*>& ptrarrObjectiveFunctions) const;
     virtual daeObjectiveFunction* GetObjectiveFunction(void) const;
 
+    virtual std::map<std::string, call_stats::TimeAndCount> GetCallStats() const;
+
+    void PrintStats();
+
     daeeEvaluationMode GetEvaluationMode();
     void SetEvaluationMode(daeeEvaluationMode evaluationMode);
-    void SetComputeStackEvaluator(computestack::adComputeStackEvaluator_t* computeStackEvaluator);
+
+    void SetComputeStackEvaluator(cs::csComputeStackEvaluator_t* computeStackEvaluator);
+    cs::csComputeStackEvaluator_t* GetComputeStackEvaluator() const;
 
     daeeInitialConditionMode	GetInitialConditionMode(void) const;
     void						SetInitialConditionMode(daeeInitialConditionMode eMode);
@@ -124,8 +130,6 @@ public:
     std::vector<daeEquationExecutionInfo*> GetEquationExecutionInfos(void) const;
     size_t	GetNumberOfEquations(void) const;
     size_t	GetTotalNumberOfVariables(void) const; // including assigned
-
-    std::map<std::string, real_t> GetEvaluationCallsStats();
 
     void	Register(daeModel* pModel);
     void	Register(daePort* pPort);
@@ -199,12 +203,8 @@ protected:
     daeBlock_t*                 m_ptrBlock;
     daeeActivityAction			m_eActivityAction;
     daeeSimulationMode			m_eSimulationMode;
-    double						m_ProblemCreationStart;
-    double						m_ProblemCreationEnd;
-    double						m_InitializationStart;
-    double						m_InitializationEnd;
-    double						m_IntegrationStart;
-    double						m_IntegrationEnd;
+
+    std::map<std::string, call_stats::TimeAndCount> m_stats;
 
     bool						m_bConditionalIntegrationMode;
     bool						m_bIsInitialized;
@@ -222,7 +222,7 @@ protected:
 
     bool                                     m_bEvaluationModeSet;
     daeeEvaluationMode                       m_evaluationMode;
-    computestack::adComputeStackEvaluator_t* m_computeStackEvaluator;
+    cs::csComputeStackEvaluator_t* m_computeStackEvaluator;
 
 // Optimization related data
     bool														m_bCalculateSensitivities;
@@ -237,12 +237,6 @@ protected:
 // Parameter estimation related data
     std::vector< boost::shared_ptr<daeVariableWrapper> >		m_arrInputVariables;
     std::vector< boost::shared_ptr<daeMeasuredVariable> >		m_arrMeasuredVariables;
-
-// Integration statistics data
-public:
-    double m_InitializationDuration;
-    double m_SolveInitalDuration;
-    double m_IntegrationDuration;
 };
 
 /*********************************************************************************************

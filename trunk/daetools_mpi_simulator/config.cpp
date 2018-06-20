@@ -10,7 +10,7 @@ PARTICULAR PURPOSE. See the GNU General Public License for more details.
 You should have received a copy of the GNU General Public License along with the
 DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 ***********************************************************************************/
-#include "typedefs.h"
+#include "cs_simulator.h"
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/json_parser.hpp>
 #include <boost/property_tree/detail/file_parser_error.hpp>
@@ -18,7 +18,7 @@ DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 #include <boost/filesystem/operations.hpp>
 #include <boost/filesystem/path.hpp>
 
-namespace daetools_mpi
+namespace cs_simulator
 {
 daeSimulationOptions::daeSimulationOptions()
 {

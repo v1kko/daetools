@@ -20,13 +20,13 @@ DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 #include <nvector/nvector_parallel.h>
 #include <sundials/sundials_math.h>
 #include "auxiliary.h"
-#include "typedefs.h"
+#include "cs_simulator.h"
 #include "idas_la_functions.h"
 #include <boost/format.hpp>
 #include <idas/idas_impl.h>
 #include "../idas/src/idas/idas_spils_impl.h"
 
-namespace daetools_mpi
+namespace cs_simulator
 {
 /* Private functions */
 static int check_flag(void *flagvalue, const char *funcname, int opt);
@@ -66,6 +66,16 @@ static int jacobian_vector_multiply(realtype tt,
                                     void *user_data,
                                     N_Vector tmp1,
                                     N_Vector tmp2);
+static int jacobian_vector_dq(realtype tt,
+                              N_Vector yy,
+                              N_Vector yp,
+                              N_Vector rr,
+                              N_Vector vvec,
+                              N_Vector Jvvec,
+                              realtype c_j,
+                              void *user_data,
+                              N_Vector tmp1,
+                              N_Vector tmp2);
 
 static int resid(realtype tres,
                  N_Vector yy,
@@ -86,6 +96,7 @@ daeIDASolver_t::daeIDASolver_t()
     yp          = NULL;
     model       = NULL;
     simulation  = NULL;
+    integrationMode = IDA_NORMAL;
 }
 
 daeIDASolver_t::~daeIDASolver_t()
@@ -118,6 +129,18 @@ void daeIDASolver_t::Initialize(daeModel_t* pmodel,
 
     MPI_Comm comm = (MPI_Comm)model->mpi_comm;
     daeSimulationOptions& cfg = daeSimulationOptions::GetConfig();
+
+    printInfo = cfg.GetBoolean("DAESolver.PrintInfo", false);
+
+    std::string integrationMode_s = cfg.GetString("DAESolver.Parameters.IntegrationMode", "Normal");
+    if(integrationMode_s == "Normal")
+        integrationMode = IDA_NORMAL;
+    else if(integrationMode_s == "OneStep")
+        integrationMode = IDA_ONE_STEP;
+    else
+        daeThrowException("Invalid integration mode specified: " + integrationMode_s);
+    printf("IntegrationMode = %s\n", integrationMode_s.c_str());
+    printf("IntegrationMode = %d\n", integrationMode);
 
     /* Allocate N-vectors. */
     yy_nv = N_VNew_Parallel(comm, model->Nequations_local, model->Nequations);
@@ -260,17 +283,27 @@ void daeIDASolver_t::Initialize(daeModel_t* pmodel,
 
         // This is very important for overall performance!!
         // For some reasons works very slow if jacobian_vector_multiply is used for Npe > 1.
-        std::string jtimes = cfg.GetString("LinearSolver.Parameters.JacTimesVecFn", "DQ");
-        if(jtimes == "DQ")
+        std::string jtimes = cfg.GetString("LinearSolver.Parameters.JacTimesVecFn", "DifferenceQuotient");
+        if(jtimes == "DifferenceQuotient")
         {
             IDASpilsSetIncrementFactor(mem, cfg.GetFloat("LinearSolver.Parameters.DQIncrementFactor",   1.0));
         }
-        else if(jtimes == "FullJacobianMultiply")
+        else if(jtimes == "JacobianVectorMultiply")
         {
             IDASpilsSetJacTimesVecFn(mem, jacobian_vector_multiply);
         }
+        else if(jtimes == "DifferenceQuotient_timed")
+        {
+            // jacobian_vector_dq calls default function: IDASpilsDQJtimes (but measures the time required).
+            IDASpilsSetIncrementFactor(mem, cfg.GetFloat("LinearSolver.Parameters.DQIncrementFactor",   1.0));
+            IDASpilsSetJacTimesVecFn(mem, jacobian_vector_dq);
+        }
+        else
+        {
+            daeThrowException( (boost::format("Not supported LinearSolver.Parameters.JacTimesVecFn option: %s") % jtimes).str() );
+        }
     }
-    else if(lasolverLibrary == "AztecOO")
+    else if(lasolverLibrary == "Trilinos")
     {
         lasolver.reset(new daeLASolver_t);
         retval = lasolver->Initialize(pmodel, model->Nequations_local);
@@ -312,6 +345,8 @@ void daeIDASolver_t::Free()
 {
     if(mem)
     {
+        CollectSolverStats();
+
         IDAFree(&mem);
         N_VDestroy_Parallel((N_Vector)yy);
         N_VDestroy_Parallel((N_Vector)yp);
@@ -348,12 +383,9 @@ real_t daeIDASolver_t::Solve(real_t dTime, daeeStopCriterion eCriterion, bool bR
 
     targetTime = dTime;
 
-    long int npsolves_cum = 0;
-    long int nliters = 0;
-    static long int npsolves_last = 0;
     for(;;)
     {
-        retval = IDASolve(mem, targetTime, &currentTime, (N_Vector)yy, (N_Vector)yp, IDA_NORMAL); // IDA_NORMAL, IDA_ONE_STEP
+        retval = IDASolve(mem, targetTime, &currentTime, (N_Vector)yy, (N_Vector)yp, integrationMode);
 
         if(retval == IDA_TOO_MUCH_WORK)
         {
@@ -415,16 +447,21 @@ real_t daeIDASolver_t::Solve(real_t dTime, daeeStopCriterion eCriterion, bool bR
             }
         }
 
-    /*
-        int kcur;
-        realtype hcur;
-        IDAGetCurrentOrder(mem, &kcur);
-        IDAGetCurrentStep(mem, &hcur);
-        IDASpilsGetNumPrecSolves(mem, &npsolves_cum);
-        nliters = npsolves_cum - npsolves_last;
-        npsolves_last = npsolves_cum;
-        printf("    t = %.15f, k = %d, h = %.15f, nliters = %ld\n", currentTime, kcur, hcur, nliters);
-    */
+        if(printInfo && integrationMode == IDA_ONE_STEP)
+        {
+            static long cum_psolves = 0;
+            int kcur;
+            realtype hcur;
+            long psolves;
+
+            IDAGetCurrentOrder(mem, &kcur);
+            IDAGetCurrentStep(mem, &hcur);
+            IDASpilsGetNumPrecSolves(mem, &psolves);
+
+            printf("    t = %.15f, k = %d, h = %.15f, psolves = %ld\n", currentTime, kcur, hcur, psolves-cum_psolves);
+            cum_psolves = psolves;
+        }
+
         if(currentTime >= targetTime)
             break;
     }
@@ -541,33 +578,29 @@ void daeIDASolver_t::Reinitialize(bool bCopyDataFromBlock, bool bResetSensitivit
     */
 }
 
-void daeIDASolver_t::PrintSolverStats()
+void daeIDASolver_t::CollectSolverStats()
 {
     if(!mem)
         return;
 
+    stats.clear();
+
     long int nst, nni, nre, nli, nreLS, nge, npe, nps, njvtimes;
     nst = nni = nre = nli = nreLS = nge = npe = nps = njvtimes = 0;
 
-    IDAGetNumSteps(mem, &nst);
-    IDAGetNumResEvals(mem, &nre);
-    IDAGetNumNonlinSolvIters(mem, &nni);
+    //IDAGetNumSteps(mem, &nst);
+    //IDAGetNumResEvals(mem, &nre);
+    //IDAGetNumNonlinSolvIters(mem, &nni);
     IDASpilsGetNumLinIters(mem, &nli);
     IDASpilsGetNumResEvals(mem, &nreLS);
-    //IDABBDPrecGetNumGfnEvals(mem, &nge);
     IDASpilsGetNumPrecEvals(mem, &npe);
     IDASpilsGetNumPrecSolves(mem, &nps);
     IDASpilsGetNumJtimesEvals(mem, &njvtimes);
-
-    printf("\nFinal Run Statistics: \n\n");
-    printf("Number of steps                    = %ld\n", nst);
-    printf("Number of residual evaluations     = %ld\n", nre);
-    printf("Number of nonlinear iterations     = %ld\n", nni);
-    printf("Number of sp linear iterations     = %ld\n", nli);
-    printf("Number of sp residual evaluations  = %ld\n", nreLS);
-    printf("Number of sp preconditioner evals  = %ld\n", npe);
-    printf("Number of sp preconditioner solves = %ld\n", nps);
-    printf("Number of Jv multiply calls        = %ld\n", njvtimes);
+    stats["NumLinIters"]    = nli;
+    stats["NumResEvals"]    = nreLS;
+    stats["NumPrecEvals"]   = npe;
+    stats["NumPrecSolves"]  = nps;
+    stats["NumJtimesEvals"] = njvtimes;
 
     long int nsteps, nrevals, nlinsetups, netfails;
     int klast, kcur;
@@ -579,23 +612,50 @@ void daeIDASolver_t::PrintSolverStats()
     IDAGetIntegratorStats(mem, &nsteps, &nrevals, &nlinsetups,
                                &netfails, &klast, &kcur, &hinused,
                                &hlast, &hcur, &tcur);
-    //printf("NumSteps                = %ld\n",         nsteps);
-    //printf("NumResEvals             = %ld\n",      nrevals);
-    printf("NumLinSolvSetups        = %ld\n", nlinsetups);
-    printf("NumErrTestFails         = %ld\n", netfails);
-    printf("LastOrder               = %d\n",  klast);
-    printf("CurrentOrder            = %d\n",  kcur);
-    printf("ActualInitStep          = %.10f\n",  hinused);
-    printf("LastStep                = %.10f\n",  hlast);
-    printf("CurrentStep             = %.10f\n",  hcur);
-    printf("CurrentTime             = %.10f\n",  tcur);
+    stats["NumSteps"]         = nsteps;
+    stats["NumResEvals"]      = nrevals;
+    stats["NumLinSolvSetups"] = nlinsetups;
+    stats["NumErrTestFails"]  = netfails;
+    stats["LastOrder"]        = klast;
+    stats["CurrentOrder"]     = kcur;
+    stats["ActualInitStep"]   = hinused;
+    stats["LastStep"]         = hlast;
+    stats["CurrentStep"]      = hcur;
+    stats["CurrentTime"]      = tcur;
 
     long int nniters, nncfails;
     nniters = nncfails = 0;
     IDAGetNonlinSolvStats(mem, &nniters, &nncfails);
-    printf("NumNonlinSolvIters      = %ld\n", nniters);
-    printf("NumNonlinSolvConvFails  = %ld\n", nncfails);
+    stats["NumNonlinSolvIters"]     = nniters;
+    stats["NumNonlinSolvConvFails"] = nncfails;
 }
+
+void daeIDASolver_t::PrintSolverStats()
+{
+    if(stats.empty())
+        CollectSolverStats();
+
+    printf("DAE solver stats:\n");
+    printf("    NumSteps                    = %15d\n",    (int)stats["NumSteps"]);
+    printf("    NumResEvals                 = %15d\n",    (int)stats["NumResEvals"]);
+    printf("    NumErrTestFails             = %15d\n",    (int)stats["NumErrTestFails"]);
+    printf("    LastOrder                   = %15d\n",    (int)stats["LastOrder"]);
+    printf("    CurrentOrder                = %15d\n",    (int)stats["CurrentOrder"]);
+    printf("    LastStep                    = %15.12f\n", stats["LastStep"]);
+    printf("    CurrentStep                 = %15.12f\n", stats["CurrentStep"]);
+
+    printf("Nonlinear solver stats:\n");
+    printf("    NumNonlinSolvIters          = %15d\n", (int)stats["NumNonlinSolvIters"]);
+    printf("    NumNonlinSolvConvFails      = %15d\n", (int)stats["NumNonlinSolvConvFails"]);
+
+    printf("Linear solver stats (Sundials spils):\n");
+    printf("    NumLinIters                 = %15d\n", (int)stats["NumLinIters"]);
+    printf("    NumResEvals                 = %15d\n", (int)stats["NumResEvals"]);
+    printf("    NumPrecEvals                = %15d\n", (int)stats["NumPrecEvals"]);
+    printf("    NumPrecSolves               = %15d\n", (int)stats["NumPrecSolves"]);
+    printf("    NumJtimesEvals              = %15d\n", (int)stats["NumJtimesEvals"]);
+}
+
 
 /* Private functions */
 int bbd_local_fn(long int Nlocal,
@@ -623,6 +683,9 @@ int setup_preconditioner(realtype tt,
                          realtype cj, void *user_data,
                          N_Vector tmp1, N_Vector tmp2, N_Vector tmp3)
 {
+    auxiliary::daeTimesAndCounters& tcs = auxiliary::daeTimesAndCounters::GetTimesAndCounters();
+    call_stats::TimerCounter tc(tcs.PSetup);
+
     realtype* yval   = NV_DATA_P(yy);
     realtype* ypval  = NV_DATA_P(yp);
     realtype* res    = NV_DATA_P(rr);
@@ -640,6 +703,9 @@ int solve_preconditioner(realtype tt,
                          realtype c_j, realtype delta, void *user_data,
                          N_Vector tmp)
 {
+    auxiliary::daeTimesAndCounters& tcs = auxiliary::daeTimesAndCounters::GetTimesAndCounters();
+    call_stats::TimerCounter tc(tcs.PSolve);
+
     realtype* yval  = NV_DATA_P(uu);
     realtype* ypval = NV_DATA_P(up);
     realtype* res   = NV_DATA_P(rr);
@@ -653,6 +719,34 @@ int solve_preconditioner(realtype tt,
     return preconditioner->Solve(tt, r, z);
 }
 
+int jacobian_vector_dq(realtype tt,
+                       N_Vector yy,
+                       N_Vector yp,
+                       N_Vector rr,
+                       N_Vector vvec,
+                       N_Vector Jvvec,
+                       realtype c_j,
+                       void *user_data,
+                       N_Vector tmp1,
+                       N_Vector tmp2)
+{
+    auxiliary::daeTimesAndCounters& tcs = auxiliary::daeTimesAndCounters::GetTimesAndCounters();
+    call_stats::TimerCounter tc(tcs.JvtimesDQ);
+
+    daeIDASolver_t* dae_solver = (daeIDASolver_t*)user_data;
+    int ret = IDASpilsDQJtimes(tt,
+                               yy,
+                               yp,
+                               rr,
+                               vvec,
+                               Jvvec,
+                               c_j,
+                               dae_solver->mem,
+                               tmp1,
+                               tmp2);
+    return ret;
+}
+
 int jacobian_vector_multiply(realtype tt,
                              N_Vector yy,
                              N_Vector yp,
@@ -664,6 +758,9 @@ int jacobian_vector_multiply(realtype tt,
                              N_Vector tmp1,
                              N_Vector tmp2)
 {
+    auxiliary::daeTimesAndCounters& tcs = auxiliary::daeTimesAndCounters::GetTimesAndCounters();
+    call_stats::TimerCounter tc(tcs.Jvtimes);
+
     daeIDASolver_t*       dae_solver     = (daeIDASolver_t*)user_data;
     daePreconditioner_t*  preconditioner = dae_solver->preconditioner.get();
 

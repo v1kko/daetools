@@ -10,21 +10,19 @@ PARTICULAR PURPOSE. See the GNU General Public License for more details.
 You should have received a copy of the GNU General Public License along with the
 DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 ***********************************************************************************/
-#ifndef DAE_MPI_TYPEDEFS_H
-#define DAE_MPI_TYPEDEFS_H
+#ifndef CS_SIMULATOR_H
+#define CS_SIMULATOR_H
 
 #include <iostream>
 #include <string>
 #include <vector>
+#include <map>
 #include <string.h>
 #include <boost/format.hpp>
 #include <boost/property_tree/ptree.hpp>
+#include <opencs.h>
 
-#ifndef real_t
-#define real_t double
-#endif
-
-namespace daetools_mpi
+namespace cs_simulator
 {
 #define daeThrowException(MSG) \
    throw std::runtime_error( (boost::format("Exception in %s (%s:%d):\n%s\n") % std::string(__FUNCTION__) % std::string(__FILE__) % __LINE__ % (MSG)).str() );
@@ -87,7 +85,7 @@ public:
     virtual void SetItem(size_t row, size_t col, real_t value) = 0;
 };
 
-class daeModel_t
+class daeModel_t : public cs::csModelVariablesData_t
 {
 public:
     daeModel_t();
@@ -107,8 +105,7 @@ public:
                           real_t* values,
                           real_t* time_derivatives,
                           real_t* residuals);
-    int EvaluateJacobian(int                number_of_equations,
-                         real_t             current_time,
+    int EvaluateJacobian(real_t             current_time,
                          real_t             inverse_time_step,
                          real_t*            values,
                          real_t*            time_derivatives,
@@ -136,10 +133,12 @@ public:
     void*        mpi_world;
     int          mpi_rank;
     void*        mpi_comm;
+    std::string  inputDirectory;
 
-    long         Nequations_local; /* Number of equations/state variables in the local node (MPI) */
-    long         Ntotal_vars;      /* Total number of variables (including Degrees of Freedom) */
-    long         Nequations;       /* Number of equations/state variables */
+/*
+    long         Nequations_local; // Number of equations/state variables in the local node (MPI)
+    long         Ntotal_vars;      // Total number of variables (including Degrees of Freedom)
+    long         Nequations;       // Number of equations/state variables
     long         Ndofs;
     real_t       startTime;
     real_t       timeHorizon;
@@ -152,7 +151,7 @@ public:
     real_t*      initDerivatives;
     real_t*      absoluteTolerances;
     const char** variableNames;
-    std::string  inputDirectory;
+*/
 };
 
 class daePreconditioner_t
@@ -237,21 +236,21 @@ public:
     daeLASolver_t();
     virtual ~daeLASolver_t();
 
-    int Initialize(daeModel_t* model, size_t numberOfVariables);
-    int Setup(real_t  time,
-              real_t  inverseTimeStep,
-              real_t* values,
-              real_t* timeDerivatives,
-              real_t* residuals);
-    int Solve(real_t  time,
-              real_t  inverseTimeStep,
-              real_t  cjratio,
-              real_t* b,
-              real_t* weight,
-              real_t* values,
-              real_t* timeDerivatives,
-              real_t* residuals);
-    int Free();
+    virtual int Initialize(daeModel_t* model, size_t numberOfVariables);
+    virtual int Setup(real_t  time,
+                      real_t  inverseTimeStep,
+                      real_t* values,
+                      real_t* timeDerivatives,
+                      real_t* residuals);
+    virtual int Solve(real_t  time,
+                      real_t  inverseTimeStep,
+                      real_t  cjratio,
+                      real_t* b,
+                      real_t* weight,
+                      real_t* values,
+                      real_t* timeDerivatives,
+                      real_t* residuals);
+    virtual int Free();
 
 public:
     void* data;
@@ -280,8 +279,11 @@ public:
     real_t Solve(real_t time, daeeStopCriterion eCriterion, bool bReportDataAroundDiscontinuities);
     void   SolveInitial();
     void   PrintSolverStats();
+    void   CollectSolverStats();
 
 public:
+    int     integrationMode;
+    bool    printInfo;
     real_t  currentTime;
     real_t  targetTime;
     real_t  rtol;
@@ -293,12 +295,12 @@ public:
     daeSimulation_t*                        simulation;
     boost::shared_ptr<daePreconditioner_t>  preconditioner;
     boost::shared_ptr<daeLASolver_t>        lasolver;
+    std::map<std::string, double>           stats;
 
     /* Opaque pointers */
     void* mem;
     void* yy;
     void* yp;
-
 };
 
 class daeSimulation_t
@@ -312,7 +314,11 @@ public:
 
     void   Initialize(daeModel_t* model,
                       daeIDASolver_t* dae_solver,
-                      const std::string& inputDirectory,
+                      real_t dStartTime,
+                      real_t dTimeHorizon,
+                      real_t dReportingInterval,
+                      real_t dRelativeTolerance,
+                      const std::string& strOutputDirectory,
                       bool bCalculateSensitivities = false);
     void   SolveInitial();
     void   Run();
@@ -324,21 +330,27 @@ public:
     real_t IntegrateForTimeInterval(real_t time_interval, bool bReportDataAroundDiscontinuities);
     real_t IntegrateUntilTime(real_t time, daeeStopCriterion eStopCriterion, bool bReportDataAroundDiscontinuities);
 
+    void SaveStats();
+    void PrintStats();
+
 public:
     daeModel_t*         model;
     daeIDASolver_t*     daesolver;
     bool                calculateSensitivities;
     bool                isInitialized;
-    real_t              currentTime;
-    real_t              timeHorizon;
-    real_t              reportingInterval;
     std::string         outputDirectory;
     std::vector<real_t> reportingTimes;
-
-    real_t initDuration;
-    real_t solveInitDuration;
-    real_t integrationDuration;
+    real_t              currentTime;
+    real_t              startTime;
+    real_t              timeHorizon;
+    real_t              reportingInterval;
+    real_t              relativeTolerance;
 };
+
+void loadModelVariables(daeModel_t* model, const std::string& inputDirectory);
+void loadModelEquations(daeModel_t* model, const std::string& inputDirectory);
+void loadJacobianData(daeModel_t* model, const std::string& inputDirectory);
+void loadPartitionData(daeModel_t* model, const std::string& inputDirectory);
 
 }
 

@@ -270,7 +270,14 @@ class daeSimulator(QtWidgets.QDialog):
                 self.ui.ExportButton.setEnabled(True)
 
             if self.lasolver:
-                self.daesolver.SetLASolver(self.lasolver)
+                if isinstance(self.lasolver, tuple):
+                    if len(self.lasolver) != 2:
+                        raise RuntimeError('Invalid linear solver specified: %s' % self.lasolver)
+                    lasolverType   = self.lasolver[0]
+                    preconditioner = self.lasolver[1]
+                    self.daesolver.SetLASolver(lasolverType, preconditioner)
+                else:
+                    self.daesolver.SetLASolver(self.lasolver)
 
             if self.optimization == None:
                 self.simulation.Initialize(self.daesolver, self.datareporter, self.log)                

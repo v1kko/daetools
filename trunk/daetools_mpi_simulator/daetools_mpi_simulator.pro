@@ -49,10 +49,12 @@ unix::QMAKE_CXXFLAGS_WARN_ON  = -Wall -Wextra -Wno-unused-parameter -Wno-unused-
 # Path to daetools/trunk directory
 BOOST_DIR       = ../boost
 IDAS_DIR        = ../idas-mpi
+OPEN_CS_DIR     = ../opencs
 
 INCLUDEPATH  += $${BOOST_DIR} \
                 $${IDAS_DIR}/build/include \
-                ../trilinos/build/include
+                ../trilinos/build/include \
+                $${OPEN_CS_DIR}
 
 QMAKE_LIBDIR += $${BOOST_DIR}/stage/lib \
                 $${IDAS_DIR}/build/lib
@@ -91,16 +93,15 @@ SOURCES += auxiliary.cpp \
            daesolver.cpp \
            simulation.cpp \
            model.cpp \
-           compute_stack_openmp.cpp \
+           cs_evaluator_sequential.cpp \
            preconditioner_jacobi.cpp \
            preconditioner_ifpack.cpp \
            preconditioner_ml.cpp \
            lasolver.cpp \
            main.cpp
 
-HEADERS += typedefs.h \
+HEADERS += cs_simulator.h \
            auxiliary.h \
-           runtime_information.h \
-           compute_stack.h \
            idas_la_functions.h \
-           compute_stack_openmp.h
+           cs_evaluator_sequential.h \
+           mpi_data_exchange.h

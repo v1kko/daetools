@@ -40,7 +40,7 @@ DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 #include "io_impl.h"
 #include "export.h"
 #include "../Units/units.h"
-#include "compute_stack.h"
+#include "../opencs/cs_evaluator.h"
 
 #include <cstdio>
 #include <cstdlib>
@@ -56,9 +56,9 @@ namespace core
 using units::base_unit;
 using units::unit;
 using units::quantity;
-using computestack::adComputeStackItem_t;
-using computestack::adJacobianMatrixItem_t;
-using computestack::adComputeStackEvaluator_t;
+using cs::csComputeStackItem_t;
+using cs::csJacobianMatrixItem_t;
+using cs::csComputeStackEvaluator_t;
 
 /*********************************************************************************************
     daeCondition
@@ -537,8 +537,6 @@ public:
     adNodePtr derivative;
 };
 
-#include "compute_stack.h"
-
 class daeNodeSaveAsContext;
 class DAE_CORE_API adNode : public daeExportable_t
 {
@@ -583,11 +581,11 @@ public:
     static adJacobian Derivative(adNodePtr node, size_t nOverallVariableIndex);
     static adNodePtr  SimplifyNode(adNodePtr node);
     static void       GetNodeCount(adNode* adnode, std::map<std::string, size_t>& mapNumbers);
-    static void       CreateComputeStack(adNode* node, std::vector<adComputeStackItem_t>& computeStack, daeBlock_t* pBlock, real_t scaling = 1.0);
+    static void       CreateComputeStack(adNode* node, std::vector<csComputeStackItem_t>& computeStack, daeBlock_t* pBlock, real_t scaling = 1.0);
     static uint32_t   GetComputeStackSize(adNode* node);
-    static void       EstimateComputeStackSizes(const std::vector<adComputeStackItem_t>& computeStack, size_t start, size_t end,
+    static void       EstimateComputeStackSizes(const std::vector<csComputeStackItem_t>& computeStack, size_t start, size_t end,
                                                 int& max_valueSize, int& max_lvalueSize, int& max_rvalueSize);
-    static size_t     EstimateComputeStackFlops(const adComputeStackItem_t* computeStack,
+    static size_t     EstimateComputeStackFlops(const csComputeStackItem_t* computeStack,
                                                 const std::map<daeeUnaryFunctions,size_t>& unaryOps,
                                                 const std::map<daeeBinaryFunctions,size_t>& binaryOps);
 };

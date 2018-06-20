@@ -222,16 +222,16 @@ def createLASolver():
     print("Supported Trilinos solvers:", str(pyTrilinos.daeTrilinosSupportedSolvers()))
     
     # Amesos SuperLU solver
-    #lasolver = pyTrilinos.daeCreateTrilinosSolver("Amesos_Superlu", "")
+    lasolver = pyTrilinos.daeCreateTrilinosSolver("Amesos_Umfpack", "")
 
     # AztecOO built-in preconditioners are specified through AZ_precond option
     #lasolver = pyTrilinos.daeCreateTrilinosSolver("AztecOO", "")
 
     # Ifpack preconditioner can be one of: [ILU, ILUT, PointRelaxation, BlockRelaxation, IC, ICT]
-    lasolver = pyTrilinos.daeCreateTrilinosSolver("AztecOO_Ifpack", "ILU")
+    #lasolver = pyTrilinos.daeCreateTrilinosSolver("AztecOO_Ifpack", "ILU")
     
     # ML preconditioner can be one of: [SA, DD, DD-ML, DD-ML-LU, maxwell, NSSA]
-    #lasolver = pyTrilinos.daeCreateTrilinosSolver("AztecOO_ML", "SA")
+    #lasolver = pyTrilinos.daeCreateTrilinosSolver("AztecOO_ML", "DD-ML")
     
     return lasolver
 
@@ -239,29 +239,29 @@ def createLASolver():
 #  - Direct: {Amesos_KLU, Amesos_Superlu, Amesos_Umfpack, Amesos_Lapack}
 #  - Iterative: {AztecOO, AztecOO_Ifpack, AztecOO_ML}
 def setOptions(lasolver):
+    parameterList = lasolver.ParameterList
+    
     #######################################################
     # Amesos_Superlu solver
     #######################################################
     if lasolver.Name == "Amesos_Superlu":
-        paramListAmesos = lasolver.AmesosOptions
-
         # Amesos status options:
-        paramListAmesos.set_int("OutputLevel", 0)
-        paramListAmesos.set_int("DebugLevel", 0)
-        paramListAmesos.set_bool("PrintTiming", False)
-        paramListAmesos.set_bool("PrintStatus", False)
-        paramListAmesos.set_bool("ComputeVectorNorms", False)
-        paramListAmesos.set_bool("ComputeTrueResidual", False)
+        parameterList.set_int("OutputLevel", 0)
+        parameterList.set_int("DebugLevel", 0)
+        parameterList.set_bool("PrintTiming", False)
+        parameterList.set_bool("PrintStatus", False)
+        parameterList.set_bool("ComputeVectorNorms", False)
+        parameterList.set_bool("ComputeTrueResidual", False)
 
         # Amesos control options:
-        paramListAmesos.set_bool("AddZeroToDiag", False)
-        paramListAmesos.set_float("AddToDiag", 0.0)
-        paramListAmesos.set_bool("Refactorize", False)
-        paramListAmesos.set_float("RcondThreshold", 0.0)
-        paramListAmesos.set_int("MaxProcs", 0)
-        paramListAmesos.set_string("MatrixProperty", "")
-        paramListAmesos.set_int("ScaleMethod", 0);
-        paramListAmesos.set_bool("Reindex", False)
+        parameterList.set_bool("AddZeroToDiag", False)
+        parameterList.set_float("AddToDiag", 0.0)
+        parameterList.set_bool("Refactorize", False)
+        parameterList.set_float("RcondThreshold", 0.0)
+        parameterList.set_int("MaxProcs", 0)
+        parameterList.set_string("MatrixProperty", "")
+        parameterList.set_int("ScaleMethod", 0);
+        parameterList.set_bool("Reindex", False)
 
     #######################################################
     # AztecOO solver options consist of:
@@ -269,47 +269,41 @@ def setOptions(lasolver):
     #  - preconditioner options given
     #######################################################
     if ("AztecOO" in lasolver.Name) or ("AztecOO_Ifpack" in lasolver.Name) or ("AztecOO_ML" in lasolver.Name):
-        paramListAztec = lasolver.AztecOOOptions
-
         lasolver.NumIters  = 500
         lasolver.Tolerance = 1e-3
-        paramListAztec.set_int("AZ_solver",      daeAztecOptions.AZ_gmres)
-        paramListAztec.set_int("AZ_kspace",      500)
-        paramListAztec.set_int("AZ_scaling",     daeAztecOptions.AZ_none)
-        paramListAztec.set_int("AZ_reorder",     0)
-        paramListAztec.set_int("AZ_conv",        daeAztecOptions.AZ_r0)
-        paramListAztec.set_int("AZ_keep_info",   1)
-        paramListAztec.set_int("AZ_output",      daeAztecOptions.AZ_warnings) # {AZ_all, AZ_none, AZ_last, AZ_summary, AZ_warnings}
-        paramListAztec.set_int("AZ_diagnostics", daeAztecOptions.AZ_none)     # {AZ_all, AZ_none, AZ_last, AZ_summary, AZ_warnings}
-        paramListAztec.Print()
+        
+        parameterList.set_int("AZ_solver",      daeAztecOptions.AZ_gmres)
+        parameterList.set_int("AZ_kspace",      30)
+        parameterList.set_int("AZ_scaling",     daeAztecOptions.AZ_none)
+        parameterList.set_int("AZ_reorder",     0)
+        parameterList.set_int("AZ_conv",        daeAztecOptions.AZ_r0)
+        parameterList.set_int("AZ_keep_info",   1)
+        parameterList.set_int("AZ_output",      daeAztecOptions.AZ_warnings) # {AZ_all, AZ_none, AZ_last, AZ_summary, AZ_warnings}
+        parameterList.set_int("AZ_diagnostics", daeAztecOptions.AZ_none)     # {AZ_all, AZ_none, AZ_last, AZ_summary, AZ_warnings}
 
     #######################################################
     # AztecOO preconditioner options
     #######################################################
     if "AztecOO_Ifpack" in lasolver.Name:
         # 2b) Ifpack preconditioner:
-        paramListIfpack = lasolver.IfpackOptions
-        paramListIfpack.set_int  ("fact: level-of-fill",      3)
-        paramListIfpack.set_float("fact: absolute threshold", 1e-5)
-        paramListIfpack.set_float("fact: relative threshold", 1.0)
-        paramListIfpack.Print()
+        parameterList.set_int  ("fact: level-of-fill",      3)
+        parameterList.set_float("fact: absolute threshold", 1e-5)
+        parameterList.set_float("fact: relative threshold", 1.0)
 
     elif "AztecOO_ML" in lasolver.Name:
         # 2c) ML preconditioner:
-        paramListML = lasolver.MLOptions
-        paramListML.set_bool("reuse: enable", True)
-        paramListML.Print()
+        parameterList.set_bool("reuse: enable", True)
 
     elif "AztecOO" in lasolver.Name:
         # 2a) AztecOO built-in preconditioner:
-        paramListAztec = lasolver.AztecOOOptions
-        paramListAztec.set_int("AZ_precond",         daeAztecOptions.AZ_dom_decomp)
-        paramListAztec.set_int("AZ_subdomain_solve", daeAztecOptions.AZ_ilu)
-        paramListAztec.set_int("AZ_orthog",          daeAztecOptions.AZ_modified)
-        paramListAztec.set_int("AZ_graph_fill",      3)
-        paramListAztec.set_float("AZ_athresh",       1e-5)
-        paramListAztec.set_float("AZ_rthresh",       1.0)
-        paramListAztec.Print()
+        parameterList.set_int("AZ_precond",         daeAztecOptions.AZ_dom_decomp)
+        parameterList.set_int("AZ_subdomain_solve", daeAztecOptions.AZ_ilu)
+        parameterList.set_int("AZ_orthog",          daeAztecOptions.AZ_modified)
+        parameterList.set_int("AZ_graph_fill",      3)
+        parameterList.set_float("AZ_athresh",       1e-5)
+        parameterList.set_float("AZ_rthresh",       1.0)
+
+    parameterList.Print()
     
 def run(**kwargs):
     simulation = simTutorial()

@@ -21,7 +21,6 @@ DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 #include <map>
 #include <stdexcept>
 #include <stdlib.h>
-#include <time.h>
 
 #ifdef __MACH__
 #include <mach/mach_time.h>
@@ -90,8 +89,7 @@ void		Enclose(std::string& strToEnclose, char cLeft, char cRight);
 void		Enclose(std::string& strToEnclose, const char* lpszLeft = "[", const char* lpszRight = "]");
 bool		ParseSingleToken(std::string& strFullName, std::string& strShortName, std::vector<size_t>& narrDomains);
 
-double GetTimeInSeconds(void);
-
+inline double GetTimeInSeconds();
 
 template<class T>
 T fromString(const std::string& value)
@@ -777,7 +775,6 @@ inline double GetTimeInSeconds(void)
     return 0.0;
 #endif
 }
-
 
 }
 

@@ -17,27 +17,29 @@ TARGET  = cdaeTrilinos_LASolver
 TEMPLATE = lib
 CONFIG += staticlib
 
-unix::QMAKE_CXXFLAGS += -std=c++11 
+unix::QMAKE_CXXFLAGS += -std=c++11
 
 INCLUDEPATH +=  $${BOOSTDIR} \
-				$${PYTHON_INCLUDE_DIR} \
-				$${PYTHON_SITE_PACKAGES_DIR} \
-				$${SUNDIALS_INCLUDE} \
-				$${TRILINOS_INCLUDE}
+                $${PYTHON_INCLUDE_DIR} \
+                $${PYTHON_SITE_PACKAGES_DIR} \
+                $${SUNDIALS_INCLUDE} \
+                $${TRILINOS_INCLUDE}
 
 QMAKE_LIBDIR += $${PYTHON_LIB_DIR}
 
 LIBS += $${BLAS_LIBS} \
-		$${LAPACK_LIBS} \
-		$${TRILINOS_LIBS}
+        $${LAPACK_LIBS} \
+        $${TRILINOS_LIBS}
 
 SOURCES += stdafx.cpp \
-    dllmain.cpp \
-    trilinos_amesos_la_solver.cpp
+           dllmain.cpp \
+           preconditioner_ifpack.cpp \
+           preconditioner_ml.cpp \
+           trilinos_amesos_la_solver.cpp
 
 HEADERS += stdafx.h \
-    base_solvers.h \
-    trilinos_amesos_la_solver.h
+           base_solvers.h \
+           trilinos_amesos_la_solver.h
 
 #######################################################
 #                Install files

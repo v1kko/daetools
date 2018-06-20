@@ -4664,7 +4664,7 @@ const std::vector<daeModelArray*>& daeModel::ModelArrays() const
     return m_ptrarrComponentArrays;
 }
 
-const std::vector<adComputeStackItem_t>& daeModel::GetComputeStack() const
+const std::vector<csComputeStackItem_t>& daeModel::GetComputeStack() const
 {
     daeBlock* pBlock = m_pDataProxy->GetBlock();
     return pBlock->m_arrAllComputeStacks;

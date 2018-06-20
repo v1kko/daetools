@@ -1,0 +1,61 @@
+{
+    "StartTime":         __startTime__,
+    "TimeHorizon":       __timeHorizon__,
+    "ReportingInterval": __reportingInterval__,
+    "OutputDirectory":   "results",
+    "DAEModel" : {
+        "ComputeStackEvaluator" : {
+            "Library" : "Sequential",
+            "Name": "",
+            "Parameters": {
+            }
+        }
+    },
+    "DAESolver" : {
+        "Library" : "Sundials",
+        "Name": "IDAS",
+        "PrintInfo": false,
+        "Parameters": {
+            "RelativeTolerance":  __relativeTolerance__,
+            "IntegrationMode":    "Normal",
+            "MaxOrd":             5,
+            "MaxNumSteps":        500,
+            "InitStep":           0.0,
+            "MaxStep":            0.0,
+            "MaxErrTestFails":    10,
+            "MaxNonlinIters":     4,
+            "MaxConvFails":       10,
+            "NonlinConvCoef":     0.33,
+            "SuppressAlg":        false,
+            "NoInactiveRootWarn": false,
+            "NonlinConvCoefIC":   0.0033,
+            "MaxNumStepsIC":      5,
+            "MaxNumJacsIC":       4,
+            "MaxNumItersIC":      10,
+            "LineSearchOffIC":    false
+        }
+    },
+    "LinearSolver" : {
+        "Library" : "Trilinos",
+        "Name": "AztecOO",
+        "PrintInfo": false,
+        "Parameters": {
+            "AZ_solver":      "AZ_gmres",
+            "AZ_kspace":      30,
+            "AZ_keep_info":   1,
+            "AZ_output":      "AZ_warnings",
+            "AZ_diagnostics": "AZ_none"
+        },
+        "Preconditioner" : {
+            "Library" : "Ifpack",
+            "Name": "ILU",
+            "PrintInfo": false,
+            "Parameters": {
+                "fact: level-of-fill":      3,
+                "fact: relax value":        0.0,
+                "fact: absolute threshold": 1e-5,
+                "fact: relative threshold": 1.00
+            }
+        }
+    }
+}
