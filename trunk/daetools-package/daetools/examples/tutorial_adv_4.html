@@ -106,7 +106,7 @@ temperature_t.AbsoluteTolerance <b><span style='color:#0000ff;'>=</span></b> <sp
         eq_types[ : , <b><span style='color:#0000ff;'>-</span></b><span style='color:#cc047c;'>1</span>] <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc0000;'>'T'</span> <span style='color:#017a31;'># top boundary</span>
         eq_types[  <span style='color:#cc047c;'>0</span>, : ] <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc0000;'>'L'</span> <span style='color:#017a31;'># left boundary</span>
         eq_types[ <b><span style='color:#0000ff;'>-</span></b><span style='color:#cc047c;'>1</span>, : ] <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc0000;'>'R'</span> <span style='color:#017a31;'># right boundary</span>
-        <span style='color:#2a00d6;'>print</span>(eq_types.T) <span style='color:#017a31;'># print it transposed to visalise it more easily</span>
+        <span style='color:#2a00d6;'>print</span>(eq_types.T) <span style='color:#017a31;'># print it transposed to visualize it more easily</span>
         <b>for</b> x,y <b>in</b> indexes:
             eq_type <b><span style='color:#0000ff;'>=</span></b> eq_types[x,y]
             eq <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.CreateEquation(<span style='color:#cc0000;'>&quot;HeatBalance&quot;</span>, <span style='color:#cc0000;'>&quot;&quot;</span>)
@@ -135,8 +135,8 @@ temperature_t.AbsoluteTolerance <b><span style='color:#0000ff;'>=</span></b> <sp
         <span style='color:#3605fb;'>self</span>.m.Description <b><span style='color:#0000ff;'>=</span></b> __doc__
 
     <b>def</b> SetUpParametersAndDomains(<span style='color:#3605fb;'>self</span>):
-        <span style='color:#3605fb;'>self</span>.m.x.CreateStructuredGrid(<span style='color:#cc047c;'>39</span>, <span style='color:#cc047c;'>0</span>, <span style='color:#cc047c;'>0.1</span>)
-        <span style='color:#3605fb;'>self</span>.m.y.CreateStructuredGrid(<span style='color:#cc047c;'>39</span>, <span style='color:#cc047c;'>0</span>, <span style='color:#cc047c;'>0.1</span>)
+        <span style='color:#3605fb;'>self</span>.m.x.CreateStructuredGrid(<span style='color:#cc047c;'>99</span>, <span style='color:#cc047c;'>0</span>, <span style='color:#cc047c;'>10.0</span>)
+        <span style='color:#3605fb;'>self</span>.m.y.CreateStructuredGrid(<span style='color:#cc047c;'>99</span>, <span style='color:#cc047c;'>0</span>, <span style='color:#cc047c;'>10.0</span>)
 
         <span style='color:#3605fb;'>self</span>.m.k.SetValue(<span style='color:#cc047c;'>401</span> <b><span style='color:#0000ff;'>*</span></b> W<b><span style='color:#0000ff;'>/</span></b>(m<b><span style='color:#0000ff;'>*</span></b>K))
         <span style='color:#3605fb;'>self</span>.m.cp.SetValue(<span style='color:#cc047c;'>385</span> <b><span style='color:#0000ff;'>*</span></b> J<b><span style='color:#0000ff;'>/</span></b>(kg<b><span style='color:#0000ff;'>*</span></b>K))
@@ -153,7 +153,7 @@ temperature_t.AbsoluteTolerance <b><span style='color:#0000ff;'>=</span></b> <sp
     <span style='color:#017a31;'># Demonstration of daetools c++/MPI code-generator:</span>
     <span style='color:#3605fb;'>import</span> tempfile
     tmp_folder <b><span style='color:#0000ff;'>=</span></b> tempfile.mkdtemp(prefix <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc0000;'>'daetools-code_generator-cxx-'</span>)
-    msg <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc0000;'>'Generated c++/MPI code will be located in: </span><span style='color:#cc0000;'>\n</span><span style='color:#cc0000;'>%s</span><span style='color:#cc0000;'>'</span> <b><span style='color:#0000ff;'>%</span></b> tmp_folder
+    msg <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc0000;'>'Generated input files for the daetools_mpi_simulator will be located in: </span><span style='color:#cc0000;'>\n</span><span style='color:#cc0000;'>%s</span><span style='color:#cc0000;'>'</span> <b><span style='color:#0000ff;'>%</span></b> tmp_folder
     log.Message(msg, <span style='color:#cc047c;'>0</span>)
 
     <b>try</b>:
@@ -161,31 +161,38 @@ temperature_t.AbsoluteTolerance <b><span style='color:#0000ff;'>=</span></b> <sp
     <b>except</b> <b><span style='color:#4e9a06;'>Exception</span></b> <span style='color:#3605fb;'>as</span> e:
         log.Message(<span style='color:#2a00d6;'>str</span>(e), <span style='color:#cc047c;'>0</span>)
 
-    <span style='color:#017a31;'># Generate c++ MPI code for 4 nodes</span>
-    <span style='color:#3605fb;'>from</span> daetools.code_generators.cxx_mpi <span style='color:#3605fb;'>import</span> daeCodeGenerator_cxx_mpi
-    cg <b><span style='color:#0000ff;'>=</span></b> daeCodeGenerator_cxx_mpi()
-    cg.generateSimulation(simulation, tmp_folder, <span style='color:#cc047c;'>4</span>)
+    <span style='color:#017a31;'># Generate input files for 4 nodes</span>
+    <span style='color:#3605fb;'>from</span> daetools.code_generators.mpi <span style='color:#3605fb;'>import</span> daeCodeGenerator_MPI
+    cg <b><span style='color:#0000ff;'>=</span></b> daeCodeGenerator_MPI()
+    
+    constraints <b><span style='color:#0000ff;'>=</span></b> [<span style='color:#cc0000;'>'Ncs'</span>,<span style='color:#cc0000;'>'Nnz'</span>,<span style='color:#cc0000;'>'Nflops'</span>,<span style='color:#cc0000;'>'Nflops_j'</span>] <span style='color:#017a31;'># use all available constraints</span>
+    cg.generateSimulation(simulation, tmp_folder, <span style='color:#cc047c;'>4</span>, balancingConstraints <b><span style='color:#0000ff;'>=</span></b> constraints, saveIncidenceMatrix <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>True</span>)
 
 <b>def</b> setupLASolver():
     lasolver <b><span style='color:#0000ff;'>=</span></b> pyTrilinos.daeCreateTrilinosSolver(<span style='color:#cc0000;'>&quot;AztecOO&quot;</span>, <span style='color:#cc0000;'>&quot;&quot;</span>)
 
-    paramListAztec <b><span style='color:#0000ff;'>=</span></b> lasolver.AztecOOOptions
+    parameterList <b><span style='color:#0000ff;'>=</span></b> lasolver.ParameterList
+    
     lasolver.NumIters  <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>1000</span>
     lasolver.Tolerance <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>1e-3</span>
-    paramListAztec.set_int(<span style='color:#cc0000;'>&quot;AZ_solver&quot;</span>,    daeAztecOptions.AZ_gmres)
-    paramListAztec.set_int(<span style='color:#cc0000;'>&quot;AZ_kspace&quot;</span>,    <span style='color:#cc047c;'>500</span>)
-    paramListAztec.set_int(<span style='color:#cc0000;'>&quot;AZ_scaling&quot;</span>,   daeAztecOptions.AZ_none)
-    paramListAztec.set_int(<span style='color:#cc0000;'>&quot;AZ_reorder&quot;</span>,   <span style='color:#cc047c;'>0</span>)
-    paramListAztec.set_int(<span style='color:#cc0000;'>&quot;AZ_conv&quot;</span>,      daeAztecOptions.AZ_r0)
-    paramListAztec.set_int(<span style='color:#cc0000;'>&quot;AZ_keep_info&quot;</span>, <span style='color:#cc047c;'>1</span>)
-    paramListAztec.set_int(<span style='color:#cc0000;'>&quot;AZ_output&quot;</span>,    daeAztecOptions.AZ_none) <span style='color:#017a31;'># {AZ_all, AZ_none, AZ_last, AZ_summary, AZ_warnings}</span>
+    
+    parameterList.set_int(<span style='color:#cc0000;'>&quot;AZ_solver&quot;</span>,    daeAztecOptions.AZ_gmres)
+    parameterList.set_int(<span style='color:#cc0000;'>&quot;AZ_kspace&quot;</span>,    <span style='color:#cc047c;'>500</span>)
+    parameterList.set_int(<span style='color:#cc0000;'>&quot;AZ_scaling&quot;</span>,   daeAztecOptions.AZ_none)
+    parameterList.set_int(<span style='color:#cc0000;'>&quot;AZ_reorder&quot;</span>,   <span style='color:#cc047c;'>0</span>)
+    parameterList.set_int(<span style='color:#cc0000;'>&quot;AZ_conv&quot;</span>,      daeAztecOptions.AZ_r0)
+    parameterList.set_int(<span style='color:#cc0000;'>&quot;AZ_keep_info&quot;</span>, <span style='color:#cc047c;'>1</span>)
+    parameterList.set_int(<span style='color:#cc0000;'>&quot;AZ_output&quot;</span>,    daeAztecOptions.AZ_none) <span style='color:#017a31;'># {AZ_all, AZ_none, AZ_last, AZ_summary, AZ_warnings}</span>
 
-    paramListAztec.set_int(<span style='color:#cc0000;'>&quot;AZ_precond&quot;</span>,         daeAztecOptions.AZ_Jacobi)
-    <span style='color:#017a31;'>#paramListAztec.set_int(&quot;AZ_subdomain_solve&quot;, daeAztecOptions.AZ_ilut)</span>
-    <span style='color:#017a31;'>#paramListAztec.set_int(&quot;AZ_overlap&quot;,         daeAztecOptions.AZ_none)</span>
-    <span style='color:#017a31;'>#paramListAztec.set_int(&quot;AZ_graph_fill&quot;,      1)</span>
+    <span style='color:#017a31;'># Preconditioner options</span>
+    parameterList.set_int  (<span style='color:#cc0000;'>&quot;AZ_precond&quot;</span>,         daeAztecOptions.AZ_dom_decomp)
+    parameterList.set_int  (<span style='color:#cc0000;'>&quot;AZ_subdomain_solve&quot;</span>, daeAztecOptions.AZ_ilu)
+    parameterList.set_int  (<span style='color:#cc0000;'>&quot;AZ_orthog&quot;</span>,          daeAztecOptions.AZ_modified)
+    parameterList.set_int  (<span style='color:#cc0000;'>&quot;AZ_graph_fill&quot;</span>,      <span style='color:#cc047c;'>1</span>)    <span style='color:#017a31;'># default: 0</span>
+    parameterList.set_float(<span style='color:#cc0000;'>&quot;AZ_athresh&quot;</span>,         <span style='color:#cc047c;'>1E-5</span>) <span style='color:#017a31;'># default: 0.0</span>
+    parameterList.set_float(<span style='color:#cc0000;'>&quot;AZ_rthresh&quot;</span>,         <span style='color:#cc047c;'>1.0</span>)  <span style='color:#017a31;'># default: 0.0</span>
 
-    paramListAztec.Print()
+    parameterList.Print()
 
     <b>return</b> lasolver
 

@@ -48,7 +48,7 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc0000;
 
 <span style='color:#cc0000;'>   Equations can be evaluated in parallel using:</span>
 
-<span style='color:#cc0000;'>   a) OpenMP API for general purpose processors and manycore devices (i.e. Xeon Phi).</span>
+<span style='color:#cc0000;'>   a) OpenMP API for general purpose processors and manycore devices.</span>
 <span style='color:#cc0000;'>      </span>
 <span style='color:#cc0000;'>      This method is specified by setting daetools.core.equations.evaluationMode option </span>
 <span style='color:#cc0000;'>      in daetools.cfg to &quot;computeStack_OpenMP&quot; or setting the simulation property:</span>
@@ -59,7 +59,7 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc0000;
 <span style='color:#cc0000;'>      If numThreads is 0 the default number of threads is used (the number of cores in the system). </span>
 <span style='color:#cc0000;'>      Sequential evaluation is achieved by setting numThreads to 1.</span>
 
-<span style='color:#cc0000;'>   b) OpenCL framework for streaming processors (GPU, GPGA) and heterogeneous systems.</span>
+<span style='color:#cc0000;'>   b) OpenCL framework for streaming processors and heterogeneous systems.</span>
 
 <span style='color:#cc0000;'>      This type is implemented in an external Python module pyEvaluator_OpenCL. </span>
 <span style='color:#cc0000;'>      It is up to one order of magnitude faster than the Evaluation Tree approach. </span>
@@ -67,7 +67,7 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc0000;
 <span style='color:#cc0000;'>      </span>
 <span style='color:#cc0000;'>      OpenCL evaluators can use a single or multiple OpenCL devices.</span>
 <span style='color:#cc0000;'>      It is required to install OpenCL drivers/runtime libraries.</span>
-<span style='color:#cc0000;'>      InteL: https://software.intel.com/en-us/articles/opencl-drivers</span>
+<span style='color:#cc0000;'>      Intel: https://software.intel.com/en-us/articles/opencl-drivers</span>
 <span style='color:#cc0000;'>      AMD: https://support.amd.com/en-us/kb-articles/Pages/OpenCL2-Driver.aspx</span>
 <span style='color:#cc0000;'>      NVidia: https://developer.nvidia.com/opencl</span>
 <span style='color:#cc0000;'>&quot;&quot;&quot;</span>
@@ -184,8 +184,8 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc0000;
         <span style='color:#2a00d6;'>print</span>(<span style='color:#cc0000;'>''</span>)
 
     <span style='color:#017a31;'># OpenCL evaluators can use a single or multiple OpenCL devices.</span>
-    <span style='color:#017a31;'>#   a) Single OpenCLdevice:</span>
-    computeStackEvaluator <b><span style='color:#0000ff;'>=</span></b> pyEvaluator_OpenCL.CreateComputeStackEvaluator(platformID <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>0</span>, deviceID <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>0</span>)
+    <span style='color:#017a31;'>#   a) Single OpenCL device:</span>
+    computeStackEvaluator <b><span style='color:#0000ff;'>=</span></b> pyEvaluator_OpenCL.CreateComputeStackEvaluator(platformID <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>1</span>, deviceID <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>1</span>)
     <span style='color:#017a31;'>#   b) Multiple OpenCL devices (for heterogenous computing):</span>
     <span style='color:#017a31;'>#computeStackEvaluator = pyEvaluator_OpenCL.CreateComputeStackEvaluator( [(0, 0, 0.6), (1, 1, 0.4)] )</span>
     simulation.SetComputeStackEvaluator(computeStackEvaluator)

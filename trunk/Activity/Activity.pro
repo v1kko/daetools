@@ -5,7 +5,8 @@ TARGET = cdaeActivity
 TEMPLATE = lib
 CONFIG += staticlib
 INCLUDEPATH += $${BOOSTDIR} \
-	           $${MPI_INCLUDE}
+               $${MPI_INCLUDE} \
+               $${OPEN_CS_INCLUDE}
 
 LIBS += $${DAE_CONFIG_LIB} \
         $${DAE_CORE_LIB} \
@@ -19,7 +20,7 @@ HEADERS += stdafx.h \
 
 SOURCES += stdafx.cpp \
     simulation.cpp \
-    dllmain.cpp \ 
+    dllmain.cpp \
     class_factory.cpp \
     base_activities.cpp \
     optimization.cpp \

@@ -40,7 +40,7 @@ DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 #include "io_impl.h"
 #include "export.h"
 #include "../Units/units.h"
-#include "../opencs/cs_evaluator.h"
+#include <OpenCS/opencs.h>
 
 #include <cstdio>
 #include <cstdlib>
@@ -57,7 +57,7 @@ using units::base_unit;
 using units::unit;
 using units::quantity;
 using cs::csComputeStackItem_t;
-using cs::csJacobianMatrixItem_t;
+using cs::csIncidenceMatrixItem_t;
 using cs::csComputeStackEvaluator_t;
 
 /*********************************************************************************************

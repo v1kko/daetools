@@ -182,14 +182,14 @@ void daeBlock::CalculateResiduals(real_t			dTime,
         real_t* residuals       = arrResiduals.Data();
 
         cs::csEvaluationContext_t EC;
-        EC.equationEvaluationMode      = cs::eEvaluateResidual;
+        EC.equationEvaluationMode      = cs::eEvaluateEquation;
         EC.sensitivityParameterIndex   = -1;
         EC.jacobianIndex               = -1;
         EC.numberOfVariables           = m_nNumberOfEquations;
         EC.numberOfEquations           = m_nNumberOfEquations; // Always total number (multi-device evaluators will adjust it if required)
         EC.numberOfDOFs                = arrDOFs.size();
         EC.numberOfComputeStackItems   = m_arrAllComputeStacks.size();
-        EC.numberOfJacobianItems       = 0;
+        EC.numberOfIncidenceMatrixItems= 0;
         EC.valuesStackSize             = 5;
         EC.lvaluesStackSize            = 20;
         EC.rvaluesStackSize            = 5;
@@ -207,7 +207,7 @@ void daeBlock::CalculateResiduals(real_t			dTime,
             #pragma omp parallel for firstprivate(EC)
             for(int ei = 0; ei < m_nNumberOfEquations; ei++)
             {
-                openmp_evaluator::EvaluateResiduals(computeStacks,
+                openmp_evaluator::EvaluateEquations(computeStacks,
                                                     ei,
                                                     activeEquationSetIndexes,
                                                     EC,
@@ -222,7 +222,7 @@ void daeBlock::CalculateResiduals(real_t			dTime,
             if(!m_computeStackEvaluator)
                 daeDeclareAndThrowException(exInvalidPointer);
 
-            m_computeStackEvaluator->EvaluateResiduals(EC,
+            m_computeStackEvaluator->EvaluateEquations(EC,
                                                        dofs,
                                                        values,
                                                        timeDerivatives,
@@ -305,24 +305,24 @@ void daeBlock::CalculateJacobian(real_t				dTime,
     {
         const std::vector<real_t>& arrDOFs = m_pDataProxy->GetAssignedVarsValues();
 
-        csComputeStackItem_t*   computeStacks             = &m_arrAllComputeStacks[0];
-        uint32_t*               activeEquationSetIndexes  = &m_arrActiveEquationSetIndexes[0];
-        csJacobianMatrixItem_t* computeStackJacobianItems = &m_arrComputeStackJacobianItems[0];
-        uint32_t                noJacobianItems           = m_arrComputeStackJacobianItems.size();
+        csComputeStackItem_t*    computeStacks             = &m_arrAllComputeStacks[0];
+        uint32_t*                activeEquationSetIndexes  = &m_arrActiveEquationSetIndexes[0];
+        csIncidenceMatrixItem_t* computeStackJacobianItems = &m_arrComputeStackJacobianItems[0];
+        uint32_t                 noJacobianItems           = m_arrComputeStackJacobianItems.size();
 
         real_t* dofs            = (arrDOFs.size() > 0 ? const_cast<real_t*>(&arrDOFs[0]) : NULL);
         real_t* values          = arrValues.Data();
         real_t* timeDerivatives = arrTimeDerivatives.Data();
 
         cs::csEvaluationContext_t EC;
-        EC.equationEvaluationMode      = cs::eEvaluateJacobian;
+        EC.equationEvaluationMode      = cs::eEvaluateDerivative; // Jacobian
         EC.sensitivityParameterIndex   = -1;
         EC.jacobianIndex               = -1;
         EC.numberOfVariables           = m_nNumberOfEquations;
         EC.numberOfEquations           = m_nNumberOfEquations; // Always total number (multi-device evaluators will adjust it if required)
         EC.numberOfDOFs                = arrDOFs.size();
         EC.numberOfComputeStackItems   = m_arrAllComputeStacks.size();
-        EC.numberOfJacobianItems       = noJacobianItems;
+        EC.numberOfIncidenceMatrixItems= noJacobianItems;
         EC.valuesStackSize             = 5;
         EC.lvaluesStackSize            = 20;
         EC.rvaluesStackSize            = 5;
@@ -342,21 +342,21 @@ void daeBlock::CalculateJacobian(real_t				dTime,
             #pragma omp parallel for firstprivate(EC)
             for(int ji = 0; ji < noJacobianItems; ji++)
             {
-                openmp_evaluator::EvaluateJacobian(computeStacks,
-                                                   ji,
-                                                   activeEquationSetIndexes,
-                                                   computeStackJacobianItems,
-                                                   EC,
-                                                   dofs,
-                                                   values,
-                                                   timeDerivatives,
-                                                   m_jacobian.data());
+                openmp_evaluator::EvaluateDerivatives(computeStacks,
+                                                      ji,
+                                                      activeEquationSetIndexes,
+                                                      computeStackJacobianItems,
+                                                      EC,
+                                                      dofs,
+                                                      values,
+                                                      timeDerivatives,
+                                                      m_jacobian.data());
             }
 
             // Evaluated Jacobian values need to be copied to the Jacobian matrix.
             for(size_t ji = 0; ji < noJacobianItems; ji++)
             {
-                const csJacobianMatrixItem_t& jacobianItem = m_arrComputeStackJacobianItems[ji];
+                const csIncidenceMatrixItem_t& jacobianItem = m_arrComputeStackJacobianItems[ji];
                 matJacobian.SetItem(jacobianItem.equationIndex, jacobianItem.blockIndex, m_jacobian[ji]);
             }
         }
@@ -367,16 +367,16 @@ void daeBlock::CalculateJacobian(real_t				dTime,
 
             m_jacobian.resize(noJacobianItems);
 
-            m_computeStackEvaluator->EvaluateJacobian(EC,
-                                                      dofs,
-                                                      values,
-                                                      timeDerivatives,
-                                                      m_jacobian.data());
+            m_computeStackEvaluator->EvaluateDerivatives(EC,
+                                                         dofs,
+                                                         values,
+                                                         timeDerivatives,
+                                                         m_jacobian.data());
 
             // Evaluated Jacobian values need to be copied to the Jacobian matrix.
             for(size_t ji = 0; ji < noJacobianItems; ji++)
             {
-                const csJacobianMatrixItem_t& jacobianItem = m_arrComputeStackJacobianItems[ji];
+                const csIncidenceMatrixItem_t& jacobianItem = m_arrComputeStackJacobianItems[ji];
                 matJacobian.SetItem(jacobianItem.equationIndex, jacobianItem.blockIndex, m_jacobian[ji]);
             }
         }
@@ -464,14 +464,14 @@ void daeBlock::CalculateSensitivityResiduals(real_t						dTime,
             daeDeclareAndThrowException(exInvalidPointer);
 
         cs::csEvaluationContext_t EC;
-        EC.equationEvaluationMode      = cs::eEvaluateSensitivityResiduals;
+        EC.equationEvaluationMode      = cs::eEvaluateSensitivityDerivative;
         EC.sensitivityParameterIndex   = -1;
         EC.jacobianIndex               = -1;
         EC.numberOfVariables           = m_nNumberOfEquations;
         EC.numberOfEquations           = m_nNumberOfEquations; // Always total number (multi-device evaluators will adjust it if required)
         EC.numberOfDOFs                = arrDOFs.size();
         EC.numberOfComputeStackItems   = m_arrAllComputeStacks.size();
-        EC.numberOfJacobianItems       = 0;
+        EC.numberOfIncidenceMatrixItems= 0;
         EC.valuesStackSize             = 5;
         EC.lvaluesStackSize            = 20;
         EC.rvaluesStackSize            = 5;
@@ -497,16 +497,16 @@ void daeBlock::CalculateSensitivityResiduals(real_t						dTime,
                 #pragma omp parallel for firstprivate(EC)
                 for(int ei = 0; ei < m_nNumberOfEquations; ei++)
                 {
-                    openmp_evaluator::EvaluateSensitivityResiduals(computeStacks,
-                                                                   ei,
-                                                                   activeEquationSetIndexes,
-                                                                   EC,
-                                                                   dofs,
-                                                                   values,
-                                                                   timeDerivatives,
-                                                                   svalues,
-                                                                   sdvalues,
-                                                                   sresiduals);
+                    openmp_evaluator::EvaluateSensitivityDerivatives(computeStacks,
+                                                                     ei,
+                                                                     activeEquationSetIndexes,
+                                                                     EC,
+                                                                     dofs,
+                                                                     values,
+                                                                     timeDerivatives,
+                                                                     svalues,
+                                                                     sdvalues,
+                                                                     sresiduals);
                 }
             }
             else if(m_pDataProxy->GetEvaluationMode() == eComputeStack_External)
@@ -514,13 +514,13 @@ void daeBlock::CalculateSensitivityResiduals(real_t						dTime,
                 if(!m_computeStackEvaluator)
                     daeDeclareAndThrowException(exInvalidPointer);
 
-                m_computeStackEvaluator->EvaluateSensitivityResiduals(EC,
-                                                                      dofs,
-                                                                      values,
-                                                                      timeDerivatives,
-                                                                      svalues,
-                                                                      sdvalues,
-                                                                      sresiduals);
+                m_computeStackEvaluator->EvaluateSensitivityDerivatives(EC,
+                                                                        dofs,
+                                                                        values,
+                                                                        timeDerivatives,
+                                                                        svalues,
+                                                                        sdvalues,
+                                                                        sresiduals);
             }
         }
     }
@@ -982,7 +982,7 @@ void daeBlock::RebuildActiveEquationSetAndRootExpressions(bool bCalculateSensiti
 
             csComputeStackItem_t*   computeStacks             = &m_arrAllComputeStacks[0];
             uint32_t*               activeEquationSetIndexes  = &m_arrActiveEquationSetIndexes[0];
-            csJacobianMatrixItem_t* computeStackJacobianItems = &m_arrComputeStackJacobianItems[0];
+            csIncidenceMatrixItem_t* computeStackJacobianItems = &m_arrComputeStackJacobianItems[0];
 
             m_computeStackEvaluator->Initialize(bCalculateSensitivities,
                                                 m_nNumberOfEquations,
@@ -1021,7 +1021,7 @@ void daeBlock::BuildComputeStackStructs()
     m_arrComputeStackJacobianItems.reserve(nnz);
     m_arrActiveEquationSetIndexes.reserve(m_nNumberOfEquations);
 
-    csJacobianMatrixItem_t jd;
+    csIncidenceMatrixItem_t jd;
     for(size_t i = 0; i < m_ptrarrEquationExecutionInfos_ActiveSet.size(); i++)
     {
         daeEquationExecutionInfo* pEEI = m_ptrarrEquationExecutionInfos_ActiveSet[i];
@@ -1060,7 +1060,7 @@ void daeBlock::ExportComputeStackStructs(const std::string& filenameComputeStack
 
     uint32_t*               activeEquationSetIndexes  = NULL;
     csComputeStackItem_t*   computeStacks             = NULL;
-    csJacobianMatrixItem_t* computeStackJacobianItems = NULL;
+    csIncidenceMatrixItem_t* computeStackJacobianItems = NULL;
     uint32_t Ncs;
     uint32_t Nasi;
     uint32_t Nji;
@@ -1075,6 +1075,7 @@ void daeBlock::ExportComputeStackStructs(const std::string& filenameComputeStack
         activeEquationSetIndexes  = &m_arrActiveEquationSetIndexes[0];
         computeStackJacobianItems = &m_arrComputeStackJacobianItems[0];
 
+        /* Write model equations. */
         std::ofstream f;
         f.open(filenameComputeStacks, std::ios_base::out | std::ios_base::trunc | std::ios_base::binary);
         if(!f.is_open())
@@ -1083,12 +1084,19 @@ void daeBlock::ExportComputeStackStructs(const std::string& filenameComputeStack
             e << "Cannot open " << filenameComputeStacks << " file.";
             throw e;
         }
+
+        int32_t fileType      = cs::eInputFile_ModelEquations;
+        int32_t opencsVersion = OPENCS_VERSION;
+        f.write((char*)&fileType,       sizeof(int32_t));
+        f.write((char*)&opencsVersion,  sizeof(int32_t));
+
         f.write((char*)&Nasi,                     sizeof(uint32_t));
         f.write((char*)&Ncs,                      sizeof(uint32_t));
         f.write((char*)activeEquationSetIndexes,  sizeof(uint32_t)               * Nasi);
         f.write((char*)computeStacks,             sizeof(csComputeStackItem_t)   * Ncs);
         f.close();
 
+        /* Write incidence matrix. */
         f.open(filenameJacobianIndexes, std::ios_base::out | std::ios_base::trunc | std::ios_base::binary);
         if(!f.is_open())
         {
@@ -1096,8 +1104,23 @@ void daeBlock::ExportComputeStackStructs(const std::string& filenameComputeStack
             e << "Cannot open " << filenameJacobianIndexes << " file.";
             throw e;
         }
+        fileType      = cs::eInputFile_SparsityPattern;
+        opencsVersion = OPENCS_VERSION;
+        f.write((char*)&fileType,       sizeof(int32_t));
+        f.write((char*)&opencsVersion,  sizeof(int32_t));
+
+        uint32_t Neq = Nasi;
+        std::vector<uint32_t> rowIndexes(Neq+1, 0);
+        for(uint32_t ji = 0; ji < Nji; ji++)
+        {
+            csIncidenceMatrixItem_t& jd = computeStackJacobianItems[ji];
+            rowIndexes[ jd.equationIndex + 1 ]++;
+        }
+
+        f.write((char*)&Neq,                      sizeof(uint32_t));
         f.write((char*)&Nji,                      sizeof(uint32_t));
-        f.write((char*)computeStackJacobianItems, sizeof(csJacobianMatrixItem_t) * Nji);
+        f.write((char*)&rowIndexes[0],            sizeof(uint32_t) * (Neq+1));
+        f.write((char*)computeStackJacobianItems, sizeof(csIncidenceMatrixItem_t) * Nji);
         f.close();
     }
     else
@@ -1118,7 +1141,7 @@ void daeBlock::ExportComputeStackStructs(const std::string& filenameComputeStack
             std::vector<int> indexes;
             for(int i = 0; i < m_arrComputeStackJacobianItems.size(); i++)
             {
-                csJacobianMatrixItem_t jd = m_arrComputeStackJacobianItems[i];
+                csIncidenceMatrixItem_t jd = m_arrComputeStackJacobianItems[i];
                 if(jd.equationIndex >= startEquationIndex && jd.equationIndex < endEquationIndex)
                     indexes.push_back(i);
             }
@@ -1141,9 +1164,9 @@ void daeBlock::ExportComputeStackStructs(const std::string& filenameComputeStack
 
         // Before updating we need to copy all items so that the original data are not affected!
         // Note: it requires extra memory - is that a problem?
-        std::vector<csComputeStackItem_t>   l_arrComputeStacks;
-        std::vector<csJacobianMatrixItem_t> l_arrComputeStackJacobianItems;
-        std::vector<uint32_t>               l_arrActiveEquationSetIndexes;
+        std::vector<csComputeStackItem_t>    l_arrComputeStacks;
+        std::vector<csIncidenceMatrixItem_t> l_arrComputeStackJacobianItems;
+        std::vector<uint32_t>                l_arrActiveEquationSetIndexes;
 
         l_arrComputeStacks.resize(numberOfComputeStacks);
         for(int i = 0; i < numberOfComputeStacks; i++)
@@ -1203,7 +1226,7 @@ void daeBlock::ExportComputeStackStructs(const std::string& filenameComputeStack
         // Update equationIndex in the computeStackJacobianItems to point to the mpi-node indexes.
         for(int ji = 0; ji < numberOfJacobianItems; ji++)
         {
-            csJacobianMatrixItem_t& jd = l_arrComputeStackJacobianItems[ji];
+            csIncidenceMatrixItem_t& jd = l_arrComputeStackJacobianItems[ji];
             jd.equationIndex -= startEquationIndex;
             jd.blockIndex     = bi_to_bi_local.at(jd.blockIndex);
         }
@@ -1212,6 +1235,7 @@ void daeBlock::ExportComputeStackStructs(const std::string& filenameComputeStack
         Nasi = numberOfEquations;
         Nji  = numberOfJacobianItems;
 
+        /* Write model equations. */
         std::ofstream f;
         f.open(filenameComputeStacks, std::ios_base::out | std::ios_base::trunc | std::ios_base::binary);
         if(!f.is_open())
@@ -1220,12 +1244,19 @@ void daeBlock::ExportComputeStackStructs(const std::string& filenameComputeStack
             e << "Cannot open " << filenameComputeStacks << " file.";
             throw e;
         }
+
+        int32_t fileType      = cs::eInputFile_ModelEquations;
+        int32_t opencsVersion = OPENCS_VERSION;
+        f.write((char*)&fileType,       sizeof(int32_t));
+        f.write((char*)&opencsVersion,  sizeof(int32_t));
+
         f.write((char*)&Nasi,                     sizeof(uint32_t));
         f.write((char*)&Ncs,                      sizeof(uint32_t));
         f.write((char*)activeEquationSetIndexes,  sizeof(uint32_t)               * Nasi);
         f.write((char*)computeStacks,             sizeof(csComputeStackItem_t)   * Ncs);
         f.close();
 
+        /* Write incidence matrix. */
         f.open(filenameJacobianIndexes, std::ios_base::out | std::ios_base::trunc | std::ios_base::binary);
         if(!f.is_open())
         {
@@ -1233,8 +1264,24 @@ void daeBlock::ExportComputeStackStructs(const std::string& filenameComputeStack
             e << "Cannot open " << filenameJacobianIndexes << " file.";
             throw e;
         }
+
+        fileType      = cs::eInputFile_SparsityPattern;
+        opencsVersion = OPENCS_VERSION;
+        f.write((char*)&fileType,       sizeof(int32_t));
+        f.write((char*)&opencsVersion,  sizeof(int32_t));
+
+        uint32_t Neq = Nasi;
+        std::vector<uint32_t> rowIndexes(Neq+1, 0);
+        for(uint32_t ji = 0; ji < Nji; ji++)
+        {
+            csIncidenceMatrixItem_t& jd = computeStackJacobianItems[ji];
+            rowIndexes[ jd.equationIndex + 1 ]++;
+        }
+
+        f.write((char*)&Neq              ,        sizeof(uint32_t));
         f.write((char*)&Nji,                      sizeof(uint32_t));
-        f.write((char*)computeStackJacobianItems, sizeof(csJacobianMatrixItem_t) * Nji);
+        f.write((char*)&rowIndexes[0],            sizeof(uint32_t) * (Neq+1));
+        f.write((char*)computeStackJacobianItems, sizeof(csIncidenceMatrixItem_t) * Nji);
         f.close();
     }
 }
@@ -1261,7 +1308,7 @@ void daeBlock::ExportComputeStackStructs(const std::string& filenameComputeStack
 
     uint32_t*               activeEquationSetIndexes  = NULL;
     csComputeStackItem_t*   computeStacks             = NULL;
-    csJacobianMatrixItem_t* computeStackJacobianItems = NULL;
+    csIncidenceMatrixItem_t* computeStackJacobianItems = NULL;
     uint32_t Ncs;
     uint32_t Nasi;
     uint32_t Nji;
@@ -1277,7 +1324,7 @@ void daeBlock::ExportComputeStackStructs(const std::string& filenameComputeStack
         std::map<uint32_t, uint32_t>::iterator eq_end = ei_to_local_ei.end();
         for(int i = 0; i < m_arrComputeStackJacobianItems.size(); i++)
         {
-            csJacobianMatrixItem_t jd = m_arrComputeStackJacobianItems[i];
+            csIncidenceMatrixItem_t jd = m_arrComputeStackJacobianItems[i];
             // If jd.equationIndex is in the map with requested equation indexes add it to the list.
             if( ei_to_local_ei.find(jd.equationIndex) != eq_end )
                 jacobianItems.push_back(i);
@@ -1310,7 +1357,7 @@ void daeBlock::ExportComputeStackStructs(const std::string& filenameComputeStack
     // Before updating we need to copy all items so that the original data are not affected!
     // Note: it requires extra memory - is that a problem?
     std::vector<csComputeStackItem_t>   l_arrComputeStacks;
-    std::vector<csJacobianMatrixItem_t> l_arrComputeStackJacobianItems;
+    std::vector<csIncidenceMatrixItem_t> l_arrComputeStackJacobianItems;
     std::vector<uint32_t>               l_arrActiveEquationSetIndexes;
 
     l_arrComputeStacks.reserve(numberOfComputeStacks);
@@ -1389,7 +1436,7 @@ void daeBlock::ExportComputeStackStructs(const std::string& filenameComputeStack
     // Update equationIndex in the computeStackJacobianItems to point to the mpi-node indexes.
     for(int ji = 0; ji < numberOfJacobianItems; ji++)
     {
-        csJacobianMatrixItem_t& jd = l_arrComputeStackJacobianItems[ji];
+        csIncidenceMatrixItem_t& jd = l_arrComputeStackJacobianItems[ji];
 
         jd.equationIndex = ei_to_local_ei.at(jd.equationIndex);
         jd.blockIndex    = bi_to_bi_local.at(jd.blockIndex);
@@ -1399,6 +1446,7 @@ void daeBlock::ExportComputeStackStructs(const std::string& filenameComputeStack
     Nasi = numberOfEquations;
     Nji  = numberOfJacobianItems;
 
+    /* Write model equations. */
     std::ofstream f;
     f.open(filenameComputeStacks, std::ios_base::out | std::ios_base::trunc | std::ios_base::binary);
     if(!f.is_open())
@@ -1407,12 +1455,19 @@ void daeBlock::ExportComputeStackStructs(const std::string& filenameComputeStack
         e << "Cannot open " << filenameComputeStacks << " file.";
         throw e;
     }
+
+    int32_t fileType      = cs::eInputFile_ModelEquations;
+    int32_t opencsVersion = OPENCS_VERSION;
+    f.write((char*)&fileType,       sizeof(int32_t));
+    f.write((char*)&opencsVersion,  sizeof(int32_t));
+
     f.write((char*)&Nasi,                     sizeof(uint32_t));
     f.write((char*)&Ncs,                      sizeof(uint32_t));
     f.write((char*)activeEquationSetIndexes,  sizeof(uint32_t)               * Nasi);
     f.write((char*)computeStacks,             sizeof(csComputeStackItem_t)   * Ncs);
     f.close();
 
+    /* Write incidence matrix. */
     f.open(filenameJacobianIndexes, std::ios_base::out | std::ios_base::trunc | std::ios_base::binary);
     if(!f.is_open())
     {
@@ -1420,8 +1475,24 @@ void daeBlock::ExportComputeStackStructs(const std::string& filenameComputeStack
         e << "Cannot open " << filenameJacobianIndexes << " file.";
         throw e;
     }
+
+    fileType      = cs::eInputFile_SparsityPattern;
+    opencsVersion = OPENCS_VERSION;
+    f.write((char*)&fileType,       sizeof(int32_t));
+    f.write((char*)&opencsVersion,  sizeof(int32_t));
+
+    uint32_t Neq = Nasi;
+    std::vector<uint32_t> rowIndexes(Neq+1, 0);
+    for(uint32_t ji = 0; ji < Nji; ji++)
+    {
+        csIncidenceMatrixItem_t& jd = computeStackJacobianItems[ji];
+        rowIndexes[ jd.equationIndex + 1 ]++;
+    }
+
+    f.write((char*)&Neq,                      sizeof(uint32_t));
     f.write((char*)&Nji,                      sizeof(uint32_t));
-    f.write((char*)computeStackJacobianItems, sizeof(csJacobianMatrixItem_t) * Nji);
+    f.write((char*)&rowIndexes[0],            sizeof(uint32_t) * (Neq+1));
+    f.write((char*)computeStackJacobianItems, sizeof(csIncidenceMatrixItem_t) * Nji);
     f.close();
 }
 
@@ -1441,7 +1512,7 @@ void daeBlock::ExportComputeStackStructs(const std::string& filenameComputeStack
 
     uint32_t*               activeEquationSetIndexes  = NULL;
     csComputeStackItem_t*   computeStacks             = NULL;
-    csJacobianMatrixItem_t* computeStackJacobianItems = NULL;
+    csIncidenceMatrixItem_t* computeStackJacobianItems = NULL;
     uint32_t Ncs;
     uint32_t Nasi;
     uint32_t Nji;
@@ -1458,7 +1529,7 @@ void daeBlock::ExportComputeStackStructs(const std::string& filenameComputeStack
         std::vector<int>::const_iterator eq_end   = equationIndexes.end();
         for(int i = 0; i < m_arrComputeStackJacobianItems.size(); i++)
         {
-            csJacobianMatrixItem_t jd = m_arrComputeStackJacobianItems[i];
+            csIncidenceMatrixItem_t jd = m_arrComputeStackJacobianItems[i];
             if( std::find(eq_begin, eq_end, (int)jd.equationIndex) != eq_end )
                 jacobianItems.push_back(i);
         }
@@ -1492,7 +1563,7 @@ void daeBlock::ExportComputeStackStructs(const std::string& filenameComputeStack
     // Before updating we need to copy all items so that the original data are not affected!
     // Note: it requires extra memory - is that a problem?
     std::vector<csComputeStackItem_t>   l_arrComputeStacks;
-    std::vector<csJacobianMatrixItem_t> l_arrComputeStackJacobianItems;
+    std::vector<csIncidenceMatrixItem_t> l_arrComputeStackJacobianItems;
     std::vector<uint32_t>               l_arrActiveEquationSetIndexes;
 
     l_arrComputeStacks.reserve(numberOfComputeStacks);
@@ -1556,7 +1627,7 @@ void daeBlock::ExportComputeStackStructs(const std::string& filenameComputeStack
     // Update equationIndex in the computeStackJacobianItems to point to the mpi-node indexes.
     for(int ji = 0; ji < numberOfJacobianItems; ji++)
     {
-        csJacobianMatrixItem_t& jd = l_arrComputeStackJacobianItems[ji];
+        csIncidenceMatrixItem_t& jd = l_arrComputeStackJacobianItems[ji];
 
         int ei = static_cast<int>(jd.equationIndex);
         int bi = static_cast<int>(jd.blockIndex);
@@ -1590,7 +1661,7 @@ void daeBlock::ExportComputeStackStructs(const std::string& filenameComputeStack
         throw e;
     }
     f.write((char*)&Nji,                      sizeof(uint32_t));
-    f.write((char*)computeStackJacobianItems, sizeof(csJacobianMatrixItem_t) * Nji);
+    f.write((char*)computeStackJacobianItems, sizeof(csIncidenceMatrixItem_t) * Nji);
     f.close();
 }
 */

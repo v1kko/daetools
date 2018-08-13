@@ -5,7 +5,8 @@ TARGET = cdaeNLOPT_NLPSolver
 TEMPLATE = lib
 CONFIG += staticlib
 INCLUDEPATH += $${BOOSTDIR} \
-               $${NLOPT_INCLUDE}
+               $${NLOPT_INCLUDE} \
+               $${OPEN_CS_INCLUDE}
 
 QMAKE_LIBDIR += $${NLOPT_LIBDIR}
 
@@ -16,15 +17,15 @@ LIBS += $${DAE_ACTIVITY_LIB} \
         $${BOOST_LIBS} \
         $${NLOPT_LIBS}
 
-HEADERS += stdafx.h \ 
+HEADERS += stdafx.h \
     nlpsolver_class_factory.h \
     nlpsolver.h \
     base_solvers.h \
-	../nlp_common.h
+    ../nlp_common.h
 SOURCES += stdafx.cpp \
     dllmain.cpp \
     nlpsolver.cpp
- 
+
 
 #win32{
 #QMAKE_POST_LINK = copy /y  $${TARGET}.lib $${STATIC_LIBS_DIR}

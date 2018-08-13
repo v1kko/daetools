@@ -14,25 +14,33 @@ DAE Tools Documentation
 
 Journal Articles
 ================
-Nikolić DD. (2016) *DAE Tools: equation-based object-oriented modelling, simulation and optimisation software*.
-**PeerJ Computer Science** 2:e54. `doi:10.7717/peerj-cs.54 <https://doi.org/10.7717/peerj-cs.54>`_
-(preprint available on: `ResearchGate <https://www.researchgate.net/publication/285596842_DAE_Tools_Equation-Based_Object-Oriented_Modelling_Simulation_and_Optimisation_Software>`_).
+
+1. Nikolić DD. (2016) *DAE Tools: equation-based object-oriented modelling, simulation and optimisation software*.
+   **PeerJ Computer Science** 2:e54. `doi:10.7717/peerj-cs.54 <https://doi.org/10.7717/peerj-cs.54>`_
+
+2. Nikolić DD. (2018) *Parallelisation of equation-based simulation programs on heterogeneous computing systems*.
+   **PeerJ Computer Science** 4:e160. `doi:10.7717/peerj-cs.160 <https://doi.org/10.7717/peerj-cs.160>`_
+
+3. Nikolić DD. (2018) *Parallelisation of equation-based simulation programs on distributed memory systems*.
+   **Preprint** `link <#>`_
 
 Presentations
 =============
 
-.. `Introduction to DAE Tools <http://www.slideshare.net/DraganNikoli5/dae-tools-introduction>`_
+1. `Overview of DAE Tools <daetools-overview.pdf>`_
+
+2. `Introduction to DAE Tools <daetools-introduction.pdf>`_
+ 
+3. `Introduction to OpenCS <opencs-introduction.pdf>`_
+
 .. (on `ResearchGate <https://www.researchgate.net/publication/303260138_DAE_Tools_-_Introduction>`_)
+.. .. raw:: html
+..     
+..     <embed src="daetools-overview.pdf" width="600px" height="300px" />
+..     
+.. .. raw:: html 
 .. 
-.. `Overview of DAE Tools <http://www.slideshare.net/DraganNikoli5/dae-tools-overview>`_
-
-.. raw:: html
-    
-    <embed src="daetools-overview.pdf" width="600px" height="300px" />
-    
-.. raw:: html 
-
-    <embed src="daetools-introduction.pdf" width="600px" height="300px" />
+..     <embed src="daetools-introduction.pdf" width="600px" height="300px" />
     
 Contents
 ========

@@ -282,10 +282,16 @@ docs_html_folder = os.path.join(root_dir, 'daetools', 'docs', 'html')
 daetools_folder  = os.path.join(root_dir, 'daetools')
 
 docs_html_dirs = []
-for f in os.walk(docs_html_folder):
+for root, dirs, files in os.walk(docs_html_folder):
     try:
-        p = os.path.relpath(f[0], daetools_folder)
-        docs_html_dirs.append(os.path.join(p, '*.*'))
+        # Add "root/files[:]" to docs_html_dirs only if the files list is not empty.
+        # This should resolve the error: [directory] doesn't exist or not a regular file,
+        # which occurs in some systems where copying of the glob: "directory/*.*" fails
+        # if there are no files in the directory (only folders).
+        for f in files:
+            full_path = os.path.join(root, f)
+            relative_path = os.path.relpath(full_path, daetools_folder)
+            docs_html_dirs.append(relative_path)
     except:
         pass
 #print('\n'.join(docs_html_dirs))

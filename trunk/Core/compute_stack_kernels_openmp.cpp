@@ -15,7 +15,7 @@ DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 namespace openmp_evaluator
 {
 /* Residual kernel function .*/
-void EvaluateResiduals(const csComputeStackItem_t*         computeStacks,
+void EvaluateEquations(const csComputeStackItem_t*         computeStacks,
                        uint32_t                            equationIndex,
                        const uint32_t*                     activeEquationSetIndexes,
                        csEvaluationContext_t               EC,
@@ -42,18 +42,18 @@ void EvaluateResiduals(const csComputeStackItem_t*         computeStacks,
 }
 
 /* Jacobian kernel functions. */
-void EvaluateJacobian(const csComputeStackItem_t*        computeStacks,
-                      uint32_t                           jacobianItemIndex,
-                      const uint32_t*                    activeEquationSetIndexes,
-                      const csJacobianMatrixItem_t*      computeStackJacobianItems,
-                      csEvaluationContext_t              EC,
-                      const real_t*                      dofs,
-                      const real_t*                      values,
-                      const real_t*                      timeDerivatives,
-                      real_t*                            jacobian)
+void EvaluateDerivatives(const csComputeStackItem_t*        computeStacks,
+                         uint32_t                           jacobianItemIndex,
+                         const uint32_t*                    activeEquationSetIndexes,
+                         const csIncidenceMatrixItem_t*     incidenceMatrixItems,
+                         csEvaluationContext_t              EC,
+                         const real_t*                      dofs,
+                         const real_t*                      values,
+                         const real_t*                      timeDerivatives,
+                         real_t*                            jacobian)
 {
     /* Locate the current equation stack in the array of all compute stacks. */
-    csJacobianMatrixItem_t jacobianItem      = computeStackJacobianItems[jacobianItemIndex];
+    csIncidenceMatrixItem_t jacobianItem     = incidenceMatrixItems[jacobianItemIndex];
     uint32_t firstIndex                      = activeEquationSetIndexes[jacobianItem.equationIndex];
     const csComputeStackItem_t* computeStack = &computeStacks[firstIndex];
 
@@ -74,16 +74,16 @@ void EvaluateJacobian(const csComputeStackItem_t*        computeStacks,
 }
 
 /* Residual kernel function .*/
-void EvaluateSensitivityResiduals(const csComputeStackItem_t*        computeStacks,
-                                  uint32_t                           equationIndex,
-                                  const uint32_t*                    activeEquationSetIndexes,
-                                  csEvaluationContext_t              EC,
-                                  const real_t*                      dofs,
-                                  const real_t*                      values,
-                                  const real_t*                      timeDerivatives,
-                                  const real_t*                      svalues,
-                                  const real_t*                      sdvalues,
-                                        real_t*                      sresiduals)
+void EvaluateSensitivityDerivatives(const csComputeStackItem_t*        computeStacks,
+                                    uint32_t                           equationIndex,
+                                    const uint32_t*                    activeEquationSetIndexes,
+                                    csEvaluationContext_t              EC,
+                                    const real_t*                      dofs,
+                                    const real_t*                      values,
+                                    const real_t*                      timeDerivatives,
+                                    const real_t*                      svalues,
+                                    const real_t*                      sdvalues,
+                                          real_t*                      sresiduals)
 {
     /* Locate the current equation stack in the array of all compute stacks. */
     uint32_t firstIndex                      = activeEquationSetIndexes[equationIndex];

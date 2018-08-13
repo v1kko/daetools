@@ -59,6 +59,9 @@ LIBRARY:
     trilinos         Trilinos Amesos and AztecOO solvers
     deal.ii          deal.II finite elements library
     coolprop         CoolProp thermophysical property library
+    opencs           OpenCS library
+                     Requires cblas_clapack, idas (with MPI support enabled), metis and trilinos libraries compiled
+                     using the compile_opencs.sh script from the OpenCS directory.
 
 CROSS-COMPILATION (GNU/Linux -> Windows):
 Prerequisities:
@@ -413,6 +416,7 @@ else
         libmesh)          ;;
         deal.ii)          ;;
         coolprop)         ;;
+        opencs)           ;;
         *) echo Unrecognized solver: "$solver"
         exit
         ;;
@@ -1918,6 +1922,80 @@ clean_dealii()
   echo ""
 }
 
+#######################################################
+#                     OpenCS                          #
+#######################################################
+configure_opencs()
+{
+  cd OpenCS
+
+  if [ -e build ]; then
+    rm -r build
+  fi
+  
+  echo ""
+  echo "[*] Setting-up OpenCS..."
+  echo ""
+
+  mkdir -p build
+  cd build
+  
+  OPEN_CS_HOME="${TRUNK}"/OpenCS
+  OPEN_CS_INSTALL_DIR="${OPEN_CS_HOME}/build"
+  
+  cmake \
+     -G"${CMAKE_GENERATOR}" \
+     -DCMAKE_INSTALL_PREFIX:STRING="${OPEN_CS_INSTALL_DIR}" \
+     -DCMAKE_BUILD_TYPE:STRING=Release \
+     -DBUILD_SHARED_LIBS:BOOL=ON \
+     -DOPENCL_INCLUDE_DIR:PATH="/opt/intel/opencl/include" \
+     -DOPENCL_LIB_DIR:PATH="/opt/intel/opencl" \
+     ${OPEN_CS_HOME}
+
+  cd "${TRUNK}"
+}
+
+compile_opencs()
+{
+  echo ""
+  echo "[*] Building OpenCS..."
+  echo ""
+  cd OpenCS
+  cd build
+  ${MAKE_Ncpu} install
+
+  if [ ${PLATFORM} = "Darwin" ]; then
+    cp -fa lib/libOpenCS_*      ${SOLIBS_DIR}
+    cp -fa bin/csSimulator_ODE  ${SOLIBS_DIR}
+    cp -fa bin/csSimulator_DAE  ${SOLIBS_DIR}
+  elif [ ${PLATFORM} = "Linux" ]; then
+    cp -fa lib/libOpenCS_*      ${SOLIBS_DIR}
+    cp -fa bin/csSimulator_ODE  ${SOLIBS_DIR}
+    cp -fa bin/csSimulator_DAE  ${SOLIBS_DIR}
+  elif [ ${PLATFORM} = "Windows" ]; then
+    cp -fa lib/libOpenCS_*      ${SOLIBS_DIR}
+    cp -fa bin/csSimulator_ODE  ${SOLIBS_DIR}
+    cp -fa bin/csSimulator_DAE  ${SOLIBS_DIR}
+  else
+    echo "..."
+  fi
+
+  cd "${TRUNK}"
+}
+
+clean_opencs()
+{
+  echo ""
+  echo "[*] Cleaning OpenCS..."
+  echo ""
+  cd OpenCS
+  cd build
+  ${MAKE} clean
+  cd "${TRUNK}"
+  echo ""
+  echo "[*] Done!"
+  echo ""
+}
 
 #######################################################
 #                Actual work                          #
@@ -2228,6 +2306,19 @@ do
 
                       if [ "${DO_CLEAN}" = "yes" ]; then
                         clean_dealii
+                      fi
+                      ;;
+
+    opencs)           if [ "${DO_CONFIGURE}" = "yes" ]; then
+                        configure_opencs
+                      fi
+
+                      if [ "${DO_BUILD}" = "yes" ]; then
+                        compile_opencs
+                      fi
+
+                      if [ "${DO_CLEAN}" = "yes" ]; then
+                        clean_opencs
                       fi
                       ;;
 

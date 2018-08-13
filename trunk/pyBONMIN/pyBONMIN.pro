@@ -26,7 +26,7 @@ LIBS += $${SOLIBS_RPATH}
 ######################################################################################
 #                                BONMIN
 ######################################################################################
-CONFIG(BONMIN, BONMIN|IPOPT):message(BONMIN) { 
+CONFIG(BONMIN, BONMIN|IPOPT):message(BONMIN) {
 
 QMAKE_CXXFLAGS += -DdaeBONMIN
 pyObject = pyBONMIN
@@ -34,8 +34,8 @@ pyObject = pyBONMIN
 INCLUDEPATH += $${BOOSTDIR} \
                $${PYTHON_INCLUDE_DIR} \
                $${PYTHON_SITE_PACKAGES_DIR} \
-               #$${NUMPY_INCLUDE_DIR} \
-               $${BONMIN_INCLUDE}
+               $${BONMIN_INCLUDE} \
+               $${OPEN_CS_INCLUDE}
 
 QMAKE_LIBDIR += $${SUNDIALS_LIBDIR} \
                 $${PYTHON_LIB_DIR} \
@@ -59,7 +59,7 @@ LIBS += $${BOOST_PYTHON_LIB} \
 ######################################################################################
 #                                IPOPT
 ######################################################################################
-CONFIG(IPOPT, BONMIN|IPOPT):message(IPOPT) { 
+CONFIG(IPOPT, BONMIN|IPOPT):message(IPOPT) {
 
 QMAKE_CXXFLAGS += -DdaeIPOPT
 pyObject = pyIPOPT
@@ -67,8 +67,8 @@ pyObject = pyIPOPT
 INCLUDEPATH += $${BOOSTDIR} \
                $${PYTHON_INCLUDE_DIR} \
                $${PYTHON_SITE_PACKAGES_DIR} \
-               #$${NUMPY_INCLUDE_DIR} \
-               $${IPOPT_INCLUDE}
+               $${IPOPT_INCLUDE} \
+               $${OPEN_CS_INCLUDE}
 
 QMAKE_LIBDIR += $${SUNDIALS_LIBDIR} \
                 $${PYTHON_LIB_DIR} \
@@ -104,21 +104,21 @@ HEADERS += stdafx.h \
 QMAKE_POST_LINK = $${COPY_FILE} \
                   $${DAE_DEST_DIR}/$${SHARED_LIB_PREFIX}$${TARGET}$${SHARED_LIB_POSTFIX}.$${SHARED_LIB_APPEND} \
                   $${SOLVERS_DIR}/$${pyObject}.$${PYTHON_EXTENSION_MODULE_EXT}
-                  
+
 # win32{
-# BONMIN { 
+# BONMIN {
 # QMAKE_POST_LINK = move /y \
 # 	$${DAE_DEST_DIR}/pyBONMIN1.dll \
 # 	$${SOLVERS_DIR}/pyBONMIN.pyd
 # }
-# 
-# IPOPT { 
+#
+# IPOPT {
 # QMAKE_POST_LINK = move /y \
 # 	$${DAE_DEST_DIR}/pyBONMIN1.dll \
 # 	$${SOLVERS_DIR}/pyIPOPT.pyd
 # }
 # }
-# 
+#
 # unix{
 # QMAKE_POST_LINK = cp -f \
 #         $${DAE_DEST_DIR}/lib$${TARGET}.$${SHARED_LIB_APPEND} \

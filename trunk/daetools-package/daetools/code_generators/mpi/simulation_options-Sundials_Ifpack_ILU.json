@@ -1,9 +1,11 @@
 {
-    "StartTime":         __startTime__,
-    "TimeHorizon":       __timeHorizon__,
-    "ReportingInterval": __reportingInterval__,
-    "OutputDirectory":   "results",
-    "DAEModel" : {
+    "Simulation": {
+        "StartTime":         __startTime__,
+        "TimeHorizon":       __timeHorizon__,
+        "ReportingInterval": __reportingInterval__,
+        "OutputDirectory":   "results"
+    },
+    "Model" : {
         "ComputeStackEvaluator" : {
             "Library" : "Sequential",
             "Name": "",
@@ -11,7 +13,7 @@
             }
         }
     },
-    "DAESolver" : {
+    "Solver" : {
         "Library" : "Sundials",
         "Name": "IDAS",
         "PrintInfo": false,

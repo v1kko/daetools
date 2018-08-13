@@ -10,13 +10,13 @@ PARTICULAR PURPOSE. See the GNU General Public License for more details.
 You should have received a copy of the GNU General Public License along with the
 DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 ***********************************************************************************/
-#include "../opencs/cs_evaluator.h"
+#include <OpenCS/cs_evaluator.h>
 using namespace cs;
 
 namespace openmp_evaluator
 {
-/* Residual kernel function. */
-void EvaluateResiduals(const csComputeStackItem_t*         computeStacks,
+/* Evaluate equations. */
+void EvaluateEquations(const csComputeStackItem_t*         computeStacks,
                        uint32_t                            equationIndex,
                        const uint32_t*                     activeEquationSetIndexes,
                        csEvaluationContext_t               EC,
@@ -26,25 +26,25 @@ void EvaluateResiduals(const csComputeStackItem_t*         computeStacks,
                        real_t*                             residuals);
 
 /* Jacobian kernel functions. */
-void EvaluateJacobian(const csComputeStackItem_t*         computeStacks,
-                      uint32_t                            jacobianItemIndex,
-                      const uint32_t*                     activeEquationSetIndexes,
-                      const csJacobianMatrixItem_t*       computeStackJacobianItems,
-                      csEvaluationContext_t               EC,
-                      const real_t*                       dofs,
-                      const real_t*                       values,
-                      const real_t*                       timeDerivatives,
-                      real_t*                             jacobian);
+void EvaluateDerivatives(const csComputeStackItem_t*         computeStacks,
+                         uint32_t                            jacobianItemIndex,
+                         const uint32_t*                     activeEquationSetIndexes,
+                         const csIncidenceMatrixItem_t*      computeStackJacobianItems,
+                         csEvaluationContext_t               EC,
+                         const real_t*                       dofs,
+                         const real_t*                       values,
+                         const real_t*                       timeDerivatives,
+                         real_t*                             jacobian);
 
-/* Sensitivity residual kernel function. */
-void EvaluateSensitivityResiduals(const csComputeStackItem_t*         computeStacks,
-                                  uint32_t                            equationIndex,
-                                  const uint32_t*                     activeEquationSetIndexes,
-                                  csEvaluationContext_t               EC,
-                                  const real_t*                       dofs,
-                                  const real_t*                       values,
-                                  const real_t*                       timeDerivatives,
-                                  const real_t*                       svalues,
-                                  const real_t*                       sdvalues,
-                                        real_t*                       sresiduals);
+/* Evaluate sensitivity derivatives. */
+void EvaluateSensitivityDerivatives(const csComputeStackItem_t*         computeStacks,
+                                    uint32_t                            equationIndex,
+                                    const uint32_t*                     activeEquationSetIndexes,
+                                    csEvaluationContext_t               EC,
+                                    const real_t*                       dofs,
+                                    const real_t*                       values,
+                                    const real_t*                       timeDerivatives,
+                                    const real_t*                       svalues,
+                                    const real_t*                       sdvalues,
+                                          real_t*                       sresiduals);
 }

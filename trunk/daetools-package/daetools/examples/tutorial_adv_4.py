@@ -155,7 +155,7 @@ def run_code_generators(simulation, log):
     cg = daeCodeGenerator_MPI()
     
     constraints = ['Ncs','Nnz','Nflops','Nflops_j'] # use all available constraints
-    cg.generateSimulation(simulation, tmp_folder, 4, balancingConstraints = constraints)
+    cg.generateSimulation(simulation, tmp_folder, 4, balancingConstraints = constraints, saveIncidenceMatrix = True)
 
 def setupLASolver():
     lasolver = pyTrilinos.daeCreateTrilinosSolver("AztecOO", "")

@@ -56,7 +56,7 @@ class daeInterProcessCommGraph(object):
         nodes = {}
         for pe, data in partitionData.items():
             #label = 'PE %d (%d : %d)\n%s %s %s %s %s' % (pe, data['Nequations'], data['Nadjacent'], equations[pe], ipcLoad[pe], ncsLoad[pe], flopsLoad[pe], nnzLoad[pe])
-            labelFormat = 'PE %d (%d : %d)\ndev Neq = %+.2f%% \ldev Nad = %+.2f%% \ldev Ncs = %+.2f%% \ldev Nflr = %+.2f%% \ldev Nnz = %+.2f%%\ldev Nflj = %+.2f%%\l'
+            labelFormat = 'PE %d (%d : %d)\ndev Neq = %+.2f%% \ldev Nadj = %+.2f%% \ldev Ncs = %+.2f%% \ldev Nflops = %+.2f%% \ldev Nnz = %+.2f%%\ldev Nflops_j = %+.2f%%\l'
             label = labelFormat % (pe, 
                                    data['Nequations'], 
                                    data['Nadjacent'], 
@@ -94,7 +94,13 @@ class daeCodeGenerator_MPI(daeCodeGenerator):
         self.Npe = 0
         self.errors = []
 
-    def generateSimulation(self, simulation, directory, Npe, balancingConstraints = [], unaryOperationsFlops = {}, binaryOperationsFlops = {}):
+    def generateSimulation(self, simulation, 
+                                 directory, 
+                                 Npe, 
+                                 balancingConstraints  = [], 
+                                 unaryOperationsFlops  = {}, 
+                                 binaryOperationsFlops = {},
+                                 saveIncidenceMatrix   = False):
         # Returns partitioningData, statsData (deviations from average in %)
         if not simulation:
             raise RuntimeError('Invalid simulation object')
@@ -105,6 +111,8 @@ class daeCodeGenerator_MPI(daeCodeGenerator):
         
         self.simulation    = simulation
         self.topLevelModel = simulation.m
+        
+        self.saveIncidenceMatrix = saveIncidenceMatrix
         
         for constraint in balancingConstraints:
             if constraint != 'Ncs' and constraint != 'Nflops' and constraint != 'Nnz' and constraint != 'Nflops_j':
@@ -136,13 +144,7 @@ class daeCodeGenerator_MPI(daeCodeGenerator):
 
         log_filename = os.path.join(directory, 'code-generation.log')
         self.logf = open(log_filename, 'w')
-        
         partitionData, statsData = self._generateRuntimeInformation(self.analyzer.runtimeInformation, directory)
-        #print('partitionData')
-        #print(json.dumps(partitionData, indent = 4))
-        #print('statsData')
-        #print(json.dumps(statsData, indent = 4))
-        
         self.logf.close()
         
         if len(self.errors):
@@ -251,10 +253,10 @@ class daeCodeGenerator_MPI(daeCodeGenerator):
         for pe in range(Npe):
             latexTable += '\\begin{figure}[h!] \n'     
             latexTable += '    \\centering \n'
-            latexTable += '    \\includegraphics[width=3cm]{%s} \n' % ('incidence_matrix-%05d.png' % pe)
+            latexTable += '    \\includegraphics[width=3cm]{%s} \n' % ('sparsity_pattern-%05d.png' % pe)
             latexTable += '\\end{figure} \n'
         latexTable += '\\caption{Incidence matrix ($N_{pe} = %d$, additional objectives: %s)} \n' % (Npe, caption_objs)
-        latexTable += '\\label{fig:incidence_matrix-%s-%dpe-%s} \n' % (modelName, Npe, label_objs)
+        latexTable += '\\label{fig:sparsity_pattern-%s-%dpe-%s} \n' % (modelName, Npe, label_objs)
         """
         latexTable += '\\FloatBarrier \n'
         latexTable += '\\clearpage \n'
@@ -393,8 +395,8 @@ class daeCodeGenerator_MPI(daeCodeGenerator):
         gc.collect()
         #################################################
         # Generate:                                     #
-        #  - runtime_data-%05d.bin                      #
-        #  - incidence_matrix-%05d.png                  #
+        #  - model_structure-%05d.csdata                #
+        #  - sparsity_pattern-%05d.png (optionally)     #
         #################################################
         # Requires interprocess_sync_map
         def packIntegerArray(arr):
@@ -428,27 +430,13 @@ class daeCodeGenerator_MPI(daeCodeGenerator):
             ids                 = blockIDs[owned_indexes]
             variable_names      = variableNames[owned_indexes]
             
-            """
             buff = bytes()
-            buff += struct.pack('d', 0.0)
-            if runtimeInformation['ModelType'] == eSteadyState:
-                buff += struct.pack('d', 0.0)
-            else:
-                buff += struct.pack('d', runtimeInformation['TimeHorizon'])
-            buff += struct.pack('d', runtimeInformation['ReportingInterval'])
-            buff += struct.pack('d', runtimeInformation['RelativeTolerance'])        
-
-            filename = os.path.join(directory, 'simulation_data-%05d.bin' % pe)
-            f = open(filename, 'wb')
-            f.write(buff)
-            f.close()
-            """
-
-            buff = bytes()
+            # Write header
+            buff += struct.pack('ii', eInputFile_ModelStructure, opencsVersion())        
             buff += struct.pack('I', Neq)
             buff += struct.pack('I', Neq_local)
             buff += struct.pack('I', len(dofs))
-            buff += struct.pack('?', runtimeInformation['QuasiSteadyState'])            
+            buff += struct.pack('?', False) # isODESystem is False for DAE systems            
             buff += packDoubleArray(dofs)
             buff += packDoubleArray(init_values)
             buff += packDoubleArray(init_derivatives)
@@ -456,41 +444,43 @@ class daeCodeGenerator_MPI(daeCodeGenerator):
             buff += packIntegerArray(ids)
             buff += packStringArray(variable_names)
             
-            filename = os.path.join(directory, 'model_variables-%05d.bin' % pe)
+            filename = os.path.join(directory, 'model_structure-%05d.csdata' % pe)
             f = open(filename, 'wb')
             f.write(buff)
             f.close()
             
-            """"
+            
             # Incidence matrix images.
             try:
-                import png
-                Nequations_local = pe_data['Nequations']
-                bi2bi_local      = pe_data['bi_to_bi_local']
-                owned_indexes    = pe_data['owned_indexes']
-                
-                filename = os.path.join(directory, 'incidence_matrix-%05d.png' % pe)
-                f = open(filename, 'wb')
-                w = png.Writer(Nequations_local, Nequations_local, greyscale=True)
-                pixels = numpy.zeros((Nequations_local, Nequations_local), dtype=numpy.int32)
-                pixels += 255
-                for row,ei in enumerate(owned_indexes):
-                    eqn_bi_indexes = equationBlockIndexes[ei]
-                    for bi in eqn_bi_indexes:
-                        col = bi2bi_local[bi]
-                        if col < Nequations_local: # skip foreign indexes
-                            pixels[row,col] = 0
-                w.write(f, pixels.tolist())
-                f.close()
+                if self.saveIncidenceMatrix:
+                    import png
+                    #Nequations_global = Neq
+                    Nequations_local  = pe_data['Nequations']
+                    bi2bi_local       = pe_data['bi_to_bi_local']
+                    owned_indexes     = pe_data['owned_indexes']
+                    
+                    filename = os.path.join(directory, 'sparsity_pattern-%05d.png' % pe)
+                    f = open(filename, 'wb')
+                    w = png.Writer(Nequations_local, Nequations_local, greyscale=True)
+                    pixels = numpy.zeros((Nequations_local, Nequations_local), dtype=numpy.int32)
+                    pixels += 255
+                    for row,ei in enumerate(owned_indexes):
+                        eqn_bi_indexes = equationBlockIndexes[ei]
+                        for bi in eqn_bi_indexes:
+                            col = bi2bi_local[bi]
+                            if col < Nequations_local: # skip foreign indexes
+                                pixels[row,col] = 0
+                    w.write(f, pixels.tolist())
+                    f.close()
             except Exception as e:
                 print(str(e))
-			"""
+			
         gc.collect()
         #################################################
         # Generate:                                     #
-        #  - interprocess_comm_data-%05d.bin            #
-        #  - model_equations-%05d.bin                   #
-        #  - preconditioner_data-%05d.bin               #
+        #  - model_equations-%05d.csdata                #
+        #  - sparsity_pattern-%05d.csdata               #
+        #  - partition_data-%05d.csdata                 #
         #################################################
         def packArray(arr):
             buff = struct.pack('i', len(arr))
@@ -501,6 +491,9 @@ class daeCodeGenerator_MPI(daeCodeGenerator):
         for pe, n_data in interprocess_sync_map.items():
             buff = bytes()
 
+            # Write header
+            buff += struct.pack('ii', eInputFile_PartitionData, opencsVersion())
+            
             buff += packArray(n_data['foreign_indexes'])
             
             dict_items = n_data['bi_to_bi_local'].items()
@@ -526,11 +519,11 @@ class daeCodeGenerator_MPI(daeCodeGenerator):
             
             equation_indexes = n_data['owned_indexes']
             bi_to_bi_local   = n_data['bi_to_bi_local']
-            filenameCS = os.path.join(directory, 'model_equations-%05d.bin' % pe)
-            filenameJI = os.path.join(directory, 'jacobian_data-%05d.bin' % pe)
+            filenameCS = os.path.join(directory, 'model_equations-%05d.csdata' % pe)
+            filenameJI = os.path.join(directory, 'sparsity_pattern-%05d.csdata' % pe)
             self.simulation.ExportComputeStackStructs(filenameCS, filenameJI, equation_indexes, bi_to_bi_local)
             
-            filename = os.path.join(directory, 'partition_data-%05d.bin' % pe)
+            filename = os.path.join(directory, 'partition_data-%05d.csdata' % pe)
             f = open(filename, 'wb')
             f.write(buff)
             f.close()
@@ -610,6 +603,9 @@ class daeCodeGenerator_MPI(daeCodeGenerator):
         weights_Ncs          = []
         weights_Nflops       = []
         weights_Nflops_jacob = []
+        weights_Nnz_x_Ncs    = []
+        
+        sum_Nnz_Ncs = 0
         for equation in self.analyzer.runtimeInformation['Equations']:
             for eeinfo in equation['EquationExecutionInfos']:
                 ncs_items, nflops = eeinfo['ComputeStackInfo'] # tuple: CS.size, CS.flops
@@ -630,27 +626,45 @@ class daeCodeGenerator_MPI(daeCodeGenerator):
                 weights_Nnz.append(nnz)
                 weights_Ncs.append(ncs_items)
                 weights_Nflops.append(nflops)
-                weights_Nflops_jacob.append(nnz * nflops)
+                weights_Nflops_jacob.append(nnz * nflops)                
+                weights_Nnz_x_Ncs.append(nnz * ncs_items)
+        
+        #print('sum(weights_Nnz_x_Ncs) = %d (average %.1f)' % (numpy.sum(weights_Nnz_x_Ncs), numpy.average(weights_Nnz_x_Ncs)))
         
         # All vertex weights together (for internal use)
-        equation_weights = weights_Ncs + weights_Nflops + weights_Nnz + weights_Nflops_jacob
+        equation_weights = [weights_Ncs, weights_Nflops, weights_Nnz, weights_Nflops_jacob]
         
+        # Vertex weights should be given as a 1D integer array(Nvertices,Nc)
         if len(self.balancingConstraints) == 0:
             vweights = None
         else:
-            vweights = []
+            weights_arr = []
             for objective in self.balancingConstraints:
                 if objective == 'Ncs':
-                    vweights += weights_Ncs
+                    weights_arr.append(weights_Ncs)
                 elif objective == 'Nflops':
-                    vweights += weights_Nflops
+                    weights_arr.append(weights_Nflops)
                 elif objective == 'Nnz':
-                    vweights += weights_Nnz
+                    weights_arr.append(weights_Nnz)
                 elif objective == 'Nflops_j':
-                    vweights += weights_Nflops_jacob
+                    weights_arr.append(weights_Nflops_jacob)
                 else:
                     raise RuntimeError('Invalid partitioning objective: %s' % objective)
-        
+            
+            # Transpose the 2D array (Nc, Nvertices) -> (Nvertices, Nc) and flatten it to 1D.  
+            # This loop is probably inefficient, use numpy.array instead?
+            # Anyway, this code will be replaced with OpenCS in the future.
+            # (a) Python list
+            vweights = []
+            Nconstr = len(weights_arr)
+            for ei in range(Nequations):
+                for ci in range(Nconstr): 
+                    vweights.append( weights_arr[ci][ei] )
+            
+            # (b) Numpy array (the code below appears to be slower than above)
+            #ndarr_weights = numpy.array(weights_arr, dtype=numpy.int32)
+            #vweights      = numpy.ravel( numpy.transpose(ndarr_weights), order = 'C' ).tolist()
+                    
         # Index sets for all processing elements (PE)
         loads_oi        = numpy.zeros((4, Npe)) # Ncs, Nflops, Nnz, Nflops_j
         all_oi          = [set() for i in range(Npe)]
@@ -662,16 +676,16 @@ class daeCodeGenerator_MPI(daeCodeGenerator):
         
         # Perform the partitioning.
         import pymetis
-        n_cuts, partitions = pymetis.part_graph(Npe, adjacency = equationBlockIndexes, vweights = vweights)
+        n_cuts, partitions = pymetis.part_graph(Npe, adjacency = equationBlockIndexes, vweights = vweights, recursive = True)
         #self.logf.write('n_cuts (metis) = %d\n' % n_cuts)
         
         # Generate a list with OWNED block indexes for each PE.
         for ei,pe in enumerate(partitions):
             owned_oi[pe].add(ei)
-            loads_oi[0][pe] += equation_weights[0*Nequations + ei] # Ncs
-            loads_oi[1][pe] += equation_weights[1*Nequations + ei] # Flops
-            loads_oi[2][pe] += equation_weights[2*Nequations + ei] # NNZ
-            loads_oi[3][pe] += equation_weights[3*Nequations + ei] # Flops Jacobian
+            loads_oi[0][pe] += equation_weights[0][ei] # Ncs
+            loads_oi[1][pe] += equation_weights[1][ei] # NFlops
+            loads_oi[2][pe] += equation_weights[2][ei] # Nnz
+            loads_oi[3][pe] += equation_weights[3][ei] # Nflops_j
         
         # Generate a list with ALL block indexes for each PE.
         for pe, owned_indexes in enumerate(owned_oi):
@@ -855,7 +869,7 @@ class daeCodeGenerator_MPI(daeCodeGenerator):
             self.logf.write(A_csr_perm.shape)
             # Now update owned_indexes and bi_to_bi_local dictionary
             import png
-            filename = os.path.join('/home/ciroki/mpi-exchange', 'incidence_matrix-%05d.png' % pe)
+            filename = os.path.join('/home/ciroki/mpi-exchange', 'sparsity_pattern-%05d.png' % pe)
             f = open(filename, 'wb')
             w = png.Writer(Nequations_local, Nequations_local, greyscale=True)
             w.write(f, A_csr_perm.tolist())

@@ -7,8 +7,8 @@ CONFIG += shared
 INCLUDEPATH += $${BOOSTDIR} \
                $${PYTHON_INCLUDE_DIR} \
                $${PYTHON_SITE_PACKAGES_DIR} \
-               #$${NUMPY_INCLUDE_DIR} \
-               $${DEALII_INCLUDE}
+               $${DEALII_INCLUDE} \
+               $${OPEN_CS_INCLUDE}
 
 QMAKE_LIBDIR += $${PYTHON_LIB_DIR} \
                 $${BLAS_LAPACK_LIBDIR} \

@@ -8,8 +8,8 @@
 #include <boost/python.hpp>
 using namespace boost::python;
 
-#include "../opencs/opencl/cs_opencl_platforms.h"
-#include "../opencs/opencl/cs_evaluator_opencl_factory.h"
+#include <OpenCS/evaluators/cs_opencl_platforms.h>
+#include <OpenCS/evaluators/cs_evaluator_opencl_factory.h>
 using namespace cs;
 
 template<typename ITEM>
@@ -41,14 +41,19 @@ boost::python::dict getDictFromMapByValue(std::map<KEY,VALUE>& mapItems)
 
 static boost::python::list lAvailableOpenCLDevices()
 {
-    std::vector<openclDevice_t> arrDevices = AvailableOpenCLDevices();
+    std::vector<openclDevice_t> arrDevices = csAvailableOpenCLDevices();
     return getListFromVectorByValue(arrDevices);
 }
 
 static boost::python::list lAvailableOpenCLPlatforms()
 {
-    std::vector<openclPlatform_t> arrPlatforms = AvailableOpenCLPlatforms();
+    std::vector<openclPlatform_t> arrPlatforms = csAvailableOpenCLPlatforms();
     return getListFromVectorByValue(arrPlatforms);
+}
+
+static csComputeStackEvaluator_t* CreateComputeStackEvaluator_s(int platformID, int deviceID, std::string buildProgramOptions)
+{
+    return csCreateOpenCLEvaluator(platformID, deviceID, buildProgramOptions);
 }
 
 static csComputeStackEvaluator_t* CreateComputeStackEvaluator_m(boost::python::list ldevices,
@@ -75,7 +80,7 @@ static csComputeStackEvaluator_t* CreateComputeStackEvaluator_m(boost::python::l
         taskPortions.push_back(taskPortion);
     }
 
-    return CreateComputeStackEvaluator_MultiDevice(platforms, devices, taskPortions, buildProgramOptions);
+    return csCreateOpenCLEvaluator_MultiDevice(platforms, devices, taskPortions, buildProgramOptions);
 }
 
 // Temporary workaround for Visual Studio 2015 update 3
@@ -120,7 +125,7 @@ BOOST_PYTHON_MODULE(pyEvaluator_OpenCL)
 
     def("AvailableOpenCLDevices",      &lAvailableOpenCLDevices);
     def("AvailableOpenCLPlatforms",    &lAvailableOpenCLPlatforms);
-    def("CreateComputeStackEvaluator", &CreateComputeStackEvaluator,
+    def("CreateComputeStackEvaluator", &CreateComputeStackEvaluator_s,
                                        ( arg("platformID"), arg("deviceID"), arg("buildProgramOptions") = ""  ), return_value_policy<manage_new_object>());
     def("CreateComputeStackEvaluator", &CreateComputeStackEvaluator_m,
                                        ( arg("devices"), arg("buildProgramOptions") = ""  ), return_value_policy<manage_new_object>());

@@ -164,7 +164,7 @@ class modTutorial(daeModel):
         eq_types[ : , -1] = 'T'  # top boundary
         eq_types[  0, : ] = 'L'  # left boundary
         eq_types[ -1, : ] = 'R'  # right boundary
-        print(eq_types.T) # print it transposed to visalise it more easily
+        print(eq_types.T) # print it transposed to visualise it more easily
 
         # Finally, create equations based on the equation type
         for x,y in indexes:

@@ -305,6 +305,14 @@ BOOST_PYTHON_MODULE(pyCore)
         .export_values()
     ;
 
+    enum_<cs::csModelInputFileType>("csModelInputFileType")
+        .value("eInputFile_ModelStructure",  cs::eInputFile_ModelStructure)
+        .value("eInputFile_ModelEquations",  cs::eInputFile_ModelEquations)
+        .value("eInputFile_SparsityPattern", cs::eInputFile_SparsityPattern)
+        .value("eInputFile_PartitionData",   cs::eInputFile_PartitionData)
+        .export_values()
+    ;
+
     enum_<daeeEvaluationMode>("daeeEvaluationMode")
         .value("eEvaluationTree_OpenMP",	dae::core::eEvaluationTree_OpenMP)
         .value("eComputeStack_OpenMP",      dae::core::eComputeStack_OpenMP)
@@ -358,6 +366,8 @@ BOOST_PYTHON_MODULE(pyCore)
     def("daeVersionMajor",  &dae::daeVersionMajor, DOCSTR_global_daeVersionMajor);
     def("daeVersionMinor",  &dae::daeVersionMinor, DOCSTR_global_daeVersionMinor);
     def("daeVersionBuild",  &dae::daeVersionBuild, DOCSTR_global_daeVersionBuild);
+
+    def("opencsVersion",    &daepython::get_OpenCSVersion);
 
 /**************************************************************
     Global constants

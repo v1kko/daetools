@@ -207,6 +207,11 @@ daeVariable* daeVariableWrapper_GetVariable(daeVariableWrapper &self)
     return boost::ref(self.m_pVariable);
 }
 
+int get_OpenCSVersion()
+{
+    return OPENCS_VERSION;
+}
+
 boost::python::object pydaeGetConfig(void)
 {
     return boost::python::object( boost::ref(daeGetConfig()) );

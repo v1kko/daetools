@@ -13,20 +13,19 @@ CONFIG += shared
 INCLUDEPATH += $${BOOSTDIR} \
                $${PYTHON_INCLUDE_DIR} \
                $${PYTHON_SITE_PACKAGES_DIR} \
-               $${OPEN_CS_DIR}
+               $${OPEN_CS_INCLUDE}
 
 QMAKE_LIBDIR += $${PYTHON_LIB_DIR}
 
 LIBS += $${SOLIBS_RPATH}
 
-unix::LIBS += $${DAE_EVALUATOR_OPENCL_LIB} \
+unix::LIBS += $${OPEN_CS_LIBS} \
               $${INTEL_OPENCL_LIBS} \
               $${BOOST_PYTHON_LIB} \
               $${BOOST_LIBS}
 # Important: quotes around $${NVIDIA_OPENCL_LIBS}
 #            for in windows the path includes empty spaces.
-win32-msvc2015::LIBS += $${DAE_EVALUATOR_OPENCL_LIB} \
-                        "$${NVIDIA_OPENCL_LIBS}" \
+win32-msvc2015::LIBS += "$${NVIDIA_OPENCL_LIBS}" \
                         $${BOOST_PYTHON_LIB} \
                         $${BOOST_LIBS}
 

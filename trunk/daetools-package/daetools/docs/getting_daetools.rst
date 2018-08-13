@@ -97,45 +97,63 @@ Install Python and Python packages
 Use the system's Python
 ///////////////////////
 
+The package names are for python 2. 
 * Debian GNU/Linux and derivatives (Ubuntu, Linux Mint)
 
   .. code-block:: bash
 
      # DAE Tools v1.6.1 and newer require PyQt5 (older versions use PyQt4: python-qt4)
-     sudo apt-get install python-numpy python-scipy python-matplotlib python-qt5 mayavi2 python-lxml
+     # Python 2:
+     sudo apt-get install python-numpy python-scipy python-matplotlib python-pyqt5 mayavi2 python-lxml
      # Optional packages:
      sudo apt-get install python-openpyxl python-h5py python-pandas python-pygraphviz
+
+     # Python 3:
+     sudo apt-get install python3-numpy python3-scipy python3-matplotlib python3-pyqt5 mayavi2 python3-lxml
+     # Optional packages:
+     sudo apt-get install python3-openpyxl python3-h5py python3-pandas python3-pygraphviz
 
 * Red Hat and derivatives (Fedora, CentOS):
 
   .. code-block:: bash
 
      # DAE Tools v1.6.1 and newer require PyQt5 (older versions use PyQt4)
-     sudo yum install numpy scipy python-matplotlib PyQt5 Mayavi python-lxml
+     # Python 2:
+     sudo yum install python-numpy python-scipy python-matplotlib python-qt5 Mayavi python-lxml
      # Optional packages:
-     sudo yum install python-openpyxl h5py python-pandas python-pygraphviz
+     sudo yum install python-openpyxl python-h5py python-pandas python-pygraphviz
+
+     # Python 3:
+     sudo yum install python3-numpy python3-scipy python3-matplotlib python3-qt5 Mayavi python3-lxml
+     # Optional packages:
+     sudo yum install python3-openpyxl python3-h5py python3-pandas python3-pygraphviz
 
 * SUSE Linux:
 
   .. code-block:: bash
 
      # DAE Tools v1.6.1 and newer require PyQt5 (older versions use PyQt4: python-qt4)
+     # Python 2:
      sudo zypper in python-numpy python-scipy python-matplotlib python-qt5 python-lxml
      # Optional packages:
-     sudo zypper in python-openpyxl h5py python-pandas python-pygraphviz
+     sudo zypper in python-openpyxl python-h5py python-pandas python-pygraphviz
+
+     # Python 3:
+     sudo zypper in python3-numpy python3-scipy python3-matplotlib python3-qt5 python3-lxml
+     # Optional packages:
+     sudo zypper in python3-openpyxl python3-h5py python3-pandas python3-pygraphviz
 
 * Arch Linux:
 
   .. code-block:: bash
 
-     # Python 2:
      # DAE Tools v1.6.1 and newer require PyQt5 (older versions use PyQt4: python2-pyqt4)
+     # Python 2:
      sudo pacman -S python2-numpy python2-scipy python2-matplotlib python2-pyqt5 mayavi python-lxml
      # Optional packages:
      sudo pacman -S python2-openpyxl python2-h5py python2-pandas python2-pygraphviz
 
      # Python 3:
-     # DAE Tools v1.6.1 and newer require PyQt5 (older versions use PyQt4: python-pyqt4)
      sudo pacman -S python-numpy python-scipy python-matplotlib python-pyqt5 mayavi python-lxml
      # Optional packages:
      sudo pacman -S python-openpyxl python-h5py python-pandas python-pygraphviz

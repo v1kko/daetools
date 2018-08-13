@@ -81,7 +81,7 @@ bool daeTCPIPDataReporter::Connect(const string& strConnectString, const string&
 #elif defined(__linux__)
             boost::process::spawn("python -m daetools.dae_plotter.plotter");
 #elif defined(__unix__) || defined(__APPLE__)
-            // There is  problem with the boost::process::spawn function in macOS.
+            // There is a problem with the boost::process::spawn function in macOS.
 #endif
             plotterStarted = true;
         }

@@ -1749,7 +1749,7 @@ public:
     std::vector<daeEquationExecutionInfo*>	m_ptrarrEquationExecutionInfos_ActiveSet;
 
     std::vector<csComputeStackItem_t>   m_arrAllComputeStacks;
-    std::vector<csJacobianMatrixItem_t> m_arrComputeStackJacobianItems;
+    std::vector<csIncidenceMatrixItem_t> m_arrComputeStackJacobianItems;
     std::vector<uint32_t>               m_arrActiveEquationSetIndexes;
     std::vector<real_t>                 m_jacobian;
 

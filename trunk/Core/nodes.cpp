@@ -2811,25 +2811,25 @@ string adUnaryNode::SaveAsLatex(const daeNodeSaveAsContext* c) const
         strResult += " \\right) ";
         break;
     case eArcSinh:
-        strResult += "\\asinh";
+        strResult += "asinh";
         strResult += " \\left( ";
         strResult += node->SaveAsLatex(c);
         strResult += " \\right) ";
         break;
     case eArcCosh:
-        strResult += "\\acosh";
+        strResult += "acosh";
         strResult += " \\left( ";
         strResult += node->SaveAsLatex(c);
         strResult += " \\right) ";
         break;
     case eArcTanh:
-        strResult += "\\atanh";
+        strResult += "atanh";
         strResult += " \\left( ";
         strResult += node->SaveAsLatex(c);
         strResult += " \\right) ";
         break;
     case eErf:
-        strResult += "\\erf";
+        strResult += "erf";
         strResult += " \\left( ";
         strResult += node->SaveAsLatex(c);
         strResult += " \\right) ";
@@ -3697,9 +3697,11 @@ string adBinaryNode::SaveAsLatex(const daeNodeSaveAsContext* c) const
         strResult += strRight;
         break;
     case eDivide:
+        strResult += "\\frac{";
         strResult += strLeft;
-        strResult += " \\over ";
+        strResult += "}{";
         strResult += strRight;
+        strResult += "}";
         break;
     case ePower:
         strResult += strLeft;

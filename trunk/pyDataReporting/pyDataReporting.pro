@@ -1,6 +1,6 @@
 include(../dae.pri)
 QT -= core \
-	gui
+    gui
 TARGET = pyDataReporting
 TEMPLATE = lib
 CONFIG += shared
@@ -8,8 +8,8 @@ CONFIG += shared
 INCLUDEPATH += $${BOOSTDIR} \
                $${PYTHON_INCLUDE_DIR} \
                $${PYTHON_SITE_PACKAGES_DIR} \
-               #$${NUMPY_INCLUDE_DIR} \
-	           $${MPI_INCLUDE}
+               $${MPI_INCLUDE} \
+               $${OPEN_CS_INCLUDE}
 
 QMAKE_LIBDIR += $${PYTHON_LIB_DIR}
 
@@ -20,7 +20,7 @@ LIBS +=	$${DAE_DATAREPORTING_LIB} \
         $${DAE_CONFIG_LIB} \
         $${BOOST_PYTHON_LIB} \
         $${BOOST_LIBS}
-        
+
 SOURCES += stdafx.cpp \
     dllmain.cpp \
     dae_python.cpp \

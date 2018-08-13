@@ -8,8 +8,8 @@ CONFIG += shared
 INCLUDEPATH += $${BOOSTDIR} \
                $${PYTHON_INCLUDE_DIR} \
                $${PYTHON_SITE_PACKAGES_DIR} \
-               #$${NUMPY_INCLUDE_DIR} \
-               $${MPI_INCLUDE}
+               $${MPI_INCLUDE} \
+               $${OPEN_CS_INCLUDE}
 
 QMAKE_LIBDIR += $${PYTHON_LIB_DIR}
 

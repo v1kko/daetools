@@ -37,7 +37,7 @@ in parallel using two methods
 
    Equations can be evaluated in parallel using:
 
-   a) OpenMP API for general purpose processors and manycore devices (i.e. Xeon Phi).
+   a) OpenMP API for general purpose processors and manycore devices.
       
       This method is specified by setting daetools.core.equations.evaluationMode option 
       in daetools.cfg to "computeStack_OpenMP" or setting the simulation property:
@@ -48,7 +48,7 @@ in parallel using two methods
       If numThreads is 0 the default number of threads is used (the number of cores in the system). 
       Sequential evaluation is achieved by setting numThreads to 1.
 
-   b) OpenCL framework for streaming processors (GPU, GPGA) and heterogeneous systems.
+   b) OpenCL framework for streaming processors and heterogeneous systems.
 
       This type is implemented in an external Python module pyEvaluator_OpenCL. 
       It is up to one order of magnitude faster than the Evaluation Tree approach. 
@@ -56,7 +56,7 @@ in parallel using two methods
       
       OpenCL evaluators can use a single or multiple OpenCL devices.
       It is required to install OpenCL drivers/runtime libraries.
-      InteL: https://software.intel.com/en-us/articles/opencl-drivers
+      Intel: https://software.intel.com/en-us/articles/opencl-drivers
       AMD: https://support.amd.com/en-us/kb-articles/Pages/OpenCL2-Driver.aspx
       NVidia: https://developer.nvidia.com/opencl
 """

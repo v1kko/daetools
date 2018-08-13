@@ -6,7 +6,8 @@ TEMPLATE = lib
 CONFIG += staticlib
 
 INCLUDEPATH += $${BOOSTDIR} \
-               $${MPI_INCLUDE}
+               $${MPI_INCLUDE} \
+               $${OPEN_CS_INCLUDE}
 
 LIBS +=	$${DAE_CONFIG_LIB} \
         $${MPI_LIBS}

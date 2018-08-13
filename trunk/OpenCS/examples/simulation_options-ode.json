@@ -1,0 +1,63 @@
+R"=====({
+    "Simulation": {
+        "StartTime":         %.15f,
+        "TimeHorizon":       %.15f,
+        "ReportingInterval": %.15f,
+        "OutputDirectory":   "results"
+    },
+    "Model" : {
+        "ComputeStackEvaluator" : {
+            "Library" : "Sequential",
+            "Name": "",
+            "Parameters": {
+            }
+        }
+    },
+    "Solver" : {
+        "Library" : "Sundials",
+        "Name": "CVodes",
+        "PrintInfo": false,
+        "Parameters": {
+            "RelativeTolerance":     %.15f,
+            "IntegrationMode":       "Normal",
+            "LinearMultistepMethod": "BDF",
+            "IterationType":         "Newton",
+            "MaxOrd":                5,
+            "MaxNumSteps":           500,
+            "InitStep":              0.0,
+            "MinStep":               0.0,
+            "MaxStep":               0.0,
+            "MaxHnilWarns":          1.0,
+            "StabLimDet":            false,
+            "MaxErrTestFails":       7,
+            "MaxNonlinIters":        3,
+            "MaxConvFails":          10,
+            "NonlinConvCoef":        0.10,
+            "NoInactiveRootWarn":    false
+        }
+    },
+    "LinearSolver" : {
+        "Library" : "Sundials",
+        "Name": "gmres",
+        "PrintInfo": false,
+        "Parameters": {
+            "kspace":              30,
+            "preconditioningType": "left",
+            "EpsLin":              0.05,
+            "JacTimesVecFn":       "DifferenceQuotient",
+            "GSType":              "MODIFIED_GS"
+        },
+        "Preconditioner" : {
+            "Library" : "Ifpack",
+            "Name": "ILU",
+            "PrintInfo": false,
+            "Parameters": {
+                "fact: level-of-fill":      3,
+                "fact: relax value":        0.0,
+                "fact: absolute threshold": 1e-5,
+                "fact: relative threshold": 1.0
+            }
+        }
+    }
+}
+)====="

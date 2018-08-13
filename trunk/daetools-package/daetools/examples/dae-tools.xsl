@@ -7,6 +7,7 @@
         <meta name="viewport" content="width=device-width, initial-scale=1"/>
         <link rel="stylesheet" href="dae-tools.css" type="text/css" media="all" />
         <link rel="shortcut icon" href="http://www.daetools.com/favicon.ico" type="image/x-icon"/>
+        <script type="text/javascript" async="true" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
         <script type="text/x-mathjax-config">
             MathJax.Hub.Config({
                 jax: ["input/TeX", "output/HTML-CSS"],
@@ -28,7 +29,6 @@
                             }
             });
         </script>
-        <script type="text/javascript" async="true" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
         <title>
             DAE Tools Model Report: <xsl:value-of select="Model/Name"/>
         </title>

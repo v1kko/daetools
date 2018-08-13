@@ -24,13 +24,14 @@ shellBONMIN {
 ######################################################################################
 #                                BONMIN
 ######################################################################################
-CONFIG(BONMIN, BONMIN|IPOPT):message(BONMIN) { 
+CONFIG(BONMIN, BONMIN|IPOPT):message(BONMIN) {
 
 QMAKE_CXXFLAGS += -DdaeBONMIN
 TARGET = cdaeBONMIN_MINLPSolver
 
 INCLUDEPATH += $${BOOSTDIR} \
-               $${BONMIN_INCLUDE}
+               $${BONMIN_INCLUDE} \
+               $${OPEN_CS_INCLUDE}
 
 QMAKE_LIBDIR += $${BONMIN_LIBDIR} \
                 $${MUMPS_LIBDIR}
@@ -47,13 +48,14 @@ LIBS += $${DAE_ACTIVITY_LIB} \
 ######################################################################################
 #                                IPOPT
 ######################################################################################
-CONFIG(IPOPT, BONMIN|IPOPT):message(IPOPT) { 
+CONFIG(IPOPT, BONMIN|IPOPT):message(IPOPT) {
 
 QMAKE_CXXFLAGS += -DdaeIPOPT
 TARGET = cdaeIPOPT_NLPSolver
 
 INCLUDEPATH += $${BOOSTDIR} \
-               $${IPOPT_INCLUDE}
+               $${IPOPT_INCLUDE} \
+               $${OPEN_CS_INCLUDE}
 
 QMAKE_LIBDIR += $${IPOPT_LIBDIR} \
                 $${MUMPS_LIBDIR}
@@ -68,11 +70,11 @@ LIBS += $${DAE_ACTIVITY_LIB} \
 }
 
 
-HEADERS += stdafx.h \ 
+HEADERS += stdafx.h \
     nlpsolver_class_factory.h \
-    nlpsolver.h \ 
+    nlpsolver.h \
     base_solvers.h \
-	../nlp_common.h 
+    ../nlp_common.h
 SOURCES += stdafx.cpp \
     dllmain.cpp \
     nlpsolver.cpp
