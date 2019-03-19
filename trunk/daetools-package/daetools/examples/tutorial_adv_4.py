@@ -17,8 +17,16 @@ DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 ************************************************************************************
 """
 __doc__ = """
-This tutorial illustrates the C++ MPI code generator.
+This tutorial illustrates the OpenCS code generator.
+For the given DAE Tools simulation it generates input files for OpenCS simulation,
+either for a single CPU or for a parallel simulation using MPI.
 The model is identical to the model in the tutorial 11.
+
+The OpenCS framework currently does not support:
+    
+- Discontinuous equations (STNs and IFs)
+- External functions
+- Thermo-physical property packages
 
 The temperature plot (at t=100s, x=0.5128, y=*):
 
@@ -26,7 +34,7 @@ The temperature plot (at t=100s, x=0.5128, y=*):
    :width: 500px
 """
 
-import sys, numpy, itertools
+import sys, numpy, itertools, json
 from time import localtime, strftime
 from daetools.pyDAE import *
 
@@ -141,8 +149,9 @@ class simTutorial(daeSimulation):
 def run_code_generators(simulation, log):
     # Demonstration of daetools c++/MPI code-generator:
     import tempfile
-    tmp_folder = tempfile.mkdtemp(prefix = 'daetools-code_generator-cxx-')
-    msg = 'Generated input files for the daetools_mpi_simulator will be located in: \n%s' % tmp_folder
+    tmp_folder1 = tempfile.mkdtemp(prefix = 'daetools-code_generator-opencs-1cpu-')
+    tmp_folder4 = tempfile.mkdtemp(prefix = 'daetools-code_generator-opencs-4cpu-')
+    msg = 'Generated input files for the csSimulator will be located in: \n%s and: \n%s' % (tmp_folder1, tmp_folder4)
     log.Message(msg, 0)
 
     try:
@@ -150,13 +159,33 @@ def run_code_generators(simulation, log):
     except Exception as e:
         log.Message(str(e), 0)
 
-    # Generate input files for 4 nodes
-    from daetools.code_generators.mpi import daeCodeGenerator_MPI
-    cg = daeCodeGenerator_MPI()
+    from daetools.code_generators.opencs import daeCodeGenerator_OpenCS
+    from pyOpenCS import createGraphPartitioner_Metis, createGraphPartitioner_Simple
     
-    constraints = ['Ncs','Nnz','Nflops','Nflops_j'] # use all available constraints
-    cg.generateSimulation(simulation, tmp_folder, 4, balancingConstraints = constraints, saveIncidenceMatrix = True)
+    cg = daeCodeGenerator_OpenCS()
 
+    # Get default simulation options for DAE systems as a dictionary and
+    # set the linear solver parameters.
+    options = cg.defaultSimulationOptions_DAE
+    options['LinearSolver']['Preconditioner']['Name']       = 'Amesos'
+    options['LinearSolver']['Preconditioner']['Parameters'] = {"amesos: solver type": "Amesos_Klu"}
+
+    # Generate input files for simulation on a single CPU
+    cg.generateSimulation(simulation, 
+                          tmp_folder1,
+                          1,
+                          simulationOptions = options)
+
+    # Generate input files for parallel simulation on 4 CPUs
+    gp = createGraphPartitioner_Metis('PartGraphRecursive')
+    constraints = ['Ncs','Nnz','Nflops','Nflops_j'] # use all available constraints
+    cg.generateSimulation(simulation,
+                          tmp_folder4,
+                          4, 
+                          graphPartitioner = gp, 
+                          simulationOptions = options, 
+                          balancingConstraints = constraints)
+    
 def setupLASolver():
     lasolver = pyTrilinos.daeCreateTrilinosSolver("AztecOO", "")
 

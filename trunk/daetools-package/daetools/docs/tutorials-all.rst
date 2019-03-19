@@ -36,6 +36,10 @@ All Tutorials
    :start-after: begin-command
    :end-before: end-command
 
+.. include:: tutorials-opencs.rst
+   :start-after: begin-command
+   :end-before: end-command
+
 .. include:: tutorials-chemeng-optimisation.rst
    :start-after: begin-command
    :end-before: end-command

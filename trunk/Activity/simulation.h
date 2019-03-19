@@ -71,9 +71,16 @@ public:
     virtual void				Reinitialize(void);
     virtual void				SolveInitial(void);
     virtual daeDAESolver_t*		GetDAESolver(void) const;
-    virtual real_t				Integrate(daeeStopCriterion eStopCriterion, bool bReportDataAroundDiscontinuities = true);
-    virtual real_t				IntegrateForTimeInterval(real_t time_interval, daeeStopCriterion eStopCriterion, bool bReportDataAroundDiscontinuities = true);
-    virtual real_t				IntegrateUntilTime(real_t time, daeeStopCriterion eStopCriterion, bool bReportDataAroundDiscontinuities = true);
+    virtual real_t				Integrate(daeeStopCriterion eStopCriterion,
+                                          bool bReportDataAroundDiscontinuities = true);
+    virtual real_t				IntegrateForTimeInterval(real_t time_interval,
+                                                         daeeStopCriterion eStopCriterion,
+                                                         bool bReportDataAroundDiscontinuities = true);
+    virtual real_t				IntegrateUntilTime(real_t time,
+                                                   daeeStopCriterion eStopCriterion,
+                                                   bool bReportDataAroundDiscontinuities = true);
+    virtual real_t				IntegrateForOneStep(daeeStopCriterion eStopCriterion,
+                                                    bool bReportDataAroundDiscontinuities = true);
     virtual void				SetUpParametersAndDomains(void);
     virtual void				SetUpVariables(void);
     virtual void				SetUpOptimization(void);
@@ -176,6 +183,16 @@ public:
                                                             const std::string& filenameJacobianIndexes,
                                                             const std::vector<uint32_t>& equationIndexes,
                                                             const std::map<uint32_t,uint32_t>& bi_to_bi_local);
+
+    void InitialiseModelBuilder(uint32_t&                                     Nvariables,
+                                uint32_t&                                     Ndofs,
+                                std::vector<std::string>&                     variableNames,
+                                std::vector<real_t>&                          variableValues,
+                                std::vector<real_t>&                          variableDerivatives,
+                                std::vector<real_t>&                          absTolerances,
+                                std::vector<std::string>&                     dofNames,
+                                std::vector<real_t>&                          dofValues,
+                                std::vector< std::shared_ptr<cs::csNode_t> >& equations);
 
 protected:
 //	void	SetInitialConditionsToZero(void);

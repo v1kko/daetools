@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <cmath>
 #include <limits>
+#include <boost/functional/hash.hpp>
 
 namespace units
 {
@@ -331,6 +332,14 @@ const base_unit unit::getBaseUnit(void) const
     return tmp;
 }
 
+size_t unit::SizeOf() const
+{
+    size_t size = sizeof(*this);
+    for(std::map<std::string, double>::const_iterator it = units.begin(); it != units.end(); it++)
+        size += (it->first.capacity()*sizeof(char) + sizeof(it->second));
+    return size;
+}
+
 bool unit::operator==(const unit& other) const
 {
     return (getBaseUnit() == other.getBaseUnit());
@@ -581,6 +590,13 @@ std::string unit::toJSON(void) const
         strJSON += ( boost::format("%s\"%s\" : %f") % (iter == units.begin() ? "" : ", ") % iter->first % iter->second ).str();
     strJSON += " }";
     return strJSON;
+}
+
+size_t unit::GetHash() const
+{
+    size_t seed = 0;
+    boost::hash_combine(seed, units);
+    return seed;
 }
 
 std::ostream& operator<<(std::ostream& out, const unit& u)

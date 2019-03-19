@@ -8,6 +8,7 @@ using namespace dae;
 #include "../Units/units_pool.h"
 #include "simplify_node.h"
 #include <typeinfo>
+#include <boost/functional/hash.hpp>
 using namespace dae::xml;
 using namespace boost;
 
@@ -311,12 +312,18 @@ void adNode::SaveNodeAsLatex(io::xmlTag_t* pTag,
     io::xmlTag_t* pChildTag = pTag->AddTag(strObjectName);
     if(!pChildTag)
         daeDeclareAndThrowException(exXMLIOError);
-
-    strValue  = "$$";
-    strValue += node->SaveAsLatex(c);
-    if(bAppendEqualToZero)
-        strValue += " = 0";
-    strValue += "$$";
+    if(!node)
+    {
+        strValue = "$$empty$$";
+    }
+    else
+    {
+        strValue  = "$$";
+        strValue += node->SaveAsLatex(c);
+        if(bAppendEqualToZero)
+            strValue += " = 0";
+        strValue += "$$";
+    }
 
     pChildTag->SetValue(strValue);
 }
@@ -734,6 +741,22 @@ adNodePtr adNode::SimplifyNode(adNodePtr node)
 /*********************************************************************************************
     adNodeImpl
 **********************************************************************************************/
+//std::mutex                                  adNodeImpl::g_mutex;
+//std::map<size_t, std::map<size_t,adNode*> > adNodeImpl::g_allNodes;
+double adNodeImpl::HASH_FLOAT_CONSTANT_PRECISION = std::pow(10, daeGetConfig().GetInteger("daetools.core.nodes.significantDecimalsForConstantsHash", 12));
+
+thread_local daeeMemoryPool adNodeImpl::g_memoryPool = eSetupNodesPool;
+
+adNodeImpl::adNodeImpl()
+{
+    // Important:
+    // Do not initialise memoryPool here - it has been done in the operator new!
+}
+
+adNodeImpl::~adNodeImpl()
+{
+}
+
 void adNodeImpl::Export(std::string& strContent, daeeModelLanguage eLanguage, daeModelExportContext& c) const
 {
 }
@@ -776,24 +799,115 @@ size_t adNodeImpl::SizeOf(void) const
     return sizeof(*this);
 }
 
+size_t adNodeImpl::GetHash() const
+{
+    daeDeclareException(exNotImplemented);
+    e << "GetHash function is not implemented in " << typeid(*this).name() << " class";
+    throw e;
+
+    return 0;
+}
+
+void adNodeImpl::SetMemoryPool(daeeMemoryPool memPool)
+{
+    g_memoryPool = memPool;
+}
+
+daeeMemoryPool adNodeImpl::GetMemoryPool()
+{
+    // Initialised only once.
+    static bool useNodeMemoryPools = daeConfig::GetConfig().GetBoolean("daetools.core.nodes.useNodeMemoryPools", true);
+
+    if(useNodeMemoryPools)
+        return g_memoryPool;
+    else
+        return eHeapMemory;
+}
+
+void adNodeImpl::ReleaseSetupNodesMemory()
+{
+    bool released;
+
+    released = adConstantNode::release_setup_memory();
+    printf("  adConstantNode::ReleaseSetupNodesMemory = %s\n", (released ? "true" : "false"));
+
+    released = adUnaryNode::release_setup_memory();
+    printf("  adUnaryNode::ReleaseSetupNodesMemory = %s\n", (released ? "true" : "false"));
+
+    released = adBinaryNode::release_setup_memory();
+    printf("  adBinaryNode::ReleaseSetupNodesMemory = %s\n", (released ? "true" : "false"));
+
+    released = adFloatCoefficientVariableSumNode::release_setup_memory();
+    printf("  adFloatCoefficientVariableSumNode::ReleaseSetupNodesMemory = %s\n", (released ? "true" : "false"));
+}
+
+void adNodeImpl::PurgeSetupNodesMemory()
+{
+    adConstantNode::purge_setup_memory();
+    adUnaryNode::purge_setup_memory();
+    adBinaryNode::purge_setup_memory();
+    adFloatCoefficientVariableSumNode::purge_setup_memory();
+}
+
+void adNodeImpl::PurgeRuntimeNodesMemory()
+{
+    adConstantNode::purge_runtime_memory();
+    adUnaryNode::purge_runtime_memory();
+    adBinaryNode::purge_runtime_memory();
+    adFloatCoefficientVariableSumNode::purge_runtime_memory();
+    adFloatCoefficientVariableSumNode::pool_allocator::purge_memory();
+}
+
+void adNodeImpl::ReleaseRuntimeNodesMemory()
+{
+    adConstantNode::release_runtime_memory();
+    adUnaryNode::release_runtime_memory();
+    adBinaryNode::release_runtime_memory();
+    adFloatCoefficientVariableSumNode::release_runtime_memory();
+    adFloatCoefficientVariableSumNode::pool_allocator::release_memory();
+}
+/*
+template<typename T>
+void adNodeImpl::AddToNodeMap(T* self)
+{
+    size_t type_id = typeid(*self).hash_code();
+    size_t addr = reinterpret_cast<size_t>(self);
+    std::lock_guard<std::mutex> lock(g_mutex);
+    std::map<size_t,adNode*>& node_map = adNodeImpl::g_allNodes[type_id];
+    node_map[addr] = self;
+}
+
+template<typename T>
+void adNodeImpl::RemoveFromNodeMap(T* self)
+{
+    size_t type_id = typeid(*self).hash_code();
+    size_t addr = reinterpret_cast<size_t>(self);
+    std::lock_guard<std::mutex> lock(g_mutex);
+    std::map<size_t,adNode*>& node_map = adNodeImpl::g_allNodes[type_id];
+    node_map.erase(addr);
+}
+*/
+
 daeeEquationType DetectEquationType(adNodePtr node)
 {
     adNode* n = node.get();
-    daeeEquationType eMode = eETUnknown;
+    daeeEquationType eEqType = eETUnknown;
+    if(!n)
+        return eEqType;
 
     if(n->IsDifferential())
     {
-        eMode = eImplicitODE;
+        eEqType = eImplicitODE;
 
         if(typeid(n) == typeid(adSetupTimeDerivativeNode*))
         {
-            eMode = eExplicitODE;
+            eEqType = eExplicitODE;
         }
         else if(typeid(n) == typeid(adUnaryNode*))
         {
             adUnaryNode* un = dynamic_cast<adUnaryNode*>(n);
             if(un->eFunction == eSign && typeid(un->node.get()) == typeid(adSetupTimeDerivativeNode*))
-                eMode = eExplicitODE;
+                eEqType = eExplicitODE;
         }
         else if(typeid(n) == typeid(adBinaryNode*))
         {
@@ -803,16 +917,16 @@ daeeEquationType DetectEquationType(adNodePtr node)
                 adNode* left  = bn->left.get();
                 adNode* right = bn->right.get();
                 if(typeid(left) == typeid(adSetupTimeDerivativeNode*) && !right->IsDifferential())
-                    eMode = eExplicitODE;
+                    eEqType = eExplicitODE;
             }
         }
     }
     else
     {
-        eMode = eAlgebraic;
+        eEqType = eAlgebraic;
     }
 
-    return eMode;
+    return eEqType;
 }
 
 /*********************************************************************************************
@@ -820,29 +934,39 @@ daeeEquationType DetectEquationType(adNodePtr node)
 **********************************************************************************************/
 adConstantNode::adConstantNode()
 {
+    adNodeImpl::AddToNodeMap(this);
 }
 
 adConstantNode::adConstantNode(const real_t d)
               : m_quantity(d, unit())
 {
+    adNodeImpl::AddToNodeMap(this);
 }
 
 adConstantNode::adConstantNode(const real_t d, const unit& units)
               : m_quantity(d, units)
 {
+    adNodeImpl::AddToNodeMap(this);
 }
 
 adConstantNode::adConstantNode(const quantity& q)
               : m_quantity(q)
 {
+    adNodeImpl::AddToNodeMap(this);
 }
 
 adConstantNode::~adConstantNode()
 {
+    adNodeImpl::RemoveFromNodeMap(this);
 }
 
 adouble adConstantNode::Evaluate(const daeExecutionContext* pExecutionContext) const
 {
+    // If a node class can be both Setup and Runtime, the Setup nodes are transformed into the Runtime ones
+    // in the daeEquation::GatherInfo function. If GatherInfo is true then we do not evaluate
+    // nodes to obtain a value but to create Runtime nodes.
+    // Therefore, return a copy of this node.
+    // To check: should a reference to this node be returned or a deep copy?
     if(pExecutionContext->m_pDataProxy->GetGatherInfo())
     {
         adouble tmp;
@@ -856,14 +980,22 @@ adouble adConstantNode::Evaluate(const daeExecutionContext* pExecutionContext) c
     }
 }
 
-const quantity adConstantNode::GetQuantity(void) const
+quantity adConstantNode::GetQuantity(void) const
 {
     return m_quantity;
 }
 
 size_t adConstantNode::SizeOf(void) const
 {
-    return sizeof(adConstantNode);
+    return m_quantity.SizeOf();
+}
+
+size_t adConstantNode::GetHash() const
+{
+    size_t seed = 0;
+    long int cval = (long int)(m_quantity.getValue()*adNodeImpl::HASH_FLOAT_CONSTANT_PRECISION);
+    boost::hash_combine(seed, cval);
+    return seed;
 }
 
 adNode* adConstantNode::Clone(void) const
@@ -926,15 +1058,19 @@ bool adConstantNode::IsFunctionOfVariables(void) const
 **********************************************************************************************/
 adTimeNode::adTimeNode(void)
 {
+    adNodeImpl::AddToNodeMap(this);
 }
 
 adTimeNode::~adTimeNode()
 {
+    adNodeImpl::RemoveFromNodeMap(this);
 }
 
 adouble adTimeNode::Evaluate(const daeExecutionContext* pExecutionContext) const
 {
     adouble tmp(pExecutionContext->m_pDataProxy->GetCurrentTime_(), 0);
+
+    // See the function adConstantNode::Evaluate for details on evaluation of nodes when a node can be both Setup and Runtime.
     if(pExecutionContext->m_pDataProxy->GetGatherInfo())
     {
         tmp.setGatherInfo(true);
@@ -943,7 +1079,7 @@ adouble adTimeNode::Evaluate(const daeExecutionContext* pExecutionContext) const
     return tmp;
 }
 
-const quantity adTimeNode::GetQuantity(void) const
+quantity adTimeNode::GetQuantity(void) const
 {
     return quantity(0.0, unit("s", 1));
 }
@@ -1020,10 +1156,12 @@ bool adTimeNode::IsFunctionOfVariables(void) const
 adEventPortDataNode::adEventPortDataNode(daeEventPort* pEventPort)
 {
     m_pEventPort = pEventPort;
+    adNodeImpl::AddToNodeMap(this);
 }
 
 adEventPortDataNode::~adEventPortDataNode()
 {
+    adNodeImpl::RemoveFromNodeMap(this);
 }
 
 adouble adEventPortDataNode::Evaluate(const daeExecutionContext* pExecutionContext) const
@@ -1036,6 +1174,8 @@ adouble adEventPortDataNode::Evaluate(const daeExecutionContext* pExecutionConte
         daeDeclareAndThrowException(exInvalidPointer);
 
     adouble tmp(m_pEventPort->GetEventData(), 0);
+
+    // See the function adConstantNode::Evaluate for details on evaluation of nodes when a node can be both Setup and Runtime.
     if(pExecutionContext->m_pDataProxy->GetGatherInfo())
     {
         tmp.setGatherInfo(true);
@@ -1044,7 +1184,7 @@ adouble adEventPortDataNode::Evaluate(const daeExecutionContext* pExecutionConte
     return tmp;
 }
 
-const quantity adEventPortDataNode::GetQuantity(void) const
+quantity adEventPortDataNode::GetQuantity(void) const
 {
     return quantity();
 }
@@ -1132,16 +1272,19 @@ adRuntimeParameterNode::adRuntimeParameterNode(daeParameter* pParameter,
         e << "NULL value in the adRuntimeParameterNode for the parameter " << m_pParameter->GetCanonicalName() << "(" << toString(m_narrDomains) << ")";
         throw e;
     }
+    adNodeImpl::AddToNodeMap(this);
 }
 
 adRuntimeParameterNode::adRuntimeParameterNode(void)
 {
     m_pParameter = NULL;
     m_pdValue    = NULL;
+    adNodeImpl::AddToNodeMap(this);
 }
 
 adRuntimeParameterNode::~adRuntimeParameterNode()
 {
+    adNodeImpl::RemoveFromNodeMap(this);
 }
 
 adouble adRuntimeParameterNode::Evaluate(const daeExecutionContext* pExecutionContext) const
@@ -1159,6 +1302,7 @@ adouble adRuntimeParameterNode::Evaluate(const daeExecutionContext* pExecutionCo
             std::cout << "The value of the " << m_pParameter->GetCanonicalName() << " parameter is not finite (= " << *m_pdValue << ")" << std::endl;
         }
 
+    // See the function adConstantNode::Evaluate for details on evaluation of nodes when a node can be both Setup and Runtime.
     if(pExecutionContext->m_pDataProxy->GetGatherInfo())
     {
         adouble tmp(*m_pdValue);
@@ -1172,7 +1316,7 @@ adouble adRuntimeParameterNode::Evaluate(const daeExecutionContext* pExecutionCo
     }
 }
 
-const quantity adRuntimeParameterNode::GetQuantity(void) const
+quantity adRuntimeParameterNode::GetQuantity(void) const
 {
     if(!m_pParameter)
         daeDeclareAndThrowException(exInvalidCall);
@@ -1306,6 +1450,7 @@ adDomainIndexNode::adDomainIndexNode(daeDomain* pDomain, size_t nIndex, real_t* 
                    m_nIndex(nIndex),
                    m_pdPointValue(pdPointValue)
 {
+    adNodeImpl::AddToNodeMap(this);
 }
 
 adDomainIndexNode::adDomainIndexNode()
@@ -1313,10 +1458,12 @@ adDomainIndexNode::adDomainIndexNode()
     m_pDomain      = NULL;
     m_nIndex       = ULONG_MAX;
     m_pdPointValue = NULL;
+    adNodeImpl::AddToNodeMap(this);
 }
 
 adDomainIndexNode::~adDomainIndexNode()
 {
+    adNodeImpl::RemoveFromNodeMap(this);
 }
 
 adouble adDomainIndexNode::Evaluate(const daeExecutionContext* pExecutionContext) const
@@ -1331,6 +1478,7 @@ adouble adDomainIndexNode::Evaluate(const daeExecutionContext* pExecutionContext
     if(!m_pdPointValue)
         daeDeclareAndThrowException(exInvalidCall);
 
+    // See the function adConstantNode::Evaluate for details on evaluation of nodes when a node can be both Setup and Runtime.
     if(pExecutionContext->m_pDataProxy->GetGatherInfo())
     {
         adouble tmp(*m_pdPointValue);
@@ -1344,7 +1492,7 @@ adouble adDomainIndexNode::Evaluate(const daeExecutionContext* pExecutionContext
     }
 }
 
-const quantity adDomainIndexNode::GetQuantity(void) const
+quantity adDomainIndexNode::GetQuantity(void) const
 {
     if(!m_pDomain)
         daeDeclareAndThrowException(exInvalidCall);
@@ -1430,7 +1578,6 @@ bool adDomainIndexNode::IsFunctionOfVariables(void) const
 /*********************************************************************************************
     adRuntimeVariableNode
 **********************************************************************************************/
-//static int __no_of_runtime_vars = 0;
 adRuntimeVariableNode::adRuntimeVariableNode(daeVariable* pVariable,
                                              size_t nOverallIndex,
                                              vector<size_t>& narrDomains)
@@ -1442,8 +1589,7 @@ adRuntimeVariableNode::adRuntimeVariableNode(daeVariable* pVariable,
     m_nBlockIndex = ULONG_MAX;
     m_bIsAssigned = false;
 
-//    __no_of_runtime_vars++;
-//    std::cout << "nv = " << __no_of_runtime_vars << std::endl;
+    adNodeImpl::AddToNodeMap(this);
 }
 
 adRuntimeVariableNode::adRuntimeVariableNode()
@@ -1453,19 +1599,18 @@ adRuntimeVariableNode::adRuntimeVariableNode()
     m_nOverallIndex = ULONG_MAX;
     m_bIsAssigned   = false;
 
-//    __no_of_runtime_vars++;
-//    std::cout << "nv = " << __no_of_runtime_vars << std::endl;
+    adNodeImpl::AddToNodeMap(this);
 }
 
 adRuntimeVariableNode::~adRuntimeVariableNode()
 {
-//    __no_of_runtime_vars--;
-//    std::cout << "nv = " << __no_of_runtime_vars << std::endl;
+    adNodeImpl::RemoveFromNodeMap(this);
 }
 
 adouble adRuntimeVariableNode::Evaluate(const daeExecutionContext* pExecutionContext) const
 {
-// If we are in the GatherInfo mode we dont need the value
+    // If we are in the GatherInfo mode we dont need the value
+    // See the function adConstantNode::Evaluate for details on evaluation of nodes when a node can be both Setup and Runtime.
     if(pExecutionContext->m_pDataProxy->GetGatherInfo())
     {
         adouble tmp;
@@ -1573,7 +1718,7 @@ adouble adRuntimeVariableNode::Evaluate(const daeExecutionContext* pExecutionCon
     }
 }
 
-const quantity adRuntimeVariableNode::GetQuantity(void) const
+quantity adRuntimeVariableNode::GetQuantity(void) const
 {
     if(!m_pVariable)
         daeDeclareAndThrowException(exInvalidCall);
@@ -1715,33 +1860,33 @@ bool adRuntimeVariableNode::IsFunctionOfVariables(void) const
 **********************************************************************************************/
 adRuntimeTimeDerivativeNode::adRuntimeTimeDerivativeNode(daeVariable* pVariable,
                                                          size_t nOverallIndex,
-                                                         size_t nOrder,
                                                          vector<size_t>& narrDomains)
                : m_nOverallIndex(nOverallIndex),
-                 m_nOrder(nOrder),
                  m_pVariable(pVariable),
                  m_narrDomains(narrDomains)
 {
 // This will be calculated at runtime (if needed; it is used only for sensitivity calculation)
     m_nBlockIndex = ULONG_MAX;
+    adNodeImpl::AddToNodeMap(this);
 }
 
 adRuntimeTimeDerivativeNode::adRuntimeTimeDerivativeNode(void)
 {
     m_pVariable        = NULL;
-    m_nOrder           = 0;
     m_nOverallIndex    = ULONG_MAX;
     m_nBlockIndex      = ULONG_MAX;
-    m_pdTimeDerivative = NULL;
+    adNodeImpl::AddToNodeMap(this);
 }
 
 adRuntimeTimeDerivativeNode::~adRuntimeTimeDerivativeNode(void)
 {
+    adNodeImpl::RemoveFromNodeMap(this);
 }
 
 adouble adRuntimeTimeDerivativeNode::Evaluate(const daeExecutionContext* pExecutionContext) const
 {
-// If we are in evaluate mode we dont need the value
+    // If we are in evaluate mode we dont need the value
+    // See the function adConstantNode::Evaluate for details on evaluation of nodes when a node can be both Setup and Runtime.
     if(pExecutionContext->m_pDataProxy->GetGatherInfo())
     {
         adouble tmp;
@@ -1801,7 +1946,7 @@ adouble adRuntimeTimeDerivativeNode::Evaluate(const daeExecutionContext* pExecut
     }
 }
 
-const quantity adRuntimeTimeDerivativeNode::GetQuantity(void) const
+quantity adRuntimeTimeDerivativeNode::GetQuantity(void) const
 {
     if(!m_pVariable)
         daeDeclareAndThrowException(exInvalidCall);
@@ -1847,7 +1992,7 @@ string adRuntimeTimeDerivativeNode::SaveAsLatex(const daeNodeSaveAsContext* c) c
         strarrIndexes.push_back(toString<size_t>(m_narrDomains[i]));
 
     string strName = daeGetRelativeName(c->m_pModel, m_pVariable);
-    return latexCreator::TimeDerivative(m_nOrder, strName, strarrIndexes);
+    return latexCreator::TimeDerivative(1, strName, strarrIndexes);
 }
 
 void adRuntimeTimeDerivativeNode::Open(io::xmlTag_t* pTag)
@@ -1857,17 +2002,14 @@ void adRuntimeTimeDerivativeNode::Open(io::xmlTag_t* pTag)
     //strName = "Name";
     //pTag->Open(strName, m_pVariable->GetName());
 
-    strName = "Degree";
-    pTag->Open(strName, m_nOrder);
+    //strName = "Degree";
+    //pTag->Open(strName, m_nOrder);
 
     strName = "OverallIndex";
     pTag->Open(strName, m_nOverallIndex);
 
     strName = "DomainIndexes";
     pTag->OpenArray(strName, m_narrDomains);
-
-    //strName = "TimeDerivative";
-    //pTag->Open(strName, *m_pdTimeDerivative);
 }
 
 void adRuntimeTimeDerivativeNode::Save(io::xmlTag_t* pTag) const
@@ -1877,17 +2019,14 @@ void adRuntimeTimeDerivativeNode::Save(io::xmlTag_t* pTag) const
     strName = "Name";
     pTag->Save(strName, m_pVariable->GetName());
 
-    strName = "Degree";
-    pTag->Save(strName, m_nOrder);
+    //strName = "Degree";
+    //pTag->Save(strName, m_nOrder);
 
     strName = "OverallIndex";
     pTag->Save(strName, m_nOverallIndex);
 
     strName = "DomainIndexes";
     pTag->SaveArray(strName, m_narrDomains);
-
-    //strName = "TimeDerivative";
-    //pTag->Save(strName, *m_pdTimeDerivative);
 }
 
 void adRuntimeTimeDerivativeNode::SaveAsContentMathML(io::xmlTag_t* pTag, const daeNodeSaveAsContext* c) const
@@ -1897,7 +2036,7 @@ void adRuntimeTimeDerivativeNode::SaveAsContentMathML(io::xmlTag_t* pTag, const 
         strarrIndexes.push_back(toString<size_t>(m_narrDomains[i]));
 
     string strName = daeGetRelativeName(c->m_pModel, m_pVariable);
-    xmlContentCreator::TimeDerivative(pTag, m_nOrder, strName, strarrIndexes);
+    xmlContentCreator::TimeDerivative(pTag, 1, strName, strarrIndexes);
 }
 
 void adRuntimeTimeDerivativeNode::SaveAsPresentationMathML(io::xmlTag_t* pTag, const daeNodeSaveAsContext* c) const
@@ -1907,7 +2046,7 @@ void adRuntimeTimeDerivativeNode::SaveAsPresentationMathML(io::xmlTag_t* pTag, c
         strarrIndexes.push_back(toString<size_t>(m_narrDomains[i]));
 
     string strName = daeGetRelativeName(c->m_pModel, m_pVariable);
-    xmlPresentationCreator::TimeDerivative(pTag, m_nOrder, strName, strarrIndexes);
+    xmlPresentationCreator::TimeDerivative(pTag, 1, strName, strarrIndexes);
 }
 
 void adRuntimeTimeDerivativeNode::AddVariableIndexToArray(map<size_t, size_t>& mapIndexes, bool bAddFixed)
@@ -1929,10 +2068,12 @@ bool adRuntimeTimeDerivativeNode::IsDifferential(void) const
 // Used only in Jacobian expressions!
 adInverseTimeStepNode::adInverseTimeStepNode()
 {
+    adNodeImpl::AddToNodeMap(this);
 }
 
 adInverseTimeStepNode::~adInverseTimeStepNode()
 {
+    adNodeImpl::RemoveFromNodeMap(this);
 }
 
 adouble adInverseTimeStepNode::Evaluate(const daeExecutionContext* pExecutionContext) const
@@ -1940,7 +2081,7 @@ adouble adInverseTimeStepNode::Evaluate(const daeExecutionContext* pExecutionCon
     return adouble(pExecutionContext->m_dInverseTimeStep);
 }
 
-const quantity adInverseTimeStepNode::GetQuantity(void) const
+quantity adInverseTimeStepNode::GetQuantity(void) const
 {
     return (1.0 * units::units_pool::s ^ (-1));
 }
@@ -2045,7 +2186,7 @@ adouble adRuntimePartialDerivativeNode::Evaluate(const daeExecutionContext* pExe
     return pardevnode->Evaluate(pExecutionContext);
 }
 
-const quantity adRuntimePartialDerivativeNode::GetQuantity(void) const
+quantity adRuntimePartialDerivativeNode::GetQuantity(void) const
 {
     if(!m_pVariable)
         daeDeclareAndThrowException(exInvalidCall);
@@ -2167,15 +2308,18 @@ adUnaryNode::adUnaryNode(daeeUnaryFunctions eFun, adNodePtr n)
 {
     node = n;
     eFunction = eFun;
+    adNodeImpl::AddToNodeMap(this);
 }
 
 adUnaryNode::adUnaryNode()
 {
     eFunction = eUFUnknown;
+    adNodeImpl::AddToNodeMap(this);
 }
 
 adUnaryNode::~adUnaryNode()
 {
+    adNodeImpl::RemoveFromNodeMap(this);
 }
 
 adouble adUnaryNode::Evaluate(const daeExecutionContext* pExecutionContext) const
@@ -2336,7 +2480,7 @@ adouble adUnaryNode::Evaluate(const daeExecutionContext* pExecutionContext) cons
     return val;
 }
 
-const quantity adUnaryNode::GetQuantity(void) const
+quantity adUnaryNode::GetQuantity(void) const
 {
     switch(eFunction)
     {
@@ -2394,6 +2538,19 @@ const quantity adUnaryNode::GetQuantity(void) const
 size_t adUnaryNode::SizeOf(void) const
 {
     return sizeof(adUnaryNode) + node->SizeOf();
+}
+
+size_t adUnaryNode::GetHash() const
+{
+    size_t seed = 0;
+    boost::hash_combine(seed, (int)eFunction);
+    boost::hash_combine(seed, *node.get());
+    return seed;
+}
+
+adNode* adUnaryNode::getNodeRawPtr() const
+{
+    return node.get();
 }
 
 adNode* adUnaryNode::Clone(void) const
@@ -3339,15 +3496,18 @@ adBinaryNode::adBinaryNode(daeeBinaryFunctions eFun, adNodePtr l, adNodePtr r)
     left  = l;
     right = r;
     eFunction = eFun;
+    adNodeImpl::AddToNodeMap(this);
 }
 
 adBinaryNode::adBinaryNode()
 {
     eFunction = eBFUnknown;
+    adNodeImpl::AddToNodeMap(this);
 }
 
 adBinaryNode::~adBinaryNode()
 {
+    adNodeImpl::RemoveFromNodeMap(this);
 }
 
 adouble adBinaryNode::Evaluate(const daeExecutionContext* pExecutionContext) const
@@ -3383,6 +3543,7 @@ adouble adBinaryNode::Evaluate(const daeExecutionContext* pExecutionContext) con
         daeDeclareAndThrowException(exInvalidPointer);
         return adouble();
     }
+
     if(pExecutionContext->m_pDataProxy->CheckForInfiniteNumbers())
         if(!check_is_finite(val.getValue()))
         {
@@ -3426,7 +3587,7 @@ adouble adBinaryNode::Evaluate(const daeExecutionContext* pExecutionContext) con
     return val;
 }
 
-const quantity adBinaryNode::GetQuantity(void) const
+quantity adBinaryNode::GetQuantity(void) const
 {
     switch(eFunction)
     {
@@ -3455,6 +3616,25 @@ const quantity adBinaryNode::GetQuantity(void) const
 size_t adBinaryNode::SizeOf(void) const
 {
     return sizeof(adBinaryNode) + left->SizeOf() + right->SizeOf();
+}
+
+size_t adBinaryNode::GetHash() const
+{
+    size_t seed = 0;
+    boost::hash_combine(seed, (int)eFunction);
+    boost::hash_combine(seed, *left.get());
+    boost::hash_combine(seed, *right.get());
+    return seed;
+}
+
+adNode* adBinaryNode::getLeftRawPtr() const
+{
+    return left.get();
+}
+
+adNode* adBinaryNode::getRightRawPtr() const
+{
+    return right.get();
 }
 
 adNode* adBinaryNode::Clone(void) const
@@ -4052,10 +4232,12 @@ bool adBinaryNode::IsDifferential(void) const
 adScalarExternalFunctionNode::adScalarExternalFunctionNode(daeScalarExternalFunction* externalFunction)
 {
     m_pExternalFunction = externalFunction;
+    adNodeImpl::AddToNodeMap(this);
 }
 
 adScalarExternalFunctionNode::~adScalarExternalFunctionNode()
 {
+    adNodeImpl::RemoveFromNodeMap(this);
 }
 
 adouble adScalarExternalFunctionNode::Evaluate(const daeExecutionContext* pExecutionContext) const
@@ -4064,6 +4246,8 @@ adouble adScalarExternalFunctionNode::Evaluate(const daeExecutionContext* pExecu
         daeDeclareAndThrowException(exInvalidPointer);
 
     adouble tmp;
+
+    // See the function adConstantNode::Evaluate for details on evaluation of nodes when a node can be both Setup and Runtime.
     if(pExecutionContext->m_pDataProxy->GetGatherInfo())
     {
     // Here I have to initialize arguments (which are at this moment setup nodes)
@@ -4112,7 +4296,7 @@ adouble adScalarExternalFunctionNode::Evaluate(const daeExecutionContext* pExecu
     return tmp;
 }
 
-const quantity adScalarExternalFunctionNode::GetQuantity(void) const
+quantity adScalarExternalFunctionNode::GetQuantity(void) const
 {
     if(!m_pExternalFunction)
         daeDeclareAndThrowException(exInvalidPointer);
@@ -4315,10 +4499,12 @@ adThermoPhysicalPropertyPackageScalarNode::adThermoPhysicalPropertyPackageScalar
     compound     = compound_;
     units        = units_;
     thermoPhysicalPropertyPackage = tpp;
+    adNodeImpl::AddToNodeMap(this);
 }
 
 adThermoPhysicalPropertyPackageScalarNode::~adThermoPhysicalPropertyPackageScalarNode()
 {
+    adNodeImpl::RemoveFromNodeMap(this);
 }
 
 adouble adThermoPhysicalPropertyPackageScalarNode::Evaluate(const daeExecutionContext* pExecutionContext) const
@@ -4340,6 +4526,7 @@ adouble adThermoPhysicalPropertyPackageScalarNode::Evaluate(const daeExecutionCo
     adouble       T2 = (temperature2 ? temperature2->Evaluate(pExecutionContext) : adouble());
     adouble_array x2 = (composition2 ? composition2->Evaluate(pExecutionContext) : adouble_array());
 
+    // See the function adConstantNode::Evaluate for details on evaluation of nodes when a node can be both Setup and Runtime.
     if(pExecutionContext->m_pDataProxy->GetGatherInfo())
     {
         tmp.setGatherInfo(true);
@@ -4412,11 +4599,32 @@ adouble adThermoPhysicalPropertyPackageScalarNode::Evaluate(const daeExecutionCo
     return tmp;
 }
 
-const quantity adThermoPhysicalPropertyPackageScalarNode::GetQuantity(void) const
+quantity adThermoPhysicalPropertyPackageScalarNode::GetQuantity(void) const
 {
     if(!thermoPhysicalPropertyPackage)
         daeDeclareAndThrowException(exInvalidPointer);
     return quantity(0.0, units);
+}
+
+size_t adThermoPhysicalPropertyPackageScalarNode::SizeOf(void) const
+{
+    size_t size = sizeof(adThermoPhysicalPropertyPackageScalarNode);
+
+    size += (pressure     ? pressure->SizeOf()     : 0);
+    size += (temperature  ? temperature->SizeOf()  : 0);
+    size += (pressure2    ? pressure2->SizeOf()    : 0);
+    size += (temperature2 ? temperature2->SizeOf() : 0);
+    //size += (composition ? composition->SizeOf() : 0);
+    //size += (composition2 ? composition2->SizeOf() : 0);
+
+    size += (units != unit() ? units.SizeOf() : 0);
+
+    size += phase.capacity()   * sizeof(char);
+    size += phase2.capacity()  * sizeof(char);
+    size += property.capacity()* sizeof(char);
+    size += compound.capacity()* sizeof(char);
+
+    return size;
 }
 
 adNode* adThermoPhysicalPropertyPackageScalarNode::Clone(void) const
@@ -4567,6 +4775,7 @@ adouble_array adThermoPhysicalPropertyPackageArrayNode::Evaluate(const daeExecut
     adouble       T2 = (temperature2 ? temperature2->Evaluate(pExecutionContext) : adouble());
     adouble_array x2 = (composition2 ? composition2->Evaluate(pExecutionContext) : adouble_array());
 
+    // See the function adConstantNode::Evaluate for details on evaluation of nodes when a node can be both Setup and Runtime.
     if(pExecutionContext->m_pDataProxy->GetGatherInfo())
     {
         tmp.setGatherInfo(true);
@@ -4645,7 +4854,7 @@ void adThermoPhysicalPropertyPackageArrayNode::GetArrayRanges(std::vector<daeArr
 {
 }
 
-const quantity adThermoPhysicalPropertyPackageArrayNode::GetQuantity(void) const
+quantity adThermoPhysicalPropertyPackageArrayNode::GetQuantity(void) const
 {
     if(!thermoPhysicalPropertyPackage)
         daeDeclareAndThrowException(exInvalidPointer);
@@ -4781,7 +4990,7 @@ adouble adFEMatrixItemNode::Evaluate(const daeExecutionContext* pExecutionContex
     return tmp;
 }
 
-const quantity adFEMatrixItemNode::GetQuantity(void) const
+quantity adFEMatrixItemNode::GetQuantity(void) const
 {
     return quantity(0.0, m_units);
 }
@@ -4904,7 +5113,7 @@ adouble adFEVectorItemNode::Evaluate(const daeExecutionContext* pExecutionContex
     return tmp;
 }
 
-const quantity adFEVectorItemNode::GetQuantity(void) const
+quantity adFEVectorItemNode::GetQuantity(void) const
 {
     return quantity(0.0, m_units);
 }
@@ -4993,19 +5202,37 @@ bool adFEVectorItemNode::IsDifferential(void) const
 /*********************************************************************************************
     adFloatCoefficientVariableSumNode
 **********************************************************************************************/
+static bool compareFCVP(const std::pair<size_t, daeFloatCoefficientVariableProduct>& a,
+                        const std::pair<size_t, daeFloatCoefficientVariableProduct>& b)
+{
+    return a.second.coefficient < b.second.coefficient;
+}
+
 adFloatCoefficientVariableSumNode::adFloatCoefficientVariableSumNode()
 {
     m_base               = 0.0;
     m_bBlockIndexesFound = false;
+    adNodeImpl::AddToNodeMap(this);
+}
+
+adFloatCoefficientVariableSumNode::adFloatCoefficientVariableSumNode(const adFloatCoefficientVariableSumNode& n)
+{
+    m_base               = n.m_base;
+    m_bBlockIndexesFound = n.m_bBlockIndexesFound;
+    m_sum                = n.m_sum;
+    adNodeImpl::AddToNodeMap(this);
 }
 
 adFloatCoefficientVariableSumNode::~adFloatCoefficientVariableSumNode()
 {
+    adNodeImpl::RemoveFromNodeMap(this);
 }
 
 adouble adFloatCoefficientVariableSumNode::Evaluate(const daeExecutionContext* pExecutionContext) const
 {
-// If we are in the GatherInfo mode we dont need the value
+    // See the function adConstantNode::Evaluate for details on evaluation of nodes when a node can be both Setup and Runtime.
+    // Important:
+    //   This object is typically very heavy, perhaps do not deep copy it?
     if(pExecutionContext->m_pDataProxy->GetGatherInfo())
     {
         adouble tmp;
@@ -5122,16 +5349,16 @@ adouble adFloatCoefficientVariableSumNode::Evaluate(const daeExecutionContext* p
 
 void adFloatCoefficientVariableSumNode::AddItem(double coefficient, daeVariable* variable, unsigned int variableIndex)
 {
-    unsigned int overallIndex = variable->GetOverallIndex() + variableIndex;
+    size_t overallIndex = variable->GetOverallIndex() + variableIndex;
     // If the item at overallIndex does not exist it adds a new item
-    // Important: its coefficient data meber must be set to zero in the constructor
+    // Important: its coefficient data member must be set to zero in the constructor
     daeFloatCoefficientVariableProduct& item = m_sum[overallIndex];
 
     item.coefficient += coefficient;
     item.variable     = variable;
 }
 
-const quantity adFloatCoefficientVariableSumNode::GetQuantity(void) const
+quantity adFloatCoefficientVariableSumNode::GetQuantity(void) const
 {
     return quantity(0.0, unit());
 }
@@ -5140,6 +5367,30 @@ size_t adFloatCoefficientVariableSumNode::SizeOf(void) const
 {
     // In general, std::map also includes some overhead (sizeof(key)+sizeof(value)+overhead)*N
     return sizeof(*this) + (sizeof(size_t) + sizeof(daeFloatCoefficientVariableProduct)) * m_sum.size();
+}
+
+size_t adFloatCoefficientVariableSumNode::GetHash() const
+{
+    size_t seed = 0;
+    boost::hash_combine(seed, m_base);
+/*
+    // Even if two adFloatCoefficientVariableSumNode objects are identical the order of items is not.
+    // Therefore, sort the m_sum in the ascending coefficient order and then calculate the hash.
+    std::vector< std::pair<size_t, daeFloatCoefficientVariableProduct> > arr_sum(m_sum.begin(), m_sum.end());
+    std::sort(arr_sum.begin(), arr_sum.end(), compareFCVP);
+    for(size_t i = 0; i < arr_sum.size(); i++)
+    {
+        const daeFloatCoefficientVariableProduct& fcvp = arr_sum[i].second;
+        boost::hash_combine(seed, fcvp);
+    }
+*/
+    for(std::map<size_t, daeFloatCoefficientVariableProduct>::const_iterator it = m_sum.begin(); it != m_sum.end(); it++)
+    {
+        const daeFloatCoefficientVariableProduct& fcvp = it->second;
+        boost::hash_combine(seed, fcvp);
+    }
+
+    return seed;
 }
 
 adNode* adFloatCoefficientVariableSumNode::Clone(void) const

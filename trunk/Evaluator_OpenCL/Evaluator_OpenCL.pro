@@ -25,6 +25,6 @@ SOURCES += stdafx.cpp \
 HEADERS += stdafx.h \
            $${OPEN_CS_DIR}/OpenCS/evaluators/cs_evaluator_opencl.h \
            $${OPEN_CS_DIR}/OpenCS/evaluators/cs_evaluator_opencl_multidevice.h \
-           $${OPEN_CS_DIR}/OpenCS/evaluators/cs_evaluator_opencl_factory.h
+           $${OPEN_CS_DIR}/OpenCS/evaluators/cs_evaluators.h
 
 OTHER_FILES += $${OPEN_CS_DIR}/OpenCS/evaluators/cs_machine_kernels.cl

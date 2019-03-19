@@ -70,7 +70,7 @@ adNodePtr simplify(adNodePtr node)
                 case dae::core::eErf:
                     return adNodePtr(new adConstantNode(erf(q)));
                 default:
-                    return node;
+                    ; // do nothing (previously: "return node;" thus returning unsimplified node that was simplified but discarded)
             }
         }
         return adNodePtr(new adUnaryNode(un->eFunction, n_s));
@@ -92,11 +92,20 @@ adNodePtr simplify(adNodePtr node)
             if(bn->eFunction == dae::core::ePlus)
                 return adNodePtr(new adConstantNode(cleft->m_quantity + cright->m_quantity));
             else if(bn->eFunction == dae::core::eMinus)
-                return adNodePtr(new  adConstantNode(cleft->m_quantity - cright->m_quantity));
+                return adNodePtr(new adConstantNode(cleft->m_quantity - cright->m_quantity));
             else if(bn->eFunction == dae::core::eMulti)
-                return adNodePtr(new  adConstantNode(cleft->m_quantity * cright->m_quantity));
+                return adNodePtr(new adConstantNode(cleft->m_quantity * cright->m_quantity));
             else if(bn->eFunction == dae::core::eDivide)
-                return adNodePtr(new  adConstantNode(cleft->m_quantity / cright->m_quantity));
+                return adNodePtr(new adConstantNode(cleft->m_quantity / cright->m_quantity));
+
+            else if(bn->eFunction == dae::core::ePower)
+                return adNodePtr(new adConstantNode(units::pow(cleft->m_quantity, cright->m_quantity)));
+            else if(bn->eFunction == dae::core::eArcTan2)
+                return adNodePtr(new adConstantNode(units::atan2(cleft->m_quantity, cright->m_quantity)));
+            else if(bn->eFunction == dae::core::eMin)
+                return adNodePtr(new adConstantNode(units::min(cleft->m_quantity, cright->m_quantity)));
+            else if(bn->eFunction == dae::core::eMax)
+                return adNodePtr(new adConstantNode(units::max(cleft->m_quantity, cright->m_quantity)));
         }
         else if(dynamic_cast<adConstantNode*>(left) && dynamic_cast<adFloatCoefficientVariableSumNode*>(right)) // c1 OP base+sum(c*Var) => combine them
         {

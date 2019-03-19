@@ -14,6 +14,7 @@ DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 #include <iostream>
 #include <vector>
 #include "trilinos_amesos_la_solver.h"
+#include "../config.h"
 
 namespace dae
 {
@@ -74,6 +75,9 @@ daePreconditioner_ML::daePreconditioner_ML(const std::string& preconditionerName
 {
     data                  = NULL;
     strPreconditionerName = preconditionerName;
+
+    daeConfig& cfg = daeConfig::GetConfig();
+    printInfo             = cfg.GetBoolean("daetools.core.printInfo", false);
 }
 
 daePreconditioner_ML::~daePreconditioner_ML()
@@ -102,6 +106,8 @@ int daePreconditioner_ML::Reinitialize()
 
     daePreconditionerData_ML* p_data = (daePreconditionerData_ML*)this->data;
     p_data->CreateStorage();
+
+    return 0;
 }
 
 Teuchos::ParameterList& daePreconditioner_ML::GetParameterList(void)

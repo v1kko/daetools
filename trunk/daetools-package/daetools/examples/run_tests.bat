@@ -26,6 +26,13 @@ python tutorial_adv_2.py console
 python tutorial_adv_3.py console
 python tutorial_adv_4.py console
 
+tutorial_opencs_dae_1.py
+tutorial_opencs_dae_2.py
+tutorial_opencs_dae_3.py
+tutorial_opencs_ode_1.py
+tutorial_opencs_ode_2.py
+tutorial_opencs_ode_3.py
+
 python tutorial_che_1.py console
 python tutorial_che_2.py console
 python tutorial_che_3.py console

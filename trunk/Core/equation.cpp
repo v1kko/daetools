@@ -3,6 +3,54 @@
 #include "nodes.h"
 #include "xmlfunctions.h"
 #include <typeinfo>
+#include <boost/functional/hash.hpp>
+
+namespace cs
+{
+// It has to be in the cs namespace (otherwise the compiler can't find it).
+size_t hash_value(csComputeStackItem_t const& item)
+{
+    size_t seed = 0;
+
+    boost::hash_combine(seed, (int)item.opCode);
+
+    if(item.opCode == cs::eOP_Constant)
+    {
+        // Deal with rounding errors causing small differences in constants.
+        long int val = (long int)(item.data.value*adNodeImpl::HASH_FLOAT_CONSTANT_PRECISION);
+        boost::hash_combine(seed, val);
+    }
+    else if(item.opCode == cs::eOP_Time)
+    {
+    }
+    else if(item.opCode == cs::eOP_InverseTimeStep)
+    {
+    }
+    else if(item.opCode == cs::eOP_Variable)
+    {
+    }
+    else if(item.opCode == cs::eOP_DegreeOfFreedom)
+    {
+    }
+    else if(item.opCode == cs::eOP_TimeDerivative)
+    {
+    }
+    else if(item.opCode == cs::eOP_Unary)
+    {
+        boost::hash_combine(seed, (int)item.function);
+    }
+    else if(item.opCode == cs::eOP_Binary)
+    {
+        boost::hash_combine(seed, (int)item.function);
+    }
+    else
+    {
+        throw std::runtime_error("Invalid op code");
+    }
+
+    return seed;
+}
+}
 
 namespace dae
 {
@@ -20,9 +68,9 @@ daeEquationExecutionInfo::daeEquationExecutionInfo(daeEquation* pEquation)
     m_pEquation = pEquation;
     m_nEquationIndexInBlock = -1;
     m_nComputeStackIndex           = -1;
-    m_nComputeStack_max_valueSize  = 0;
-    m_nComputeStack_max_lvalueSize = 0;
-    m_nComputeStack_max_rvalueSize = 0;
+//    m_nComputeStack_max_valueSize  = 0;
+//    m_nComputeStack_max_lvalueSize = 0;
+//    m_nComputeStack_max_rvalueSize = 0;
 }
 
 daeEquationExecutionInfo::~daeEquationExecutionInfo()
@@ -135,7 +183,10 @@ void daeEquationExecutionInfo::SaveRuntime(io::xmlTag_t* pTag) const
     adNode::SaveNodeAsLatex(pTag, strName, m_EquationEvaluationNode.get(), &c, true);
 
     strName = "IsLinear";
-    pTag->Save(strName, m_EquationEvaluationNode->IsLinear());
+    if(m_EquationEvaluationNode)
+        pTag->Save(strName, m_EquationEvaluationNode->IsLinear());
+    else
+        pTag->Save(strName, false);
 }
 
 adNode* daeEquationExecutionInfo::GetEquationEvaluationNodeRawPtr(void) const
@@ -211,20 +262,20 @@ std::vector<csComputeStackItem_t> daeEquationExecutionInfo::GetComputeStack() co
     return cs;
 }
 
-uint8_t daeEquationExecutionInfo::GetComputeStack_max_valueSize() const
-{
-    return m_nComputeStack_max_valueSize;
-}
+//uint8_t daeEquationExecutionInfo::GetComputeStack_max_valueSize() const
+//{
+//    return m_nComputeStack_max_valueSize;
+//}
 
-uint8_t daeEquationExecutionInfo::GetComputeStack_max_lvalueSize() const
-{
-    return m_nComputeStack_max_lvalueSize;
-}
+//uint8_t daeEquationExecutionInfo::GetComputeStack_max_lvalueSize() const
+//{
+//    return m_nComputeStack_max_lvalueSize;
+//}
 
-uint8_t daeEquationExecutionInfo::GetComputeStack_max_rvalueSize() const
-{
-    return m_nComputeStack_max_rvalueSize;
-}
+//uint8_t daeEquationExecutionInfo::GetComputeStack_max_rvalueSize() const
+//{
+//    return m_nComputeStack_max_rvalueSize;
+//}
 
 void daeEquationExecutionInfo::GatherInfo(daeExecutionContext& EC, daeModel* pModel)
 {
@@ -275,6 +326,12 @@ void daeEquationExecutionInfo::Residual(daeExecutionContext& EC)
     if(!EC.m_pBlock)
         daeDeclareAndThrowException(exInvalidPointer);
 #endif
+    if(!m_EquationEvaluationNode)
+    {
+        daeDeclareException(exInvalidPointer);
+        e << "EquationEvaluationNode has been deleted";
+        throw e;
+    }
 
     adouble __ad ;
     bool bPrintInfo               = m_pEquation->m_pModel->m_pDataProxy->PrintInfo();
@@ -291,24 +348,6 @@ void daeEquationExecutionInfo::Residual(daeExecutionContext& EC)
     try
     {
         __ad = m_EquationEvaluationNode->Evaluate(&EC) * m_dScaling;
-
-    /* ComputeStack evaluation
-        csComputeStackItem_t* computeStack = &EC.m_pBlock->m_arrAllComputeStacks[m_nComputeStackIndex];
-        adouble __ad1 = adNode::EvaluateComputeStack(computeStack, &EC) * m_dScaling;
-        if(__ad.getValue() != __ad1.getValue())
-        {
-            daeDeclareException(exInvalidCall);
-            e << "The residual values of the " << GetName() << " equation not equal: " << __ad.getValue() << " and " << __ad1.getValue();
-            throw e;
-        }
-        if(__ad.getDerivative() != __ad1.getDerivative())
-        {
-            daeDeclareException(exInvalidCall);
-            e << "The residual derivatives of the " << GetName() << " equation not equal: "
-              << toStringFormatted(__ad.getDerivative(), -1, 14) << " and " << toStringFormatted(__ad1.getDerivative(), -1, 14);
-            throw e;
-        }
-    */
     }
     catch(std::exception& se)
     {
@@ -336,6 +375,12 @@ void daeEquationExecutionInfo::Jacobian(daeExecutionContext& EC)
     if(!EC.m_pBlock)
         daeDeclareAndThrowException(exInvalidPointer);
 #endif
+    if(!m_EquationEvaluationNode)
+    {
+        daeDeclareException(exInvalidPointer);
+        e << "EquationEvaluationNode has been deleted";
+        throw e;
+    }
 
     EC.m_pEquationExecutionInfo = this;
 
@@ -381,24 +426,6 @@ void daeEquationExecutionInfo::Jacobian(daeExecutionContext& EC)
             try
             {
                 __ad = m_EquationEvaluationNode->Evaluate(&EC) * m_dScaling;
-
-            /* ComputeStack evaluation
-                csComputeStackItem_t* computeStack = &EC.m_pBlock->m_arrAllComputeStacks[m_nComputeStackIndex];
-                adouble __ad1 = adNode::EvaluateComputeStack(computeStack, &EC) * m_dScaling;
-                if(__ad.getValue() != __ad1.getValue())
-                {
-                    daeDeclareException(exInvalidCall);
-                    e << "The Jacobian values of the " << GetName() << " equation not equal: " << __ad.getValue() << " and " << __ad1.getValue();
-                    throw e;
-                }
-                if(__ad.getDerivative() != __ad1.getDerivative())
-                {
-                    daeDeclareException(exInvalidCall);
-                    e << "The Jacobian derivatives of the " << GetName() << " equation not equal: "
-                      << toStringFormatted(__ad.getDerivative(), -1, 14) << " and " << toStringFormatted(__ad1.getDerivative(), -1, 14);
-                    throw e;
-                }
-            */
             }
             catch(std::exception& se)
             {
@@ -463,6 +490,12 @@ void daeEquationExecutionInfo::SensitivityResiduals(daeExecutionContext& EC, con
     if(!EC.m_pDataProxy)
         daeDeclareAndThrowException(exInvalidPointer);
 #endif
+    if(!m_EquationEvaluationNode)
+    {
+        daeDeclareException(exInvalidPointer);
+        e << "EquationEvaluationNode has been deleted";
+        throw e;
+    }
 
     bool bPrintInfo               = m_pEquation->m_pModel->m_pDataProxy->PrintInfo();
     bool bCheckForInfiniteNumbers = m_pEquation->m_pModel->m_pDataProxy->CheckForInfiniteNumbers();
@@ -484,24 +517,6 @@ void daeEquationExecutionInfo::SensitivityResiduals(daeExecutionContext& EC, con
         try
         {
             __ad = m_EquationEvaluationNode->Evaluate(&EC) * m_dScaling;
-
-        /*  ComputeStack evaluation
-            csComputeStackItem_t* computeStack = &EC.m_pBlock->m_arrAllComputeStacks[m_nComputeStackIndex];
-            adouble __ad1 = adNode::EvaluateComputeStack(computeStack, &EC) * m_dScaling;
-            if(__ad.getValue() != __ad1.getValue())
-            {
-                daeDeclareException(exInvalidCall);
-                e << "The sensitivitity values of the " << GetName() << " equation not equal: " << __ad.getValue() << " and " << __ad1.getValue();
-                throw e;
-            }
-            if(__ad.getDerivative() != __ad1.getDerivative())
-            {
-                daeDeclareException(exInvalidCall);
-                e << "The sensitivitity derivatives of the " << GetName() << " equation not equal: "
-                  << toStringFormatted(__ad.getDerivative(), -1, 14) << " and " << toStringFormatted(__ad1.getDerivative(), -1, 14);
-                throw e;
-            }
-        */
         }
         catch(std::exception& se)
         {
@@ -531,6 +546,12 @@ void daeEquationExecutionInfo::SensitivityParametersGradients(daeExecutionContex
     if(!EC.m_pDataProxy)
         daeDeclareAndThrowException(exInvalidPointer);
 #endif
+    if(!m_EquationEvaluationNode)
+    {
+        daeDeclareException(exInvalidPointer);
+        e << "EquationEvaluationNode has been deleted";
+        throw e;
+    }
 
     bool bPrintInfo = m_pEquation->m_pModel->m_pDataProxy->PrintInfo();
     bool bCheckForInfiniteNumbers = m_pEquation->m_pModel->m_pDataProxy->CheckForInfiniteNumbers();
@@ -558,6 +579,11 @@ void daeEquationExecutionInfo::CreateComputeStack(daeBlock* pBlock)
     // Create compute stack array.
     m_nComputeStackIndex = pBlock->m_arrAllComputeStacks.size();
     adNode::CreateComputeStack(m_EquationEvaluationNode.get(), pBlock->m_arrAllComputeStacks, pBlock, m_dScaling);
+
+    /* Reset runtime node. */
+    if(pBlock->m_pDataProxy->GetDeleteRuntimeNodes())
+        m_EquationEvaluationNode.reset();
+
     //csComputeStackItem_t item = pBlock->m_arrAllComputeStacks[m_nComputeStackIndex];
     //int stackSize = item.tag;
     //printf("  stackSize = %d\n", stackSize);
@@ -581,9 +607,21 @@ void daeEquationExecutionInfo::CreateComputeStack(daeBlock* pBlock)
 
     //printf("daeEquationExecutionInfo: %s (%d, %d, %d)\n", this->GetName().c_str(), max_valueSize, max_lvalueSize, max_rvalueSize);
 
-    m_nComputeStack_max_valueSize  = (uint8_t)max_valueSize;
-    m_nComputeStack_max_lvalueSize = (uint8_t)max_lvalueSize;
-    m_nComputeStack_max_rvalueSize = (uint8_t)max_rvalueSize;
+/*
+    static std::map<size_t, int> hashes;
+    size_t h = 0;
+    for(size_t i = start; i < end; i++)
+        boost::hash_combine<csComputeStackItem_t>(h, pBlock->m_arrAllComputeStacks[i]);
+    if(hashes.find(h) == hashes.end())
+        hashes[h] = 0;
+    else
+        hashes[h] += 1;
+    printf("Unique hashes %zu (%zu)\n", hashes.size(), end-start);
+*/
+
+//    m_nComputeStack_max_valueSize  = (uint8_t)max_valueSize;
+//    m_nComputeStack_max_lvalueSize = (uint8_t)max_lvalueSize;
+//    m_nComputeStack_max_rvalueSize = (uint8_t)max_rvalueSize;
 
 /*
     // Initialise isAssigned and block indexes since they were set to ULONG_MAX in the runtime node constructor.
@@ -620,6 +658,9 @@ void daeEquationExecutionInfo::BuildJacobianExpressions()
 
     try
     {
+        if(!m_EquationEvaluationNode)
+            throw std::runtime_error("EquationEvaluationNode has been deleted");
+
         // m_mapIndexes<OverallIndex, IndexInBlock>
         for(iter = m_mapIndexes.begin(); iter != m_mapIndexes.end(); iter++)
         {
@@ -1144,6 +1185,9 @@ void daeEquation::Export(std::string& strContent, daeeModelLanguage eLanguage, d
     string strExport, strResidual, strBounds;
     boost::format fmtFile;
 
+    if(!m_pResidualNode)
+        daeDeclareAndThrowException(exInvalidCall);
+
     if(c.m_bExportDefinition)
     {
     }
@@ -1286,12 +1330,16 @@ void daeEquation::SaveRuntime(io::xmlTag_t* pTag) const
 void daeEquation::SaveNodeAsLatex(io::xmlTag_t* pTag, const string& strObjectName) const
 {
     string strValue, strDEDI, strDomain;
-    daeNodeSaveAsContext c(m_pModel);
-    adNode* node = m_pResidualNode.get();
 
     io::xmlTag_t* pChildTag = pTag->AddTag(strObjectName);
     if(!pChildTag)
         daeDeclareAndThrowException(exXMLIOError);
+
+    if(!m_pResidualNode)
+        return;
+
+    daeNodeSaveAsContext c(m_pModel);
+    adNode* node = m_pResidualNode.get();
 
     strValue  = "$$";
     strValue += node->SaveAsLatex(&c);
@@ -1377,12 +1425,16 @@ void daeEquation::SaveNodeAsLatex(io::xmlTag_t* pTag, const string& strObjectNam
 void daeEquation::SaveNodeAsMathML(io::xmlTag_t* pTag, const string& strObjectName) const
 {
     string strName, strValue, strDEDI, strDomain;
-    daeNodeSaveAsContext c(m_pModel); //, m_ptrarrDistributedEquationDomainInfos);
-    adNode* node = m_pResidualNode.get();
 
     io::xmlTag_t* pChildTag = pTag->AddTag(strObjectName);
     if(!pChildTag)
         daeDeclareAndThrowException(exXMLIOError);
+
+    if(!m_pResidualNode)
+        return;
+
+    daeNodeSaveAsContext c(m_pModel); //, m_ptrarrDistributedEquationDomainInfos);
+    adNode* node = m_pResidualNode.get();
 
     strName = "math";
     io::xmlTag_t* pMathMLTag = pChildTag->AddTag(strName);
@@ -1809,6 +1861,9 @@ void daeEquation::CreateEquationExecutionInfos(daeModel* pModel, vector<daeEquat
                                      *pDistrEqnDomainInfo4, *pDistrEqnDomainInfo5, *pDistrEqnDomainInfo6,
                                      *pDistrEqnDomainInfo7, *pDistrEqnDomainInfo8;
 
+    // May be declined if requested in the daetools.cfg config file.
+    adNodeImpl::SetMemoryPool(eRuntimeNodesPool);
+
     ptrarrEqnExecutionInfosCreated.clear();
 
     nNoDomains = m_ptrarrDistributedEquationDomainInfos.size();
@@ -2154,6 +2209,10 @@ void daeEquation::CreateEquationExecutionInfos(daeModel* pModel, vector<daeEquat
         // However, daeEquation owns the pointers.
         this->m_ptrarrEquationExecutionInfos.push_back(pEquationExecutionInfo);
     }
+
+    /* Reset setup node. */
+    if(m_pModel->m_pDataProxy->GetDeleteSetupNodes())
+        m_pResidualNode.reset();
 }
 
 bool daeEquation::CheckObject(vector<string>& strarrErrors) const

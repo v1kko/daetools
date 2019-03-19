@@ -765,8 +765,8 @@ adouble daeVariable::Create_adouble(const size_t* indexes, const size_t N) const
 
     if(m_pModel->m_pDataProxy->GetGatherInfo())
     {
-        std::map<size_t, adouble>::const_iterator it = m_mapRuntimeVariableNodes.find(nIndex);
-        if(it != m_mapRuntimeVariableNodes.end()) // if found
+        std::map<size_t, adouble>::const_iterator it = m_pModel->m_pDataProxy->m_mapRuntimeVariableNodes.find(nIndex);
+        if(it != m_pModel->m_pDataProxy->m_mapRuntimeVariableNodes.end()) // if found
         {
             //std::cout << "Found runtime variable " << GetName() << "[" << nIndex << "] in the map" << std::endl;
             return it->second;
@@ -785,8 +785,8 @@ adouble daeVariable::Create_adouble(const size_t* indexes, const size_t N) const
         tmp.setGatherInfo(true);
 
         // Add it to the map for it has not been added yet
-        daeVariable* self = const_cast<daeVariable*>(this);
-        self->m_mapRuntimeVariableNodes[nIndex] = tmp;
+        //daeVariable* self = const_cast<daeVariable*>(this);
+        m_pModel->m_pDataProxy->m_mapRuntimeVariableNodes[nIndex] = tmp;
         //std::cout << "Added runtime variable " << GetName() << "[" << nIndex << "] to the map" << std::endl;
     }
 
@@ -852,9 +852,9 @@ adouble daeVariable::CreateSetupVariable(const daeDomainIndex* indexes, const si
     size_t nOverallIndex = -1;
     if(int_indexes.size() == N) // all indexes are constant indexes
     {
-        nOverallIndex = CalculateIndex(int_indexes);
-        std::map<size_t, adouble>::const_iterator it = m_mapSetupVariableNodes.find(nOverallIndex);
-        if(it != m_mapSetupVariableNodes.end()) // if found
+        nOverallIndex = m_nOverallIndex + CalculateIndex(int_indexes);
+        std::map<size_t, adouble>::const_iterator it = m_pModel->m_pDataProxy->m_mapSetupVariableNodes.find(nOverallIndex);
+        if(it != m_pModel->m_pDataProxy->m_mapSetupVariableNodes.end()) // if found
         {
             //std::cout << "Found variable " << GetName() << "(" << int_indexes[0] << ") in the map" << std::endl;
             return it->second;
@@ -880,7 +880,7 @@ adouble daeVariable::CreateSetupVariable(const daeDomainIndex* indexes, const si
     {
         //std::cout << "Added variable " << GetName() << "(" << int_indexes[0] << ") to the map" << std::endl;
         daeVariable* self = const_cast<daeVariable*>(this);
-        self->m_mapSetupVariableNodes[nOverallIndex] = tmp;
+        m_pModel->m_pDataProxy->m_mapSetupVariableNodes[nOverallIndex] = tmp;
     }
 
     return tmp;
@@ -1012,14 +1012,14 @@ adouble daeVariable::Calculate_dt(const size_t* indexes, const size_t N) const
 
     if(m_pModel->m_pDataProxy->GetGatherInfo())
     {
-        std::map<size_t, adouble>::const_iterator it = m_mapRuntimeTimeDerivativeNodes.find(nIndex);
-        if(it != m_mapRuntimeTimeDerivativeNodes.end()) // if found
+        std::map<size_t, adouble>::const_iterator it = m_pModel->m_pDataProxy->m_mapRuntimeTimeDerivativeNodes.find(nIndex);
+        if(it != m_pModel->m_pDataProxy->m_mapRuntimeTimeDerivativeNodes.end()) // if found
             return it->second;
 
         adRuntimeTimeDerivativeNode* node = new adRuntimeTimeDerivativeNode();
         node->m_pVariable = const_cast<daeVariable*>(this);
         node->m_nOverallIndex = nIndex;
-        node->m_nOrder = 1;
+        //node->m_nOrder = 1;
         if(N > 0)
         {
             node->m_narrDomains.resize(N);
@@ -1030,8 +1030,8 @@ adouble daeVariable::Calculate_dt(const size_t* indexes, const size_t N) const
         tmp.setGatherInfo(true);
 
         // Add it to the map for it has not been added yet
-        daeVariable* self = const_cast<daeVariable*>(this);
-        self->m_mapRuntimeTimeDerivativeNodes[nIndex] = tmp;
+        //daeVariable* self = const_cast<daeVariable*>(this);
+        m_pModel->m_pDataProxy->m_mapRuntimeTimeDerivativeNodes[nIndex] = tmp;
     }
     return tmp;
 }
@@ -1095,9 +1095,9 @@ adouble daeVariable::CreateSetupTimeDerivative(const daeDomainIndex* indexes, co
     size_t nOverallIndex = -1;
     if(int_indexes.size() == N) // all indexes are constant indexes
     {
-        nOverallIndex = CalculateIndex(int_indexes);
-        std::map<size_t, adouble>::const_iterator it = m_mapSetupTimeDerivativeNodes.find(nOverallIndex);
-        if(it != m_mapSetupTimeDerivativeNodes.end()) // if found
+        nOverallIndex = m_nOverallIndex + CalculateIndex(int_indexes);
+        std::map<size_t, adouble>::const_iterator it = m_pModel->m_pDataProxy->m_mapSetupTimeDerivativeNodes.find(nOverallIndex);
+        if(it != m_pModel->m_pDataProxy->m_mapSetupTimeDerivativeNodes.end()) // if found
             return it->second;
     }
 
@@ -1105,7 +1105,7 @@ adouble daeVariable::CreateSetupTimeDerivative(const daeDomainIndex* indexes, co
     adouble tmp;
     adSetupTimeDerivativeNode* node = new adSetupTimeDerivativeNode();
     node->m_pVariable = const_cast<daeVariable*>(this);
-    node->m_nOrder = 1;
+    //node->m_nOrder = 1;
 
     if(N > 0)
     {
@@ -1120,7 +1120,7 @@ adouble daeVariable::CreateSetupTimeDerivative(const daeDomainIndex* indexes, co
     if(int_indexes.size() == N && nOverallIndex != -1)
     {
         daeVariable* self = const_cast<daeVariable*>(this);
-        self->m_mapSetupTimeDerivativeNodes[nOverallIndex] = tmp;
+        m_pModel->m_pDataProxy->m_mapSetupTimeDerivativeNodes[nOverallIndex] = tmp;
     }
 
     return tmp;

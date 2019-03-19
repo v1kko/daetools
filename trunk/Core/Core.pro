@@ -37,6 +37,7 @@ SOURCES +=  action.cpp \
             nodes.cpp \
             nodes_array.cpp \
             nodes_compute_stack.cpp \
+            cs_export.cpp \
             object.cpp \
             objfun_constraints.cpp \
             ode_model.cpp \

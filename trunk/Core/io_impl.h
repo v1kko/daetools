@@ -20,7 +20,8 @@ DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 namespace dae
 {
 
-#define daeDeclareDynamicClass(Class) public: std::string GetObjectClassName(void) const {return std::string(#Class);}
+#define daeDeclareDynamicClass(Class) typedef Class this_type; \
+                                      public: std::string GetObjectClassName(void) const {return std::string(#Class);}
 
 namespace io
 {

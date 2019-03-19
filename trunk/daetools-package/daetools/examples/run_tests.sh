@@ -22,9 +22,11 @@ echo tutorial3.py
 $PYTHON $ROOT/tutorial3.py console
 
 echo tutorial4.py
+# Does not work with compute stack
 $PYTHON $ROOT/tutorial4.py console
 
 echo tutorial5.py
+# Does not work with compute stack
 $PYTHON $ROOT/tutorial5.py console
 
 echo tutorial6.py
@@ -56,6 +58,7 @@ echo tutorial14.py
 $PYTHON $ROOT/tutorial14.py console
 
 echo tutorial15.py
+# Does not work with compute stack
 $PYTHON $ROOT/tutorial15.py console
 
 echo tutorial16.py
@@ -92,6 +95,24 @@ echo tutorial_adv_4.py
 $PYTHON $ROOT/tutorial_adv_4.py console
 
 
+echo tutorial_opencs_dae_1.py
+$PYTHON $ROOT/tutorial_opencs_dae_1.py
+
+echo tutorial_opencs_dae_2.py
+$PYTHON $ROOT/tutorial_opencs_dae_2.py
+
+echo tutorial_opencs_dae_3.py
+$PYTHON $ROOT/tutorial_opencs_dae_3.py
+
+echo tutorial_opencs_ode_1.py
+$PYTHON $ROOT/tutorial_opencs_ode_1.py
+
+echo tutorial_opencs_ode_2.py
+$PYTHON $ROOT/tutorial_opencs_ode_2.py
+
+echo tutorial_opencs_ode_3.py
+$PYTHON $ROOT/tutorial_opencs_ode_3.py
+
 
 echo tutorial_che_1.py
 $PYTHON $ROOT/tutorial_che_1.py console
@@ -100,6 +121,7 @@ echo tutorial_che_2.py
 $PYTHON $ROOT/tutorial_che_2.py console
 
 echo tutorial_che_3.py
+# Does not work with compute stack
 $PYTHON $ROOT/tutorial_che_3.py console
 
 echo tutorial_che_4.py

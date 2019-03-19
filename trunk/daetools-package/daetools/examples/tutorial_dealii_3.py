@@ -186,7 +186,7 @@ class simTutorial(daeSimulation):
             setFEInitialConditions(self.m.fe_model, self.m.fe_system, 'c', c_with_noise_wiki)
         else:
             setFEInitialConditions(self.m.fe_model, self.m.fe_system, 'c', c_with_noise_ray)
-
+  
 def run(**kwargs):
     guiRun = kwargs.get('guiRun', False)
     

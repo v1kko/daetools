@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<meta name="Generator" content="Kate, the KDE Advanced Text Editor" />
+<title>tutorial_opencs_daetools_1.py</title>
+</head>
+<!-- Highlighting: "Python" -->
+<body>
+<pre style='color:#1f1c1b;background-color:#ffffff;'>
+<span style='color:#017a31;'>#!/usr/bin/env python</span>
+<span style='color:#017a31;'># -*- coding: utf-8 -*-</span>
+
+<span style='color:#017a31;'>&quot;&quot;&quot;</span>
+<span style='color:#017a31;'>***********************************************************************************</span>
+<span style='color:#017a31;'>                           tutorial_opencs_daetools_1.py</span>
+<span style='color:#017a31;'>                DAE Tools: pyDAE module, www.daetools.com</span>
+<span style='color:#017a31;'>                Copyright (C) Dragan Nikolic</span>
+<span style='color:#017a31;'>***********************************************************************************</span>
+<span style='color:#017a31;'>DAE Tools is free software; you can redistribute it and/or modify it under the</span>
+<span style='color:#017a31;'>terms of the GNU General Public License version 3 as published by the Free Software</span>
+<span style='color:#017a31;'>Foundation. DAE Tools is distributed in the hope that it will be useful, but WITHOUT</span>
+<span style='color:#017a31;'>ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A</span>
+<span style='color:#017a31;'>PARTICULAR PURPOSE. See the GNU General Public License for more details.</span>
+<span style='color:#017a31;'>You should have received a copy of the GNU General Public License along with the</span>
+<span style='color:#017a31;'>DAE Tools software; if not, see &lt;http://www.gnu.org/licenses/&gt;.</span>
+<span style='color:#017a31;'>************************************************************************************</span>
+<span style='color:#017a31;'>&quot;&quot;&quot;</span>
+__doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc0000;'>&quot;&quot;&quot;</span>
+<span style='color:#cc0000;'>DAE Tools version of the tutorial_opencs_dae_1.py example (IDAS idasAkzoNob_dns model).</span>
+<span style='color:#cc0000;'>&quot;&quot;&quot;</span>
+
+<span style='color:#3605fb;'>import</span> os, sys, json
+<span style='color:#3605fb;'>from</span> time <span style='color:#3605fb;'>import</span> localtime, strftime
+<span style='color:#3605fb;'>from</span> daetools.pyDAE <span style='color:#3605fb;'>import</span> <b><span style='color:#0000ff;'>*</span></b>
+<span style='color:#3605fb;'>from</span> tutorial_opencs_dae_1 <span style='color:#3605fb;'>import</span> ChemicalKinetics
+
+y_type <b><span style='color:#0000ff;'>=</span></b> daeVariableType(<span style='color:#cc0000;'>&quot;y_type&quot;</span>, unit(), <span style='color:#cc047c;'>0</span>, <span style='color:#cc047c;'>1E10</span>,   <span style='color:#cc047c;'>0</span>, <span style='color:#cc047c;'>1e-10</span>)
+
+<b>class</b> modTutorial(daeModel):
+    <b>def</b> <b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#3605fb;'>self</span>, Name, cs_model, Parent <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>None</span>, Description <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc0000;'>&quot;&quot;</span>):
+        daeModel.<b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#3605fb;'>self</span>, Name, Parent, Description)
+        
+        <span style='color:#3605fb;'>self</span>.cs_model <b><span style='color:#0000ff;'>=</span></b> cs_model
+        
+        <span style='color:#3605fb;'>self</span>.N <b><span style='color:#0000ff;'>=</span></b> daeDomain(<span style='color:#cc0000;'>&quot;N&quot;</span>, <span style='color:#3605fb;'>self</span>, unit(), <span style='color:#cc0000;'>&quot;&quot;</span>)
+        <span style='color:#3605fb;'>self</span>.y <b><span style='color:#0000ff;'>=</span></b> daeVariable(<span style='color:#cc0000;'>&quot;y&quot;</span>, y_type, <span style='color:#3605fb;'>self</span>, <span style='color:#cc0000;'>&quot;&quot;</span>, [<span style='color:#3605fb;'>self</span>.N])
+        
+    <b>def</b> DeclareEquations(<span style='color:#3605fb;'>self</span>):
+        daeModel.DeclareEquations(<span style='color:#3605fb;'>self</span>)
+        
+        Neq <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.cs_model.Nequations
+        
+        <span style='color:#017a31;'># Create a vector of variables:</span>
+        y <b><span style='color:#0000ff;'>=</span></b> numpy.empty(Neq, dtype<b><span style='color:#0000ff;'>=</span></b><span style='color:#2a00d6;'>object</span>)
+        y[:] <b><span style='color:#0000ff;'>=</span></b> [<span style='color:#3605fb;'>self</span>.y(i) <b>for</b> i <b>in</b> <span style='color:#2a00d6;'>range</span>(Neq)]
+
+        <span style='color:#017a31;'># Create a vector of time derivatives:</span>
+        dydt <b><span style='color:#0000ff;'>=</span></b> numpy.empty(Neq, dtype<b><span style='color:#0000ff;'>=</span></b><span style='color:#2a00d6;'>object</span>)
+        dydt[:] <b><span style='color:#0000ff;'>=</span></b> [dt(<span style='color:#3605fb;'>self</span>.y(i)) <b>for</b> i <b>in</b> <span style='color:#2a00d6;'>range</span>(Neq)]
+        
+        equations <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.cs_model.CreateEquations(y, dydt)    
+        <b>for</b> i <b>in</b> <span style='color:#2a00d6;'>range</span>(Neq):
+            eq <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.CreateEquation(<span style='color:#cc0000;'>&quot;y(</span><span style='color:#cc0000;'>%d</span><span style='color:#cc0000;'>)&quot;</span> <b><span style='color:#0000ff;'>%</span></b> i, <span style='color:#cc0000;'>&quot;&quot;</span>)
+            eq.Residual <b><span style='color:#0000ff;'>=</span></b> equations[i]
+            eq.CheckUnitsConsistency <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>False</span>
+
+<b>class</b> simTutorial(daeSimulation):
+    <b>def</b> <b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#3605fb;'>self</span>, cs_model):
+        daeSimulation.<b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#3605fb;'>self</span>)
+        <span style='color:#3605fb;'>self</span>.m <b><span style='color:#0000ff;'>=</span></b> modTutorial(<span style='color:#cc0000;'>&quot;tutorial_opencs_dae_1&quot;</span>, cs_model)
+        <span style='color:#3605fb;'>self</span>.m.Description <b><span style='color:#0000ff;'>=</span></b> __doc__
+        
+        <span style='color:#3605fb;'>self</span>.cs_model <b><span style='color:#0000ff;'>=</span></b> cs_model
+    
+    <b>def</b> SetUpParametersAndDomains(<span style='color:#3605fb;'>self</span>):
+        <span style='color:#3605fb;'>self</span>.m.N.CreateArray(<span style='color:#3605fb;'>self</span>.cs_model.Nequations)
+
+    <b>def</b> SetUpVariables(<span style='color:#3605fb;'>self</span>):
+        ics <b><span style='color:#0000ff;'>=</span></b> numpy.array(<span style='color:#3605fb;'>self</span>.cs_model.GetInitialConditions())
+        <b>for</b> i <b>in</b> <span style='color:#2a00d6;'>range</span>(<span style='color:#3605fb;'>self</span>.cs_model.Nequations<b><span style='color:#0000ff;'>-</span></b><span style='color:#cc047c;'>1</span>): <span style='color:#017a31;'># y6 is not differential variable</span>
+            <span style='color:#3605fb;'>self</span>.m.y.SetInitialCondition(i, ics[i])
+        
+<b>def</b> run(<b><span style='color:#0000ff;'>**</span></b>kwargs):
+    cs_model <b><span style='color:#0000ff;'>=</span></b> ChemicalKinetics()
+    simulation <b><span style='color:#0000ff;'>=</span></b> simTutorial(cs_model)
+    <b>return</b> daeActivity.simulate(simulation, reportingInterval <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>1</span>, 
+                                            timeHorizon       <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>180</span>,
+                                            <b><span style='color:#0000ff;'>**</span></b>kwargs)
+           
+<b>if</b> <span style='color:#3605fb;'>__name__</span> <b><span style='color:#0000ff;'>==</span></b> <span style='color:#cc0000;'>&quot;__main__&quot;</span>:
+    guiRun <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>False</span> <b>if</b> (<span style='color:#2a00d6;'>len</span>(sys.argv) <b><span style='color:#0000ff;'>&gt;</span></b> <span style='color:#cc047c;'>1</span> <b>and</b> sys.argv[<span style='color:#cc047c;'>1</span>] <b><span style='color:#0000ff;'>==</span></b> <span style='color:#cc0000;'>'console'</span>) <b>else</b> <span style='color:#3605fb;'>True</span>
+    run(guiRun <b><span style='color:#0000ff;'>=</span></b> guiRun)
+</pre>
+</body>
+</html>

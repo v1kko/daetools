@@ -26,6 +26,7 @@ POINTER_CONVERSION(daeOptimizationConstraint)
 POINTER_CONVERSION(daeVariableWrapper)
 POINTER_CONVERSION(daeModel_t)
 POINTER_CONVERSION(daeEquationExecutionInfo)
+POINTER_CONVERSION(cs::csComputeStackEvaluator_t)
 }
 #endif
 #endif
@@ -57,6 +58,14 @@ BOOST_PYTHON_MODULE(pyActivity)
         .value("eOptimization",			dae::activity::eOptimization)
         .value("eParameterEstimation",	dae::activity::eParameterEstimation)
         .export_values()
+    ;
+
+    register_ptr_to_python< std::shared_ptr<cs::csNode_t> >();
+
+    class_< std::vector<cs::csNodePtr> >("vector_csNodePtr")
+        .def(vector_indexing_suite< std::vector<cs::csNodePtr> >())
+        .def("__str__",     &daepython::vector_csNodePtr__str__)
+        .def("__repr__",    &daepython::vector_csNodePtr__str__)
     ;
 
 /**************************************************************
@@ -91,6 +100,7 @@ BOOST_PYTHON_MODULE(pyActivity)
         .def("Integrate",                   pure_virtual(&daeSimulation_t::Integrate))
         .def("IntegrateForTimeInterval",    pure_virtual(&daeSimulation_t::IntegrateForTimeInterval))
         .def("IntegrateUntilTime",          pure_virtual(&daeSimulation_t::IntegrateUntilTime))
+        .def("IntegrateForOneStep",         pure_virtual(&daeSimulation_t::IntegrateForOneStep))
        ;
 
     class_<daepython::daeDefaultSimulationWrapper, bases<daeSimulation_t>, boost::noncopyable>("daeSimulation", DOCSTR_daeSimulation, no_init)
@@ -224,6 +234,8 @@ BOOST_PYTHON_MODULE(pyActivity)
                                             ( arg("self"), arg("timeInterval"), arg("stopCriterion"), arg("reportDataAroundDiscontinuities") = true ), DOCSTR_daeSimulation_IntegrateForTimeInterval)
         .def("IntegrateUntilTime",          &daeSimulation::IntegrateUntilTime,
                                             ( arg("self"), arg("time"), arg("stopCriterion"), arg("reportDataAroundDiscontinuities") = true ), DOCSTR_daeSimulation_IntegrateUntilTime)
+        .def("IntegrateForOneStep",          &daeSimulation::IntegrateForOneStep,
+                                            ( arg("self"), arg("stopCriterion"), arg("reportDataAroundDiscontinuities") = true ), DOCSTR_daeSimulation_IntegrateUntilTime)
 
         .def("CreateEqualityConstraint",    &daeSimulation::CreateEqualityConstraint, return_internal_reference<>(),
                                             ( arg("self"), arg("description") ), DOCSTR_daeSimulation_CreateEqualityConstraint)
@@ -275,6 +287,8 @@ BOOST_PYTHON_MODULE(pyActivity)
                                           (arg("self"), arg("filenameComputeStacks"), arg("filenameJacobianIndexes"),
                                            arg("equationIndexes"), arg("bi_to_bi_local")),
                                           DOCSTR_daeSimulation_ExportComputeStackStructs)
+
+        .def("GetOpenCSModelData",      &daepython::daeDefaultSimulationWrapper::GetOpenCSModelData, ( arg("self") ))
     ;
 
 /**************************************************************

@@ -210,6 +210,45 @@ void daeFiniteElementModel::UpdateEquations()
     }
 }
 
+static void LogMemoryUsage()
+{
+    int currRealMem = 0;
+    int peakRealMem = 0;
+    int currVirtMem = 0;
+    int peakVirtMem = 0;
+
+    GetProcessMemory(&currRealMem, &peakRealMem, &currVirtMem, &peakVirtMem);
+
+    // Transform kB into MB
+    currRealMem /= 1000;
+    peakRealMem /= 1000;
+    currVirtMem /= 1000;
+    peakVirtMem /= 1000;
+    printf("       RAM = %5d MB (peak RAM = %5d MB, virtRAM = %5d MB, peak virtRAM = %5d MB)\n", currRealMem, peakRealMem, currVirtMem, peakVirtMem);
+}
+
+void daeFiniteElementModel::InitializeEquations()
+{
+    daeModel::InitializeEquations();
+
+    if(m_pDataProxy->GetDeleteSetupNodes())
+    {
+        printf("Before Aj/Mij/Fi reset and ClearAssembledSystem\n");
+        LogMemoryUsage();
+
+        m_Aij.reset();
+        m_Mij.reset();
+        m_Fi.reset();
+
+        // Clear the matrices and the system vector.
+        // If matrices are required after the assembly phase do not do it!
+        m_fe->ClearAssembledSystem();  /* Reset setup node. */
+
+        printf("After Aj/Mij/Fi reset and ClearAssembledSystem\n");
+        LogMemoryUsage();
+    }
+}
+
 /******************************************************************
     daeFiniteElementEquation
 *******************************************************************/
@@ -250,6 +289,12 @@ void daeFiniteElementEquation::CreateEquationExecutionInfos(daeModel* pModel, st
     std::vector<unsigned int> narrRowIndices;
     std::vector< std::pair<size_t, daeVariable*> > arrGlobalDOFToVariablePoint;
 
+    // May be declined if requested in the daetools.cfg config file.
+    adNodeImpl::SetMemoryPool(eRuntimeNodesPool);
+
+    double memRuntime  = 0;
+    double memSetup    = 0;
+
     if(!pModel)
         daeDeclareAndThrowException(exInvalidPointer);
 
@@ -284,8 +329,8 @@ void daeFiniteElementEquation::CreateEquationExecutionInfos(daeModel* pModel, st
     pTopLevelModel->PropagateGlobalExecutionContext(&EC);
 
     bool bPrintInfo = pModel->m_pDataProxy->PrintInfo();
-    if(bPrintInfo)
-        std::cout << "FEEquation start = " << m_startRow << " end = " << m_endRow << std::endl;
+    //if(bPrintInfo)
+    //    std::cout << "FEEquation start = " << m_startRow << " end = " << m_endRow << std::endl;
 
     fe = m_FEModel.m_fe;
     if(!fe)
@@ -300,12 +345,15 @@ void daeFiniteElementEquation::CreateEquationExecutionInfos(daeModel* pModel, st
         {
             arrGlobalDOFToVariablePoint[counter] = std::pair<size_t, daeVariable*>(j, variable);
             counter++;
-            if(bPrintInfo)
-                std::cout << (boost::format("%d : (%d : %s)") % counter % j % variable->GetName()).str() << std::endl;
+            //if(bPrintInfo)
+            //    std::cout << (boost::format("%d : (%d : %s)") % counter % j % variable->GetName()).str() << std::endl;
         }
     }
     if(counter != m_FEModel.m_Aij->GetNrows())
         daeDeclareAndThrowException(exInvalidCall);
+
+    //size_t type_id = typeid(adFloatCoefficientVariableSumNode).hash_code();
+    //printf("adFloatCoefficientVariableSumNode before rt (count %zu)\n", adNodeImpl::g_allNodes[type_id].size());
 
     counter = 0;
     for(size_t row = m_startRow; row < m_endRow; row++)
@@ -324,17 +372,26 @@ void daeFiniteElementEquation::CreateEquationExecutionInfos(daeModel* pModel, st
         a_Mij = 0;
 
         // RHS
-
         // If existing, evaluate Setup adNode from the matrix into a Runtime adNode
-        //a_Fi = create_adouble(new adFEVectorItemNode("f", *m_FEModel.m_Fi, row, unit()));
         adouble adFi_item = m_FEModel.m_Fi->GetItem(row);
         if(adFi_item.node)
         {
-            adNodePtr setup_node = adNode::SimplifyNode(adFi_item.node);
-            a_Fi = setup_node->Evaluate(&EC);
+            // OLD: First create runtime nodes.
+            a_Fi = adFi_item.node->Evaluate(&EC);
+            if(bPrintInfo)
+                memSetup += adFi_item.node->SizeOf();
+            //a_Fi.node = adNode::SimplifyNode(a_Fi.node);
 
-            // Reset the vector item with the new simplified runtime node
-            m_FEModel.m_Fi->SetItem(row, a_Fi);
+            // NEW: Nodes used during FE system assembly are both setup and runtime nodes,
+            //      and setup variable/time derivative nodes are never used.
+            //      Therefore, it is safe to use nodes from FE matrices/vector as if they
+            //      are runtime nodes! Anyhow, double check this!!
+            //a_Fi = adFi_item;
+
+            // Reset the vector item with an empty adouble.
+            adFi_item.node.reset();
+            if(pDataProxy->GetDeleteSetupNodes())
+                m_FEModel.m_Fi->SetItem(row, adouble()); /* Reset setup node. */
         }
         else
             a_Fi = create_adouble(new adConstantNode(adFi_item.getValue()));
@@ -353,19 +410,25 @@ void daeFiniteElementEquation::CreateEquationExecutionInfos(daeModel* pModel, st
             // Set it to be the variable's local index (we need it to create adoubles with runtime nodes)
             indexes[0] = internalVariableIndex;
 
-            //if(!a_Aij.node)
-            //    a_Aij =         create_adouble(new adFEMatrixItemNode("A", *m_FEModel.m_Aij, row, column, unit())) * variable->Create_adouble(indexes, 1);
-            //else
-            //    a_Aij = a_Aij + create_adouble(new adFEMatrixItemNode("A", *m_FEModel.m_Aij, row, column, unit())) * variable->Create_adouble(indexes, 1);
-
             adouble adAij_item = m_FEModel.m_Aij->GetItem(row, column);
             if(adAij_item.node)
             {
-                adNodePtr setup_node = adNode::SimplifyNode(adAij_item.node);
-                adouble   runtime_ad = setup_node->Evaluate(&EC);
+                // OLD: First create runtime nodes.
+                adouble runtime_ad = adAij_item.node->Evaluate(&EC);
+                if(bPrintInfo)
+                    memSetup += adAij_item.node->SizeOf();
+                //runtime_ad.node = adNode::SimplifyNode(runtime_ad.node);
 
-                // Reset the matrix item with the new simplified runtime node
-                m_FEModel.m_Aij->SetItem(row, column, runtime_ad);
+                // NEW: Nodes used during FE system assembly are both setup and runtime nodes,
+                //      and setup variable/time derivative nodes are never used.
+                //      Therefore, it is safe to use nodes from FE matrices/vector as if they
+                //      are runtime nodes! Anyhow, double check this!!
+                //adouble runtime_ad = adAij_item;
+
+                // Reset the matrix item with an empty adouble.
+                adAij_item.node.reset();
+                if(pDataProxy->GetDeleteSetupNodes())
+                    m_FEModel.m_Aij->SetItem(row, column, adouble()); /* Reset setup node. */
 
                 adConstantNode* cn = dynamic_cast<adConstantNode*>(runtime_ad.node.get());
                 if(cn && cn->m_quantity.getValue() == 0)
@@ -401,18 +464,24 @@ void daeFiniteElementEquation::CreateEquationExecutionInfos(daeModel* pModel, st
             adouble adMij_item = m_FEModel.m_Mij->GetItem(row, column);
             if(adMij_item.node || adMij_item.getValue() != 0.0)
             {
-                //if(!a_Mij.node)
-                //    a_Mij =         create_adouble(new adFEMatrixItemNode("M", *m_FEModel.m_Mij, row, column, unit())) * variable->Calculate_dt(indexes, 1);
-                //else
-                //    a_Mij = a_Mij + create_adouble(new adFEMatrixItemNode("M", *m_FEModel.m_Mij, row, column, unit())) * variable->Calculate_dt(indexes, 1);
-
                 if(adMij_item.node)
                 {
-                    adNodePtr setup_node = adNode::SimplifyNode(adMij_item.node);
-                    adouble   runtime_ad = setup_node->Evaluate(&EC);
+                    // OLD: First create runtime nodes.
+                    adouble runtime_ad = adMij_item.node->Evaluate(&EC);
+                    if(bPrintInfo)
+                        memSetup += adMij_item.node->SizeOf();
+                    //runtime_ad.node = adNode::SimplifyNode(runtime_ad.node);
 
-                    // Reset the matrix item with the new simplified runtime node
-                    m_FEModel.m_Mij->SetItem(row, column, runtime_ad);
+                    // NEW: Nodes used during FE system assembly are both setup and runtime nodes,
+                    //      and setup variable/time derivative nodes are never used.
+                    //      Therefore, it is safe to use nodes from FE matrices/vector as if they
+                    //      are runtime nodes! Anyhow, double check this!!
+                    //adouble runtime_ad = adAij_item;
+
+                    // Reset the matrix item with an empty adouble.
+                    adMij_item.node.reset();
+                    if(pDataProxy->GetDeleteSetupNodes())
+                        m_FEModel.m_Mij->SetItem(row, column, adouble()); /* Reset setup node. */
 
                     adConstantNode* cn = dynamic_cast<adConstantNode*>(runtime_ad.node.get());
                     if(cn && cn->m_quantity.getValue() == 0)
@@ -447,6 +516,9 @@ void daeFiniteElementEquation::CreateEquationExecutionInfos(daeModel* pModel, st
 
         pEquationExecutionInfo->m_EquationEvaluationNode = (a_Mij + a_Aij - a_Fi).node;
 
+        if(bPrintInfo)
+            memRuntime += pEquationExecutionInfo->m_EquationEvaluationNode->SizeOf();
+
         /* ACHTUNG, ACHTUNG!!
            We already have m_EquationEvaluationNode and a call to GatherInfo() seems unnecesary.
            This way we avoided creation of setup nodes first and then evaluating them into the runtime ones
@@ -470,11 +542,29 @@ void daeFiniteElementEquation::CreateEquationExecutionInfos(daeModel* pModel, st
         // This vector is redundant - all EquationExecutionInfos exist in models and states too.
         // However, daeEquation owns the pointers.
         this->m_ptrarrEquationExecutionInfos.push_back(pEquationExecutionInfo);
+
+    /*
+        // Free setup nodes after every 1000 equations (check if it helps)
+        if(row % 1000 == 0)
+        {
+            printf("  ReleaseSetupNodesMemory after every 1000 equations (%zu):\n", row);
+            LogMemoryUsage();
+            adNodeImpl::ReleaseSetupNodesMemory(); // release memory, not purge!
+            LogMemoryUsage();
+        }
+    */
     }
 
-    // Clear the matrices and the system vector
-    // If matrices are required after the assembly phase do not do it!
-    //fe->ClearAssembledSystem();
+    if(pModel->m_pDataProxy->GetDeleteSetupNodes())
+        m_pResidualNode.reset();
+
+    if(bPrintInfo)
+    {
+        //printf("adFloatCoefficientVariableSumNode after (count %zu)\n", adNodeImpl::g_allNodes[type_id].size());
+        printf("FE memSetup    = %.3f MB\n", memSetup    / (1024.0*1024.0));
+        printf("FE memRuntime  = %.3f MB\n", memRuntime  / (1024.0*1024.0));
+        LogMemoryUsage();
+    }
 
     pTopLevelModel->PropagateGlobalExecutionContext(NULL);
 }

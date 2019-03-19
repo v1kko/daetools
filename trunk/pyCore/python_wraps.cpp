@@ -49,6 +49,26 @@ adouble_array create_adouble_array_from_object(boost::python::object value)
     }
 }
 
+boost::python::dict daeMemoryUsage()
+{
+    int currRealMem = 0;
+    int peakRealMem = 0;
+    int currVirtMem = 0;
+    int peakVirtMem = 0;
+
+    GetProcessMemory(&currRealMem, &peakRealMem, &currVirtMem, &peakVirtMem);
+
+    boost::python::dict RAM;
+
+    // Transform kB into MB
+    RAM["RAM"]         = currRealMem / 1000.0;
+    RAM["peakRAM"]     = peakRealMem / 1000.0;
+    RAM["virtRAM"]     = currVirtMem / 1000.0;
+    RAM["peakVirtRAM"] = peakVirtMem / 1000.0;
+
+    return RAM;
+}
+
 /*******************************************************
     Common
 *******************************************************/

@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<meta name="Generator" content="Kate, the KDE Advanced Text Editor" />
+<title>tutorial_opencs_ode_1.py</title>
+</head>
+<!-- Highlighting: "Python" -->
+<body>
+<pre style='color:#1f1c1b;background-color:#ffffff;'>
+<span style='color:#017a31;'>#!/usr/bin/env python</span>
+<span style='color:#017a31;'># -*- coding: utf-8 -*-</span>
+
+<span style='color:#017a31;'>&quot;&quot;&quot;</span>
+<span style='color:#017a31;'>***********************************************************************************</span>
+<span style='color:#017a31;'>                           tutorial_opencs_ode_1.py</span>
+<span style='color:#017a31;'>                DAE Tools: pyOpenCS module, www.daetools.com</span>
+<span style='color:#017a31;'>                Copyright (C) Dragan Nikolic</span>
+<span style='color:#017a31;'>***********************************************************************************</span>
+<span style='color:#017a31;'>DAE Tools is free software; you can redistribute it and/or modify it under the</span>
+<span style='color:#017a31;'>terms of the GNU General Public License version 3 as published by the Free Software</span>
+<span style='color:#017a31;'>Foundation. DAE Tools is distributed in the hope that it will be useful, but WITHOUT</span>
+<span style='color:#017a31;'>ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A</span>
+<span style='color:#017a31;'>PARTICULAR PURPOSE. See the GNU General Public License for more details.</span>
+<span style='color:#017a31;'>You should have received a copy of the GNU General Public License along with the</span>
+<span style='color:#017a31;'>DAE Tools software; if not, see &lt;http://www.gnu.org/licenses/&gt;.</span>
+<span style='color:#017a31;'>************************************************************************************</span>
+<span style='color:#017a31;'>&quot;&quot;&quot;</span>
+__doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc0000;'>&quot;&quot;&quot;</span>
+<span style='color:#cc0000;'>Reimplementation of CVodes cvsRoberts_dns example.</span>
+<span style='color:#cc0000;'>The Roberts chemical kinetics problem with 3 rate equations::</span>
+<span style='color:#cc0000;'>    </span>
+<span style='color:#cc0000;'>    dy1/dt = -0.04*y1 + 1.e4*y2*y3</span>
+<span style='color:#cc0000;'>    dy2/dt =  0.04*y1 - 1.e4*y2*y3 - 3.e7*(y2)^2</span>
+<span style='color:#cc0000;'>    dy3/dt =  3.e7*(y2)^2</span>
+
+<span style='color:#cc0000;'>The problem is simulated for 4000 s, with the initial conditions::</span>
+<span style='color:#cc0000;'>    </span>
+<span style='color:#cc0000;'>    y1 = 1.0</span>
+<span style='color:#cc0000;'>    y2 = y3 = 0</span>
+<span style='color:#cc0000;'>    </span>
+<span style='color:#cc0000;'>The problem is stiff.</span>
+<span style='color:#cc0000;'>The original results are in tutorial_opencs_ode_1.csv file.</span>
+<span style='color:#cc0000;'>&quot;&quot;&quot;</span>
+
+<span style='color:#3605fb;'>import</span> os, sys, json
+<span style='color:#3605fb;'>from</span> time <span style='color:#3605fb;'>import</span> localtime, strftime
+<span style='color:#3605fb;'>from</span> daetools.pyDAE <span style='color:#3605fb;'>import</span> <b><span style='color:#0000ff;'>*</span></b>
+<span style='color:#3605fb;'>from</span> pyOpenCS <span style='color:#3605fb;'>import</span> csModelBuilder_t, csNumber_t, csSimulate
+<span style='color:#3605fb;'>from</span> tutorial_opencs_aux <span style='color:#3605fb;'>import</span> compareResults
+
+<b>class</b> Roberts:
+    <b>def</b> <b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#3605fb;'>self</span>):
+        <span style='color:#3605fb;'>self</span>.Nequations <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>3</span>
+
+    <b>def</b> GetInitialConditions(<span style='color:#3605fb;'>self</span>):
+        y0 <b><span style='color:#0000ff;'>=</span></b> [<span style='color:#cc047c;'>0.0</span>] <b><span style='color:#0000ff;'>*</span></b> <span style='color:#3605fb;'>self</span>.Nequations
+
+        y0[<span style='color:#cc047c;'>0</span>] <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>1.0</span>
+        y0[<span style='color:#cc047c;'>1</span>] <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>0.0</span>
+        y0[<span style='color:#cc047c;'>2</span>] <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>0.0</span>
+        <b>return</b> y0
+
+    <b>def</b> GetVariableNames(<span style='color:#3605fb;'>self</span>):
+        <b>return</b> [<span style='color:#cc0000;'>'y1'</span>, <span style='color:#cc0000;'>'y2'</span>, <span style='color:#cc0000;'>'y3'</span>]
+    
+    <b>def</b> CreateEquations(<span style='color:#3605fb;'>self</span>, y):
+        <span style='color:#017a31;'># y is a list of csNumber_t objects representing model variables</span>
+        y1,y2,y3 <b><span style='color:#0000ff;'>=</span></b> y
+
+        equations <b><span style='color:#0000ff;'>=</span></b> [<span style='color:#3605fb;'>None</span>] <b><span style='color:#0000ff;'>*</span></b> <span style='color:#3605fb;'>self</span>.Nequations
+        equations[<span style='color:#cc047c;'>0</span>] <b><span style='color:#0000ff;'>=</span></b> <b><span style='color:#0000ff;'>-</span></b><span style='color:#cc047c;'>0.04</span> <b><span style='color:#0000ff;'>*</span></b> y1 <b><span style='color:#0000ff;'>+</span></b> <span style='color:#cc047c;'>1.0e4</span> <b><span style='color:#0000ff;'>*</span></b> y2 <b><span style='color:#0000ff;'>*</span></b> y3
+        equations[<span style='color:#cc047c;'>1</span>] <b><span style='color:#0000ff;'>=</span></b>  <span style='color:#cc047c;'>0.04</span> <b><span style='color:#0000ff;'>*</span></b> y1 <b><span style='color:#0000ff;'>-</span></b> <span style='color:#cc047c;'>1.0e4</span> <b><span style='color:#0000ff;'>*</span></b> y2 <b><span style='color:#0000ff;'>*</span></b> y3 <b><span style='color:#0000ff;'>-</span></b> <span style='color:#cc047c;'>3.0e7</span> <b><span style='color:#0000ff;'>*</span></b> numpy.power(y2, <span style='color:#cc047c;'>2</span>)
+        equations[<span style='color:#cc047c;'>2</span>] <b><span style='color:#0000ff;'>=</span></b>  <span style='color:#cc047c;'>3.0e7</span> <b><span style='color:#0000ff;'>*</span></b> numpy.power(y2, <span style='color:#cc047c;'>2</span>)
+        
+        <b>return</b> equations
+    
+<b>def</b> run(<b><span style='color:#0000ff;'>**</span></b>kwargs):
+    inputFilesDirectory <b><span style='color:#0000ff;'>=</span></b> kwargs.get(<span style='color:#cc0000;'>'inputFilesDirectory'</span>, os.path.splitext(os.path.basename(<span style='color:#3605fb;'>__file__</span>))[<span style='color:#cc047c;'>0</span>])
+
+    <span style='color:#017a31;'># Instantiate the model being simulated.</span>
+    model <b><span style='color:#0000ff;'>=</span></b> Roberts()
+    
+    <span style='color:#017a31;'># 1. Initialise the ODE system with the number of variables and other inputs.</span>
+    mb <b><span style='color:#0000ff;'>=</span></b> csModelBuilder_t()
+    mb.Initialize_ODE_System(model.Nequations, <span style='color:#cc047c;'>0</span>, defaultAbsoluteTolerance <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>1e-7</span>)
+    
+    <span style='color:#017a31;'># 2. Specify the OpenCS model.    </span>
+    <span style='color:#017a31;'># Create and set model equations using the provided time/variable/dof objects.</span>
+    <span style='color:#017a31;'># The ODE system is defined as:</span>
+    <span style='color:#017a31;'>#     x' = f(x,y,t)</span>
+    <span style='color:#017a31;'># where x' are derivatives of state variables, x are state variables,</span>
+    <span style='color:#017a31;'># y are fixed variables (degrees of freedom) and t is the current simulation time.</span>
+    time            <b><span style='color:#0000ff;'>=</span></b> mb.Time             <span style='color:#017a31;'># Current simulation time (t)</span>
+    variables       <b><span style='color:#0000ff;'>=</span></b> mb.Variables        <span style='color:#017a31;'># State variables (x)</span>
+    dofs            <b><span style='color:#0000ff;'>=</span></b> mb.DegreesOfFreedom <span style='color:#017a31;'># Fixed variables (y)</span>
+    mb.ModelEquations <b><span style='color:#0000ff;'>=</span></b> model.CreateEquations(variables)    
+    
+    <span style='color:#017a31;'># Set initial conditions</span>
+    mb.VariableValues <b><span style='color:#0000ff;'>=</span></b> model.GetInitialConditions()
+    
+    <span style='color:#017a31;'># Set variable names.</span>
+    mb.VariableNames  <b><span style='color:#0000ff;'>=</span></b> model.GetVariableNames()
+    
+    <span style='color:#017a31;'># 3. Generate a model for single CPU simulations.    </span>
+    <span style='color:#017a31;'># Set simulation options (specified as a string in JSON format).</span>
+    <span style='color:#017a31;'># The default options are returned by SimulationOptions function as a string in JSON format.</span>
+    <span style='color:#017a31;'># The TimeHorizon and the ReportingInterval must be set.</span>
+    options <b><span style='color:#0000ff;'>=</span></b> json.loads(mb.SimulationOptions)
+    options[<span style='color:#cc0000;'>'Simulation'</span>][<span style='color:#cc0000;'>'OutputDirectory'</span>]             <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc0000;'>'results'</span>
+    options[<span style='color:#cc0000;'>'Simulation'</span>][<span style='color:#cc0000;'>'TimeHorizon'</span>]                 <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>4000.0</span>
+    options[<span style='color:#cc0000;'>'Simulation'</span>][<span style='color:#cc0000;'>'ReportingInterval'</span>]           <b><span style='color:#0000ff;'>=</span></b>   <span style='color:#cc047c;'>10.0</span>
+    options[<span style='color:#cc0000;'>'Solver'</span>][<span style='color:#cc0000;'>'Parameters'</span>][<span style='color:#cc0000;'>'RelativeTolerance'</span>] <b><span style='color:#0000ff;'>=</span></b>   <span style='color:#cc047c;'>1e-5</span>
+    mb.SimulationOptions <b><span style='color:#0000ff;'>=</span></b> json.dumps(options, indent<b><span style='color:#0000ff;'>=</span></b><span style='color:#cc047c;'>4</span>)
+    
+    <span style='color:#017a31;'># Partition the system to create the OpenCS model for a single CPU simulation.</span>
+    <span style='color:#017a31;'># In this case (Npe = 1) the graph partitioner is not required.</span>
+    Npe <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>1</span>
+    graphPartitioner <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>None</span>
+    cs_models <b><span style='color:#0000ff;'>=</span></b> mb.PartitionSystem(Npe, graphPartitioner)
+    csModelBuilder_t.ExportModels(cs_models, inputFilesDirectory, mb.SimulationOptions)
+    <span style='color:#2a00d6;'>print</span>(<span style='color:#cc0000;'>&quot;OpenCS model generated successfully!&quot;</span>)
+
+    <span style='color:#017a31;'># 4. Run simulation using the exported model from the specified directory.</span>
+    csSimulate(inputFilesDirectory)
+    
+    <span style='color:#017a31;'># Compare OpenCS and the original model results.</span>
+    compareResults(inputFilesDirectory, [<span style='color:#cc0000;'>'y1'</span>, <span style='color:#cc0000;'>'y2'</span>, <span style='color:#cc0000;'>'y3'</span>])
+    
+<b>if</b> <span style='color:#3605fb;'>__name__</span> <b><span style='color:#0000ff;'>==</span></b> <span style='color:#cc0000;'>&quot;__main__&quot;</span>:
+    inputFilesDirectory <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc0000;'>'tutorial_opencs_ode_1'</span>
+    run(inputFilesDirectory <b><span style='color:#0000ff;'>=</span></b> inputFilesDirectory)
+</pre>
+</body>
+</html>

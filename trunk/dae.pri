@@ -11,8 +11,8 @@
 # DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 #************************************************************************************
 DAE_TOOLS_MAJOR = 1
-DAE_TOOLS_MINOR = 8
-DAE_TOOLS_BUILD = 1
+DAE_TOOLS_MINOR = 9
+DAE_TOOLS_BUILD = 0
 
 # DAE Tools version (major, minor, build)
 VERSION = $${DAE_TOOLS_MAJOR}.$${DAE_TOOLS_MINOR}.$${DAE_TOOLS_BUILD}
@@ -192,7 +192,7 @@ macx-g++::SOLIBS_RPATH_SL       = -Wl,-rpath,\'@loader_path\'
 CONFIG += rtti
 
 # For profiling with Valgrind
-#unix::QMAKE_CXXFLAGS += -g
+#QMAKE_CXXFLAGS += -g
 
 # c++11
 unix::QMAKE_CXXFLAGS  += -std=c++11
@@ -414,7 +414,7 @@ win64-g++-*::BLAS_LAPACK_LIBS    =  $${BLAS_LAPACK_LIBDIR}/liblapack.a $${BLAS_L
 # 1. OpenBLAS dynamically linked:
 #linux-g++::BLAS_LAPACK_LIBS = -L$${BLAS_LAPACK_LIBDIR} -lopenblas_daetools -lm
 # 2. daetools compiled reference BLAS and Lapack statically linked:
-linux-g++::BLAS_LAPACK_LIBS = $${BLAS_LAPACK_LIBDIR}/liblapack.a $${BLAS_LAPACK_LIBDIR}/libblas.a -lgfortran -lm
+linux-g++::BLAS_LAPACK_LIBS = $${BLAS_LAPACK_LIBDIR}/liblapack.a $${BLAS_LAPACK_LIBDIR}/libblas.a -l:libgfortran.so.3 -lm
 macx-g++::BLAS_LAPACK_LIBS  = $${BLAS_LAPACK_LIBDIR}/liblapack.a $${BLAS_LAPACK_LIBDIR}/libblas.a -lgfortran -lm
 
 
@@ -722,9 +722,9 @@ DEALII_INCLUDE           = $${DEALII_DIR}/include
 DEALII_LIB_DIR           = $${DEALII_DIR}/lib
 
 win32-msvc2015::DEALII_LIBS = $${DEALII_LIB_DIR}/deal_II-daetools.lib
-unix::DEALII_LIBS           = -ldeal_II-daetools -lz -lblas -lgfortran -lm
-win32-g++-*::DEALII_LIBS    = -ldeal_II-daetools -lblas -lgfortran -lm
-win64-g++-*::DEALII_LIBS    = -ldeal_II-daetools -lblas -lgfortran -lm
+unix::DEALII_LIBS           = -ldeal_II-daetools -lz
+win32-g++-*::DEALII_LIBS    = -ldeal_II-daetools
+win64-g++-*::DEALII_LIBS    = -ldeal_II-daetools
 
 #####################################################################################
 #                        CoolProp thermo package
@@ -809,11 +809,11 @@ OPEN_CS_DIR = ../OpenCS
 OPEN_CS_INCLUDE = $${OPEN_CS_DIR}/build/include
 OPEN_CS_LIB_DIR = $${OPEN_CS_DIR}/build/lib
 
-unix::OPEN_CS_LIBS                  = -L$${OPEN_CS_LIB_DIR} -lOpenCS_Evaluators
-unix::OPEN_CS_MODELS_LIBS           = -lOpenCS_Models
+unix::OPEN_CS_LIBS                 = -L$${OPEN_CS_LIB_DIR} -lOpenCS_Evaluators
+unix::OPEN_CS_MODELS_LIB           = -L$${OPEN_CS_LIB_DIR} -lOpenCS_Models -lOpenCS_Evaluators
 
-win32-msvc2015::OPEN_CS_LIBS        = -L$${OPEN_CS_LIB_DIR} OpenCS_Evaluators.lib
-win32-msvc2015::OPEN_CS_MODELS_LIBS = OpenCS_Models.lib
+win32-msvc2015::OPEN_CS_LIBS       = -L$${OPEN_CS_LIB_DIR} OpenCS_Evaluators.lib
+win32-msvc2015::OPEN_CS_MODELS_LIB = -L$${OPEN_CS_LIB_DIR} OpenCS_Models.lib
 
 #####################################################################################
 #                                  DAE Tools
@@ -910,7 +910,7 @@ unix::DAE_CAPE_THERMO_PACKAGE_LIB       =
 unix::DAE_COOLPROP_THERMO_PACKAGE_LIB   = -lcdaeCoolPropThermoPackage
 unix::DAE_EVALUATOR_OPENCL_LIB          = -lcdaeEvaluator_OpenCL
 
-QMAKE_LIBDIR += $${DAE_DEST_DIR} $${BOOSTLIBPATH} $${PYTHON_LIB_DIR}
+QMAKE_LIBDIR += $${DAE_DEST_DIR} $${BOOSTLIBPATH}
 
 #######################################################
 #            Settings for installing files

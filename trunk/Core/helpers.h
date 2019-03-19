@@ -90,6 +90,8 @@ void		Enclose(std::string& strToEnclose, const char* lpszLeft = "[", const char*
 bool		ParseSingleToken(std::string& strFullName, std::string& strShortName, std::vector<size_t>& narrDomains);
 
 inline double GetTimeInSeconds();
+inline void GetProcessMemory(int* currRealMem, int* peakRealMem,
+                             int* currVirtMem, int* peakVirtMem);
 
 template<class T>
 T fromString(const std::string& value)
@@ -773,6 +775,59 @@ inline double GetTimeInSeconds(void)
 #else
     #error Unknown Platform!!
     return 0.0;
+#endif
+}
+
+/*
+ * Measures the current (and peak) resident and virtual memories
+ * usage of your linux C process, in kB
+ */
+void GetProcessMemory(int* currRealMem, int* peakRealMem,
+                      int* currVirtMem, int* peakVirtMem)
+{
+    *currRealMem = 0;
+    *peakRealMem = 0;
+    *currVirtMem = 0;
+    *peakVirtMem = 0;
+
+#if !defined(__MINGW32__) && (defined(_WIN32) || defined(WIN32) || defined(WIN64) || defined(_WIN64))
+
+#elif defined(__MACH__) || defined(__APPLE__)
+
+#elif defined(__MINGW32__)
+
+#elif __linux__ == 1
+    // stores each word in status file
+    char buffer[1024] = "";
+
+    // linux file contains this-process info
+    FILE* file = fopen("/proc/self/status", "r");
+    if(file == NULL)
+        return;
+
+    // read the entire file
+    while (fscanf(file, " %1023s", buffer) == 1)
+    {
+        if (strcmp(buffer, "VmRSS:") == 0)
+        {
+            fscanf(file, " %d", currRealMem);
+        }
+        if (strcmp(buffer, "VmHWM:") == 0)
+        {
+            fscanf(file, " %d", peakRealMem);
+        }
+        if (strcmp(buffer, "VmSize:") == 0)
+        {
+            fscanf(file, " %d", currVirtMem);
+        }
+        if (strcmp(buffer, "VmPeak:") == 0)
+        {
+            fscanf(file, " %d", peakVirtMem);
+        }
+    }
+    fclose(file);
+#else
+    #error Unknown Platform!!
 #endif
 }
 

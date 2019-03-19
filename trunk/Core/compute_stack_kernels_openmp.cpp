@@ -29,16 +29,14 @@ void EvaluateEquations(const csComputeStackItem_t*         computeStacks,
     const csComputeStackItem_t* computeStack = &computeStacks[firstIndex];
 
     /* Evaluate the compute stack (scaling is included). */
-    adouble_t res_cs = evaluateComputeStack(computeStack,
-                                            EC,
-                                            dofs,
-                                            values,
-                                            timeDerivatives,
-                                            NULL,
-                                            NULL);
+    real_t res_cs = evaluateComputeStack(computeStack,
+                                         EC,
+                                         dofs,
+                                         values,
+                                         timeDerivatives);
 
     /* Set the value in the residuals array. */
-    residuals[equationIndex] = res_cs.m_dValue;
+    residuals[equationIndex] = res_cs;
 }
 
 /* Jacobian kernel functions. */
@@ -61,13 +59,13 @@ void EvaluateDerivatives(const csComputeStackItem_t*        computeStacks,
     EC.jacobianIndex = jacobianItem.overallIndex;
 
     /* Evaluate the compute stack (scaling is included). */
-    adouble_t jac_cs = evaluateComputeStack(computeStack,
-                                               EC,
-                                               dofs,
-                                               values,
-                                               timeDerivatives,
-                                               NULL,
-                                               NULL);
+    adouble_t jac_cs = evaluateComputeStackDerivative(computeStack,
+                                                      EC,
+                                                      dofs,
+                                                      values,
+                                                      timeDerivatives,
+                                                      NULL,
+                                                      NULL);
 
     /* Set the value in the jacobian array. */
     jacobian[jacobianItemIndex] = jac_cs.m_dDeriv;
@@ -90,13 +88,13 @@ void EvaluateSensitivityDerivatives(const csComputeStackItem_t*        computeSt
     const csComputeStackItem_t* computeStack = &computeStacks[firstIndex];
 
     /* Evaluate the compute stack (scaling is included). */
-    adouble_t res_cs = evaluateComputeStack(computeStack,
-                                            EC,
-                                            dofs,
-                                            values,
-                                            timeDerivatives,
-                                            svalues,
-                                            sdvalues);
+    adouble_t res_cs = evaluateComputeStackDerivative(computeStack,
+                                                      EC,
+                                                      dofs,
+                                                      values,
+                                                      timeDerivatives,
+                                                      svalues,
+                                                      sdvalues);
 
     /* Set the value in the sensitivity array matrix (here we access the data using its row pointers). */
     sresiduals[equationIndex] = res_cs.m_dDeriv;

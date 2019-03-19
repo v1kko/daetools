@@ -17,8 +17,9 @@ Tutorials
 .. rubric:: Basic Tutorials
 
 The `Basic Tutorials <tutorials-basic.html>`_ illustrate the fundamental modelling concepts in **DAE Tools**,
-simulation options, use of data reporter, data receiver and log objects, DAE and LA solvers, interoperability
-with NumPy, support for discrete systems and external functions.
+discontinuous equations and state transition networks, user-defined schedules, simulation options, 
+use of data reporter, data receiver and log objects, DAE and LA solvers, interoperability with NumPy, 
+support for discrete systems, external functions, thermophysical property packages and variable constraints.
 
 
 .. _tutorials_advanced:
@@ -63,6 +64,13 @@ problems solved by **DAE Tools**.
 - Variance based methods (FAST and Sobol)
 
 
+.. _tutorials_opecs:
+
+.. rubric:: OpenCS Examples
+
+The `OpenCS Examples <tutorials-opencs.html>`_ illustrate the capabilities of the **OpenCS** framework (using Python wrappers).
+
+
 .. _tutorials_optimisation:
 
 .. rubric:: Optimisation Tutorials
@@ -93,6 +101,7 @@ parameter estimation and optimal control tests.
    tutorials-fe
    tutorials-chemeng
    tutorials-sa
+   tutorials-opencs
    tutorials-optimisation
    tutorials-chemeng-optimisation
    #tutorials-all

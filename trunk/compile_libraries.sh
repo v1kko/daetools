@@ -156,18 +156,18 @@ PYTHON_LIB_DIR=
 TRUNK="$( cd "$( dirname "$0" )" && pwd )"
 HOST_ARCH=`uname -m`
 PLATFORM=`uname -s`
-if [[ "${PLATFORM}" == *"MSYS_"* ]]; then
+if [ "${PLATFORM}" = *"MSYS_"* ]; then
   PLATFORM="Windows"
   # Platform should be set by i.e. vcbuildtools.bat
   VC_PLAT=`cmd "/C echo %Platform%"`
   echo $VC_PLAT
-  if [[ "${VC_PLAT}" == *"X86"* ]]; then
+  if [ "${VC_PLAT}" = *"X86"* ]; then
     HOST_ARCH="win32"
-  elif [[ "${VC_PLAT}" == *"x86"* ]]; then
+  elif [ "${VC_PLAT}" = *"x86"* ]; then
     HOST_ARCH="win32"
-  elif [[ "${VC_PLAT}" == *"x64"* ]]; then
+  elif [ "${VC_PLAT}" = *"x64"* ]; then
     HOST_ARCH="win64"
-  elif [[ "${VC_PLAT}" == *"X64"* ]]; then
+  elif [ "${VC_PLAT}" = *"X64"* ]; then
     HOST_ARCH="win64"
   else
     echo unknown HOST_ARCH: $HOST_ARCH
@@ -245,7 +245,7 @@ for i; do
 done
 
 MINGW_MAKE=
-if [[ "${PLATFORM}" == "Windows" ]]; then
+if [ "${PLATFORM}" = "Windows" ]; then
   MINGW_MAKE="mingw32-make"
 fi
 
@@ -1966,16 +1966,10 @@ compile_opencs()
 
   if [ ${PLATFORM} = "Darwin" ]; then
     cp -fa lib/libOpenCS_*      ${SOLIBS_DIR}
-    cp -fa bin/csSimulator_ODE  ${SOLIBS_DIR}
-    cp -fa bin/csSimulator_DAE  ${SOLIBS_DIR}
   elif [ ${PLATFORM} = "Linux" ]; then
     cp -fa lib/libOpenCS_*      ${SOLIBS_DIR}
-    cp -fa bin/csSimulator_ODE  ${SOLIBS_DIR}
-    cp -fa bin/csSimulator_DAE  ${SOLIBS_DIR}
   elif [ ${PLATFORM} = "Windows" ]; then
-    cp -fa lib/libOpenCS_*      ${SOLIBS_DIR}
-    cp -fa bin/csSimulator_ODE  ${SOLIBS_DIR}
-    cp -fa bin/csSimulator_DAE  ${SOLIBS_DIR}
+    cp -fa lib/OpenCS_*.dll     ${SOLIBS_DIR}
   else
     echo "..."
   fi

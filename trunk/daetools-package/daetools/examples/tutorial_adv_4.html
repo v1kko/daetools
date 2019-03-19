@@ -28,8 +28,16 @@
 <span style='color:#017a31;'>************************************************************************************</span>
 <span style='color:#017a31;'>&quot;&quot;&quot;</span>
 __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc0000;'>&quot;&quot;&quot;</span>
-<span style='color:#cc0000;'>This tutorial illustrates the C++ MPI code generator.</span>
+<span style='color:#cc0000;'>This tutorial illustrates the OpenCS code generator.</span>
+<span style='color:#cc0000;'>For the given DAE Tools simulation it generates input files for OpenCS simulation,</span>
+<span style='color:#cc0000;'>either for a single CPU or for a parallel simulation using MPI.</span>
 <span style='color:#cc0000;'>The model is identical to the model in the tutorial 11.</span>
+
+<span style='color:#cc0000;'>The OpenCS framework currently does not support:</span>
+<span style='color:#cc0000;'>    </span>
+<span style='color:#cc0000;'>- Discontinuous equations (STNs and IFs)</span>
+<span style='color:#cc0000;'>- External functions</span>
+<span style='color:#cc0000;'>- Thermo-physical property packages</span>
 
 <span style='color:#cc0000;'>The temperature plot (at t=100s, x=0.5128, y=*):</span>
 
@@ -37,7 +45,7 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc0000;
 <span style='color:#cc0000;'>   :width: 500px</span>
 <span style='color:#cc0000;'>&quot;&quot;&quot;</span>
 
-<span style='color:#3605fb;'>import</span> sys, numpy, itertools
+<span style='color:#3605fb;'>import</span> sys, numpy, itertools, json
 <span style='color:#3605fb;'>from</span> time <span style='color:#3605fb;'>import</span> localtime, strftime
 <span style='color:#3605fb;'>from</span> daetools.pyDAE <span style='color:#3605fb;'>import</span> <b><span style='color:#0000ff;'>*</span></b>
 
@@ -152,8 +160,9 @@ temperature_t.AbsoluteTolerance <b><span style='color:#0000ff;'>=</span></b> <sp
 <b>def</b> run_code_generators(simulation, log):
     <span style='color:#017a31;'># Demonstration of daetools c++/MPI code-generator:</span>
     <span style='color:#3605fb;'>import</span> tempfile
-    tmp_folder <b><span style='color:#0000ff;'>=</span></b> tempfile.mkdtemp(prefix <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc0000;'>'daetools-code_generator-cxx-'</span>)
-    msg <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc0000;'>'Generated input files for the daetools_mpi_simulator will be located in: </span><span style='color:#cc0000;'>\n</span><span style='color:#cc0000;'>%s</span><span style='color:#cc0000;'>'</span> <b><span style='color:#0000ff;'>%</span></b> tmp_folder
+    tmp_folder1 <b><span style='color:#0000ff;'>=</span></b> tempfile.mkdtemp(prefix <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc0000;'>'daetools-code_generator-opencs-1cpu-'</span>)
+    tmp_folder4 <b><span style='color:#0000ff;'>=</span></b> tempfile.mkdtemp(prefix <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc0000;'>'daetools-code_generator-opencs-4cpu-'</span>)
+    msg <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc0000;'>'Generated input files for the csSimulator will be located in: </span><span style='color:#cc0000;'>\n</span><span style='color:#cc0000;'>%s</span><span style='color:#cc0000;'> and: </span><span style='color:#cc0000;'>\n</span><span style='color:#cc0000;'>%s</span><span style='color:#cc0000;'>'</span> <b><span style='color:#0000ff;'>%</span></b> (tmp_folder1, tmp_folder4)
     log.Message(msg, <span style='color:#cc047c;'>0</span>)
 
     <b>try</b>:
@@ -161,13 +170,33 @@ temperature_t.AbsoluteTolerance <b><span style='color:#0000ff;'>=</span></b> <sp
     <b>except</b> <b><span style='color:#4e9a06;'>Exception</span></b> <span style='color:#3605fb;'>as</span> e:
         log.Message(<span style='color:#2a00d6;'>str</span>(e), <span style='color:#cc047c;'>0</span>)
 
-    <span style='color:#017a31;'># Generate input files for 4 nodes</span>
-    <span style='color:#3605fb;'>from</span> daetools.code_generators.mpi <span style='color:#3605fb;'>import</span> daeCodeGenerator_MPI
-    cg <b><span style='color:#0000ff;'>=</span></b> daeCodeGenerator_MPI()
+    <span style='color:#3605fb;'>from</span> daetools.code_generators.opencs <span style='color:#3605fb;'>import</span> daeCodeGenerator_OpenCS
+    <span style='color:#3605fb;'>from</span> pyOpenCS <span style='color:#3605fb;'>import</span> createGraphPartitioner_Metis, createGraphPartitioner_Simple
     
-    constraints <b><span style='color:#0000ff;'>=</span></b> [<span style='color:#cc0000;'>'Ncs'</span>,<span style='color:#cc0000;'>'Nnz'</span>,<span style='color:#cc0000;'>'Nflops'</span>,<span style='color:#cc0000;'>'Nflops_j'</span>] <span style='color:#017a31;'># use all available constraints</span>
-    cg.generateSimulation(simulation, tmp_folder, <span style='color:#cc047c;'>4</span>, balancingConstraints <b><span style='color:#0000ff;'>=</span></b> constraints, saveIncidenceMatrix <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>True</span>)
+    cg <b><span style='color:#0000ff;'>=</span></b> daeCodeGenerator_OpenCS()
 
+    <span style='color:#017a31;'># Get default simulation options for DAE systems as a dictionary and</span>
+    <span style='color:#017a31;'># set the linear solver parameters.</span>
+    options <b><span style='color:#0000ff;'>=</span></b> cg.defaultSimulationOptions_DAE
+    options[<span style='color:#cc0000;'>'LinearSolver'</span>][<span style='color:#cc0000;'>'Preconditioner'</span>][<span style='color:#cc0000;'>'Name'</span>]       <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc0000;'>'Amesos'</span>
+    options[<span style='color:#cc0000;'>'LinearSolver'</span>][<span style='color:#cc0000;'>'Preconditioner'</span>][<span style='color:#cc0000;'>'Parameters'</span>] <b><span style='color:#0000ff;'>=</span></b> {<span style='color:#cc0000;'>&quot;amesos: solver type&quot;</span>: <span style='color:#cc0000;'>&quot;Amesos_Klu&quot;</span>}
+
+    <span style='color:#017a31;'># Generate input files for simulation on a single CPU</span>
+    cg.generateSimulation(simulation, 
+                          tmp_folder1,
+                          <span style='color:#cc047c;'>1</span>,
+                          simulationOptions <b><span style='color:#0000ff;'>=</span></b> options)
+
+    <span style='color:#017a31;'># Generate input files for parallel simulation on 4 CPUs</span>
+    gp <b><span style='color:#0000ff;'>=</span></b> createGraphPartitioner_Metis(<span style='color:#cc0000;'>'PartGraphRecursive'</span>)
+    constraints <b><span style='color:#0000ff;'>=</span></b> [<span style='color:#cc0000;'>'Ncs'</span>,<span style='color:#cc0000;'>'Nnz'</span>,<span style='color:#cc0000;'>'Nflops'</span>,<span style='color:#cc0000;'>'Nflops_j'</span>] <span style='color:#017a31;'># use all available constraints</span>
+    cg.generateSimulation(simulation,
+                          tmp_folder4,
+                          <span style='color:#cc047c;'>4</span>, 
+                          graphPartitioner <b><span style='color:#0000ff;'>=</span></b> gp, 
+                          simulationOptions <b><span style='color:#0000ff;'>=</span></b> options, 
+                          balancingConstraints <b><span style='color:#0000ff;'>=</span></b> constraints)
+    
 <b>def</b> setupLASolver():
     lasolver <b><span style='color:#0000ff;'>=</span></b> pyTrilinos.daeCreateTrilinosSolver(<span style='color:#cc0000;'>&quot;AztecOO&quot;</span>, <span style='color:#cc0000;'>&quot;&quot;</span>)
 

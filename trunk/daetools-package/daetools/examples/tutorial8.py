@@ -179,6 +179,8 @@ def setupDataReporters(simulation):
        Exports the results in the binary VTK format (.vtr files).
      - daeCSVFileDataReporter
        Exports the results in the CSV format.
+     - daePickleDataReporter
+       Exports the results as the Python pickle.
 
     The daeDelegateDataReporter does not process the data but simply delegates all calls
     to the contained data reporters.
@@ -196,6 +198,7 @@ def setupDataReporters(simulation):
     dr9  = daePandasDataReporter()
     dr10 = daeVTKDataReporter()
     dr11 = daeCSVFileDataReporter()
+    dr12 = daePickleDataReporter()
 
     # Add all data reporters to a list and store the list in the simulation object.
     # The reason is that the data reporter objects are destroyed at the exit of the
@@ -216,19 +219,21 @@ def setupDataReporters(simulation):
     datareporter.AddDataReporter(dr9)
     datareporter.AddDataReporter(dr10)
     datareporter.AddDataReporter(dr11)
+    datareporter.AddDataReporter(dr12)
 
     # Connect data reporters
     modelName = simulation.m.Name
     simName   = modelName + strftime(" [%d.%m.%Y %H:%M:%S]", localtime())
     directory = tempfile.gettempdir()
-    out_filename  = os.path.join(directory, "%s.out"  % modelName)
-    mat_filename  = os.path.join(directory, "%s.mat"  % modelName)
-    xlsx_filename = os.path.join(directory, "%s.xlsx" % modelName)
-    json_filename = os.path.join(directory, "%s.json" % modelName)
-    xml_filename  = os.path.join(directory, "%s.xml"  % modelName)
-    hdf5_filename = os.path.join(directory, "%s.hdf5" % modelName)
-    vtk_directory = os.path.join(directory, "%s-vtk"  % modelName)
-    csv_filename  = os.path.join(directory, "%s.csv"  % modelName)
+    out_filename    = os.path.join(directory, "%s.out"  % modelName)
+    mat_filename    = os.path.join(directory, "%s.mat"  % modelName)
+    xlsx_filename   = os.path.join(directory, "%s.xlsx" % modelName)
+    json_filename   = os.path.join(directory, "%s.json" % modelName)
+    xml_filename    = os.path.join(directory, "%s.xml"  % modelName)
+    hdf5_filename   = os.path.join(directory, "%s.hdf5" % modelName)
+    vtk_directory   = os.path.join(directory, "%s-vtk"  % modelName)
+    csv_filename    = os.path.join(directory, "%s.csv"  % modelName)
+    pickle_filename = os.path.join(directory, "%s.simulation" % modelName)
 
     dr1.Connect(out_filename,   simName)
     dr2.Connect("",             simName)
@@ -241,6 +246,7 @@ def setupDataReporters(simulation):
     dr9.Connect("",             simName)
     dr10.Connect(vtk_directory, simName)
     dr11.Connect(csv_filename,  simName)
+    dr12.Connect(pickle_filename,  simName)
 
     # Print the connection status for all data reporters
     for dr in simulation._data_reporters_:

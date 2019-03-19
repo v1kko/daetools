@@ -174,7 +174,7 @@ def run(**kwargs):
 
     # OpenCL evaluators can use a single or multiple OpenCL devices.
     #   a) Single OpenCL device:
-    computeStackEvaluator = pyEvaluator_OpenCL.CreateComputeStackEvaluator(platformID = 1, deviceID = 1)
+    computeStackEvaluator = pyEvaluator_OpenCL.CreateComputeStackEvaluator(platformID = 0, deviceID = 0)
     #   b) Multiple OpenCL devices (for heterogenous computing):
     #computeStackEvaluator = pyEvaluator_OpenCL.CreateComputeStackEvaluator( [(0, 0, 0.6), (1, 1, 0.4)] )
     simulation.SetComputeStackEvaluator(computeStackEvaluator)

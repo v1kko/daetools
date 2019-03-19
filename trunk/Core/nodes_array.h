@@ -77,7 +77,7 @@ public:
     virtual bool			IsLinear(void) const;
     virtual bool			IsFunctionOfVariables(void) const;
     virtual void			Export(std::string& strContent, daeeModelLanguage eLanguage, daeModelExportContext& c) const;
-    virtual const quantity	GetQuantity(void) const;
+    virtual quantity        GetQuantity(void) const;
 
 public:
     quantity m_quantity;
@@ -109,7 +109,7 @@ public:
     virtual bool			IsLinear(void) const;
     virtual bool			IsFunctionOfVariables(void) const;
     virtual void			Export(std::string& strContent, daeeModelLanguage eLanguage, daeModelExportContext& c) const;
-    virtual const quantity	GetQuantity(void) const;
+    virtual quantity        GetQuantity(void) const;
 
 public:
     std::vector<quantity> m_qarrValues;
@@ -139,7 +139,7 @@ public:
     virtual void			AddVariableIndexToArray(map<size_t, size_t>& mapIndexes, bool bAddFixed);
     virtual bool			IsLinear(void) const;
     virtual bool			IsFunctionOfVariables(void) const;
-    virtual const quantity	GetQuantity(void) const;
+    virtual quantity        GetQuantity(void) const;
 
 public:
 // Runtime part
@@ -173,7 +173,7 @@ public:
     virtual void			AddVariableIndexToArray(map<size_t, size_t>& mapIndexes, bool bAddFixed);
     virtual bool			IsLinear(void) const;
     virtual bool			IsFunctionOfVariables(void) const;
-    virtual const quantity	GetQuantity(void) const;
+    virtual quantity        GetQuantity(void) const;
 
 public:
 // Runtime part
@@ -205,7 +205,7 @@ public:
     virtual void			SaveAsContentMathML(io::xmlTag_t* pTag, const daeNodeSaveAsContext* c) const;
     virtual void			SaveAsPresentationMathML(io::xmlTag_t* pTag, const daeNodeSaveAsContext* c) const;
     virtual void			AddVariableIndexToArray(map<size_t, size_t>& mapIndexes, bool bAddFixed);
-    virtual const quantity	GetQuantity(void) const;
+    virtual quantity        GetQuantity(void) const;
 
 public:
 // Runtime part
@@ -240,7 +240,7 @@ public:
     virtual void			AddVariableIndexToArray(map<size_t, size_t>& mapIndexes, bool bAddFixed);
     virtual bool			IsLinear(void) const;
     virtual bool			IsFunctionOfVariables(void) const;
-    virtual const quantity	GetQuantity(void) const;
+    virtual quantity        GetQuantity(void) const;
 
 public:
 // Runtime part
@@ -280,7 +280,7 @@ public:
     virtual void	AddVariableIndexToArray(map<size_t, size_t>& mapIndexes, bool bAddFixed);
     virtual bool	IsLinear(void) const;
     virtual bool	IsFunctionOfVariables(void) const;
-    virtual const quantity GetQuantity(void) const;
+    virtual quantity GetQuantity(void) const;
 
 public:
     adNodeArrayPtr	node;
@@ -315,7 +315,7 @@ public:
     virtual bool	IsLinear(void) const;
     virtual bool	IsFunctionOfVariables(void) const;
     virtual bool    IsDifferential(void) const;
-    virtual const quantity GetQuantity(void) const;
+    virtual quantity GetQuantity(void) const;
 
 public:
 // Runtime part
@@ -348,7 +348,7 @@ public:
     virtual bool			IsLinear(void) const;
     virtual bool			IsFunctionOfVariables(void) const;
     virtual void			Export(std::string& strContent, daeeModelLanguage eLanguage, daeModelExportContext& c) const;
-    virtual const quantity	GetQuantity(void) const;
+    virtual quantity        GetQuantity(void) const;
     virtual bool            IsDifferential(void) const;
 
 public:
@@ -381,7 +381,7 @@ public:
     virtual bool			IsLinear(void) const;
     virtual bool			IsFunctionOfVariables(void) const;
     virtual void			Export(std::string& strContent, daeeModelLanguage eLanguage, daeModelExportContext& c) const;
-    virtual const quantity	GetQuantity(void) const;
+    virtual quantity        GetQuantity(void) const;
     virtual bool            IsDifferential(void) const;
 
 public:
@@ -415,7 +415,7 @@ public:
     virtual bool	IsLinear(void) const;
     virtual bool	IsFunctionOfVariables(void) const;
     virtual void	Export(std::string& strContent, daeeModelLanguage eLanguage, daeModelExportContext& c) const;
-    virtual const quantity GetQuantity(void) const;
+    virtual quantity GetQuantity(void) const;
     virtual bool    IsDifferential(void) const;
 
 public:
@@ -448,7 +448,7 @@ public:
     virtual void	SaveAsPresentationMathML(io::xmlTag_t* pTag, const daeNodeSaveAsContext* c) const;
     virtual void	AddVariableIndexToArray(map<size_t, size_t>& mapIndexes, bool bAddFixed);
     virtual void	Export(std::string& strContent, daeeModelLanguage eLanguage, daeModelExportContext& c) const;
-    virtual const quantity GetQuantity(void) const;
+    virtual quantity GetQuantity(void) const;
     virtual bool    IsDifferential(void) const;
 
 public:
@@ -481,7 +481,7 @@ public:
     virtual void			SaveAsPresentationMathML(io::xmlTag_t* pTag, const daeNodeSaveAsContext* c) const;
     virtual void			AddVariableIndexToArray(map<size_t, size_t>& mapIndexes, bool bAddFixed);
     virtual void			Export(std::string& strContent, daeeModelLanguage eLanguage, daeModelExportContext& c) const;
-    virtual const quantity	GetQuantity(void) const;
+    virtual quantity        GetQuantity(void) const;
     virtual bool            IsDifferential(void) const;
 
 public:
@@ -512,7 +512,7 @@ public:
     virtual void			SaveAsPresentationMathML(io::xmlTag_t* pTag, const daeNodeSaveAsContext* c) const;
     virtual void			AddVariableIndexToArray(map<size_t, size_t>& mapIndexes, bool bAddFixed);
     virtual void			Export(std::string& strContent, daeeModelLanguage eLanguage, daeModelExportContext& c) const;
-    virtual const quantity	GetQuantity(void) const;
+    virtual quantity        GetQuantity(void) const;
 
 public:
     daeParameter*               m_pParameter;
@@ -542,7 +542,7 @@ public:
     virtual void			SaveAsPresentationMathML(io::xmlTag_t* pTag, const daeNodeSaveAsContext* c) const;
     virtual void			AddVariableIndexToArray(map<size_t, size_t>& mapIndexes, bool bAddFixed);
     virtual void			Export(std::string& strContent, daeeModelLanguage eLanguage, daeModelExportContext& c) const;
-    virtual const quantity	GetQuantity(void) const;
+    virtual quantity        GetQuantity(void) const;
 
 public:
     daeDomain*      m_pDomain;
@@ -572,7 +572,7 @@ public:
     virtual void			SaveAsPresentationMathML(io::xmlTag_t* pTag, const daeNodeSaveAsContext* c) const;
     virtual void			AddVariableIndexToArray(map<size_t, size_t>& mapIndexes, bool bAddFixed);
     virtual void			Export(std::string& strContent, daeeModelLanguage eLanguage, daeModelExportContext& c) const;
-    virtual const quantity	GetQuantity(void) const;
+    virtual quantity        GetQuantity(void) const;
 
 public:
     std::vector<adNodePtr> m_ptrarrNodes;
@@ -602,7 +602,7 @@ public:
     virtual void			SaveAsPresentationMathML(io::xmlTag_t* pTag, const daeNodeSaveAsContext* c) const;
     virtual void			AddVariableIndexToArray(map<size_t, size_t>& mapIndexes, bool bAddFixed);
     virtual void			Export(std::string& strContent, daeeModelLanguage eLanguage, daeModelExportContext& c) const;
-    virtual const quantity	GetQuantity(void) const;
+    virtual quantity        GetQuantity(void) const;
     virtual bool            IsLinear(void) const;
     virtual bool            IsFunctionOfVariables(void) const;
     virtual bool            IsDifferential(void) const;
@@ -636,7 +636,7 @@ public:
     virtual void			SaveAsPresentationMathML(io::xmlTag_t* pTag, const daeNodeSaveAsContext* c) const;
     virtual void			AddVariableIndexToArray(map<size_t, size_t>& mapIndexes, bool bAddFixed);
     virtual void			Export(std::string& strContent, daeeModelLanguage eLanguage, daeModelExportContext& c) const;
-    virtual const quantity	GetQuantity(void) const;
+    virtual quantity        GetQuantity(void) const;
 
 public:
     daeVariable*                m_pVariable;
@@ -668,7 +668,7 @@ public:
     virtual void			SaveAsPresentationMathML(io::xmlTag_t* pTag, const daeNodeSaveAsContext* c) const;
     virtual void			AddVariableIndexToArray(map<size_t, size_t>& mapIndexes, bool bAddFixed);
     virtual void			Export(std::string& strContent, daeeModelLanguage eLanguage, daeModelExportContext& c) const;
-    virtual const quantity	GetQuantity(void) const;
+    virtual quantity        GetQuantity(void) const;
     virtual bool            IsDifferential(void) const;
 
 public:
@@ -705,7 +705,7 @@ public:
     virtual void			SaveAsPresentationMathML(io::xmlTag_t* pTag, const daeNodeSaveAsContext* c) const;
     virtual void			AddVariableIndexToArray(map<size_t, size_t>& mapIndexes, bool bAddFixed);
     virtual void			Export(std::string& strContent, daeeModelLanguage eLanguage, daeModelExportContext& c) const;
-    virtual const quantity	GetQuantity(void) const;
+    virtual quantity        GetQuantity(void) const;
 
 public:
     daeVariable*                        m_pVariable;
@@ -745,7 +745,7 @@ public:
     virtual void			SaveAsPresentationMathML(io::xmlTag_t* pTag, const daeNodeSaveAsContext* c) const;
     virtual void			AddVariableIndexToArray(map<size_t, size_t>& mapIndexes, bool bAddFixed);
     virtual void			Export(std::string& strContent, daeeModelLanguage eLanguage, daeModelExportContext& c) const;
-    virtual const quantity	GetQuantity(void) const;
+    virtual quantity        GetQuantity(void) const;
 
 public:
     daeDomain*                          m_pDomain;
@@ -779,7 +779,7 @@ public:
     virtual bool            IsFunctionOfVariables(void) const;
     virtual void			AddVariableIndexToArray(map<size_t, size_t>& mapIndexes, bool bAddFixed);
     virtual void			Export(std::string& strContent, daeeModelLanguage eLanguage, daeModelExportContext& c) const;
-    virtual const quantity	GetQuantity(void) const;
+    virtual quantity        GetQuantity(void) const;
 
 public:
     daeVectorExternalFunction* m_pExternalFunction;
@@ -814,7 +814,7 @@ public:
     virtual bool            IsFunctionOfVariables(void) const;
     virtual bool            IsDifferential(void) const;
     virtual void            Export(std::string& strContent, daeeModelLanguage eLanguage, daeModelExportContext& c) const;
-    virtual const quantity  GetQuantity(void) const;
+    virtual quantity        GetQuantity(void) const;
 
 public:
     daeeThermoPackagePropertyType       propertyType;

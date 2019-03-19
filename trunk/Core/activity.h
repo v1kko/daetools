@@ -111,6 +111,8 @@ public:
     virtual real_t				IntegrateUntilTime(real_t time,
                                                    daeeStopCriterion eStopCriterion,
                                                    bool bReportDataAroundDiscontinuities = true)		= 0;
+    virtual real_t				IntegrateForOneStep(daeeStopCriterion eStopCriterion,
+                                                    bool bReportDataAroundDiscontinuities = true)       = 0;
 
     virtual void GetOptimizationConstraints(std::vector<daeOptimizationConstraint_t*>& ptrarrConstraints) const	 = 0;
     virtual void GetOptimizationVariables(std::vector<daeOptimizationVariable_t*>& ptrarrOptVariables) const	 = 0;

@@ -70,17 +70,19 @@ The default daeSimulation.Run() function (re-implemented in Python) is:
                 
 In this example the following schedule is specified:
 
-1. Run the simulation for 100s using the daeSimulation.IntegrateForTimeInterval() function
-   and report the data using the daeSimulation.ReportData() function.
+1. Re-assign the value of Qin to 500W, run the simulation for 100s 
+   using the IntegrateForTimeInterval function and report the data using the 
+   ReportData() function.
 
-2. Re-assign the value of Qin to 2000W. After re-assigning DOFs or re-setting initial conditions
-   the function daeSimulation.Reinitialize() has to be called to reinitialise the DAE system.
-   Use the function daeSimulation.IntegrateUntilTime() to run until the time reaches 200s
+2. Re-assign the value of Qin to 7500W, run the simulation the time reaches 200s
+   using the IntegrateUntilTime function and report the data.
+
+3. Re-assign the variable Qin to 1000W, run the simulation for 100s in OneStep mode
+   using the IntegrateForOneStep() function and report the data at every time step.
+
+4. Re-assign the variable Qin to 1500W, re-initialise the temperature again to 300K,
+   run the simulation until the TimeHorizon is reached using the function Integrate() 
    and report the data.
-
-3. Re-assign the variable Qin to a new value 1500W, re-initialise the temperature again to 300K
-   re-initialise the system, run the simulation until the TimeHorizon is reached using the function
-   daeSimulation.Integrate() and report the data.
 
 The plot of the inlet power:
 
@@ -149,14 +151,18 @@ class simTutorial(daeSimulation):
     # daeSimulation class can be used to advance in time, while functions ReAssignValue() and
     # ReSetInitialCondition() from daeVariable class can be used to alter the values of variables.
     # In this example we specify the following schedule:
-    #  1. Run the simulation for 100s using the function daeSimulation.IntegrateForTimeInterval()
-    #     and report the data using the function daeSimulation.ReportData().
-    #  2. Re-assign the value of Qin to 2000W. After re-assigning DOFs or re-setting initial conditions
+    #  1. Re-assign the value of Qin to 500W. After re-assigning DOFs or re-setting initial conditions
     #     the function daeSimulation.Reinitialize() has to be called to reinitialise the DAE system.
+    #     Run the simulation for 100s using the function daeSimulation.IntegrateForTimeInterval()
+    #     and report the data using the function daeSimulation.ReportData().
+    #  2. Re-assign the value of Qin to 750W and re-initialise the system.
     #     Use the function daeSimulation.IntegrateUntilTime() to run until the time reaches 200s
     #     and report the data.
-    #  3. Re-assign the variable Qin to a new value 1500W, re-initialise the temperature again to 300K
-    #     re-initialise the system, run the simulation until the TimeHorizon is reached using the function
+    #  3. Re-assign the variable Qin to 1000W and re-initialise the system. 
+    #     Use the function daeSimulation.IntegrateForOneStep() to integrate in OneStep mode for 100s
+    #     and report the data at every time step.
+    #  4. Re-assign the variable Qin to 1500W, re-set T to 300K and re-initialise the system.
+    #     Run the simulation until the TimeHorizon is reached using the function
     #     daeSimulation.Integrate() and report the data.
     # Nota bene:
     #  a) The daeLog object (accessed through the simulation.Log property) can be used to print the messages
@@ -174,7 +180,7 @@ class simTutorial(daeSimulation):
         self.Log.Message("OP: Integrating for 100 seconds ... ", 0)
         time = self.IntegrateForTimeInterval(100, eDoNotStopAtDiscontinuity)
         self.ReportData(self.CurrentTime)
-        self.Log.SetProgress(int(100.0 * self.CurrentTime/self.TimeHorizon));   
+        self.Log.SetProgress(int(100.0 * self.CurrentTime/self.TimeHorizon))
 
         # 2. Set Qin=750W and integrate until time = 200s
         self.m.Qin.ReAssignValue(750 * W)
@@ -183,10 +189,22 @@ class simTutorial(daeSimulation):
         self.Log.Message("OP: Integrating until time = 200 seconds ... ", 0)
         time = self.IntegrateUntilTime(200, eDoNotStopAtDiscontinuity)
         self.ReportData(self.CurrentTime)
-        self.Log.SetProgress(int(100.0 * self.CurrentTime/self.TimeHorizon));   
+        self.Log.SetProgress(int(100.0 * self.CurrentTime/self.TimeHorizon))
 
-        # 3. Set Qin=1000W and integrate until the specified TimeHorizon is reached
+        # 3. Set Qin=1000W and integrate in OneStep mode for 100 seconds.
         self.m.Qin.ReAssignValue(1000 * W)
+        self.Reinitialize()
+        t_end = time + 100.0
+        self.Log.Message("OP: Integrating in one step mode:", 0)
+        while time < t_end:
+            msg = "    Integrated from %.10f to " % time
+            time = self.IntegrateForOneStep(eDoNotStopAtDiscontinuity)
+            self.ReportData(self.CurrentTime)
+            msg += "%.10f ... " % time
+            self.Log.Message(msg, 0)
+
+        # 4. Set Qin=1500W and integrate until the specified TimeHorizon is reached
+        self.m.Qin.ReAssignValue(1500 * W)
         self.m.T.ReSetInitialCondition(300 * K)
         self.Reinitialize()
         self.ReportData(self.CurrentTime)
@@ -194,7 +212,7 @@ class simTutorial(daeSimulation):
         self.Log.Message("OP: Integrating from " + str(time) + " to the time horizon (" + str(self.TimeHorizon) + ") ... ", 0)
         time = self.Integrate(eDoNotStopAtDiscontinuity)
         self.ReportData(self.CurrentTime)
-        self.Log.SetProgress(int(100.0 * self.CurrentTime/self.TimeHorizon));   
+        self.Log.SetProgress(int(100.0 * self.CurrentTime/self.TimeHorizon))
         self.Log.Message("OP: Finished", 0)
 
 def run(**kwargs):

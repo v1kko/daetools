@@ -9,7 +9,6 @@ namespace dae
 {
 namespace core
 {
-
 daeBlock::daeBlock(void)
 {
     m_bInitializeMode					= false;
@@ -1042,6 +1041,28 @@ void daeBlock::CleanComputeStackStructs()
 {
     m_arrComputeStackJacobianItems.clear();
     m_arrActiveEquationSetIndexes.clear();
+}
+
+/* New version. */
+void daeBlock::CreateModelBuilderEquations(std::vector< std::shared_ptr<cs::csNode_t> >& equations)
+{
+    size_t Nequations = m_ptrarrEquationExecutionInfos_ActiveSet.size();
+
+    if(m_ptrarrEquationExecutionInfos.size() != Nequations) // there are STNs in the model
+    {
+        daeDeclareException(exInvalidCall);
+        e << "The model contains discontinuous equations (STNs/IFs) currently not supported by OpenCS framework";
+        throw e;
+    }
+
+    equations.resize(Nequations);
+    for(size_t i = 0; i < Nequations; i++)
+    {
+        daeEquationExecutionInfo* pEEI = m_ptrarrEquationExecutionInfos_ActiveSet[i];
+
+        std::shared_ptr<cs::csNode_t> n( new csNode_wrapper(pEEI, this) );
+        equations[i] = n;
+    }
 }
 
 void daeBlock::ExportComputeStackStructs(const std::string& filenameComputeStacks,

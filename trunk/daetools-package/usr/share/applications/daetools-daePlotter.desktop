@@ -1,8 +1,8 @@
 [Desktop Entry]
 Categories=GNOME;Development;
 Comment=DAE Tools Plotter
-Exec=daeplotter
-GenericName=Equation-Oriented modelling tool
+Exec=python -m daetools.dae_plotter.plotter
+GenericName=DAE Tools Plotter
 Icon=daetools-48x48
 MimeType=
 Name=daetools Plotter

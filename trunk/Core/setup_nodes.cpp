@@ -4,6 +4,7 @@
 using namespace dae;
 #include <typeinfo>
 #include "xmlfunctions.h"
+#include <boost/functional/hash.hpp>
 using namespace dae::xml;
 
 namespace dae
@@ -18,15 +19,18 @@ adSetupParameterNode::adSetupParameterNode(daeParameter* pParameter,
                     : m_pParameter(pParameter),
                       m_arrDomains(arrDomains)
 {
+    adNodeImpl::AddToNodeMap(this);
 }
 
 adSetupParameterNode::adSetupParameterNode()
 {
     m_pParameter = NULL;
+    adNodeImpl::AddToNodeMap(this);
 }
 
 adSetupParameterNode::~adSetupParameterNode()
 {
+    adNodeImpl::RemoveFromNodeMap(this);
 }
 
 adouble adSetupParameterNode::Evaluate(const daeExecutionContext* pExecutionContext) const
@@ -46,13 +50,26 @@ adouble adSetupParameterNode::Evaluate(const daeExecutionContext* pExecutionCont
     return tmp;
 }
 
-const quantity adSetupParameterNode::GetQuantity(void) const
+quantity adSetupParameterNode::GetQuantity(void) const
 {
     if(!m_pParameter)
         daeDeclareAndThrowException(exInvalidCall);
 
     //std::cout << (boost::format("%s units = %s") % m_pParameter->GetCanonicalName() % m_pParameter->GetUnits().getBaseUnit().toString()).str() << std::endl;
     return quantity(0.0, m_pParameter->GetUnits());
+}
+
+size_t adSetupParameterNode::SizeOf(void) const
+{
+    return sizeof(adSetupParameterNode) + sizeof(daeDomainIndex)*m_arrDomains.capacity();
+}
+
+size_t adSetupParameterNode::GetHash() const
+{
+    size_t seed = 0;
+    boost::hash_combine(seed, (std::intptr_t)m_pParameter);
+    boost::hash_combine(seed, m_arrDomains);
+    return seed;
 }
 
 adNode* adSetupParameterNode::Clone(void) const
@@ -142,15 +159,18 @@ bool adSetupParameterNode::IsFunctionOfVariables(void) const
 adSetupDomainIteratorNode::adSetupDomainIteratorNode(daeDistributedEquationDomainInfo* pDEDI)
                          : m_pDEDI(pDEDI)
 {
+    adNodeImpl::AddToNodeMap(this);
 }
 
 adSetupDomainIteratorNode::adSetupDomainIteratorNode()
 {
     m_pDEDI = NULL;
+    adNodeImpl::AddToNodeMap(this);
 }
 
 adSetupDomainIteratorNode::~adSetupDomainIteratorNode()
 {
+    adNodeImpl::RemoveFromNodeMap(this);
 }
 
 adouble adSetupDomainIteratorNode::Evaluate(const daeExecutionContext* pExecutionContext) const
@@ -163,7 +183,7 @@ adouble adSetupDomainIteratorNode::Evaluate(const daeExecutionContext* pExecutio
     return (*pDomain)[nIndex];
 }
 
-const quantity adSetupDomainIteratorNode::GetQuantity(void) const
+quantity adSetupDomainIteratorNode::GetQuantity(void) const
 {
     if(!m_pDEDI)
         daeDeclareAndThrowException(exInvalidCall);
@@ -249,14 +269,17 @@ bool adSetupDomainIteratorNode::IsFunctionOfVariables(void) const
 adSetupValueInArrayAtIndexNode::adSetupValueInArrayAtIndexNode(const daeDomainIndex& domainIndex, adNodeArrayPtr n)
                               : m_domainIndex(domainIndex), node(n)
 {
+    adNodeImpl::AddToNodeMap(this);
 }
 
 adSetupValueInArrayAtIndexNode::adSetupValueInArrayAtIndexNode()
 {
+    adNodeImpl::AddToNodeMap(this);
 }
 
 adSetupValueInArrayAtIndexNode::~adSetupValueInArrayAtIndexNode()
 {
+    adNodeImpl::RemoveFromNodeMap(this);
 }
 
 adouble adSetupValueInArrayAtIndexNode::Evaluate(const daeExecutionContext* pExecutionContext) const
@@ -270,12 +293,17 @@ adouble adSetupValueInArrayAtIndexNode::Evaluate(const daeExecutionContext* pExe
     return adarr[nIndex];
 }
 
-const quantity adSetupValueInArrayAtIndexNode::GetQuantity(void) const
+quantity adSetupValueInArrayAtIndexNode::GetQuantity(void) const
 {
     if(!node)
         daeDeclareAndThrowException(exInvalidCall);
 
     return node->GetQuantity();
+}
+
+size_t adSetupValueInArrayAtIndexNode::SizeOf(void) const
+{
+    return sizeof(adSetupValueInArrayAtIndexNode) /*+ node->SizeOf()*/;
 }
 
 adNode* adSetupValueInArrayAtIndexNode::Clone(void) const
@@ -399,15 +427,18 @@ adSetupVariableNode::adSetupVariableNode(daeVariable* pVariable,
                     : m_pVariable(pVariable),
                       m_arrDomains(arrDomains)
 {
+    adNodeImpl::AddToNodeMap(this);
 }
 
 adSetupVariableNode::adSetupVariableNode()
 {
     m_pVariable = NULL;
+    adNodeImpl::AddToNodeMap(this);
 }
 
 adSetupVariableNode::~adSetupVariableNode()
 {
+    adNodeImpl::RemoveFromNodeMap(this);
 }
 
 adouble adSetupVariableNode::Evaluate(const daeExecutionContext* pExecutionContext) const
@@ -427,7 +458,7 @@ adouble adSetupVariableNode::Evaluate(const daeExecutionContext* pExecutionConte
     return tmp;
 }
 
-const quantity adSetupVariableNode::GetQuantity(void) const
+quantity adSetupVariableNode::GetQuantity(void) const
 {
     if(!m_pVariable)
         daeDeclareAndThrowException(exInvalidCall);
@@ -436,9 +467,22 @@ const quantity adSetupVariableNode::GetQuantity(void) const
     return quantity(0.0, m_pVariable->GetVariableType()->GetUnits());
 }
 
+size_t adSetupVariableNode::SizeOf(void) const
+{
+    return sizeof(adSetupVariableNode) + sizeof(daeDomainIndex)*m_arrDomains.capacity();
+}
+
 adNode* adSetupVariableNode::Clone(void) const
 {
     return new adSetupVariableNode(*this);
+}
+
+size_t adSetupVariableNode::GetHash() const
+{
+    size_t seed = 0;
+    boost::hash_combine(seed, (std::intptr_t)m_pVariable);
+    boost::hash_combine(seed, m_arrDomains);
+    return seed;
 }
 
 void adSetupVariableNode::Export(std::string& strContent, daeeModelLanguage eLanguage, daeModelExportContext& c) const
@@ -522,22 +566,22 @@ bool adSetupVariableNode::IsFunctionOfVariables(void) const
     adSetupTimeDerivativeNode
 **********************************************************************************************/
 adSetupTimeDerivativeNode::adSetupTimeDerivativeNode(daeVariable* pVariable,
-                                                     size_t nOrder,
                                                      vector<daeDomainIndex>& arrDomains)
                          : m_pVariable(pVariable),
-                           m_nOrder(nOrder),
                            m_arrDomains(arrDomains)
 {
+    adNodeImpl::AddToNodeMap(this);
 }
 
 adSetupTimeDerivativeNode::adSetupTimeDerivativeNode()
 {
     m_pVariable = NULL;
-    m_nOrder   = 0;
+    adNodeImpl::AddToNodeMap(this);
 }
 
 adSetupTimeDerivativeNode::~adSetupTimeDerivativeNode()
 {
+    adNodeImpl::RemoveFromNodeMap(this);
 }
 
 adouble adSetupTimeDerivativeNode::Evaluate(const daeExecutionContext* pExecutionContext) const
@@ -557,13 +601,26 @@ adouble adSetupTimeDerivativeNode::Evaluate(const daeExecutionContext* pExecutio
     return tmp;
 }
 
-const quantity adSetupTimeDerivativeNode::GetQuantity(void) const
+quantity adSetupTimeDerivativeNode::GetQuantity(void) const
 {
     if(!m_pVariable)
         daeDeclareAndThrowException(exInvalidCall);
 
     //std::cout << (boost::format("%s units = %s") % m_pVariable->GetCanonicalName() % m_pVariable->GetVariableType()->GetUnits().getBaseUnit()).str() << std::endl;
     return quantity(0.0, m_pVariable->GetVariableType()->GetUnits() / unit("s", 1));
+}
+
+size_t adSetupTimeDerivativeNode::SizeOf(void) const
+{
+    return sizeof(adSetupTimeDerivativeNode) + sizeof(daeDomainIndex)*m_arrDomains.capacity();
+}
+
+size_t adSetupTimeDerivativeNode::GetHash() const
+{
+    size_t seed = 0;
+    boost::hash_combine(seed, (std::intptr_t)m_pVariable);
+    boost::hash_combine(seed, m_arrDomains);
+    return seed;
 }
 
 adNode* adSetupTimeDerivativeNode::Clone(void) const
@@ -612,7 +669,7 @@ string adSetupTimeDerivativeNode::SaveAsLatex(const daeNodeSaveAsContext* c) con
     vector<string> strarrIndexes;
     FillDomains(m_arrDomains, strarrIndexes);
     string strName = daeGetRelativeName(c->m_pModel, m_pVariable);
-    return latexCreator::TimeDerivative(m_nOrder, strName, strarrIndexes);
+    return latexCreator::TimeDerivative(1, strName, strarrIndexes);
 }
 
 void adSetupTimeDerivativeNode::Open(io::xmlTag_t* pTag)
@@ -626,8 +683,8 @@ void adSetupTimeDerivativeNode::Save(io::xmlTag_t* pTag) const
     strName = "Variable";
     pTag->SaveObjectRef(strName, m_pVariable);
 
-    strName = "Degree";
-    pTag->Save(strName, m_nOrder);
+    //strName = "Degree";
+    //pTag->Save(strName, m_nOrder);
 
     strName = "DomainIterators";
     pTag->SaveObjectArray(strName, m_arrDomains);
@@ -638,7 +695,7 @@ void adSetupTimeDerivativeNode::SaveAsContentMathML(io::xmlTag_t* pTag, const da
     vector<string> strarrIndexes;
     FillDomains(m_arrDomains, strarrIndexes);
     string strName = daeGetRelativeName(c->m_pModel, m_pVariable);
-    xmlContentCreator::TimeDerivative(pTag, m_nOrder, strName, strarrIndexes);
+    xmlContentCreator::TimeDerivative(pTag, 1, strName, strarrIndexes);
 }
 
 void adSetupTimeDerivativeNode::SaveAsPresentationMathML(io::xmlTag_t* pTag, const daeNodeSaveAsContext* c) const
@@ -646,7 +703,7 @@ void adSetupTimeDerivativeNode::SaveAsPresentationMathML(io::xmlTag_t* pTag, con
     vector<string> strarrIndexes;
     FillDomains(m_arrDomains, strarrIndexes);
     string strName = daeGetRelativeName(c->m_pModel, m_pVariable);
-    xmlPresentationCreator::TimeDerivative(pTag, m_nOrder, strName, strarrIndexes);
+    xmlPresentationCreator::TimeDerivative(pTag, 1, strName, strarrIndexes);
 }
 
 void adSetupTimeDerivativeNode::AddVariableIndexToArray(map<size_t, size_t>& mapIndexes, bool bAddFixed)
@@ -675,6 +732,7 @@ adSetupPartialDerivativeNode::adSetupPartialDerivativeNode(daeVariable* pVariabl
                               m_eDiscretizationMethod(eDiscretizationMethod),
                               m_mapDiscretizationOptions(mapDiscretizationOptions)
 {
+    adNodeImpl::AddToNodeMap(this);
 }
 
 adSetupPartialDerivativeNode::adSetupPartialDerivativeNode()
@@ -683,10 +741,12 @@ adSetupPartialDerivativeNode::adSetupPartialDerivativeNode()
     m_pDomain   = NULL;
     m_nOrder   = 0;
     m_eDiscretizationMethod = eDMUnknown;
+    adNodeImpl::AddToNodeMap(this);
 }
 
 adSetupPartialDerivativeNode::~adSetupPartialDerivativeNode()
 {
+    adNodeImpl::RemoveFromNodeMap(this);
 }
 
 adouble adSetupPartialDerivativeNode::Evaluate(const daeExecutionContext* pExecutionContext) const
@@ -708,7 +768,7 @@ adouble adSetupPartialDerivativeNode::Evaluate(const daeExecutionContext* pExecu
     return tmp;
 }
 
-const quantity adSetupPartialDerivativeNode::GetQuantity(void) const
+quantity adSetupPartialDerivativeNode::GetQuantity(void) const
 {
     if(!m_pVariable)
         daeDeclareAndThrowException(exInvalidCall);
@@ -720,6 +780,14 @@ const quantity adSetupPartialDerivativeNode::GetQuantity(void) const
         return quantity(0.0, m_pVariable->GetVariableType()->GetUnits() / m_pDomain->GetUnits());
     else
         return quantity(0.0, m_pVariable->GetVariableType()->GetUnits() / (m_pDomain->GetUnits() ^ 2));
+}
+
+size_t adSetupPartialDerivativeNode::SizeOf(void) const
+{
+    size_t size = sizeof(adSetupPartialDerivativeNode) + sizeof(daeDomainIndex)*m_arrDomains.capacity();
+    for(std::map<std::string, std::string>::const_iterator it = m_mapDiscretizationOptions.begin(); it != m_mapDiscretizationOptions.end(); it++)
+        size += (it->first.capacity()*sizeof(char) + it->second.capacity()*sizeof(char));
+    return size;
 }
 
 adNode* adSetupPartialDerivativeNode::Clone(void) const

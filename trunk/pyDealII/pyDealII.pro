@@ -13,6 +13,7 @@ INCLUDEPATH += $${BOOSTDIR} \
 QMAKE_LIBDIR += $${PYTHON_LIB_DIR} \
                 $${BLAS_LAPACK_LIBDIR} \
                 $${DEALII_LIB_DIR}
+QMAKE_LIBDIR += $${OPEN_CS_LIB_DIR}
 
 unix::QMAKE_CXXFLAGS += -fpermissive -fpic -Wall -Wpointer-arith -Wwrite-strings -Wsynth -Wsign-compare -Wswitch -Wno-unused-local-typedefs \
                         -O2 -fstrict-aliasing -felide-constructors -Wno-unused -frounding-math -fsignaling-nans \
@@ -42,6 +43,7 @@ LIBS += $${DEALII_LIBS} \
         $${DAE_CONFIG_LIB} \
         $${BOOST_PYTHON_LIB} \
         $${BOOST_LIBS} \
+        $${BLAS_LAPACK_LIBS} \
         $${RT}
 
 SOURCES += stdafx.cpp \

@@ -68,6 +68,7 @@ PROJECT:
         deal.ii                 Build deal.II FEM library and its python extension module (pyDealII).
         cape_open_thermo        Build Cape Open thermo-physical property package library (cdaeCapeOpenThermoPackage.dll, Windows only).
         opencl_evaluator        Build Evaluator_OpenCL library and its python extension module (pyEvaluator_OpenCL).
+        pyopencs                Build pyOpenCS python extension module.
 EOF
 }
 
@@ -171,18 +172,18 @@ QMAKE="qmake"
 QMAKE_SPEC="linux-g++"
 DAE_IF_CROSS_COMPILING=0
 
-if [[ ${PLATFORM} == *"MSYS_"* ]]; then
+if [ ${PLATFORM} = *"MSYS_"* ]; then
   PLATFORM="Windows"
   # Platform should be set by i.e. vcbuildtools.bat 
   VC_PLAT=`cmd "/C echo %Platform% "`
   echo $VC_PLAT
-  if [[ ${VC_PLAT} == *"X86"* ]]; then
+  if [ ${VC_PLAT} = *"X86"* ]; then
     HOST_ARCH="win32"
-  elif [[ ${VC_PLAT} == *"x86"* ]]; then
+  elif [ ${VC_PLAT} = *"x86"* ]; then
     HOST_ARCH="win32"
-  elif [[ ${VC_PLAT} == *"x64"* ]]; then
+  elif [ ${VC_PLAT} = *"x64"* ]; then
     HOST_ARCH="win64"
-  elif [[ "${VC_PLAT}" == *"X64"* ]]; then
+  elif [ "${VC_PLAT}" = *"X64"* ]; then
     HOST_ARCH="win64"
   else
     echo unknown HOST_ARCH: $HOST_ARCH
@@ -300,6 +301,7 @@ do
     deal.ii)          ;; 
     cape_open_thermo) ;; 
     opencl_evaluator) ;;
+    pyopencs)           ;;
     *) echo Unrecognized project: "$project"
        exit
        ;;
@@ -478,6 +480,9 @@ do
         
         opencl_evaluator) compile pyEvaluator_OpenCL "-j1"
                           ;;
+                          
+        pyopencs) compile pyOpenCS "-j1"
+                  ;;
                           
         *) echo "??????????????????????"
            echo Unrecognized project: "$project"

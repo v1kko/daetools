@@ -3438,7 +3438,7 @@ daeBlock* daeModel::DoBlockDecomposition(void)
     return pBlock;
 }
 
-void daeModel::PopulateBlockIndexes(daeBlock* pBlock)
+void daeModel::PopulateBlockIndexesAndCreateComputeStack(daeBlock* pBlock)
 {
     /* If we change block indexes (for instance when doing data partitioning for c++(MPI) code generator)
      * then the following data need to be updated as well:
@@ -3537,6 +3537,12 @@ void daeModel::PopulateBlockIndexes(daeBlock* pBlock)
         {
             pEquationExec = m_ptrarrEEIfromModels[i];
             // Get compute stack size
+            if(!pEquationExec->m_EquationEvaluationNode)
+            {
+                daeDeclareException(exRuntimeCheck);
+                e << "Invalid node in " << pEquationExec->GetName();
+                throw e;
+            }
             noItems += adNode::GetComputeStackSize(pEquationExec->m_EquationEvaluationNode.get());
         }
         for(size_t i = 0; i < m_ptrarrAllSTNs.size(); i++)
@@ -4149,6 +4155,7 @@ void daeModel::InitializeStage3(daeLog_t* pLog)
     m_pDataProxy->Initialize(this, pLog, m_nTotalNumberOfVariables);
 
 // Create equations
+    adNodeImpl::SetMemoryPool(eSetupNodesPool);
     BuildUpSTNsAndEquations();
 
 // Now we have all elements created - its a good moment to check everything
@@ -4166,12 +4173,46 @@ void daeModel::InitializeStage3(daeLog_t* pLog)
     SetDefaultAbsoluteTolerances();
 }
 
+
+static void LogMemoryUsage()
+{
+    int currRealMem = 0;
+    int peakRealMem = 0;
+    int currVirtMem = 0;
+    int peakVirtMem = 0;
+
+    GetProcessMemory(&currRealMem, &peakRealMem, &currVirtMem, &peakVirtMem);
+
+    // Transform kB into MB
+    currRealMem /= 1000;
+    peakRealMem /= 1000;
+    currVirtMem /= 1000;
+    peakVirtMem /= 1000;
+    printf("       RAM = %5d MB (peak RAM = %5d MB, virtRAM = %5d MB, peak virtRAM = %5d MB)\n", currRealMem, peakRealMem, currVirtMem, peakVirtMem);
+}
+
 void daeModel::InitializeStage4(void)
 {
+    //printf("Start InitializeEquations:\n");
+    //printf("    DeleteSetupNodes   = %s\n", (m_pDataProxy->GetDeleteSetupNodes()   ? "true" : "false"));
+    //printf("    DeleteRuntimeNodes = %s\n", (m_pDataProxy->GetDeleteRuntimeNodes() ? "true" : "false"));
+
 // Initialize equations
     m_pDataProxy->SetGatherInfo(true);
         InitializeEquations();
     m_pDataProxy->SetGatherInfo(false);
+
+    // Here, setup nodes should be all removed
+    //printf("No adConstantNode                    = %zu\n", adNodeImpl::g_allNodes[typeid(adConstantNode).hash_code()].size());
+    //printf("No adUnaryNode                       = %zu\n", adNodeImpl::g_allNodes[typeid(adUnaryNode).hash_code()].size());
+    //printf("No adBinaryNode                      = %zu\n", adNodeImpl::g_allNodes[typeid(adBinaryNode).hash_code()].size());
+    //printf("No adFloatCoefficientVariableSumNode = %zu\n", adNodeImpl::g_allNodes[typeid(adFloatCoefficientVariableSumNode).hash_code()].size());
+
+    // If reqested, release memory for setup nodes from boost::singletoon_pool<setup_pool_tag, ...>
+    if(m_pDataProxy->GetDeleteSetupNodes())
+    {
+        adNodeImpl::PurgeSetupNodesMemory();
+    }
 }
 
 daeBlock_t* daeModel::InitializeStage5(void)
@@ -4184,12 +4225,31 @@ daeBlock_t* daeModel::InitializeStage5(void)
 void daeModel::InitializeStage6(daeBlock_t* ptrBlock)
 {
     daeBlock* pBlock = dynamic_cast<daeBlock*>(ptrBlock);
-    PopulateBlockIndexes(pBlock);
+    PopulateBlockIndexesAndCreateComputeStack(pBlock);
 
     // Now add block indexes for every variable in the simulation
     // They can be accessed using daeVariable::GetBlockIndexes() which returns const std::vector<size_t>&
     const std::map<size_t, size_t>& mapOverallIndex_BlockIndex = pBlock->m_mapVariableIndexes;
     InitializeBlockIndexes(mapOverallIndex_BlockIndex);
+
+    // If reqested, release memory for runtime nodes from boost::singletoon_pool<runtime_pool_tag, ...>
+    if(m_pDataProxy->GetDeleteRuntimeNodes())
+    {
+        bool bPrintInfo = m_pDataProxy->PrintInfo();
+        if(bPrintInfo)
+        {
+            printf("Before purge memory for runtime nodes\n");
+            LogMemoryUsage();
+        }
+
+        adNodeImpl::PurgeRuntimeNodesMemory();
+
+        if(bPrintInfo)
+        {
+            printf("After purge memory for runtime nodes\n");
+            LogMemoryUsage();
+        }
+    }
 }
 
 void daeModel::StoreInitializationValues(const std::string& strFileName) const

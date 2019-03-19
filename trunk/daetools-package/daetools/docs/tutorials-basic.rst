@@ -120,7 +120,7 @@ Basic Tutorials
 
 .. |t_6| replace:: Using ports, making port connections, declaring components (instances of other models).
 
-.. |t_7| replace:: Making user-defined operating procedures, resetting the values of degrees of freedom and
+.. |t_7| replace:: Making user-defined schedules (operating procedures), resetting the values of degrees of freedom and
                    resetting initial conditions.
 
 .. |t_8| replace:: Using data reporters to write the results into files (Matlab, MS Excel, JSON, XML, HDF5, VTK, Pandas),

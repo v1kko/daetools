@@ -21,7 +21,9 @@ Supported platforms:
 * Windows (x86 and x64)
 * MacOS (x86_64)
 
-The software works on both python 2 and 3. The binaries are provided for 2.7, 3.4, 3.5 and 3.6.
+The software works on both python 2 and 3. The binaries are provided for 2.7, 3.5, 3.6 and 3.7.
+In addition, DAE Tools require OpenCL installed (all graphics cards and CPUs support OpenCL since 2011, 
+typically as a part of display drivers).
 
 Mandatory packages:
 
@@ -38,6 +40,7 @@ Optional packages:
 * HDF5 for Python: `<http://www.h5py.org>`_ (HDF5 binary data format for large data sets)
 * Pandas: `<http://pandas.pydata.org>`_ (Python data analysis library)
 * Mayavi2: `<http://docs.enthought.com/mayavi/mayavi>`_ (3D scientific data visualization)
+* PyMetis: `<https://pypi.org/project/PyMetis>`_ (graph partitioning library used by the MPI code-generator)
 * PyGraphviz: `<https://pygraphviz.github.io>`_ (Python interface to the Graphviz graph layout and visualization package)
 * SALib: `<https://github.com/SALib/SALib>`_ (Sensitivity Analysis in Python; included in ``daetools/ext_libs/SALib``)
 * PyEVTK: `<https://pypi.python.org/pypi/PyEVTK>`_ (data export to binary VTK files; included in ``daetools/ext_libs/pyevtk``)
@@ -45,6 +48,7 @@ Optional packages:
   (Intel: `<https://software.intel.com/en-us/articles/opencl-drivers>`_;
   AMD: `<https://support.amd.com/en-us/kb-articles/Pages/OpenCL2-Driver.aspx>`_;
   NVidia: `<https://developer.nvidia.com/opencl>`_)
+* mpi4py: `<https://github.com/mpi4py/mpi4py>`_ (for parallel OpenCS simulations)
 
 Optional packages (proprietary):
 
@@ -98,6 +102,7 @@ Use the system's Python
 ///////////////////////
 
 The package names are for python 2. 
+
 * Debian GNU/Linux and derivatives (Ubuntu, Linux Mint)
 
   .. code-block:: bash
@@ -171,7 +176,7 @@ Install one of scientific python distributions
      # DAE Tools v1.6.1 and newer require PyQt5 (older versions use PyQt4: pyqt=4.11)
      conda install numpy scipy matplotlib pyqt lxml pandas h5py openpyxl
      conda install -c menpo vtk=7
-     pip install pygraphviz mayavi
+     pip install pygraphviz pymetis mayavi
 
 * `Enthought Canopy <https://www.enthought.com/products/canopy>`_
 
@@ -214,7 +219,7 @@ Install one of scientific python distributions
      # DAE Tools v1.6.1 and newer require PyQt5 (older versions use PyQt4: pyqt=4.11)
      conda install numpy scipy matplotlib pyqt lxml pandas h5py openpyxl
      conda install -c menpo vtk=7
-     pip install pygraphviz mayavi
+     pip install pygraphviz pymetis mayavi
   
 * `Enthought Canopy <https://www.enthought.com/products/canopy>`_
 
@@ -262,7 +267,7 @@ The easiest way is to install one of available scientific python distributions:
      # DAE Tools v1.6.1 and newer require PyQt5 (older versions use PyQt4: pyqt=4.11)
      conda install numpy scipy matplotlib pyqt lxml pandas h5py openpyxl
      conda install -c menpo vtk=7
-     pip install pygraphviz mayavi
+     pip install pygraphviz pymetis mayavi
   
 * `Enthought Canopy <https://www.enthought.com/products/canopy>`_
 * `Python(x,y) <https://python-xy.github.io/>`_
@@ -497,7 +502,7 @@ Microsoft VC++
 First, download and install (a) `Visual Studio Community Edition 2015 <https://www.microsoft.com/en-us/download/details.aspx?id=48146>`_ 
 or (b) ``Visual Studio 2017`` and ``VC++ Build Tools 2015``. Python 3.5 and 3.6 are compiled using VC++ 2015 (``msvc++ v14.0``).
 Start ``x86`` (32 bit builds) or ``x64`` (64 bit builds) ``Visual C++ 2015 Command Prompt``. Install some software that provides
-``bash`` environment. `Git for Windows <https://git-scm.com/download/win>`_ has been successfuly tested. During installation,
+``bash`` environment. `Git for Windows <https://git-scm.com/download/win>`_ has been successfully tested. During installation,
 when asked select the following options:
 
 - Use Git and optional Unix tools from the Windows Command Prompt

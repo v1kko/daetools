@@ -81,17 +81,19 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc0000;
 <span style='color:#cc0000;'>                </span>
 <span style='color:#cc0000;'>In this example the following schedule is specified:</span>
 
-<span style='color:#cc0000;'>1. Run the simulation for 100s using the daeSimulation.IntegrateForTimeInterval() function</span>
-<span style='color:#cc0000;'>   and report the data using the daeSimulation.ReportData() function.</span>
+<span style='color:#cc0000;'>1. Re-assign the value of Qin to 500W, run the simulation for 100s </span>
+<span style='color:#cc0000;'>   using the IntegrateForTimeInterval function and report the data using the </span>
+<span style='color:#cc0000;'>   ReportData() function.</span>
 
-<span style='color:#cc0000;'>2. Re-assign the value of Qin to 2000W. After re-assigning DOFs or re-setting initial conditions</span>
-<span style='color:#cc0000;'>   the function daeSimulation.Reinitialize() has to be called to reinitialise the DAE system.</span>
-<span style='color:#cc0000;'>   Use the function daeSimulation.IntegrateUntilTime() to run until the time reaches 200s</span>
+<span style='color:#cc0000;'>2. Re-assign the value of Qin to 7500W, run the simulation the time reaches 200s</span>
+<span style='color:#cc0000;'>   using the IntegrateUntilTime function and report the data.</span>
+
+<span style='color:#cc0000;'>3. Re-assign the variable Qin to 1000W, run the simulation for 100s in OneStep mode</span>
+<span style='color:#cc0000;'>   using the IntegrateForOneStep() function and report the data at every time step.</span>
+
+<span style='color:#cc0000;'>4. Re-assign the variable Qin to 1500W, re-initialise the temperature again to 300K,</span>
+<span style='color:#cc0000;'>   run the simulation until the TimeHorizon is reached using the function Integrate() </span>
 <span style='color:#cc0000;'>   and report the data.</span>
-
-<span style='color:#cc0000;'>3. Re-assign the variable Qin to a new value 1500W, re-initialise the temperature again to 300K</span>
-<span style='color:#cc0000;'>   re-initialise the system, run the simulation until the TimeHorizon is reached using the function</span>
-<span style='color:#cc0000;'>   daeSimulation.Integrate() and report the data.</span>
 
 <span style='color:#cc0000;'>The plot of the inlet power:</span>
 
@@ -160,14 +162,18 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc0000;
     <span style='color:#017a31;'># daeSimulation class can be used to advance in time, while functions ReAssignValue() and</span>
     <span style='color:#017a31;'># ReSetInitialCondition() from daeVariable class can be used to alter the values of variables.</span>
     <span style='color:#017a31;'># In this example we specify the following schedule:</span>
-    <span style='color:#017a31;'>#  1. Run the simulation for 100s using the function daeSimulation.IntegrateForTimeInterval()</span>
-    <span style='color:#017a31;'>#     and report the data using the function daeSimulation.ReportData().</span>
-    <span style='color:#017a31;'>#  2. Re-assign the value of Qin to 2000W. After re-assigning DOFs or re-setting initial conditions</span>
+    <span style='color:#017a31;'>#  1. Re-assign the value of Qin to 500W. After re-assigning DOFs or re-setting initial conditions</span>
     <span style='color:#017a31;'>#     the function daeSimulation.Reinitialize() has to be called to reinitialise the DAE system.</span>
+    <span style='color:#017a31;'>#     Run the simulation for 100s using the function daeSimulation.IntegrateForTimeInterval()</span>
+    <span style='color:#017a31;'>#     and report the data using the function daeSimulation.ReportData().</span>
+    <span style='color:#017a31;'>#  2. Re-assign the value of Qin to 750W and re-initialise the system.</span>
     <span style='color:#017a31;'>#     Use the function daeSimulation.IntegrateUntilTime() to run until the time reaches 200s</span>
     <span style='color:#017a31;'>#     and report the data.</span>
-    <span style='color:#017a31;'>#  3. Re-assign the variable Qin to a new value 1500W, re-initialise the temperature again to 300K</span>
-    <span style='color:#017a31;'>#     re-initialise the system, run the simulation until the TimeHorizon is reached using the function</span>
+    <span style='color:#017a31;'>#  3. Re-assign the variable Qin to 1000W and re-initialise the system. </span>
+    <span style='color:#017a31;'>#     Use the function daeSimulation.IntegrateForOneStep() to integrate in OneStep mode for 100s</span>
+    <span style='color:#017a31;'>#     and report the data at every time step.</span>
+    <span style='color:#017a31;'>#  4. Re-assign the variable Qin to 1500W, re-set T to 300K and re-initialise the system.</span>
+    <span style='color:#017a31;'>#     Run the simulation until the TimeHorizon is reached using the function</span>
     <span style='color:#017a31;'>#     daeSimulation.Integrate() and report the data.</span>
     <span style='color:#017a31;'># Nota bene:</span>
     <span style='color:#017a31;'>#  a) The daeLog object (accessed through the simulation.Log property) can be used to print the messages</span>
@@ -185,7 +191,7 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc0000;
         <span style='color:#3605fb;'>self</span>.Log.Message(<span style='color:#cc0000;'>&quot;OP: Integrating for 100 seconds ... &quot;</span>, <span style='color:#cc047c;'>0</span>)
         time <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.IntegrateForTimeInterval(<span style='color:#cc047c;'>100</span>, eDoNotStopAtDiscontinuity)
         <span style='color:#3605fb;'>self</span>.ReportData(<span style='color:#3605fb;'>self</span>.CurrentTime)
-        <span style='color:#3605fb;'>self</span>.Log.SetProgress(<span style='color:#2a00d6;'>int</span>(<span style='color:#cc047c;'>100.0</span> <b><span style='color:#0000ff;'>*</span></b> <span style='color:#3605fb;'>self</span>.CurrentTime<b><span style='color:#0000ff;'>/</span></b><span style='color:#3605fb;'>self</span>.TimeHorizon))<b><span style='color:#0000ff;'>;</span></b>   
+        <span style='color:#3605fb;'>self</span>.Log.SetProgress(<span style='color:#2a00d6;'>int</span>(<span style='color:#cc047c;'>100.0</span> <b><span style='color:#0000ff;'>*</span></b> <span style='color:#3605fb;'>self</span>.CurrentTime<b><span style='color:#0000ff;'>/</span></b><span style='color:#3605fb;'>self</span>.TimeHorizon))
 
         <span style='color:#017a31;'># 2. Set Qin=750W and integrate until time = 200s</span>
         <span style='color:#3605fb;'>self</span>.m.Qin.ReAssignValue(<span style='color:#cc047c;'>750</span> <b><span style='color:#0000ff;'>*</span></b> W)
@@ -194,10 +200,22 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc0000;
         <span style='color:#3605fb;'>self</span>.Log.Message(<span style='color:#cc0000;'>&quot;OP: Integrating until time = 200 seconds ... &quot;</span>, <span style='color:#cc047c;'>0</span>)
         time <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.IntegrateUntilTime(<span style='color:#cc047c;'>200</span>, eDoNotStopAtDiscontinuity)
         <span style='color:#3605fb;'>self</span>.ReportData(<span style='color:#3605fb;'>self</span>.CurrentTime)
-        <span style='color:#3605fb;'>self</span>.Log.SetProgress(<span style='color:#2a00d6;'>int</span>(<span style='color:#cc047c;'>100.0</span> <b><span style='color:#0000ff;'>*</span></b> <span style='color:#3605fb;'>self</span>.CurrentTime<b><span style='color:#0000ff;'>/</span></b><span style='color:#3605fb;'>self</span>.TimeHorizon))<b><span style='color:#0000ff;'>;</span></b>   
+        <span style='color:#3605fb;'>self</span>.Log.SetProgress(<span style='color:#2a00d6;'>int</span>(<span style='color:#cc047c;'>100.0</span> <b><span style='color:#0000ff;'>*</span></b> <span style='color:#3605fb;'>self</span>.CurrentTime<b><span style='color:#0000ff;'>/</span></b><span style='color:#3605fb;'>self</span>.TimeHorizon))
 
-        <span style='color:#017a31;'># 3. Set Qin=1000W and integrate until the specified TimeHorizon is reached</span>
+        <span style='color:#017a31;'># 3. Set Qin=1000W and integrate in OneStep mode for 100 seconds.</span>
         <span style='color:#3605fb;'>self</span>.m.Qin.ReAssignValue(<span style='color:#cc047c;'>1000</span> <b><span style='color:#0000ff;'>*</span></b> W)
+        <span style='color:#3605fb;'>self</span>.Reinitialize()
+        t_end <b><span style='color:#0000ff;'>=</span></b> time <b><span style='color:#0000ff;'>+</span></b> <span style='color:#cc047c;'>100.0</span>
+        <span style='color:#3605fb;'>self</span>.Log.Message(<span style='color:#cc0000;'>&quot;OP: Integrating in one step mode:&quot;</span>, <span style='color:#cc047c;'>0</span>)
+        <b>while</b> time <b><span style='color:#0000ff;'>&lt;</span></b> t_end:
+            msg <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc0000;'>&quot;    Integrated from </span><span style='color:#cc0000;'>%.10f</span><span style='color:#cc0000;'> to &quot;</span> <b><span style='color:#0000ff;'>%</span></b> time
+            time <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.IntegrateForOneStep(eDoNotStopAtDiscontinuity)
+            <span style='color:#3605fb;'>self</span>.ReportData(<span style='color:#3605fb;'>self</span>.CurrentTime)
+            msg <b><span style='color:#0000ff;'>+=</span></b> <span style='color:#cc0000;'>&quot;</span><span style='color:#cc0000;'>%.10f</span><span style='color:#cc0000;'> ... &quot;</span> <b><span style='color:#0000ff;'>%</span></b> time
+            <span style='color:#3605fb;'>self</span>.Log.Message(msg, <span style='color:#cc047c;'>0</span>)
+
+        <span style='color:#017a31;'># 4. Set Qin=1500W and integrate until the specified TimeHorizon is reached</span>
+        <span style='color:#3605fb;'>self</span>.m.Qin.ReAssignValue(<span style='color:#cc047c;'>1500</span> <b><span style='color:#0000ff;'>*</span></b> W)
         <span style='color:#3605fb;'>self</span>.m.T.ReSetInitialCondition(<span style='color:#cc047c;'>300</span> <b><span style='color:#0000ff;'>*</span></b> K)
         <span style='color:#3605fb;'>self</span>.Reinitialize()
         <span style='color:#3605fb;'>self</span>.ReportData(<span style='color:#3605fb;'>self</span>.CurrentTime)
@@ -205,7 +223,7 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc0000;
         <span style='color:#3605fb;'>self</span>.Log.Message(<span style='color:#cc0000;'>&quot;OP: Integrating from &quot;</span> <b><span style='color:#0000ff;'>+</span></b> <span style='color:#2a00d6;'>str</span>(time) <b><span style='color:#0000ff;'>+</span></b> <span style='color:#cc0000;'>&quot; to the time horizon (&quot;</span> <b><span style='color:#0000ff;'>+</span></b> <span style='color:#2a00d6;'>str</span>(<span style='color:#3605fb;'>self</span>.TimeHorizon) <b><span style='color:#0000ff;'>+</span></b> <span style='color:#cc0000;'>&quot;) ... &quot;</span>, <span style='color:#cc047c;'>0</span>)
         time <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.Integrate(eDoNotStopAtDiscontinuity)
         <span style='color:#3605fb;'>self</span>.ReportData(<span style='color:#3605fb;'>self</span>.CurrentTime)
-        <span style='color:#3605fb;'>self</span>.Log.SetProgress(<span style='color:#2a00d6;'>int</span>(<span style='color:#cc047c;'>100.0</span> <b><span style='color:#0000ff;'>*</span></b> <span style='color:#3605fb;'>self</span>.CurrentTime<b><span style='color:#0000ff;'>/</span></b><span style='color:#3605fb;'>self</span>.TimeHorizon))<b><span style='color:#0000ff;'>;</span></b>   
+        <span style='color:#3605fb;'>self</span>.Log.SetProgress(<span style='color:#2a00d6;'>int</span>(<span style='color:#cc047c;'>100.0</span> <b><span style='color:#0000ff;'>*</span></b> <span style='color:#3605fb;'>self</span>.CurrentTime<b><span style='color:#0000ff;'>/</span></b><span style='color:#3605fb;'>self</span>.TimeHorizon))
         <span style='color:#3605fb;'>self</span>.Log.Message(<span style='color:#cc0000;'>&quot;OP: Finished&quot;</span>, <span style='color:#cc047c;'>0</span>)
 
 <b>def</b> run(<b><span style='color:#0000ff;'>**</span></b>kwargs):

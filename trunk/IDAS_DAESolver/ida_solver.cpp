@@ -171,9 +171,21 @@ daeIDASolver::daeIDASolver(void)
     m_bPrintInfo                                = cfg.GetBoolean("daetools.IDAS.printInfo",                               false);
     m_bResetLAMatrixAfterDiscontinuity          = cfg.GetBoolean("daetools.core.resetLAMatrixAfterDiscontinuity",         true);
     m_iNumberOfSTNRebuildsDuringInitialization  = cfg.GetInteger("daetools.IDAS.numberOfSTNRebuildsDuringInitialization", 1000);
+    m_dSensRelTolerance                         = cfg.GetFloat("daetools.IDAS.sensRelativeTolerance",                     1e-5);
+    m_dSensAbsTolerance                         = cfg.GetFloat("daetools.IDAS.sensAbsoluteTolerance",                     1e-5);
 
-    m_dSensRelTolerance                         = cfg.GetFloat("daetools.IDAS.sensRelativeTolerance",                1e-5);
-    m_dSensAbsTolerance                         = cfg.GetFloat("daetools.IDAS.sensAbsoluteTolerance",                1e-5);
+    m_bReportDataInOneStepMode    = cfg.GetBoolean("daetools.IDAS.reportDataInOneStepMode", false);
+    std::string integrationMode_s = cfg.GetString ("daetools.IDAS.integrationMode",         "Normal");
+    if(integrationMode_s == "Normal")
+        m_IntegrationMode = IDA_NORMAL;
+    else if(integrationMode_s == "OneStep")
+        m_IntegrationMode = IDA_ONE_STEP;
+    else
+    {
+        daeDeclareException(exInvalidPointer);
+        e << "Invalid integration mode specified: " << integrationMode_s;
+        throw e;
+    }
 }
 
 daeIDASolver::~daeIDASolver(void)
@@ -1084,7 +1096,7 @@ void daeIDASolver::ResetIDASolver(bool bCopyDataFromBlock, real_t t0, bool bRese
     }
 }
 
-real_t daeIDASolver::Solve(real_t dTime, daeeStopCriterion eCriterion, bool bReportDataAroundDiscontinuities)
+real_t daeIDASolver::Solve(real_t dTime, daeeStopCriterion eCriterion, bool bReportDataAroundDiscontinuities, bool takeSingleStep)
 {
     int retval;
     daeeDiscontinuityType eDiscontinuityType;
@@ -1092,14 +1104,31 @@ real_t daeIDASolver::Solve(real_t dTime, daeeStopCriterion eCriterion, bool bRep
     if(!m_pLog || !m_pBlock || m_nNumberOfEquations == 0)
     {
         daeDeclareException(exMiscellanous);
-        e << "Sundials IDAS solver cravenly refuses to solve the system: the solver has not been initialized";
+        e << "Sundials IDAS solver cowardly refuses to solve the system: the solver has not been initialized";
         throw e;
+    }
+
+    // Set the integration mode based on the global value.
+    // It will be modified if a single step integration is requested.
+    int integrationMode = m_IntegrationMode;
+
+    // If integration mode is one step, tout is used only during the first call to IDASolve to determine
+    // the direction of integration and the rough scale of the problem. Therefore, set it to TimeHorizon
+    // so that the solver can get the proper scale.
+    if(takeSingleStep)
+    {
+        integrationMode = IDA_ONE_STEP;
+
+        if(m_dCurrentTime == 0.0)
+            dTime = m_pSimulation->GetTimeHorizon();
+        else
+            dTime = m_dCurrentTime + 1.0; // it is unused, but has to be higher than the current time.
     }
 
     if(dTime <= m_dCurrentTime)
     {
         daeDeclareException(exInvalidCall);
-        e << "Sundials IDAS solver cravenly refuses to solve the system: an invalid time horizon specified ["
+        e << "Sundials IDAS solver cowardly refuses to solve the system: an invalid time horizon specified ["
           << dTime << "]; it must be higher than [" << m_dCurrentTime << "]";
         throw e;
     }
@@ -1107,7 +1136,12 @@ real_t daeIDASolver::Solve(real_t dTime, daeeStopCriterion eCriterion, bool bRep
 
     for(;;)
     {
-        retval = IDASolve(m_pIDA, m_dTargetTime, &m_dCurrentTime, m_pIDASolverData->m_vectorVariables, m_pIDASolverData->m_vectorTimeDerivatives, IDA_NORMAL);
+        retval = IDASolve(m_pIDA,
+                          m_dTargetTime,
+                          &m_dCurrentTime,
+                          m_pIDASolverData->m_vectorVariables,
+                          m_pIDASolverData->m_vectorTimeDerivatives,
+                          integrationMode);
         if(retval == IDA_TOO_MUCH_WORK)
         {
             m_pLog->Message(string("Warning: IDAS solver error at TIME = ") + toString(m_dCurrentTime) + string(" [IDA_TOO_MUCH_WORK]"), 0);
@@ -1129,16 +1163,20 @@ real_t daeIDASolver::Solve(real_t dTime, daeeStopCriterion eCriterion, bool bRep
             throw e;
         }
 
-        //int kcur;
-        //realtype hcur;
-        //IDAGetCurrentOrder(m_pIDA, &kcur);
-        //IDAGetCurrentStep(m_pIDA, &hcur);
-        //printf("    t = %.15f, k = %d, h = %.15f\n", m_dCurrentTime, kcur, hcur);
+        if(m_bPrintInfo)
+        {
+            int kcur;
+            realtype hcur;
+            IDAGetCurrentOrder(m_pIDA, &kcur);
+            IDAGetCurrentStep(m_pIDA, &hcur);
+            std::cout << (boost::format("At time = %.15f: current order (k) = %d, current time step (h) = %.15f") % m_dCurrentTime % kcur % hcur).str() << std::endl;
+        }
 
     // Now we have to copy the values *from* the solver *to* the block.
     // Achtung, Achtung: This is extremely important to do, for we must be able to re-set the
     //                   variables' values or initial conditions after any IntegrateXXX function,
     //                   and to evaluate conditional expressions in state transitions.
+    // However, now we use block indexes to directly access the solvers arrays and therefore nothing is actually copied.
         realtype* pdValues			= NV_DATA_S(m_pIDASolverData->m_vectorVariables);
         realtype* pdTimeDerivatives	= NV_DATA_S(m_pIDASolverData->m_vectorTimeDerivatives);
 
@@ -1190,11 +1228,40 @@ real_t daeIDASolver::Solve(real_t dTime, daeeStopCriterion eCriterion, bool bRep
             }
         }
 
+        /* Before returning, report the data if requested. */
+        if(integrationMode == IDA_ONE_STEP && m_bReportDataInOneStepMode)
+            m_pSimulation->ReportData(m_dCurrentTime);
+
+        /* If in OneStep integration mode break after a single iteration. */
+        if(takeSingleStep)
+            break;
+
+        /* If in Normal integration mode break after reaching the specified target time. */
         if(m_dCurrentTime >= m_dTargetTime)
             break;
     }
 
     return m_dCurrentTime;
+}
+
+void daeIDASolver::SetIntegrationMode(daeeIntegrationMode integrationMode)
+{
+    if(integrationMode == eNormalIntegration)
+        m_IntegrationMode = IDA_NORMAL;
+    else if(integrationMode == eOneStepIntegration)
+        m_IntegrationMode = IDA_ONE_STEP;
+    else
+        daeDeclareAndThrowException(exInvalidCall);
+}
+
+daeeIntegrationMode daeIDASolver::GetIntegrationMode() const
+{
+    if(m_IntegrationMode == IDA_NORMAL)
+        return eNormalIntegration;
+    else if(m_IntegrationMode == IDA_ONE_STEP)
+        return eOneStepIntegration;
+    else
+        daeDeclareAndThrowException(exInvalidCall);
 }
 
 daeBlock_t* daeIDASolver::GetBlock(void) const

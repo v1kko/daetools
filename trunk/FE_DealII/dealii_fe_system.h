@@ -11,6 +11,9 @@
 #ifdef _OPENMP
 #include <omp.h>
 #endif
+#include <thread>
+#include <chrono>
+#include <atomic>
 
 namespace dae
 {
@@ -323,6 +326,8 @@ protected:
             local_dof_indices(fe.dofs_per_cell),
             dofs_per_cell(fe.dofs_per_cell)
         {
+            PerTaskData::count++;
+            //printf("Constructor PerTaskData (count = %d)\n", (int)PerTaskData::count);
         }
 
         PerTaskData(const PerTaskData &data) :
@@ -332,7 +337,17 @@ protected:
             local_dof_indices(data.dofs_per_cell),
             dofs_per_cell(data.dofs_per_cell)
         {
+            PerTaskData::count++;
+            //printf("Copy constructor PerTaskData (count = %d)\n", (int)PerTaskData::count);
         }
+
+        ~PerTaskData()
+        {
+            PerTaskData::count--;
+            //printf("Deleted PerTaskData (count = %d)\n", (int)PerTaskData::count);
+        }
+
+        static std::atomic_int count;
 
         boost::numeric::ublas::matrix<adouble> cell_matrix;
         boost::numeric::ublas::matrix<adouble> cell_matrix_dt;
@@ -340,7 +355,6 @@ protected:
         std::vector<unsigned int>              local_dof_indices;
         unsigned int                           dofs_per_cell;
         CellId id;
-
     };
 
     struct ScratchData {
@@ -406,11 +420,13 @@ public:
     SmartPointer< FESystem<dim> >   fe;
     ConstraintMatrix                hanging_node_constraints;
 
-    BlockSparsityPattern        sparsity_pattern;
-    BlockSparseMatrix<adouble>  system_matrix;
-    BlockSparseMatrix<adouble>  system_matrix_dt;
-    BlockVector<adouble>        system_rhs;
-    BlockVector<adouble>        solution;
+    BlockSparsityPattern            sparsity_pattern;
+
+    boost::shared_ptr< BlockSparseMatrix<adouble> > system_matrix;
+    boost::shared_ptr< BlockSparseMatrix<adouble> > system_matrix_dt;
+    boost::shared_ptr< BlockVector<adouble> >       system_rhs;
+
+    //BlockVector<adouble>        solution;
     BlockVector<double>         datareporter_solution;
 
     std::map< unsigned int, std::vector< std::pair<adouble,adouble> > > m_mapSurfaceIntegrals;
@@ -439,6 +455,9 @@ public:
     int          numberOfAssembled;
     int          n_active_cells;
 };
+
+template <int dim>
+std::atomic_int dealiiFiniteElementSystem<dim>::PerTaskData::count(0);
 
 template <int dim>
 dealiiFiniteElementSystem<dim>::dealiiFiniteElementSystem():
@@ -509,6 +528,24 @@ dealiiFiniteElementWeakForm<dim>* dealiiFiniteElementSystem<dim>::GetWeakForm() 
     return m_weakForm;
 }
 
+static void LogMemoryUsage()
+{
+    int currRealMem = 0;
+    int peakRealMem = 0;
+    int currVirtMem = 0;
+    int peakVirtMem = 0;
+
+    GetProcessMemory(&currRealMem, &peakRealMem, &currVirtMem, &peakVirtMem);
+
+    // Transform kB into MB
+    currRealMem /= 1000;
+    peakRealMem /= 1000;
+    currVirtMem /= 1000;
+    peakVirtMem /= 1000;
+    printf("       RAM = %5d MB (peak RAM = %5d MB, virtRAM = %5d MB, peak virtRAM = %5d MB)\n", currRealMem, peakRealMem, currVirtMem, peakVirtMem);
+}
+
+
 template <int dim>
 void dealiiFiniteElementSystem<dim>::SetWeakForm(dealiiFiniteElementWeakForm<dim>* weakForm)
 {
@@ -526,7 +563,6 @@ void dealiiFiniteElementSystem<dim>::SetWeakForm(dealiiFiniteElementWeakForm<dim
 template <int dim>
 dealiiFiniteElementSystem<dim>::~dealiiFiniteElementSystem ()
 {
-    dof_handler.clear ();
 }
 
 template <int dim>
@@ -596,23 +632,22 @@ void dealiiFiniteElementSystem<dim>::setup_system()
     DoFTools::make_sparsity_pattern (dof_handler, sparsity_pattern);
     sparsity_pattern.compress();
 
-    system_matrix.reinit (sparsity_pattern);
-    system_matrix_dt.reinit(sparsity_pattern);
+    system_matrix.reset(new BlockSparseMatrix<adouble>());
+    system_matrix->reinit (sparsity_pattern);
 
-    solution.reinit (n_blocks);
+    system_matrix_dt.reset(new BlockSparseMatrix<adouble>());
+    system_matrix_dt->reinit(sparsity_pattern);
+
+    system_rhs.reset(new BlockVector<adouble>());
+    system_rhs->reinit (n_blocks);
     for(unsigned int i = 0; i < n_blocks; i++)
-        solution.block(i).reinit(m_dofs_per_block[i]);
-    solution.collect_sizes();
+        system_rhs->block(i).reinit(m_dofs_per_block[i]);
+    system_rhs->collect_sizes();
 
     datareporter_solution.reinit (n_blocks);
     for(unsigned int i = 0; i < n_blocks; i++)
         datareporter_solution.block(i).reinit(m_dofs_per_block[i]);
     datareporter_solution.collect_sizes();
-
-    system_rhs.reinit (n_blocks);
-    for(unsigned int i = 0; i < n_blocks; i++)
-        system_rhs.block(i).reinit(m_dofs_per_block[i]);
-    system_rhs.collect_sizes();
 
     int currentIndex = 0;
     for(unsigned int k = 0; k < m_DOFs.size(); k++)
@@ -664,14 +699,26 @@ bool dealiiFiniteElementSystem<dim>::NeedsReAssembling()
 template <int dim>
 void dealiiFiniteElementSystem<dim>::ReAssembleSystem()
 {
+    if(!system_matrix || !system_matrix_dt || !system_rhs)
+        throw std::runtime_error(std::string("The Finite Element systems has been cleared"));
+
     this->assemble_system();
 }
 
 template <int dim>
 void dealiiFiniteElementSystem<dim>::AssembleSystem()
 {
+    if(!system_matrix || !system_matrix_dt || !system_rhs)
+        throw std::runtime_error(std::string("The Finite Element systems has been cleared"));
+
     this->assemble_system();
 }
+
+//#define  SIMPLIFY(res_node) { \
+//                                adNodePtr tmp = adNode::SimplifyNode(res_node); \
+//                                res_node.reset(); \
+//                                res_node = tmp; \
+//                            }
 
 template <int dim>
 void dealiiFiniteElementSystem<dim>::cell_matrix_contribution(const unsigned int dofs_per_cell,
@@ -1346,13 +1393,13 @@ void dealiiFiniteElementSystem<dim>::copy_local_to_global (const PerTaskData &da
         for(unsigned int j = 0; j < data.dofs_per_cell; ++j)
         {
             if(hasNonzeroValue( data.cell_matrix(i,j) ))
-                system_matrix.add(data.local_dof_indices[i], data.local_dof_indices[j], data.cell_matrix(i,j));
+                system_matrix->add(data.local_dof_indices[i], data.local_dof_indices[j], data.cell_matrix(i,j));
 
             if(hasNonzeroValue( data.cell_matrix_dt(i,j) ))
-                system_matrix_dt.add(data.local_dof_indices[i], data.local_dof_indices[j], data.cell_matrix_dt(i,j));
+                system_matrix_dt->add(data.local_dof_indices[i], data.local_dof_indices[j], data.cell_matrix_dt(i,j));
         }
         if(hasNonzeroValue( data.cell_rhs[i] ))
-            system_rhs(data.local_dof_indices[i]) += data.cell_rhs[i];
+            (*system_rhs)(data.local_dof_indices[i]) += data.cell_rhs[i];
     }
 
     float percent = 100.0*(numberOfAssembled+1)/n_active_cells;
@@ -1733,34 +1780,95 @@ void dealiiFiniteElementSystem<dim>::RowIndices(unsigned int row, std::vector<un
             narrIndices.push_back(column_indices.local_to_global(block_column_index, it->column()));
     }
 }
+/*
+static void printNodeInfo()
+{
+    size_t constant_ti  = typeid(adConstantNode).hash_code();
+    size_t fcvs_ti      = typeid(adFloatCoefficientVariableSumNode).hash_code();
+    size_t variable_ti  = typeid(adSetupVariableNode).hash_code();
+    size_t timederiv_ti = typeid(adSetupTimeDerivativeNode).hash_code();
+    size_t unary_ti     = typeid(adUnaryNode).hash_code();
+    size_t binary_ti    = typeid(adBinaryNode).hash_code();
 
+    std::map<size_t,adNode*>::iterator it;
+    std::map<size_t,adNode*>& constant_map  = adNodeImpl::g_allNodes[constant_ti];
+    std::map<size_t,adNode*>& fcvs_map      = adNodeImpl::g_allNodes[fcvs_ti];
+    std::map<size_t,adNode*>& variable_map  = adNodeImpl::g_allNodes[variable_ti];
+    std::map<size_t,adNode*>& timederiv_map = adNodeImpl::g_allNodes[timederiv_ti];
+    std::map<size_t,adNode*>& unary_map     = adNodeImpl::g_allNodes[unary_ti];
+    std::map<size_t,adNode*>& binary_map    = adNodeImpl::g_allNodes[binary_ti];
+
+    int mem = 0;
+    for(it = constant_map.begin(); it != constant_map.end(); it++)
+        mem += ( sizeof(adConstantNode) );
+    printf("adConstantNode count = %d, memory = %d MB\n", (int)constant_map.size(), mem / (1024*1024));
+
+    printf("adFloatCoefficientVariableSumNode count = %d\n", (int)fcvs_map.size());
+    mem = 0;
+    for(it = fcvs_map.begin(); it != fcvs_map.end(); it++)
+    {
+        adFloatCoefficientVariableSumNode* pn = dynamic_cast<adFloatCoefficientVariableSumNode*>(it->second);
+        if(pn)
+            mem += ( sizeof(adFloatCoefficientVariableSumNode) + pn->m_sum.size() * (sizeof(size_t) + sizeof(daeFloatCoefficientVariableProduct)) );
+    }
+    printf("adFloatCoefficientVariableSumNode count = %d, memory = %d MB\n", (int)fcvs_map.size(), mem / (1024*1024));
+
+    mem = 0;
+    for(it = unary_map.begin(); it != unary_map.end(); it++)
+        mem += ( sizeof(adUnaryNode) );
+    printf("adUnaryNode count = %d, memory = %d MB\n", (int)unary_map.size(), mem / (1024*1024));
+
+    mem = 0;
+    for(it = binary_map.begin(); it != binary_map.end(); it++)
+        mem += ( sizeof(adBinaryNode) );
+    printf("adBinaryNode count = %d, memory = %d MB\n", (int)binary_map.size(), mem / (1024*1024));
+
+    mem = 0;
+    for(it = variable_map.begin(); it != variable_map.end(); it++)
+    {
+        adSetupVariableNode* pn = dynamic_cast<adSetupVariableNode*>(it->second);
+        if(pn)
+            mem += ( sizeof(adSetupVariableNode) + pn->m_arrDomains.capacity() * sizeof(daeDomainIndex) );
+    }
+    printf("adSetupVariableNode count = %d, memory = %d MB\n", (int)variable_map.size(), mem / (1024*1024));
+
+    mem = 0;
+    for(it = timederiv_map.begin(); it != timederiv_map.end(); it++)
+    {
+        adSetupTimeDerivativeNode* pn = dynamic_cast<adSetupTimeDerivativeNode*>(it->second);
+        if(pn)
+            mem += ( sizeof(adSetupTimeDerivativeNode) + pn->m_arrDomains.capacity() * sizeof(daeDomainIndex) );
+    }
+    printf("adSetupTimeDerivativeNode count = %d, memory = %d MB\n", (int)timederiv_map.size(), mem / (1024*1024));
+}
+*/
 template <int dim>
 void dealiiFiniteElementSystem<dim>::ClearAssembledSystem()
 {
-    system_matrix.clear();
-    system_matrix_dt.clear();
-    system_rhs.reinit(0);
+    system_matrix.reset();
+    system_matrix_dt.reset();
+    system_rhs.reset();
 }
 
 
 template <int dim>
 dae::daeMatrix<adouble>* dealiiFiniteElementSystem<dim>::Asystem() const
 {
-    BlockSparseMatrix<adouble>* Aij = const_cast<BlockSparseMatrix<adouble>*>(&system_matrix);
+    BlockSparseMatrix<adouble>* Aij = const_cast<BlockSparseMatrix<adouble>*>(system_matrix.get());
     return new daeFEBlockMatrix<adouble>(*Aij);
 }
 
 template <int dim>
 dae::daeMatrix<adouble>* dealiiFiniteElementSystem<dim>::Msystem() const
 {
-    BlockSparseMatrix<adouble>* Mij = const_cast<BlockSparseMatrix<adouble>*>(&system_matrix_dt);
+    BlockSparseMatrix<adouble>* Mij = const_cast<BlockSparseMatrix<adouble>*>(system_matrix_dt.get());
     return new daeFEBlockMatrix<adouble>(*Mij);
 }
 
 template <int dim>
 dae::daeArray<adouble>* dealiiFiniteElementSystem<dim>::Fload() const
 {
-    BlockVector<adouble>* Fi = const_cast<BlockVector<adouble>*>(&system_rhs);
+    BlockVector<adouble>* Fi = const_cast<BlockVector<adouble>*>(system_rhs.get());
     return new daeFEBlockArray<adouble>(*Fi);
 }
 

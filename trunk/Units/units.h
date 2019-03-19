@@ -99,6 +99,9 @@ public:
     static std::map<std::string, base_unit>& get_base_units(void);
     const base_unit getBaseUnit(void) const;
 
+    size_t SizeOf() const;
+    size_t GetHash() const;
+
     bool operator==(const unit& other) const;
     bool operator!=(const unit& other) const;
 
@@ -116,9 +119,9 @@ public:
     const unit operator-(double value) const;
     const unit operator-(void) const;
 
-    std::string toString(void) const;
-    std::string toLatex(void) const;
-    std::string toJSON(void) const;
+    std::string toString() const;
+    std::string toLatex() const;
+    std::string toJSON() const;
     friend std::ostream& operator<<(std::ostream& out, const unit& u);
 
 public:
@@ -164,9 +167,9 @@ public:
     const quantity scaleTo(const quantity& referrer) const;
     const quantity scaleTo(const unit& referrer) const;
 
-    std::string toString(void) const;
-    std::string toLatex(void) const;
-    std::string toJSON(void) const;
+    std::string toString() const;
+    std::string toLatex() const;
+    std::string toJSON() const;
     friend std::ostream& operator<<(std::ostream& out, const quantity& q);
 
     bool operator==(const quantity& other) const;
@@ -198,10 +201,16 @@ public:
     bool operator <(const quantity& other) const;
     bool operator <(double value) const;
 
+    size_t SizeOf() const;
+    size_t GetHash() const;
+
 protected:
     boost::shared_ptr<unit> _units;
     double                  _value;
 };
+
+std::size_t hash_value(unit const& u);
+std::size_t hash_value(quantity const& q);
 
 inline std::string toString(const std::vector<quantity>& qarray, const std::string& strDelimiter = std::string(", "))
 {

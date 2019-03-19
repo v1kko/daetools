@@ -265,6 +265,18 @@ void adNode::CreateComputeStack(adNode* adnode, std::vector<csComputeStackItem_t
         item.function       = bnode->eFunction;
         computeStack.push_back(item);
     }
+    else if( dynamic_cast<adScalarExternalFunctionNode*>(adnode) )
+    {
+        daeDeclareException(exInvalidCall);
+        e << "External functions are not supported by OpenCS framework";
+        throw e;
+    }
+    else if( dynamic_cast<adThermoPhysicalPropertyPackageScalarNode*>(adnode) )
+    {
+        daeDeclareException(exInvalidCall);
+        e << "Thermo-physical property packages are not supported by OpenCS framework";
+        throw e;
+    }
     else
     {
         daeDeclareException(exInvalidCall);

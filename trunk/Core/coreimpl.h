@@ -423,6 +423,7 @@ public:
 class daeBlock;
 class daeVariable;
 class daeEquation;
+class csNode_wrapper;
 class DAE_CORE_API daeEquationExecutionInfo : public io::daeSerializable
 {
 public:
@@ -460,9 +461,9 @@ public:
     std::pair<size_t,size_t>          GetComputeStackInfo(const std::map<daeeUnaryFunctions, size_t> &unaryOps,
                                                           const std::map<daeeBinaryFunctions, size_t> &binaryOps) const;
     std::vector<csComputeStackItem_t> GetComputeStack() const;
-    uint8_t GetComputeStack_max_valueSize() const;
-    uint8_t GetComputeStack_max_lvalueSize() const;
-    uint8_t GetComputeStack_max_rvalueSize() const;
+    //uint8_t GetComputeStack_max_valueSize() const;
+    //uint8_t GetComputeStack_max_lvalueSize() const;
+    //uint8_t GetComputeStack_max_rvalueSize() const;
 
 protected:
     void BuildJacobianExpressions();
@@ -479,9 +480,9 @@ protected:
 
     uint32_t                            m_nComputeStackIndex;
     //std::vector<csComputeStackItem_t>   m_EquationComputeStack;
-    uint8_t                             m_nComputeStack_max_valueSize;
-    uint8_t                             m_nComputeStack_max_lvalueSize;
-    uint8_t                             m_nComputeStack_max_rvalueSize;
+//    uint8_t                             m_nComputeStack_max_valueSize;
+//    uint8_t                             m_nComputeStack_max_lvalueSize;
+//    uint8_t                             m_nComputeStack_max_rvalueSize;
 
     friend class daeEquation;
     friend class daeFiniteElementEquation;
@@ -491,6 +492,28 @@ protected:
     friend class daeFiniteElementModel;
     friend class daeState;
     friend class daeBlock;
+    friend class csNode_wrapper;
+};
+
+// Compute Stack export support
+class DAE_CORE_API csNode_wrapper : public cs::csNode_t
+{
+public:
+    csNode_wrapper(daeEquationExecutionInfo* eei, daeBlock* pblock);
+    virtual ~csNode_wrapper();
+
+    std::string   ToLatex(const cs::csModelBuilder_t* mb) const;
+    cs::adouble_t Evaluate(const cs::csNodeEvaluationContext_t& EC) const;
+    void          CollectVariableTypes(std::vector<int32_t>& variableTypes) const;
+    void          CollectVariableIndexes(std::map<uint32_t,uint32_t>& variableIndexes) const;
+    uint32_t      CreateComputeStack(std::vector<cs::csComputeStackItem_t>& computeStack);
+    uint32_t      GetComputeStackSize();
+    uint32_t      GetComputeStackFlops(const std::map<cs::csUnaryFunctions,uint32_t>&  unaryOps,
+                                       const std::map<cs::csBinaryFunctions,uint32_t>& binaryOps);
+
+public:
+    daeBlock*                 block;
+    daeEquationExecutionInfo* eeinfo;
 };
 
 /*********************************************************************************************
@@ -512,6 +535,7 @@ public:
 
     size_t GetCurrentIndex(void) const;
     string GetIndexAsString(void) const;
+    size_t GetHash() const;
 
 public:
     daeeDomainIndexType					m_eType;
@@ -667,6 +691,8 @@ public:
         m_bIsModelDynamic			= false;
         m_bCopyDataFromBlock        = false;
         m_pLastSatisfiedCondition   = NULL;
+        m_bDeleteSetupNodes         = false;
+        m_bDeleteRuntimeNodes       = false;
 
         daeConfig& cfg = daeConfig::GetConfig();
         m_bResetLAMatrixAfterDiscontinuity = cfg.GetBoolean("daetools.core.resetLAMatrixAfterDiscontinuity", true);
@@ -747,6 +773,17 @@ public:
         m_pLog           = pLog;
 
         m_bGatherInfo	 = false;
+
+        daeConfig& cfg = daeConfig::GetConfig();
+        int deleteNodesThreshold = cfg.GetInteger("daetools.core.nodes.deleteNodesThreshold", 10000);
+        if(m_nTotalNumberOfVariables > deleteNodesThreshold)
+        {
+            m_bDeleteSetupNodes = true;
+            if(m_eEvaluationMode == eEvaluationTree_OpenMP)
+                m_bDeleteRuntimeNodes = false;
+            else
+                m_bDeleteRuntimeNodes = true;
+        }
     }
 
     void Load(const std::string& strFileName)
@@ -1286,7 +1323,6 @@ public:
     {
         return m_bGatherInfo;
     }
-
     void SetGatherInfo(bool bGatherInfo)
     {
         m_bGatherInfo = bGatherInfo;
@@ -1296,7 +1332,6 @@ public:
     {
         return m_eInitialConditionMode;
     }
-
     void SetInitialConditionMode(daeeInitialConditionMode eMode)
     {
         m_eInitialConditionMode = eMode;
@@ -1311,7 +1346,6 @@ public:
     {
         return m_dCurrentTime;
     }
-
     void SetCurrentTime(real_t time)
     {
         m_dCurrentTime = time;
@@ -1321,10 +1355,27 @@ public:
     {
         return m_bReinitializationFlag;
     }
-
     void SetReinitializationFlag(bool bReinitializationFlag)
     {
         m_bReinitializationFlag = bReinitializationFlag;
+    }
+
+    bool GetDeleteSetupNodes(void) const
+    {
+        return m_bDeleteSetupNodes;
+    }
+    void SetDeleteSetupNodes(bool deleteSetupNodes)
+    {
+        m_bDeleteSetupNodes = deleteSetupNodes;
+    }
+
+    bool GetDeleteRuntimeNodes(void) const
+    {
+        return m_bDeleteRuntimeNodes;
+    }
+    void SetDeleteRuntimeNodes(bool deleteRuntimeNodes)
+    {
+        m_bDeleteRuntimeNodes = deleteRuntimeNodes;
     }
 
 /*
@@ -1561,6 +1612,8 @@ protected:
     bool							m_bIsModelDynamic;
     bool							m_bCopyDataFromBlock;
     daeeEvaluationMode              m_eEvaluationMode;
+    bool                            m_bDeleteSetupNodes;
+    bool                            m_bDeleteRuntimeNodes;
 
     daeeInitialConditionMode		m_eInitialConditionMode;
     size_t							m_nNumberOfParameters;
@@ -1568,6 +1621,14 @@ protected:
     daeMatrix<real_t>*				m_pmatSValues;
     daeMatrix<real_t>*				m_pmatSTimeDerivatives;
     daeMatrix<real_t>*				m_pmatSResiduals;
+
+    std::map<size_t, adouble> m_mapSetupVariableNodes;
+    std::map<size_t, adouble> m_mapSetupTimeDerivativeNodes;
+    std::map<size_t, adouble> m_mapRuntimeVariableNodes;
+    std::map<size_t, adouble> m_mapRuntimeTimeDerivativeNodes;
+
+    friend class daeVariable;
+    friend class daeModel;
 };
 
 /******************************************************************
@@ -1710,6 +1771,8 @@ public:
                                    const std::vector<uint32_t>& equationIndexes,
                                    const std::map<uint32_t,uint32_t>& bi_to_bi_local);
 
+    void CreateModelBuilderEquations(std::vector< std::shared_ptr<cs::csNode_t> >& equations);
+
 public:
 // Used internally by the block during calculation of Residuals/Jacobian/Hesian
     void				SetValuesArray(daeArray<real_t>* pValues);
@@ -1748,10 +1811,10 @@ public:
     // It changes after every discontinuity that causes a change in active states.
     std::vector<daeEquationExecutionInfo*>	m_ptrarrEquationExecutionInfos_ActiveSet;
 
-    std::vector<csComputeStackItem_t>   m_arrAllComputeStacks;
+    std::vector<csComputeStackItem_t>    m_arrAllComputeStacks;
     std::vector<csIncidenceMatrixItem_t> m_arrComputeStackJacobianItems;
-    std::vector<uint32_t>               m_arrActiveEquationSetIndexes;
-    std::vector<real_t>                 m_jacobian;
+    std::vector<uint32_t>                m_arrActiveEquationSetIndexes;
+    std::vector<real_t>                  m_jacobian;
 
     std::map<std::string, call_stats::TimeAndCount> m_stats;
 
@@ -2405,11 +2468,6 @@ protected:
     daePort*				m_pParentPort;
 
     std::vector<size_t>     m_narrBlockIndexes;
-
-    std::map<size_t, adouble> m_mapSetupVariableNodes;
-    std::map<size_t, adouble> m_mapSetupTimeDerivativeNodes;
-    std::map<size_t, adouble> m_mapRuntimeVariableNodes;
-    std::map<size_t, adouble> m_mapRuntimeTimeDerivativeNodes;
 
     friend class daePort;
     friend class daeModel;
@@ -3087,14 +3145,14 @@ public:
 protected:
     void		InitializeParameters(void);
     void		InitializeVariables(void);
-    void		InitializeEquations(void);
+    virtual void InitializeEquations(void);
     void		InitializeDEDIs(void);
     void		InitializePortAndModelArrays(void);
     void		InitializeSTNs(void);
     void		InitializeOnEventAndOnConditionActions(void);
     void        InitializeBlockIndexes(const std::map<size_t, size_t>& mapOverallIndex_BlockIndex);
     daeBlock*	DoBlockDecomposition(void);
-    void        PopulateBlockIndexes(daeBlock* pBlock);
+    void        PopulateBlockIndexesAndCreateComputeStack(daeBlock* pBlock);
     void		SetDefaultAbsoluteTolerances(void);
     void		SetDefaultInitialGuessesAndConstraints(void);
     void		BuildUpSTNsAndEquations(void);
@@ -3736,6 +3794,10 @@ public:
     void DeclareEquationsForWeakForm(void);
     void UpdateEquations();
 
+// Internal functions
+protected:
+    virtual void InitializeEquations(void);
+
 protected:
     daeFiniteElementObject_t*               m_fe;
     daeDomain                               m_omega;
@@ -4114,9 +4176,9 @@ public:
     typedef adouble_c (*external_lib_function)(const adouble_c[], const char*[], int);
 
     daeCTypesExternalFunction(const string& strName,
-                           daeModel* pModel,
-                           const unit& units,
-                           external_lib_function fun_ptr);
+                              daeModel* pModel,
+                              const unit& units,
+                              external_lib_function fun_ptr);
     virtual ~daeCTypesExternalFunction(void);
 
 public:

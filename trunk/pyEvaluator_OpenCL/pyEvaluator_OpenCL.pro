@@ -19,13 +19,14 @@ QMAKE_LIBDIR += $${PYTHON_LIB_DIR}
 
 LIBS += $${SOLIBS_RPATH}
 
-unix::LIBS += $${OPEN_CS_LIBS} \
+unix::LIBS += $${OPEN_CS_EVALUATOR_LIBS} \
               $${INTEL_OPENCL_LIBS} \
               $${BOOST_PYTHON_LIB} \
               $${BOOST_LIBS}
-# Important: quotes around $${NVIDIA_OPENCL_LIBS}
-#            for in windows the path includes empty spaces.
-win32-msvc2015::LIBS += "$${NVIDIA_OPENCL_LIBS}" \
+
+# Important: quotes around $${NVIDIA_OPENCL_LIBS} (in windows the path may include empty spaces).
+win32-msvc2015::LIBS += $${OPEN_CS_LIBS} \
+                        "$${NVIDIA_OPENCL_LIBS}" \
                         $${BOOST_PYTHON_LIB} \
                         $${BOOST_LIBS}
 
@@ -33,7 +34,10 @@ SOURCES += stdafx.cpp \
            dllmain.cpp \
            dae_python.cpp \
 
-HEADERS += stdafx.h
+HEADERS += stdafx.h \
+           resource.h
+
+OTHER_FILES += Evaluator_OpenCL_resource.rc
 
 #######################################################
 #                Install files

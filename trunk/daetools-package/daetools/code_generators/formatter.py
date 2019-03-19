@@ -260,7 +260,7 @@ class daeExpressionFormatter(object):
 
         return res
 
-    def formatTimeDerivative(self, variableCanonicalName, domainIndexes, overallIndex, order):
+    def formatTimeDerivative(self, variableCanonicalName, domainIndexes, overallIndex):
         # ACHTUNG, ACHTUNG!! Take care of indexing of the overallIndex and the domainIndexes
         if self.useRelativeNames:
             name = daeGetRelativeName(self.modelCanonicalName, variableCanonicalName)
@@ -465,7 +465,7 @@ class daeExpressionFormatter(object):
             res = self.formatVariable(node.Variable.CanonicalName, node.DomainIndexes, node.OverallIndex)
 
         elif isinstance(node, adRuntimeTimeDerivativeNode):
-            res = self.formatTimeDerivative(node.Variable.CanonicalName, node.DomainIndexes, node.OverallIndex, node.Order)
+            res = self.formatTimeDerivative(node.Variable.CanonicalName, node.DomainIndexes, node.OverallIndex)
 
         elif isinstance(node, adFEMatrixItemNode):
             #raise RuntimeError('Finite Elements equations are not supported for code generation, node: %s' % type(node))

@@ -14,6 +14,7 @@
 #include <string>
 #include <boost/python.hpp>
 //#include <boost/python/numeric.hpp>
+#include <boost/algorithm/string.hpp>
 #include <boost/python/slice.hpp>
 #include <boost/python/tuple.hpp>
 #include <boost/smart_ptr.hpp>
@@ -130,6 +131,8 @@ adouble_array create_adouble_array_from_object(boost::python::object value);
 
 boost::python::list daeArray_GetValues(daeArray<real_t>& self);
 
+boost::python::dict daeMemoryUsage();
+
 /*******************************************************
     String functions
 *******************************************************/
@@ -206,6 +209,36 @@ string daeScalarExternalFunction__repr__(daeScalarExternalFunction& self);
 
 string daeVectorExternalFunction__str__(daeVectorExternalFunction& self);
 string daeVectorExternalFunction__repr__(daeVectorExternalFunction& self);
+
+template<typename T>
+std::string vector__str__(std::vector<T>& arr)
+{
+    std::string res = "[";
+    for(int i = 0; i < arr.size(); i++)
+        res += (i == 0 ? "" : ", ") + std::to_string((T)arr[i]);
+    res += "]\n";
+    return res;
+}
+
+template<>
+inline std::string vector__str__(std::vector<std::string>& arr)
+{
+    std::string res = "[";
+    for(int i = 0; i < arr.size(); i++)
+        res += (i == 0 ? "" : ", ") + arr[i];
+    res += "]";
+    return res;
+}
+
+template<>
+inline std::string vector__str__(std::vector<real_t>& arr)
+{
+    std::string res = "[";
+    for(int i = 0; i < arr.size(); i++)
+        res += (i == 0 ? "" : ", ") + (boost::format("%.10f") % arr[i]).str(); // boost::trim_right_copy_if( "", boost::is_any_of("0") );
+    res += "]";
+    return res;
+}
 
 string adComputeStackItem_variableName(csComputeStackItem_t& self);
 csOpCode adComputeStackItem_opCode(csComputeStackItem_t& self);
@@ -1286,7 +1319,7 @@ boost::python::list daeOnEventActions_Actions(const daeOnEventActions& self);
 boost::python::list daeOnEventActions_UserDefinedActions(const daeOnEventActions& self);
 
 /******************************************************************
-    Opaque support or Python threads and GIL support
+    Opaque support for Python threads and GIL support
 *******************************************************************/
 class pyAllowThreads : public daeAllowThreads_t
 {

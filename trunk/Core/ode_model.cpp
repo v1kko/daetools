@@ -28,6 +28,9 @@ daeODEEquation::~daeODEEquation()
 
 void daeODEEquation::CreateEquationExecutionInfos(daeModel* pModel, std::vector<daeEquationExecutionInfo*>& ptrarrEqnExecutionInfosCreated, bool bAddToTheModel)
 {
+    // May be declined if requested in the daetools.cfg config file.
+    adNodeImpl::SetMemoryPool(eRuntimeNodesPool);
+
     daeEquation::CreateEquationExecutionInfos(pModel, ptrarrEqnExecutionInfosCreated, bAddToTheModel);
 }
 

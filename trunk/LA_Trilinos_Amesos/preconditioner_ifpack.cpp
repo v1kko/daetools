@@ -14,6 +14,7 @@ DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 #include <iostream>
 #include <vector>
 #include "trilinos_amesos_la_solver.h"
+#include "../config.h"
 
 namespace dae
 {
@@ -75,6 +76,8 @@ daePreconditioner_Ifpack::daePreconditioner_Ifpack(const std::string& preconditi
 {
     data                  = NULL;
     strPreconditionerName = preconditionerName;
+    daeConfig& cfg = daeConfig::GetConfig();
+    printInfo = cfg.GetBoolean("daetools.core.printInfo", false);
 }
 
 daePreconditioner_Ifpack::~daePreconditioner_Ifpack()
@@ -103,6 +106,7 @@ int daePreconditioner_Ifpack::Reinitialize()
 
     daePreconditionerData_Ifpack* p_data = (daePreconditionerData_Ifpack*)this->data;
     p_data->CreateStorage();
+
     return 0;
 }
 
@@ -141,7 +145,8 @@ int daePreconditioner_Ifpack::Setup(real_t  time,
     }
 
     int ret = p_data->m_pPreconditionerIfpack->Compute();
-    printf("    t = %.15f compute preconditioner (condest = %.2e)\n", time, p_data->m_pPreconditionerIfpack->Condest());
+    if(printInfo)
+        printf("    t = %.15f compute preconditioner (condest = %.2e)\n", time, p_data->m_pPreconditionerIfpack->Condest());
 
     return ret;
 }

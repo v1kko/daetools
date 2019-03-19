@@ -45,7 +45,7 @@ class daeNodeGraph(object):
 
     def _processNode(self, parent, node, edgeLabel=''):
         if isinstance(node, adConstantNode):
-            label = '%.6e' % node.Quantity.value
+            label = '%.15e' % node.Quantity.value
             child = self._newLeaf(parent, label, color='darkorchid', fontcolor='darkorchid', edgeLabel=edgeLabel)
         
         elif isinstance(node, adTimeNode):
@@ -180,11 +180,11 @@ class daeNodeGraph(object):
             label = 'SUM'
             child = self._newLeaf(parent, label, color='green', fontcolor='green', edgeLabel=edgeLabel)
             
-            label = '%.6e' % node.base
+            label = '%.15e' % node.base
             child = self._newLeaf(child, label, color='darkorchid', fontcolor='darkorchid', edgeLabel=edgeLabel)
                 
             for overallIndex,item in items:
-                label = '%.6e * %s(%d)' % (item.coefficient, item.variable.Name, overallIndex-item.variable.OverallIndex)
+                label = '%.15e * %s(%d)' % (item.coefficient, item.variable.Name, overallIndex-item.variable.OverallIndex)
                 child = self._newLeaf(child, label, color='darkorchid', fontcolor='darkorchid', edgeLabel=edgeLabel)
                 
         else:

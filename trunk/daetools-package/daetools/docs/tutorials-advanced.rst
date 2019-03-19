@@ -31,7 +31,7 @@ Advanced Tutorials
 .. |tadv_3| replace:: Using code-generators (Scilab/GNU_Octave/Matlab MEX functions,
                       Simulink S-functions, Modelica/gPROMS/FMI code-generators).
 
-.. |tadv_4| replace:: C++ MPI code generator.
+.. |tadv_4| replace:: OpenCS code generator.
 
 
 .. begin-command

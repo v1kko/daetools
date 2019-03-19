@@ -126,6 +126,24 @@ void daeSimulation::Pause(void)
     m_eActivityAction = ePauseActivity;
 }
 
+static void LogMemoryUsage(daeLog_t* pLog)
+{
+    int currRealMem = 0;
+    int peakRealMem = 0;
+    int currVirtMem = 0;
+    int peakVirtMem = 0;
+
+    GetProcessMemory(&currRealMem, &peakRealMem, &currVirtMem, &peakVirtMem);
+
+    // Transform kB into MB
+    currRealMem /= 1000;
+    peakRealMem /= 1000;
+    currVirtMem /= 1000;
+    peakVirtMem /= 1000;
+    if(pLog)
+        pLog->Message((boost::format("      RAM = %5d MB (peak RAM = %5d MB, virtRAM = %5d MB, peak virtRAM = %5d MB)") % currRealMem % peakRealMem % currVirtMem % peakVirtMem).str(), 0);
+}
+
 void daeSimulation::Initialize(daeDAESolver_t* pDAESolver,
                                daeDataReporter_t* pDataReporter,
                                daeLog_t* pLog,
@@ -191,12 +209,18 @@ void daeSimulation::Initialize(daeDAESolver_t* pDAESolver,
     m_pLog->Message(string("Creating the system... "), 0);
 
     if(bPrintInfo)
+    {
+        LogMemoryUsage(m_pLog);
         m_pLog->Message(string("  Initializing the simulation... "), 0);
+    }
 
 // Create data proxy and propagate it
     if(bPrintInfo)
         m_pLog->Message(string("    InitializeStage1"), 0);
     m_pModel->InitializeStage1();
+
+    if(bPrintInfo)
+        LogMemoryUsage(m_pLog);
 
 // Initialize params and domains
     if(bPrintInfo)
@@ -206,6 +230,9 @@ void daeSimulation::Initialize(daeDAESolver_t* pDAESolver,
         SetUpParametersAndDomains();
     else
         SetUpParametersAndDomains_RuntimeSettings();
+
+    if(bPrintInfo)
+        LogMemoryUsage(m_pLog);
 
 // Define the optimization problem: objective function and constraints
     if(bPrintInfo)
@@ -276,11 +303,15 @@ void daeSimulation::Initialize(daeDAESolver_t* pDAESolver,
     if(bPrintInfo)
         m_pLog->Message(string("    InitializeStage2"), 0);
     m_pModel->InitializeStage2();
+    if(bPrintInfo)
+        LogMemoryUsage(m_pLog);
 
 // Create data storage for variables, derivatives, var. types, tolerances, etc
     if(bPrintInfo)
         m_pLog->Message(string("    InitializeStage3"), 0);
     m_pModel->InitializeStage3(m_pLog);
+    if(bPrintInfo)
+        LogMemoryUsage(m_pLog);
 
 // Set initial values, initial conditions, fix variables, set initial guesses, abs tolerances, etc
     if(bPrintInfo)
@@ -291,20 +322,29 @@ void daeSimulation::Initialize(daeDAESolver_t* pDAESolver,
     else
         SetUpVariables_RuntimeSettings();
 
+    if(bPrintInfo)
+        LogMemoryUsage(m_pLog);
+
 // Create equation execution infos in models and stns
     if(bPrintInfo)
         m_pLog->Message(string("    InitializeStage4"), 0);
     m_pModel->InitializeStage4();
+    if(bPrintInfo)
+        LogMemoryUsage(m_pLog);
 
 // Now we have everything set up and we should check for inconsistences
     if(bPrintInfo)
         m_pLog->Message(string("    CheckSystem"), 0);
     CheckSystem();
+    if(bPrintInfo)
+        LogMemoryUsage(m_pLog);
 
 // Do the block decomposition if needed (at the moment only one block is created)
     if(bPrintInfo)
         m_pLog->Message(string("    InitializeStage5"), 0);
     m_ptrBlock = m_pModel->InitializeStage5();
+    if(bPrintInfo)
+        LogMemoryUsage(m_pLog);
 
     daeBlock* pBlock = dynamic_cast<daeBlock*>(m_ptrBlock);
 
@@ -318,6 +358,8 @@ void daeSimulation::Initialize(daeDAESolver_t* pDAESolver,
     if(bPrintInfo)
         m_pLog->Message(string("    DoDataPartitioning"), 0);
     DoDataPartitioning(pBlock->m_EquationsIndexes, pBlock->m_mapVariableIndexes);
+    if(bPrintInfo)
+        LogMemoryUsage(m_pLog);
 
     // Use the block indexes from the daeBlock to populate EquationExecutionInfos,
     // build Jacobian expressions (if required; also uses the block indexes),
@@ -325,11 +367,15 @@ void daeSimulation::Initialize(daeDAESolver_t* pDAESolver,
     if(bPrintInfo)
         m_pLog->Message(string("    InitializeStage6"), 0);
     m_pModel->InitializeStage6(m_ptrBlock);
+    if(bPrintInfo)
+        LogMemoryUsage(m_pLog);
 
 // Setup DAE solver and sensitivities
     if(bPrintInfo)
         m_pLog->Message(string("    Setup DAE Solver"), 0);
     SetupSolver();
+    if(bPrintInfo)
+        LogMemoryUsage(m_pLog);
 
 // Collect variables to report
     if(bPrintInfo)
@@ -339,6 +385,9 @@ void daeSimulation::Initialize(daeDAESolver_t* pDAESolver,
 
 // Set the IsInitialized flag to true
     m_bIsInitialized = true;
+
+    if(bPrintInfo)
+        LogMemoryUsage(m_pLog);
 
 // Announce success
     m_pLog->Message(string("The system created successfully."), 0);
@@ -566,6 +615,8 @@ void daeSimulation::SolveInitial(void)
 
 // Set the SolveInitial flag to true
     m_bIsSolveInitial = true;
+    if(bPrintInfo)
+        LogMemoryUsage(m_pLog);
 
 // Announce success
     m_pLog->Message(string("Starting the initialization of the system... Done."), 0);
@@ -1413,6 +1464,33 @@ real_t daeSimulation::IntegrateUntilTime(real_t time, daeeStopCriterion eStopCri
     return m_dCurrentTime;
 }
 
+real_t daeSimulation::IntegrateForOneStep(daeeStopCriterion eStopCriterion,
+                                          bool bReportDataAroundDiscontinuities)
+{
+    call_stats::TimerCounter tc(m_stats["Integration"]);
+
+    if(!m_pModel)
+        daeDeclareAndThrowException(exInvalidPointer);
+    if(!m_pDAESolver)
+        daeDeclareAndThrowException(exInvalidPointer);
+
+    // Reset the last satisfied condition pointer
+    m_pModel->GetDataProxy()->SetLastSatisfiedCondition(NULL);
+
+    // If integration mode is one step, tout is used only during the first call to Solve to determine
+    // the direction of integration and the rough scale of the problem.
+    real_t time = m_dCurrentTime;
+
+    // Inform the DAE solver about the time past which the solution is not to proceed.
+    // For instance, IDA solver can take time steps past the time horizon since the
+    // default stop time is infinity and that can cause errors sometimes.
+    m_pDAESolver->SetTimeHorizon(m_dTimeHorizon);
+
+    m_dCurrentTime = m_pDAESolver->Solve(time, eStopCriterion, bReportDataAroundDiscontinuities, true);
+
+    return m_dCurrentTime;
+}
+
 void daeSimulation::Reinitialize(void)
 {
     if(!m_pModel)
@@ -1420,8 +1498,11 @@ void daeSimulation::Reinitialize(void)
     if(!m_pDAESolver)
         daeDeclareAndThrowException(exInvalidPointer);
     if(m_dCurrentTime >= m_dTimeHorizon)
-        daeDeclareAndThrowException(exInvalidCall);
-
+    {
+        daeDeclareException(exInvalidCall);
+        e << "Reinitialize called at current time (" << m_dCurrentTime << ") >= time horizon ("  << m_dTimeHorizon << ")";
+        throw ;
+    }
     m_pDAESolver->Reinitialize(true, false);
 }
 
@@ -1470,6 +1551,374 @@ std::map<std::string, size_t> daeSimulation::GetActiveEquationSetNodeCount() con
         daeDeclareAndThrowException(exInvalidPointer);
 
     return m_ptrBlock->GetActiveEquationSetNodeCount();
+}
+
+static void setVariableNames(std::map<size_t, size_t>&          mapIndexes,
+                             const std::map<size_t, size_t>&    mapAssignedVarsIndexes,
+                             daeVariable_t*                     variable,
+                             const std::string&                 relativeName,
+                             std::vector<std::string>&          variableNames,
+                             std::vector<std::string>&          dofNames)
+{
+    std::string strName;
+    size_t oi, bi, dofi, oi_counter;
+    std::vector<daeDomain_t*> domains;
+    variable->GetDomains(domains);
+    int Ndomains = domains.size();
+
+    oi_counter = 0;
+    oi = variable->GetOverallIndex();
+    std::map<size_t, size_t>::const_iterator cit;
+    std::map<size_t, size_t>::const_iterator cit_end = mapIndexes.end();
+
+    // Overall indexes start with the variable->OverallIndex and incrementally increase
+    // up to variable->OverallIndex + variable->NumberOfPoints.
+    // However, that is generally not the case for block indexes.
+    // Hence, each blockIndex must be individually retreived from the map<overalIndex : blockIndex>.
+    if(Ndomains == 0)
+    {
+        strName = relativeName;
+        cit = mapIndexes.find(oi);
+        if(cit != cit_end) // if found it is a state variable, otherwise a degree of freedom
+        {
+            bi = cit->second;
+            variableNames[bi] = strName;
+        }
+        else
+        {
+            dofi = mapAssignedVarsIndexes.at(oi);
+            dofNames[dofi] = strName;
+        }
+    }
+    else if(Ndomains == 1)
+    {
+        for(size_t d1 = 0; d1 < domains[0]->GetNumberOfPoints(); d1++)
+        {
+            strName = relativeName + "(" + std::to_string(d1) + ")";
+            cit = mapIndexes.find(oi + oi_counter);
+            if(cit != cit_end) // if found it is a state variable, otherwise a degree of freedom
+            {
+                bi = cit->second;
+                variableNames[bi] = strName;
+            }
+            else
+            {
+                dofi = mapAssignedVarsIndexes.at(oi);
+                dofNames[dofi] = strName;
+            }
+            oi_counter++;
+        }
+    }
+    else if(Ndomains == 2)
+    {
+        for(size_t d1 = 0; d1 < domains[0]->GetNumberOfPoints(); d1++)
+        for(size_t d2 = 0; d2 < domains[1]->GetNumberOfPoints(); d2++)
+        {
+            strName = relativeName +
+                                "(" +
+                                      std::to_string(d1) +
+                                "," + std::to_string(d2) +
+                                ")";
+            cit = mapIndexes.find(oi + oi_counter);
+            if(cit != cit_end) // if found it is a state variable, otherwise a degree of freedom
+            {
+                bi = cit->second;
+                variableNames[bi] = strName;
+            }
+            else
+            {
+                dofi = mapAssignedVarsIndexes.at(oi);
+                dofNames[dofi] = strName;
+            }
+            oi_counter++;
+        }
+    }
+    else if(Ndomains == 3)
+    {
+        for(size_t d1 = 0; d1 < domains[0]->GetNumberOfPoints(); d1++)
+        for(size_t d2 = 0; d2 < domains[1]->GetNumberOfPoints(); d2++)
+        for(size_t d3 = 0; d3 < domains[2]->GetNumberOfPoints(); d3++)
+        {
+            strName = relativeName +
+                                "(" +
+                                      std::to_string(d1) +
+                                "," + std::to_string(d2) +
+                                "," + std::to_string(d3) +
+                                ")";
+            cit = mapIndexes.find(oi + oi_counter);
+            if(cit != cit_end) // if found it is a state variable, otherwise a degree of freedom
+            {
+                bi = cit->second;
+                variableNames[bi] = strName;
+            }
+            else
+            {
+                dofi = mapAssignedVarsIndexes.at(oi);
+                dofNames[dofi] = strName;
+            }
+            oi_counter++;
+        }
+    }
+    else if(Ndomains == 4)
+    {
+        for(size_t d1 = 0; d1 < domains[0]->GetNumberOfPoints(); d1++)
+        for(size_t d2 = 0; d2 < domains[1]->GetNumberOfPoints(); d2++)
+        for(size_t d3 = 0; d3 < domains[2]->GetNumberOfPoints(); d3++)
+        for(size_t d4 = 0; d4 < domains[3]->GetNumberOfPoints(); d4++)
+        {
+            strName = relativeName +
+                                "(" +
+                                      std::to_string(d1) +
+                                "," + std::to_string(d2) +
+                                "," + std::to_string(d3) +
+                                "," + std::to_string(d4) +
+                                ")";
+            cit = mapIndexes.find(oi + oi_counter);
+            if(cit != cit_end) // if found it is a state variable, otherwise a degree of freedom
+            {
+                bi = cit->second;
+                variableNames[bi] = strName;
+            }
+            else
+            {
+                dofi = mapAssignedVarsIndexes.at(oi);
+                dofNames[dofi] = strName;
+            }
+            oi_counter++;
+        }
+    }
+    else if(Ndomains == 5)
+    {
+        for(size_t d1 = 0; d1 < domains[0]->GetNumberOfPoints(); d1++)
+        for(size_t d2 = 0; d2 < domains[1]->GetNumberOfPoints(); d2++)
+        for(size_t d3 = 0; d3 < domains[2]->GetNumberOfPoints(); d3++)
+        for(size_t d4 = 0; d4 < domains[3]->GetNumberOfPoints(); d4++)
+        for(size_t d5 = 0; d5 < domains[4]->GetNumberOfPoints(); d5++)
+        {
+            strName = relativeName +
+                                "(" +
+                                      std::to_string(d1) +
+                                "," + std::to_string(d2) +
+                                "," + std::to_string(d3) +
+                                "," + std::to_string(d4) +
+                                "," + std::to_string(d5) +
+                                ")";
+            cit = mapIndexes.find(oi + oi_counter);
+            if(cit != cit_end) // if found it is a state variable, otherwise a degree of freedom
+            {
+                bi = cit->second;
+                variableNames[bi] = strName;
+            }
+            else
+            {
+                dofi = mapAssignedVarsIndexes.at(oi);
+                dofNames[dofi] = strName;
+            }
+            oi_counter++;
+        }
+    }
+    else if(Ndomains == 6)
+    {
+        for(size_t d1 = 0; d1 < domains[0]->GetNumberOfPoints(); d1++)
+        for(size_t d2 = 0; d2 < domains[1]->GetNumberOfPoints(); d2++)
+        for(size_t d3 = 0; d3 < domains[2]->GetNumberOfPoints(); d3++)
+        for(size_t d4 = 0; d4 < domains[3]->GetNumberOfPoints(); d4++)
+        for(size_t d5 = 0; d5 < domains[4]->GetNumberOfPoints(); d5++)
+        for(size_t d6 = 0; d6 < domains[5]->GetNumberOfPoints(); d6++)
+        {
+            strName = relativeName +
+                                "(" +
+                                      std::to_string(d1) +
+                                "," + std::to_string(d2) +
+                                "," + std::to_string(d3) +
+                                "," + std::to_string(d4) +
+                                "," + std::to_string(d5) +
+                                "," + std::to_string(d6) +
+                                ")";
+            cit = mapIndexes.find(oi + oi_counter);
+            if(cit != cit_end) // if found it is a state variable, otherwise a degree of freedom
+            {
+                bi = cit->second;
+                variableNames[bi] = strName;
+            }
+            else
+            {
+                dofi = mapAssignedVarsIndexes.at(oi);
+                dofNames[dofi] = strName;
+            }
+            oi_counter++;
+        }
+    }
+    else if(Ndomains == 7)
+    {
+        for(size_t d1 = 0; d1 < domains[0]->GetNumberOfPoints(); d1++)
+        for(size_t d2 = 0; d2 < domains[1]->GetNumberOfPoints(); d2++)
+        for(size_t d3 = 0; d3 < domains[2]->GetNumberOfPoints(); d3++)
+        for(size_t d4 = 0; d4 < domains[3]->GetNumberOfPoints(); d4++)
+        for(size_t d5 = 0; d5 < domains[4]->GetNumberOfPoints(); d5++)
+        for(size_t d6 = 0; d6 < domains[5]->GetNumberOfPoints(); d6++)
+        for(size_t d7 = 0; d7 < domains[6]->GetNumberOfPoints(); d7++)
+        {
+            strName = relativeName +
+                                "(" +
+                                      std::to_string(d1) +
+                                "," + std::to_string(d2) +
+                                "," + std::to_string(d3) +
+                                "," + std::to_string(d4) +
+                                "," + std::to_string(d5) +
+                                "," + std::to_string(d6) +
+                                "," + std::to_string(d7) +
+                                ")";
+            cit = mapIndexes.find(oi + oi_counter);
+            if(cit != cit_end) // if found it is a state variable, otherwise a degree of freedom
+            {
+                bi = cit->second;
+                variableNames[bi] = strName;
+            }
+            else
+            {
+                dofi = mapAssignedVarsIndexes.at(oi);
+                dofNames[dofi] = strName;
+            }
+            oi_counter++;
+        }
+    }
+    else if(Ndomains == 8)
+    {
+        for(size_t d1 = 0; d1 < domains[0]->GetNumberOfPoints(); d1++)
+        for(size_t d2 = 0; d2 < domains[1]->GetNumberOfPoints(); d2++)
+        for(size_t d3 = 0; d3 < domains[2]->GetNumberOfPoints(); d3++)
+        for(size_t d4 = 0; d4 < domains[3]->GetNumberOfPoints(); d4++)
+        for(size_t d5 = 0; d5 < domains[4]->GetNumberOfPoints(); d5++)
+        for(size_t d6 = 0; d6 < domains[5]->GetNumberOfPoints(); d6++)
+        for(size_t d7 = 0; d7 < domains[6]->GetNumberOfPoints(); d7++)
+        for(size_t d8 = 0; d8 < domains[7]->GetNumberOfPoints(); d8++)
+        {
+            strName = relativeName +
+                                "(" +
+                                      std::to_string(d1) +
+                                "," + std::to_string(d2) +
+                                "," + std::to_string(d3) +
+                                "," + std::to_string(d4) +
+                                "," + std::to_string(d5) +
+                                "," + std::to_string(d6) +
+                                "," + std::to_string(d7) +
+                                "," + std::to_string(d8) +
+                                ")";
+            cit = mapIndexes.find(oi + oi_counter);
+            if(cit != cit_end) // if found it is a state variable, otherwise a degree of freedom
+            {
+                bi = cit->second;
+                variableNames[bi] = strName;
+            }
+            else
+            {
+                dofi = mapAssignedVarsIndexes.at(oi);
+                dofNames[dofi] = strName;
+            }
+            oi_counter++;
+        }
+    }
+}
+
+void daeSimulation::InitialiseModelBuilder(uint32_t&                                     Nvariables,
+                                           uint32_t&                                     Ndofs,
+                                           std::vector<std::string>&                     variableNames,
+                                           std::vector<real_t>&                          variableValues,
+                                           std::vector<real_t>&                          variableDerivatives,
+                                           std::vector<real_t>&                          absTolerances,
+                                           std::vector<std::string>&                     dofNames,
+                                           std::vector<real_t>&                          dofValues,
+                                           std::vector< std::shared_ptr<cs::csNode_t> >& equations)
+{
+    if(!m_ptrBlock)
+        daeDeclareAndThrowException(exInvalidPointer);
+
+    boost::shared_ptr<daeDataProxy_t> pDataProxy = m_pModel->GetDataProxy();
+    daeBlock*                         pBlock     = dynamic_cast<daeBlock*>(m_ptrBlock);
+
+    Ndofs      = 0;
+    Nvariables = 0;
+
+    size_t  Nvariables_total = pDataProxy->GetTotalNumberOfVariables();
+    real_t*                         absTols                 = m_pModel->GetDataProxy()->GetAbsoluteTolerancesPointer();
+    const std::vector<real_t*>&     x                       = pDataProxy->GetValuesReferences();
+    const std::vector<real_t*>&     dx_dt                   = pDataProxy->GetTimeDerivativesReferences();
+    const std::vector<real_t>&      dofs                    = pDataProxy->GetAssignedVarsValues();
+    const std::map<size_t, size_t>& mapAssignedVarsIndexes  = pDataProxy->GetAssignedVarsIndexes(); // map{overallIndex : dofIndex}
+    std::map<size_t, size_t>&       mapIndexes              = pBlock->m_mapVariableIndexes;         // map{overallIndex : blockIndex}
+
+    std::map<std::string, daeVariable_t*> mapVariables; // map{canonicalName : daeVariable_t*}
+    m_pModel->CollectAllVariables(mapVariables);
+
+    Ndofs      = dofs.size();
+    Nvariables = pBlock->GetNumberOfEquations();
+
+    if(Nvariables+Ndofs != Nvariables_total)
+        daeDeclareAndThrowException(exInvalidCall);
+
+    variableNames.resize       (Nvariables, "x");
+    variableValues.resize      (Nvariables, 0.0);
+    variableDerivatives.resize (Nvariables, 0.0);
+    absTolerances.resize       (Nvariables, 0.0);
+    dofNames.resize            (Ndofs,     "y");
+    dofValues.resize           (Ndofs,      0.0);
+    equations.resize           (Nvariables);
+
+    std::string topLevelModelName = m_pModel->GetCanonicalName();
+    for(std::map<std::string, daeVariable_t*>::const_iterator iter = mapVariables.begin(); iter != mapVariables.end(); iter++)
+    {
+        const std::string&   canonicalName = iter->first;
+        daeVariable_t*       variable      = iter->second;
+
+        std::string relativeName = daeGetRelativeName(topLevelModelName, canonicalName);
+        setVariableNames(mapIndexes, mapAssignedVarsIndexes, variable, relativeName, variableNames, dofNames);
+    }
+
+    for(size_t oi = 0; oi < Nvariables_total; oi++)
+    {
+        std::map<size_t, size_t>::const_iterator iter = mapIndexes.find(oi);
+        if(iter == mapIndexes.end()) // if not found - continue (process only state variables, not degrees of freedom)
+            continue;
+
+        size_t bi = iter->second;
+
+        variableValues[bi]      = *x[oi];
+        variableDerivatives[bi] = *dx_dt[oi];
+        absTolerances[bi]       = absTols[oi];
+
+        //std::cout << variableNames[bi] << " = " << variableValues[bi] << std::endl;
+        //std::cout.flush();
+    }
+
+    for(std::map<size_t, size_t>::const_iterator iter = mapAssignedVarsIndexes.begin(); iter != mapAssignedVarsIndexes.end(); iter++)
+    {
+        size_t oi   = iter->first;
+        size_t dofi = iter->second;
+
+        dofValues[dofi] = dofs[dofi];
+
+        //std::cout << dofNames[dofi] << " = " << dofValues[dofi] << std::endl;
+        //std::cout.flush();
+    }
+
+//    mb.Initialize_DAE_System(Nvariables,
+//                             Ndofs,
+//                             defaultVariableValue,
+//                             defaultVariableTimeDerivative,
+//                             defaultAbsoluteTolerance,
+//                             defaultVariableName);
+
+    pBlock->CreateModelBuilderEquations(equations);
+    //for(size_t i = 0; i < Nvariables; i++)
+    //    std::cout << "Equation[" << i << "] = " << equations[i].node->ToLatex() << std::endl;
+
+//    mb.SetModelEquations          (equations);
+//    mb.SetVariableNames           (variableNames);
+//    mb.SetVariableValues          (variableValues);
+//    mb.SetVariableTimeDerivatives (variableDerivatives);
+//    mb.SetAbsoluteTolerances      (absTolerances);
+//    mb.SetDegreeOfFreedomValues   (dofValues);
 }
 
 void daeSimulation::ExportComputeStackStructs(const std::string& filenameComputeStacks,

@@ -21,6 +21,26 @@ def _formatName(name):
     lnames = daeGetStrippedName(name).split('.')
     return '.'.join(lnames[1:])
 
+class daePickleDataReporter(daeDataReporterFile):
+    """
+    Saves data as the Python pickle which can be opened in DAE Plotter
+    or unpickled directly:
+        f = open(filename, 'rb')
+        process = pickle.load(f)
+        f.close()
+    where process is the dataReceiverProcess instance identical to the 
+    daeDataReceiverProcess objects used in the other data reporters below.
+    """
+    def __init__(self):
+        daeDataReporterFile.__init__(self)
+
+    def WriteDataToFile(self):
+        try:
+            from daetools.dae_plotter.data_receiver_io import pickleProcess
+            pickleProcess(self.Process, self.ConnectString)
+        except Exception as e:
+            print(('Cannot write results in the Python pickle format:\n' + str(e)))
+
 class daeVTKDataReporter(daeDataReporterLocal):
     """
     Saves data in the binary VTK format (.vtr) using the pyEVTK module.

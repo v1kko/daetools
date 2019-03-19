@@ -1,8 +1,19 @@
 #include "units.h"
 #include <algorithm>
+#include <boost/functional/hash.hpp>
 
 namespace units
 {
+std::size_t hash_value(unit const& u)
+{
+    return u.GetHash();
+}
+
+std::size_t hash_value(quantity const& q)
+{
+    return q.GetHash();
+}
+
 create_base_units::create_base_units()
 {
     std::map<std::string, base_unit> __scaled_units__;
@@ -198,18 +209,22 @@ create_base_units::create_base_units()
         quantity
 **************************************************************/
 // Dimensionless quanities should not create a large unit object but
-// use the dimensionless global object.
-boost::shared_ptr<unit> c_dimless(new unit());
+// use the dimension less global object.
+boost::shared_ptr<unit> g_dimensionless_unit(new unit());
 
 quantity::quantity(void)
 {
     _value = 0.0;
-    _units = c_dimless;
+    _units = g_dimensionless_unit;
 }
 
 quantity::quantity(double val, const unit& u)
 {
-    _units.reset(new unit(u));
+    if(u == *g_dimensionless_unit)
+        _units = g_dimensionless_unit;
+    else
+        _units.reset(new unit(u));
+
     _value = val;
 }
 
@@ -276,6 +291,22 @@ std::string quantity::toJSON(void) const
     strJSON += ( boost::format("\"Value\" : %f")  % getValue() ).str();
     strJSON += " }";
     return strJSON;
+}
+
+size_t quantity::SizeOf() const
+{
+    size_t size = sizeof(*this);
+    if(_units && (*_units != unit())) // if it has its own unit object - not the global dimensionless unit
+        size += _units->SizeOf();
+    return size;
+}
+
+size_t quantity::GetHash() const
+{
+    size_t seed = 0;
+    boost::hash_combine(seed,  _value);
+    boost::hash_combine(seed, *_units);
+    return seed;
 }
 
 std::ostream& operator<<(std::ostream& out, const quantity& q)

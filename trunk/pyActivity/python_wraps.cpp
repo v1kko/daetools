@@ -13,4 +13,14 @@ boost::python::dict GetCallStats(daeSimulation& self)
     std::map<std::string, call_stats::TimeAndCount> stats = self.GetCallStats();
     return getDictFromMapByValue(stats);
 }
+
+std::string vector_csNodePtr__str__(std::vector<cs::csNodePtr>& self)
+{
+    std::string res = "[";
+    for(int i = 0; i < self.size(); i++)
+        res += (i == 0 ? "" : ", ") + self[i]->ToLatex();
+    res += "]";
+    return res;
+}
+
 }

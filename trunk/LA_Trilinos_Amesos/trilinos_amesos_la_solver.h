@@ -247,6 +247,7 @@ public:
 
 public:
     void* data;
+    bool printInfo;
     std::string strPreconditionerName;
     Teuchos::ParameterList m_parameterList;
     std::map<std::string, call_stats::TimeAndCount>  m_stats;
@@ -285,6 +286,7 @@ public:
 
 public:
     void* data;
+    bool printInfo;
     std::string strPreconditionerName;
     Teuchos::ParameterList m_parameterList;
     std::map<std::string, call_stats::TimeAndCount>  m_stats;

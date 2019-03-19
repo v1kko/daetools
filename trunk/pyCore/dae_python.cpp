@@ -67,7 +67,7 @@ BOOST_PYTHON_MODULE(pyCore)
         .value("eStructuredGrid",   dae::core::eStructuredGrid)
         .value("eUnstructuredGrid",	dae::core::eUnstructuredGrid)
         .export_values()
-        ;
+    ;
 
     enum_<daeeParameterType>("daeeParameterType")
         .value("ePTUnknown",	dae::core::ePTUnknown)
@@ -91,7 +91,7 @@ BOOST_PYTHON_MODULE(pyCore)
         .value("eBFDM",			dae::core::eBFDM)
         .value("eUpwindCCFV",	dae::core::eUpwindCCFV)
         .export_values()
-        ;
+    ;
 
     enum_<daeeDomainBounds>("daeeDomainBounds")
         .value("eDBUnknown",		dae::core::eDBUnknown)
@@ -322,21 +322,33 @@ BOOST_PYTHON_MODULE(pyCore)
 
     class_< std::vector<std::string> >("vector_string")
         .def(vector_indexing_suite< std::vector<std::string> >())
+        .def("__str__",     &daepython::vector__str__<std::string>)
+        .def("__repr__",    &daepython::vector__str__<std::string>)
     ;
     class_< std::vector<double> >("vector_double")
         .def(vector_indexing_suite< std::vector<double> >())
+        .def("__str__",     &daepython::vector__str__<double>)
+        .def("__repr__",    &daepython::vector__str__<double>)
     ;
     class_< std::vector<float> >("vector_float")
         .def(vector_indexing_suite< std::vector<float> >())
+        .def("__str__",     &daepython::vector__str__<float>)
+        .def("__repr__",    &daepython::vector__str__<float>)
     ;
     class_< std::vector<size_t> >("vector_size_t")
         .def(vector_indexing_suite< std::vector<size_t> >())
+        .def("__str__",     &daepython::vector__str__<size_t>)
+        .def("__repr__",    &daepython::vector__str__<size_t>)
     ;
     class_< std::vector<int> >("vector_int")
         .def(vector_indexing_suite< std::vector<int> >())
+        .def("__str__",     &daepython::vector__str__<int>)
+        .def("__repr__",    &daepython::vector__str__<int>)
     ;
     class_< std::vector<long> >("vector_long")
         .def(vector_indexing_suite< std::vector<long> >())
+        .def("__str__",     &daepython::vector__str__<long>)
+        .def("__repr__",    &daepython::vector__str__<long>)
     ;
     class_< std::map<size_t,size_t> >("map_ulong_ulong")
         .def(map_indexing_suite< std::map<size_t,size_t> >())
@@ -366,6 +378,8 @@ BOOST_PYTHON_MODULE(pyCore)
     def("daeVersionMajor",  &dae::daeVersionMajor, DOCSTR_global_daeVersionMajor);
     def("daeVersionMinor",  &dae::daeVersionMinor, DOCSTR_global_daeVersionMinor);
     def("daeVersionBuild",  &dae::daeVersionBuild, DOCSTR_global_daeVersionBuild);
+
+    def("daeMemoryUsage",   &daepython::daeMemoryUsage);
 
     def("opencsVersion",    &daepython::get_OpenCSVersion);
 
@@ -459,6 +473,7 @@ BOOST_PYTHON_MODULE(pyCore)
         .add_property("IsDifferential",         &adNode::IsDifferential)
         .add_property("Quantity",               &adNode::GetQuantity)
         .add_property("SizeOf",                 &adNode::SizeOf)
+        .add_property("Hash",                   &adNode::GetHash)
 
         .def("SaveAsLatex", &adNode::SaveAsLatex)
 
@@ -510,7 +525,7 @@ BOOST_PYTHON_MODULE(pyCore)
     ;
 
     class_<adSetupTimeDerivativeNode, bases<adNode>, boost::noncopyable>("adSetupTimeDerivativeNode", no_init)
-        .def_readonly("Order",          &adSetupTimeDerivativeNode::m_nOrder)
+        //.def_readonly("Order",          &adSetupTimeDerivativeNode::m_nOrder)
         .add_property("Variable",       make_function(&daepython::adSetupTimeDerivativeNode_Variable, return_internal_reference<>()))
         .add_property("DomainIndexes",	&daepython::adSetupTimeDerivativeNode_Domains)
     ;
@@ -595,7 +610,7 @@ BOOST_PYTHON_MODULE(pyCore)
     ;
 
     class_<adRuntimeTimeDerivativeNode, bases<adNode>, boost::noncopyable>("adRuntimeTimeDerivativeNode", no_init)
-        .def_readonly("Order",          &adRuntimeTimeDerivativeNode::m_nOrder)
+        //.def_readonly("Order",          &adRuntimeTimeDerivativeNode::m_nOrder)
         .def_readonly("OverallIndex",   &adRuntimeTimeDerivativeNode::m_nOverallIndex)
         .def_readonly("BlockIndex",     &adRuntimeTimeDerivativeNode::m_nBlockIndex)
         .add_property("Variable",       make_function(&daepython::adRuntimeTimeDerivativeNode_Variable, return_internal_reference<>()))
@@ -1937,9 +1952,9 @@ BOOST_PYTHON_MODULE(pyCore)
         .add_property("Equation",            make_function(&daeEquationExecutionInfo::GetEquation, return_internal_reference<>()),
                                              DOCSTR_daeEquationExecutionInfo_Equation)
         .add_property("ComputeStack",	             &daepython::daeEquationExecutionInfo_GetComputeStack, DOCSTR_daeEquationExecutionInfo_GetComputeStack)
-        .def_readonly("ComputeStack_max_valueSize",  &daeEquationExecutionInfo::GetComputeStack_max_valueSize)
-        .def_readonly("ComputeStack_max_lvalueSize", &daeEquationExecutionInfo::GetComputeStack_max_lvalueSize)
-        .def_readonly("ComputeStack_max_rvalueSize", &daeEquationExecutionInfo::GetComputeStack_max_rvalueSize)
+        //.def_readonly("ComputeStack_max_valueSize",  &daeEquationExecutionInfo::GetComputeStack_max_valueSize)
+        //.def_readonly("ComputeStack_max_lvalueSize", &daeEquationExecutionInfo::GetComputeStack_max_lvalueSize)
+        //.def_readonly("ComputeStack_max_rvalueSize", &daeEquationExecutionInfo::GetComputeStack_max_rvalueSize)
 
         .def("GetComputeStackInfo",                  &daepython::daeEquationExecutionInfo_GetComputeStackInfo,
                                                      ( arg("self"),

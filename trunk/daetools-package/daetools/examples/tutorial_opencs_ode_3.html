@@ -1,0 +1,387 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<meta name="Generator" content="Kate, the KDE Advanced Text Editor" />
+<title>tutorial_opencs_ode_3.py</title>
+</head>
+<!-- Highlighting: "Python" -->
+<body>
+<pre style='color:#1f1c1b;background-color:#ffffff;'>
+<span style='color:#017a31;'>#!/usr/bin/env python</span>
+<span style='color:#017a31;'># -*- coding: utf-8 -*-</span>
+
+<span style='color:#017a31;'>&quot;&quot;&quot;</span>
+<span style='color:#017a31;'>***********************************************************************************</span>
+<span style='color:#017a31;'>                           tutorial_opencs_ode_3.py</span>
+<span style='color:#017a31;'>                DAE Tools: pyOpenCS module, www.daetools.com</span>
+<span style='color:#017a31;'>                Copyright (C) Dragan Nikolic</span>
+<span style='color:#017a31;'>***********************************************************************************</span>
+<span style='color:#017a31;'>DAE Tools is free software; you can redistribute it and/or modify it under the</span>
+<span style='color:#017a31;'>terms of the GNU General Public License version 3 as published by the Free Software</span>
+<span style='color:#017a31;'>Foundation. DAE Tools is distributed in the hope that it will be useful, but WITHOUT</span>
+<span style='color:#017a31;'>ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A</span>
+<span style='color:#017a31;'>PARTICULAR PURPOSE. See the GNU General Public License for more details.</span>
+<span style='color:#017a31;'>You should have received a copy of the GNU General Public License along with the</span>
+<span style='color:#017a31;'>DAE Tools software; if not, see &lt;http://www.gnu.org/licenses/&gt;.</span>
+<span style='color:#017a31;'>************************************************************************************</span>
+<span style='color:#017a31;'>&quot;&quot;&quot;</span>
+__doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc0000;'>&quot;&quot;&quot;</span>
+<span style='color:#cc0000;'>Reimplementation of CVodes cvsDiurnal_kry example.</span>
+<span style='color:#cc0000;'>2-species diurnal kinetics advection-diffusion PDE system in 2D::</span>
+
+<span style='color:#cc0000;'>  dc(i)/dt = Kh*(d/dx)^2 c(i) + V*dc(i)/dx + (d/dy)(Kv(y)*dc(i)/dy) + Ri(c1,c2,t), i = 1,2</span>
+
+<span style='color:#cc0000;'>where::</span>
+<span style='color:#cc0000;'>    </span>
+<span style='color:#cc0000;'>  R1(c1,c2,t) = -q1*c1*c3 - q2*c1*c2 + 2*q3(t)*c3 + q4(t)*c2</span>
+<span style='color:#cc0000;'>  R2(c1,c2,t) =  q1*c1*c3 - q2*c1*c2 - q4(t)*c2</span>
+<span style='color:#cc0000;'>  Kv(y) = Kv0*exp(y/5)</span>
+
+<span style='color:#cc0000;'>Kh, V, Kv0, q1, q2, and c3 are constants, and q3(t) and q4(t) vary diurnally.</span>
+<span style='color:#cc0000;'>The problem is posed on the square::</span>
+<span style='color:#cc0000;'>    </span>
+<span style='color:#cc0000;'>    0 &lt;= x &lt;= 20 (km)</span>
+<span style='color:#cc0000;'>    30 &lt;= y &lt;= 50 (km)</span>
+
+<span style='color:#cc0000;'>with homogeneous Neumann boundary conditions, and integrated for 86400 sec (1 day).</span>
+<span style='color:#cc0000;'>The PDE system is discretised using the central differences on a uniform 10 x 10 mesh.</span>
+<span style='color:#cc0000;'>The original results are in tutorial_opencs_ode_3.csv file.</span>
+<span style='color:#cc0000;'>&quot;&quot;&quot;</span>
+
+<span style='color:#3605fb;'>import</span> os, sys, json, itertools
+<span style='color:#3605fb;'>from</span> daetools.pyDAE <span style='color:#3605fb;'>import</span> <b><span style='color:#0000ff;'>*</span></b>
+<span style='color:#3605fb;'>import</span> pyOpenCS
+<span style='color:#3605fb;'>from</span> pyOpenCS <span style='color:#3605fb;'>import</span> csModelBuilder_t, csNumber_t, csGraphPartitioner_2D_Npde, csSimulate
+<span style='color:#3605fb;'>from</span> tutorial_opencs_aux <span style='color:#3605fb;'>import</span> compareResults
+
+V   <b><span style='color:#0000ff;'>=</span></b>  <span style='color:#cc047c;'>1.00E-03</span>
+Kh  <b><span style='color:#0000ff;'>=</span></b>  <span style='color:#cc047c;'>4.00E-06</span>
+Kv0 <b><span style='color:#0000ff;'>=</span></b>  <span style='color:#cc047c;'>1.00E-08</span>
+q1  <b><span style='color:#0000ff;'>=</span></b>  <span style='color:#cc047c;'>1.63E-16</span>
+q2  <b><span style='color:#0000ff;'>=</span></b>  <span style='color:#cc047c;'>4.66E-16</span>
+C3  <b><span style='color:#0000ff;'>=</span></b>  <span style='color:#cc047c;'>3.70E+16</span>
+a3  <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>22.62</span>
+a4  <b><span style='color:#0000ff;'>=</span></b>  <span style='color:#cc047c;'>7.601</span>
+
+<b>class</b> DiurnalKinetics_2D:
+    <b>def</b> <b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#3605fb;'>self</span>, Nx, Ny):
+        <span style='color:#3605fb;'>self</span>.Nx <b><span style='color:#0000ff;'>=</span></b> Nx
+        <span style='color:#3605fb;'>self</span>.Ny <b><span style='color:#0000ff;'>=</span></b> Ny
+        
+        <span style='color:#3605fb;'>self</span>.x0 <b><span style='color:#0000ff;'>=</span></b>  <span style='color:#cc047c;'>0.0</span>
+        <span style='color:#3605fb;'>self</span>.x1 <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>20.0</span>
+        <span style='color:#3605fb;'>self</span>.y0 <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>30.0</span>
+        <span style='color:#3605fb;'>self</span>.y1 <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>50.0</span>
+        <span style='color:#3605fb;'>self</span>.dx <b><span style='color:#0000ff;'>=</span></b> (<span style='color:#3605fb;'>self</span>.x1<b><span style='color:#0000ff;'>-</span></b><span style='color:#3605fb;'>self</span>.x0) <b><span style='color:#0000ff;'>/</span></b> (Nx<b><span style='color:#0000ff;'>-</span></b><span style='color:#cc047c;'>1</span>)
+        <span style='color:#3605fb;'>self</span>.dy <b><span style='color:#0000ff;'>=</span></b> (<span style='color:#3605fb;'>self</span>.y1<b><span style='color:#0000ff;'>-</span></b><span style='color:#3605fb;'>self</span>.y0) <b><span style='color:#0000ff;'>/</span></b> (Ny<b><span style='color:#0000ff;'>-</span></b><span style='color:#cc047c;'>1</span>)
+
+        <span style='color:#3605fb;'>self</span>.x_domain <b><span style='color:#0000ff;'>=</span></b> []
+        <span style='color:#3605fb;'>self</span>.y_domain <b><span style='color:#0000ff;'>=</span></b> []
+        <b>for</b> x <b>in</b> <span style='color:#2a00d6;'>range</span>(<span style='color:#3605fb;'>self</span>.Nx):
+            <span style='color:#3605fb;'>self</span>.x_domain.append(<span style='color:#3605fb;'>self</span>.x0 <b><span style='color:#0000ff;'>+</span></b> x <b><span style='color:#0000ff;'>*</span></b> <span style='color:#3605fb;'>self</span>.dx)
+        <b>for</b> y <b>in</b> <span style='color:#2a00d6;'>range</span>(<span style='color:#3605fb;'>self</span>.Ny):
+            <span style='color:#3605fb;'>self</span>.y_domain.append(<span style='color:#3605fb;'>self</span>.y0 <b><span style='color:#0000ff;'>+</span></b> y <b><span style='color:#0000ff;'>*</span></b> <span style='color:#3605fb;'>self</span>.dy)
+
+        <span style='color:#3605fb;'>self</span>.C1_start_index <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>0</span><b><span style='color:#0000ff;'>*</span></b>Nx<b><span style='color:#0000ff;'>*</span></b>Ny
+        <span style='color:#3605fb;'>self</span>.C2_start_index <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>1</span><b><span style='color:#0000ff;'>*</span></b>Nx<b><span style='color:#0000ff;'>*</span></b>Ny
+
+        <span style='color:#3605fb;'>self</span>.Nequations <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>2</span><b><span style='color:#0000ff;'>*</span></b>Nx<b><span style='color:#0000ff;'>*</span></b>Ny
+
+    <b>def</b> GetInitialConditions(<span style='color:#3605fb;'>self</span>):
+        <span style='color:#017a31;'># Use numpy array so that setting C1_0 and C2_0 changes the original values</span>
+        C0 <b><span style='color:#0000ff;'>=</span></b> numpy.zeros(<span style='color:#3605fb;'>self</span>.Nequations)
+        C1_0 <b><span style='color:#0000ff;'>=</span></b> C0[<span style='color:#3605fb;'>self</span>.C1_start_index : <span style='color:#3605fb;'>self</span>.C2_start_index]
+        C2_0 <b><span style='color:#0000ff;'>=</span></b> C0[<span style='color:#3605fb;'>self</span>.C2_start_index : <span style='color:#3605fb;'>self</span>.Nequations]
+
+        dx <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.dx
+        dy <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.dy
+        x0 <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.x0
+        x1 <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.x1
+        y0 <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.y0
+        y1 <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.y1
+        
+        <b>def</b> alfa(x):
+            xmid <b><span style='color:#0000ff;'>=</span></b> (x1<b><span style='color:#0000ff;'>+</span></b>x0)<b><span style='color:#0000ff;'>/</span></b><span style='color:#cc047c;'>2.0</span>
+            cx <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>0.1</span> <b><span style='color:#0000ff;'>*</span></b> (x <b><span style='color:#0000ff;'>-</span></b> xmid)
+            cx2 <b><span style='color:#0000ff;'>=</span></b> cx<b><span style='color:#0000ff;'>*</span></b>cx
+            <b>return</b> <span style='color:#cc047c;'>1</span> <b><span style='color:#0000ff;'>-</span></b> cx2 <b><span style='color:#0000ff;'>+</span></b> <span style='color:#cc047c;'>0.5</span><b><span style='color:#0000ff;'>*</span></b>cx2<b><span style='color:#0000ff;'>*</span></b>cx2
+        
+        <b>def</b> beta(y):
+            ymid <b><span style='color:#0000ff;'>=</span></b> (y1<b><span style='color:#0000ff;'>+</span></b>y0)<b><span style='color:#0000ff;'>/</span></b><span style='color:#cc047c;'>2.0</span>
+            cy <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>0.1</span> <b><span style='color:#0000ff;'>*</span></b> (y <b><span style='color:#0000ff;'>-</span></b> ymid)
+            cy2 <b><span style='color:#0000ff;'>=</span></b> cy<b><span style='color:#0000ff;'>*</span></b>cy
+            <b>return</b> <span style='color:#cc047c;'>1</span> <b><span style='color:#0000ff;'>-</span></b> cy2 <b><span style='color:#0000ff;'>+</span></b> <span style='color:#cc047c;'>0.5</span><b><span style='color:#0000ff;'>*</span></b>cy2<b><span style='color:#0000ff;'>*</span></b>cy2
+        
+        <b>for</b> ix <b>in</b> <span style='color:#2a00d6;'>range</span>(<span style='color:#3605fb;'>self</span>.Nx):
+            <b>for</b> iy <b>in</b> <span style='color:#2a00d6;'>range</span>(<span style='color:#3605fb;'>self</span>.Ny):
+                index <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.GetIndex(ix,iy)
+                x <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.x_domain[ix]
+                y <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.y_domain[iy]
+
+                C1_0[index] <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>1E6</span>  <b><span style='color:#0000ff;'>*</span></b> alfa(x) <b><span style='color:#0000ff;'>*</span></b> beta(y)
+                C2_0[index] <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>1E12</span> <b><span style='color:#0000ff;'>*</span></b> alfa(x) <b><span style='color:#0000ff;'>*</span></b> beta(y)
+        
+        <b>return</b> C0.tolist()
+
+    <b>def</b> GetVariableNames(<span style='color:#3605fb;'>self</span>):
+        x_y_inds <b><span style='color:#0000ff;'>=</span></b> [(x,y) <b>for</b> x,y <b>in</b> itertools.product(<span style='color:#2a00d6;'>range</span>(<span style='color:#3605fb;'>self</span>.Nx), <span style='color:#2a00d6;'>range</span>(<span style='color:#3605fb;'>self</span>.Ny))]
+        <b>return</b> [<span style='color:#cc0000;'>'C1(</span><span style='color:#cc0000;'>%d</span><span style='color:#cc0000;'>,</span><span style='color:#cc0000;'>%d</span><span style='color:#cc0000;'>)'</span><b><span style='color:#0000ff;'>%</span></b>(x,y) <b>for</b> x,y <b>in</b> x_y_inds] <b><span style='color:#0000ff;'>+</span></b> [<span style='color:#cc0000;'>'C2(</span><span style='color:#cc0000;'>%d</span><span style='color:#cc0000;'>,</span><span style='color:#cc0000;'>%d</span><span style='color:#cc0000;'>)'</span><b><span style='color:#0000ff;'>%</span></b>(x,y) <b>for</b> x,y <b>in</b> x_y_inds]
+
+    <b>def</b> CreateEquations(<span style='color:#3605fb;'>self</span>, y, time):
+        <span style='color:#017a31;'># y is a list of csNumber_t objects representing model variables</span>
+        C1_values <b><span style='color:#0000ff;'>=</span></b> y[<span style='color:#3605fb;'>self</span>.C1_start_index : <span style='color:#3605fb;'>self</span>.C2_start_index]
+        C2_values <b><span style='color:#0000ff;'>=</span></b> y[<span style='color:#3605fb;'>self</span>.C2_start_index : <span style='color:#3605fb;'>self</span>.Nequations]
+        
+        dx <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.dx
+        dy <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.dy
+        Nx <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.Nx
+        Ny <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.Ny
+        x_domain <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.x_domain
+        y_domain <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.y_domain
+
+        <span style='color:#017a31;'># Math. functions</span>
+        sin    <b><span style='color:#0000ff;'>=</span></b> pyOpenCS.sin
+        acos   <b><span style='color:#0000ff;'>=</span></b> pyOpenCS.acos
+        exp    <b><span style='color:#0000ff;'>=</span></b> pyOpenCS.exp
+        cs_max <b><span style='color:#0000ff;'>=</span></b> pyOpenCS.<span style='color:#2a00d6;'>max</span>
+
+        nonzero <b><span style='color:#0000ff;'>=</span></b> csNumber_t(<span style='color:#cc047c;'>1E-30</span>)
+        
+        <b>def</b> Kv(y):
+            <b>return</b> Kv0 <b><span style='color:#0000ff;'>*</span></b> numpy.exp(y_domain[y] <b><span style='color:#0000ff;'>/</span></b> <span style='color:#cc047c;'>5.0</span>)
+
+        <b>def</b> q3(time):
+            w <b><span style='color:#0000ff;'>=</span></b> numpy.arccos(<b><span style='color:#0000ff;'>-</span></b><span style='color:#cc047c;'>1.0</span>) <b><span style='color:#0000ff;'>/</span></b> <span style='color:#cc047c;'>43200.0</span>
+            sinwt <b><span style='color:#0000ff;'>=</span></b> cs_max(nonzero, sin(w<b><span style='color:#0000ff;'>*</span></b>time))
+            <b>return</b> exp(<b><span style='color:#0000ff;'>-</span></b>a3 <b><span style='color:#0000ff;'>/</span></b> sinwt)
+
+        <b>def</b> q4(time):
+            w <b><span style='color:#0000ff;'>=</span></b> numpy.arccos(<b><span style='color:#0000ff;'>-</span></b><span style='color:#cc047c;'>1.0</span>) <b><span style='color:#0000ff;'>/</span></b> <span style='color:#cc047c;'>43200.0</span>
+            sinwt <b><span style='color:#0000ff;'>=</span></b> cs_max(nonzero, sin(w<b><span style='color:#0000ff;'>*</span></b>time))
+            <b>return</b> exp(<b><span style='color:#0000ff;'>-</span></b>a4 <b><span style='color:#0000ff;'>/</span></b> sinwt)
+
+        <b>def</b> R1(c1, c2, time):
+            <b>return</b> <b><span style='color:#0000ff;'>-</span></b>q1<b><span style='color:#0000ff;'>*</span></b>c1<b><span style='color:#0000ff;'>*</span></b>C3 <b><span style='color:#0000ff;'>-</span></b> q2<b><span style='color:#0000ff;'>*</span></b>c1<b><span style='color:#0000ff;'>*</span></b>c2 <b><span style='color:#0000ff;'>+</span></b> <span style='color:#cc047c;'>2</span><b><span style='color:#0000ff;'>*</span></b>q3(time)<b><span style='color:#0000ff;'>*</span></b>C3 <b><span style='color:#0000ff;'>+</span></b> q4(time)<b><span style='color:#0000ff;'>*</span></b>c2
+
+        <b>def</b> R2(c1, c2, time):
+            <b>return</b> q1<b><span style='color:#0000ff;'>*</span></b>c1<b><span style='color:#0000ff;'>*</span></b>C3 <b><span style='color:#0000ff;'>-</span></b> q2<b><span style='color:#0000ff;'>*</span></b>c1<b><span style='color:#0000ff;'>*</span></b>c2 <b><span style='color:#0000ff;'>-</span></b> q4(time)<b><span style='color:#0000ff;'>*</span></b>c2
+
+        <b>def</b> C1(x, y):
+            index <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.GetIndex(x, y)
+            <b>return</b> C1_values[index]
+        
+        <b>def</b> C2(x, y):
+            index <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.GetIndex(x, y)
+            <b>return</b> C2_values[index]
+
+        <span style='color:#017a31;'># First order partial derivative per x.</span>
+        <b>def</b> dC1_dx(x, y):
+            <span style='color:#017a31;'># If called for x == 0 or x == Nx-1 return 0.0 (zero flux through boundaries).</span>
+            <b>if</b>(x <b><span style='color:#0000ff;'>==</span></b> <span style='color:#cc047c;'>0</span> <b>or</b> x <b><span style='color:#0000ff;'>==</span></b> Nx<b><span style='color:#0000ff;'>-</span></b><span style='color:#cc047c;'>1</span>):
+                <b>return</b> csNumber_t(<span style='color:#cc047c;'>0.0</span>)
+
+            ci1 <b><span style='color:#0000ff;'>=</span></b> C1(x<b><span style='color:#0000ff;'>+</span></b><span style='color:#cc047c;'>1</span>, y)
+            ci2 <b><span style='color:#0000ff;'>=</span></b> C1(x<b><span style='color:#0000ff;'>-</span></b><span style='color:#cc047c;'>1</span>, y)
+            <b>return</b> (ci1 <b><span style='color:#0000ff;'>-</span></b> ci2) <b><span style='color:#0000ff;'>/</span></b> (<span style='color:#cc047c;'>2</span><b><span style='color:#0000ff;'>*</span></b>dx)
+
+        <b>def</b> dC2_dx(x, y):
+            <span style='color:#017a31;'># If called for x == 0 or x == Nx-1 return 0.0 (zero flux through boundaries).</span>
+            <b>if</b>(x <b><span style='color:#0000ff;'>==</span></b> <span style='color:#cc047c;'>0</span> <b>or</b> x <b><span style='color:#0000ff;'>==</span></b> Nx<b><span style='color:#0000ff;'>-</span></b><span style='color:#cc047c;'>1</span>):
+                <b>return</b> csNumber_t(<span style='color:#cc047c;'>0.0</span>)
+
+            ci1 <b><span style='color:#0000ff;'>=</span></b> C2(x<b><span style='color:#0000ff;'>+</span></b><span style='color:#cc047c;'>1</span>, y)
+            ci2 <b><span style='color:#0000ff;'>=</span></b> C2(x<b><span style='color:#0000ff;'>-</span></b><span style='color:#cc047c;'>1</span>, y)
+            <b>return</b> (ci1 <b><span style='color:#0000ff;'>-</span></b> ci2) <b><span style='color:#0000ff;'>/</span></b> (<span style='color:#cc047c;'>2</span><b><span style='color:#0000ff;'>*</span></b>dx)
+
+        <span style='color:#017a31;'># First order partial derivative per y.</span>
+        <b>def</b> dC1_dy(x, y):
+            <span style='color:#017a31;'># If called for y == 0 or y == Ny-1 return 0.0 (zero flux through boundaries).</span>
+            <b>if</b>(y <b><span style='color:#0000ff;'>==</span></b> <span style='color:#cc047c;'>0</span> <b>or</b> y <b><span style='color:#0000ff;'>==</span></b> Ny<b><span style='color:#0000ff;'>-</span></b><span style='color:#cc047c;'>1</span>):
+                <b>return</b> csNumber_t(<span style='color:#cc047c;'>0.0</span>)
+
+            ci1 <b><span style='color:#0000ff;'>=</span></b> C1(x, y<b><span style='color:#0000ff;'>+</span></b><span style='color:#cc047c;'>1</span>)
+            ci2 <b><span style='color:#0000ff;'>=</span></b> C1(x, y<b><span style='color:#0000ff;'>-</span></b><span style='color:#cc047c;'>1</span>)
+            <b>return</b> (ci1 <b><span style='color:#0000ff;'>-</span></b> ci2) <b><span style='color:#0000ff;'>/</span></b> (<span style='color:#cc047c;'>2</span><b><span style='color:#0000ff;'>*</span></b>dy)
+
+        <b>def</b> dC2_dy(x, y):
+            <span style='color:#017a31;'># If called for y == 0 or y == Ny-1  return 0.0 (zero flux through boundaries).</span>
+            <b>if</b>(y <b><span style='color:#0000ff;'>==</span></b> <span style='color:#cc047c;'>0</span> <b>or</b> y <b><span style='color:#0000ff;'>==</span></b> Ny<b><span style='color:#0000ff;'>-</span></b><span style='color:#cc047c;'>1</span>):
+                <b>return</b> csNumber_t(<span style='color:#cc047c;'>0.0</span>)
+
+            ci1 <b><span style='color:#0000ff;'>=</span></b> C2(x, y<b><span style='color:#0000ff;'>+</span></b><span style='color:#cc047c;'>1</span>)
+            ci2 <b><span style='color:#0000ff;'>=</span></b> C2(x, y<b><span style='color:#0000ff;'>-</span></b><span style='color:#cc047c;'>1</span>)
+            <b>return</b> (ci1 <b><span style='color:#0000ff;'>-</span></b> ci2) <b><span style='color:#0000ff;'>/</span></b> (<span style='color:#cc047c;'>2</span><b><span style='color:#0000ff;'>*</span></b>dy)
+
+        <span style='color:#017a31;'># Second order partial derivative per x.</span>
+        <b>def</b> d2C1_dx2(x, y):
+            <span style='color:#017a31;'># If called for x == 0 or x == Nx-1 return 0.0 (no diffusion through boundaries).</span>
+            <b>if</b>(x <b><span style='color:#0000ff;'>==</span></b> <span style='color:#cc047c;'>0</span> <b>or</b> x <b><span style='color:#0000ff;'>==</span></b> Nx<b><span style='color:#0000ff;'>-</span></b><span style='color:#cc047c;'>1</span>):
+                <b>return</b> csNumber_t(<span style='color:#cc047c;'>0.0</span>)
+
+            ci1 <b><span style='color:#0000ff;'>=</span></b> C1(x<b><span style='color:#0000ff;'>+</span></b><span style='color:#cc047c;'>1</span>, y)
+            ci  <b><span style='color:#0000ff;'>=</span></b> C1(x,   y)
+            ci2 <b><span style='color:#0000ff;'>=</span></b> C1(x<b><span style='color:#0000ff;'>-</span></b><span style='color:#cc047c;'>1</span>, y)
+            <b>return</b> (ci1 <b><span style='color:#0000ff;'>-</span></b> <span style='color:#cc047c;'>2</span><b><span style='color:#0000ff;'>*</span></b>ci <b><span style='color:#0000ff;'>+</span></b> ci2) <b><span style='color:#0000ff;'>/</span></b> (dx<b><span style='color:#0000ff;'>*</span></b>dx)
+
+        <b>def</b> d2C2_dx2(x, y):
+            <span style='color:#017a31;'># If called for x == 0 or x == Nx-1 return 0.0 (no diffusion through boundaries).</span>
+            <b>if</b>(x <b><span style='color:#0000ff;'>==</span></b> <span style='color:#cc047c;'>0</span> <b>or</b> x <b><span style='color:#0000ff;'>==</span></b> Nx<b><span style='color:#0000ff;'>-</span></b><span style='color:#cc047c;'>1</span>):
+                <b>return</b> csNumber_t(<span style='color:#cc047c;'>0.0</span>)
+
+            ci1 <b><span style='color:#0000ff;'>=</span></b> C2(x<b><span style='color:#0000ff;'>+</span></b><span style='color:#cc047c;'>1</span>, y)
+            ci  <b><span style='color:#0000ff;'>=</span></b> C2(x,   y)
+            ci2 <b><span style='color:#0000ff;'>=</span></b> C2(x<b><span style='color:#0000ff;'>-</span></b><span style='color:#cc047c;'>1</span>, y)
+            <b>return</b> (ci1 <b><span style='color:#0000ff;'>-</span></b> <span style='color:#cc047c;'>2</span><b><span style='color:#0000ff;'>*</span></b>ci <b><span style='color:#0000ff;'>+</span></b> ci2) <b><span style='color:#0000ff;'>/</span></b> (dx<b><span style='color:#0000ff;'>*</span></b>dx)
+
+        <span style='color:#017a31;'># Second order partial derivative per y.</span>
+        <b>def</b> d2C1_dy2(x, y):
+            <span style='color:#017a31;'># If called for y == 0 or y == Ny-1 return 0.0 (no diffusion through boundaries).</span>
+            <b>if</b>(y <b><span style='color:#0000ff;'>==</span></b> <span style='color:#cc047c;'>0</span> <b>or</b> y <b><span style='color:#0000ff;'>==</span></b> Ny<b><span style='color:#0000ff;'>-</span></b><span style='color:#cc047c;'>1</span>):
+                <b>return</b> csNumber_t(<span style='color:#cc047c;'>0.0</span>)
+
+            ci1 <b><span style='color:#0000ff;'>=</span></b> C1(x, y<b><span style='color:#0000ff;'>+</span></b><span style='color:#cc047c;'>1</span>)
+            ci  <b><span style='color:#0000ff;'>=</span></b> C1(x,   y)
+            ci2 <b><span style='color:#0000ff;'>=</span></b> C1(x, y<b><span style='color:#0000ff;'>-</span></b><span style='color:#cc047c;'>1</span>)
+            <b>return</b> (ci1 <b><span style='color:#0000ff;'>-</span></b> <span style='color:#cc047c;'>2</span><b><span style='color:#0000ff;'>*</span></b>ci <b><span style='color:#0000ff;'>+</span></b> ci2) <b><span style='color:#0000ff;'>/</span></b> (dy<b><span style='color:#0000ff;'>*</span></b>dy)
+
+        <b>def</b> d2C2_dy2(x, y):
+            <span style='color:#017a31;'># If called for y == 0 or y == Ny-1 return 0.0 (no diffusion through boundaries).</span>
+            <b>if</b>(y <b><span style='color:#0000ff;'>==</span></b> <span style='color:#cc047c;'>0</span> <b>or</b> y <b><span style='color:#0000ff;'>==</span></b> Ny<b><span style='color:#0000ff;'>-</span></b><span style='color:#cc047c;'>1</span>):
+                <b>return</b> csNumber_t(<span style='color:#cc047c;'>0.0</span>)
+
+            ci1 <b><span style='color:#0000ff;'>=</span></b> C2(x, y<b><span style='color:#0000ff;'>+</span></b><span style='color:#cc047c;'>1</span>)
+            ci  <b><span style='color:#0000ff;'>=</span></b> C2(x,   y)
+            ci2 <b><span style='color:#0000ff;'>=</span></b> C2(x, y<b><span style='color:#0000ff;'>-</span></b><span style='color:#cc047c;'>1</span>)
+            <b>return</b> (ci1 <b><span style='color:#0000ff;'>-</span></b> <span style='color:#cc047c;'>2</span><b><span style='color:#0000ff;'>*</span></b>ci <b><span style='color:#0000ff;'>+</span></b> ci2) <b><span style='color:#0000ff;'>/</span></b> (dy<b><span style='color:#0000ff;'>*</span></b>dy)
+
+        eq <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>0</span>
+        equations <b><span style='color:#0000ff;'>=</span></b> [<span style='color:#3605fb;'>None</span>] <b><span style='color:#0000ff;'>*</span></b> <span style='color:#3605fb;'>self</span>.Nequations
+        <span style='color:#017a31;'># Component 2 (C1):</span>
+        <b>for</b> x <b>in</b> <span style='color:#2a00d6;'>range</span>(Nx):
+            <b>for</b> y <b>in</b> <span style='color:#2a00d6;'>range</span>(Ny):
+                equations[eq] <b><span style='color:#0000ff;'>=</span></b> V  <b><span style='color:#0000ff;'>*</span></b> dC1_dx(x,y) <b><span style='color:#0000ff;'>+</span></b>  <b><span style='color:#0000ff;'>\</span></b>
+                                Kh <b><span style='color:#0000ff;'>*</span></b> d2C1_dx2(x,y) <b><span style='color:#0000ff;'>+</span></b> <b><span style='color:#0000ff;'>\</span></b>
+                                Kv(y) <b><span style='color:#0000ff;'>*</span></b> (<span style='color:#cc047c;'>0.2</span> <b><span style='color:#0000ff;'>*</span></b> dC1_dy(x,y) <b><span style='color:#0000ff;'>+</span></b> d2C1_dy2(x,y)) <b><span style='color:#0000ff;'>+</span></b> <b><span style='color:#0000ff;'>\</span></b>
+                                R1(C1(x,y), C2(x,y), time)                     
+                eq <b><span style='color:#0000ff;'>+=</span></b> <span style='color:#cc047c;'>1</span>
+        
+        <span style='color:#017a31;'># Component 2 (C2):</span>
+        <b>for</b> x <b>in</b> <span style='color:#2a00d6;'>range</span>(Nx):
+            <b>for</b> y <b>in</b> <span style='color:#2a00d6;'>range</span>(Ny):
+                equations[eq] <b><span style='color:#0000ff;'>=</span></b> V  <b><span style='color:#0000ff;'>*</span></b> dC2_dx(x,y) <b><span style='color:#0000ff;'>+</span></b> <b><span style='color:#0000ff;'>\</span></b>
+                                Kh <b><span style='color:#0000ff;'>*</span></b> d2C2_dx2(x,y) <b><span style='color:#0000ff;'>+</span></b> <b><span style='color:#0000ff;'>\</span></b>
+                                Kv(y) <b><span style='color:#0000ff;'>*</span></b> (<span style='color:#cc047c;'>0.2</span> <b><span style='color:#0000ff;'>*</span></b> dC2_dy(x,y) <b><span style='color:#0000ff;'>+</span></b> d2C2_dy2(x,y)) <b><span style='color:#0000ff;'>+</span></b> <b><span style='color:#0000ff;'>\</span></b>
+                                R2(C1(x,y), C2(x,y), time)
+                eq <b><span style='color:#0000ff;'>+=</span></b> <span style='color:#cc047c;'>1</span>
+        
+        <b>return</b> equations
+    
+    <b>def</b> GetIndex(<span style='color:#3605fb;'>self</span>, x, y):
+        <b>if</b> x <b><span style='color:#0000ff;'>&lt;</span></b> <span style='color:#cc047c;'>0</span> <b>or</b> x <b><span style='color:#0000ff;'>&gt;=</span></b> <span style='color:#3605fb;'>self</span>.Nx:
+            <b>raise</b> <b><span style='color:#4e9a06;'>RuntimeError</span></b>(<span style='color:#cc0000;'>&quot;Invalid x index&quot;</span>)
+        <b>if</b> y <b><span style='color:#0000ff;'>&lt;</span></b> <span style='color:#cc047c;'>0</span> <b>or</b> y <b><span style='color:#0000ff;'>&gt;=</span></b> <span style='color:#3605fb;'>self</span>.Ny:
+            <b>raise</b> <b><span style='color:#4e9a06;'>RuntimeError</span></b>(<span style='color:#cc0000;'>&quot;Invalid y index&quot;</span>)
+        <b>return</b> <span style='color:#3605fb;'>self</span>.Ny<b><span style='color:#0000ff;'>*</span></b>x <b><span style='color:#0000ff;'>+</span></b> y
+    
+<b>def</b> run(<b><span style='color:#0000ff;'>**</span></b>kwargs):
+    inputFilesDirectory <b><span style='color:#0000ff;'>=</span></b> kwargs.get(<span style='color:#cc0000;'>'inputFilesDirectory'</span>, os.path.splitext(os.path.basename(<span style='color:#3605fb;'>__file__</span>))[<span style='color:#cc047c;'>0</span>])
+    Nx <b><span style='color:#0000ff;'>=</span></b> kwargs.get(<span style='color:#cc0000;'>'Nx'</span>, <span style='color:#cc047c;'>80</span>)
+    Ny <b><span style='color:#0000ff;'>=</span></b> kwargs.get(<span style='color:#cc0000;'>'Ny'</span>, <span style='color:#cc047c;'>80</span>)
+    
+    <span style='color:#017a31;'># Instantiate the model being simulated.</span>
+    model <b><span style='color:#0000ff;'>=</span></b> DiurnalKinetics_2D(Nx, Ny)
+    
+    <span style='color:#017a31;'># 1. Initialise the ODE system with the number of variables and other inputs.</span>
+    mb <b><span style='color:#0000ff;'>=</span></b> csModelBuilder_t()
+    mb.Initialize_ODE_System(model.Nequations, <span style='color:#cc047c;'>0</span>, defaultAbsoluteTolerance <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>1e-5</span>)
+    
+    <span style='color:#017a31;'># Create and set model equations using the provided time/variable/dof objects.</span>
+    <span style='color:#017a31;'># The ODE system is defined as:</span>
+    <span style='color:#017a31;'>#     x' = f(x,y,t)</span>
+    <span style='color:#017a31;'># where x' are derivatives of state variables, x are state variables,</span>
+    <span style='color:#017a31;'># y are fixed variables (degrees of freedom) and t is the current simulation time.</span>
+    mb.ModelEquations <b><span style='color:#0000ff;'>=</span></b> model.CreateEquations(mb.Variables, mb.Time)    
+    <span style='color:#017a31;'># Set initial conditions</span>
+    mb.VariableValues <b><span style='color:#0000ff;'>=</span></b> model.GetInitialConditions()
+    <span style='color:#017a31;'># Set variable names.</span>
+    mb.VariableNames  <b><span style='color:#0000ff;'>=</span></b> model.GetVariableNames()
+    
+    <span style='color:#017a31;'># 3. Generate a model for single CPU simulations.    </span>
+    <span style='color:#017a31;'># Set simulation options (specified as a string in JSON format).</span>
+    options <b><span style='color:#0000ff;'>=</span></b> json.loads(mb.SimulationOptions)
+    options[<span style='color:#cc0000;'>'Simulation'</span>][<span style='color:#cc0000;'>'OutputDirectory'</span>]             <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc0000;'>'results'</span>
+    options[<span style='color:#cc0000;'>'Simulation'</span>][<span style='color:#cc0000;'>'TimeHorizon'</span>]                 <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>86400.0</span>
+    options[<span style='color:#cc0000;'>'Simulation'</span>][<span style='color:#cc0000;'>'ReportingInterval'</span>]           <b><span style='color:#0000ff;'>=</span></b>   <span style='color:#cc047c;'>100.0</span>
+    options[<span style='color:#cc0000;'>'Solver'</span>][<span style='color:#cc0000;'>'Parameters'</span>][<span style='color:#cc0000;'>'RelativeTolerance'</span>] <b><span style='color:#0000ff;'>=</span></b>    <span style='color:#cc047c;'>1e-5</span>
+    
+    <span style='color:#017a31;'># ILU options for Ncpu = 1: k = 1, rho = 1.0, alpha = 1e-5, w = 0.0</span>
+    options[<span style='color:#cc0000;'>'LinearSolver'</span>][<span style='color:#cc0000;'>'Preconditioner'</span>][<span style='color:#cc0000;'>'Parameters'</span>][<span style='color:#cc0000;'>'fact: level-of-fill'</span>]      <b><span style='color:#0000ff;'>=</span></b>    <span style='color:#cc047c;'>1</span>
+    options[<span style='color:#cc0000;'>'LinearSolver'</span>][<span style='color:#cc0000;'>'Preconditioner'</span>][<span style='color:#cc0000;'>'Parameters'</span>][<span style='color:#cc0000;'>'fact: relax value'</span>]        <b><span style='color:#0000ff;'>=</span></b>  <span style='color:#cc047c;'>0.0</span>
+    options[<span style='color:#cc0000;'>'LinearSolver'</span>][<span style='color:#cc0000;'>'Preconditioner'</span>][<span style='color:#cc0000;'>'Parameters'</span>][<span style='color:#cc0000;'>'fact: absolute threshold'</span>] <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>1e-5</span>
+    options[<span style='color:#cc0000;'>'LinearSolver'</span>][<span style='color:#cc0000;'>'Preconditioner'</span>][<span style='color:#cc0000;'>'Parameters'</span>][<span style='color:#cc0000;'>'fact: relative threshold'</span>] <b><span style='color:#0000ff;'>=</span></b>  <span style='color:#cc047c;'>1.0</span>
+    mb.SimulationOptions <b><span style='color:#0000ff;'>=</span></b> json.dumps(options, indent<b><span style='color:#0000ff;'>=</span></b><span style='color:#cc047c;'>4</span>)
+    
+    <span style='color:#017a31;'># Partition the system to create the OpenCS model for a single CPU simulation.</span>
+    <span style='color:#017a31;'># In this case (Npe = 1) the graph partitioner is not required.</span>
+    Npe <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>1</span>
+    graphPartitioner <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>None</span>
+    cs_models <b><span style='color:#0000ff;'>=</span></b> mb.PartitionSystem(Npe, graphPartitioner)
+    csModelBuilder_t.ExportModels(cs_models, inputFilesDirectory, mb.SimulationOptions)
+    <span style='color:#2a00d6;'>print</span>(<span style='color:#cc0000;'>&quot;Single CPU OpenCS model generated successfully!&quot;</span>)
+
+    <span style='color:#017a31;'># 4. Generate models for parallel simulations on message-passing multi-processors.    </span>
+    <span style='color:#017a31;'># ILU options for Ncpu = 8: k = 1, rho = 1.0, alpha = 1e-1, w = 0.0</span>
+    options[<span style='color:#cc0000;'>'LinearSolver'</span>][<span style='color:#cc0000;'>'Preconditioner'</span>][<span style='color:#cc0000;'>'Parameters'</span>][<span style='color:#cc0000;'>'fact: level-of-fill'</span>]      <b><span style='color:#0000ff;'>=</span></b>    <span style='color:#cc047c;'>1</span>
+    options[<span style='color:#cc0000;'>'LinearSolver'</span>][<span style='color:#cc0000;'>'Preconditioner'</span>][<span style='color:#cc0000;'>'Parameters'</span>][<span style='color:#cc0000;'>'fact: relax value'</span>]        <b><span style='color:#0000ff;'>=</span></b>  <span style='color:#cc047c;'>0.0</span>
+    options[<span style='color:#cc0000;'>'LinearSolver'</span>][<span style='color:#cc0000;'>'Preconditioner'</span>][<span style='color:#cc0000;'>'Parameters'</span>][<span style='color:#cc0000;'>'fact: absolute threshold'</span>] <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>1e-1</span>
+    options[<span style='color:#cc0000;'>'LinearSolver'</span>][<span style='color:#cc0000;'>'Preconditioner'</span>][<span style='color:#cc0000;'>'Parameters'</span>][<span style='color:#cc0000;'>'fact: relative threshold'</span>] <b><span style='color:#0000ff;'>=</span></b>  <span style='color:#cc047c;'>1.0</span>
+    mb.SimulationOptions <b><span style='color:#0000ff;'>=</span></b> json.dumps(options, indent<b><span style='color:#0000ff;'>=</span></b><span style='color:#cc047c;'>4</span>)
+    
+    <span style='color:#017a31;'># For distributed memory systems a graph partitioner must be specified.</span>
+    <span style='color:#017a31;'># Available partitioners:</span>
+    <span style='color:#017a31;'>#   1. csGraphPartitioner_Simple (splits the given set of equations into Npe parts with no analysis)</span>
+    <span style='color:#017a31;'>#   2. csGraphPartitioner_2D_Npde (distributes Npde equations on an uniform 2D grid split into Npe quadrants)</span>
+    <span style='color:#017a31;'>#   3. csGraphPartitioner_Metis (partitions the set of equations using the METIS graph partitioner)</span>
+    <span style='color:#017a31;'>#      Two algorithms are avaiable:</span>
+    <span style='color:#017a31;'>#       - PartGraphKway:      'Multilevel k-way partitioning' algorithm</span>
+    <span style='color:#017a31;'>#       - PartGraphRecursive: 'Multilevel recursive bisectioning' algorithm</span>
+    <span style='color:#017a31;'>#   4. User-defined graph partitioners</span>
+    <span style='color:#017a31;'># The Metis partitioner can additionally balance the specified quantities in all partitions </span>
+    <span style='color:#017a31;'># using the following balancing constraints:</span>
+    <span style='color:#017a31;'>#  - Ncs:      balance number of compute stack items in equations</span>
+    <span style='color:#017a31;'>#  - Nnz:      balance number of non-zero items in the incidence matrix</span>
+    <span style='color:#017a31;'>#  - Nflops:   balance number of FLOPS required to evaluate equations</span>
+    <span style='color:#017a31;'>#  - Nflops_j: balance number of FLOPS required to evaluate derivatives (Jacobian) matrix</span>
+    <span style='color:#017a31;'># PartitionSystem arguments:</span>
+    <span style='color:#017a31;'>#  - Npe: unsigned int specifying the number of processing elements (CPUs)</span>
+    <span style='color:#017a31;'>#  - graphPartitioner: csGraphPartitioner_t instance</span>
+    <span style='color:#017a31;'>#  - balancingConstraints: a list of balancing constraints as strings </span>
+    <span style='color:#017a31;'>#  - logPartitionResults: bool (default False); if true a log file is created</span>
+    <span style='color:#017a31;'>#  - unaryOperationsFlops: dictionary [csUnaryFunctions : unsigned int])</span>
+    <span style='color:#017a31;'>#  - binaryOperationsFlops: dictionary [csBinaryFunctions : unsigned int]</span>
+    Npe <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>8</span>
+    graphPartitioner <b><span style='color:#0000ff;'>=</span></b> csGraphPartitioner_2D_Npde(Nx <b><span style='color:#0000ff;'>=</span></b> model.Nx, 
+                                                  Ny <b><span style='color:#0000ff;'>=</span></b> model.Ny, 
+                                                  Npde <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>2</span>, 
+                                                  Npex_Npey_ratio <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>0.5</span>)
+    inputFilesDirectory_mpi <b><span style='color:#0000ff;'>=</span></b> inputFilesDirectory <b><span style='color:#0000ff;'>+</span></b> <span style='color:#cc0000;'>'-Npe=</span><span style='color:#cc0000;'>%d</span><span style='color:#cc0000;'>-2D_Npde'</span> <b><span style='color:#0000ff;'>%</span></b> Npe
+    cs_models_mpi <b><span style='color:#0000ff;'>=</span></b> mb.PartitionSystem(Npe, graphPartitioner, logPartitionResults <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>True</span>)
+    csModelBuilder_t.ExportModels(cs_models_mpi, inputFilesDirectory_mpi, mb.SimulationOptions)
+    <span style='color:#2a00d6;'>print</span>(<span style='color:#cc0000;'>&quot;Npe = </span><span style='color:#cc0000;'>%d</span><span style='color:#cc0000;'> CPUs OpenCS model generated successfully!&quot;</span> <b><span style='color:#0000ff;'>%</span></b> Npe)
+
+    <span style='color:#017a31;'># 5. Run simulation using the exported model from the specified directory.</span>
+    csSimulate(inputFilesDirectory)
+    
+    <span style='color:#017a31;'># Compare OpenCS and the original model results.</span>
+    compareResults(inputFilesDirectory, [<span style='color:#cc0000;'>'C1(0,0)'</span>])
+    
+<b>if</b> <span style='color:#3605fb;'>__name__</span> <b><span style='color:#0000ff;'>==</span></b> <span style='color:#cc0000;'>&quot;__main__&quot;</span>:
+    Nx <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>80</span>
+    Ny <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>80</span>
+    inputFilesDirectory <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc0000;'>'tutorial_opencs_ode_3'</span>
+    run(Nx <b><span style='color:#0000ff;'>=</span></b> Nx, Ny <b><span style='color:#0000ff;'>=</span></b> Ny, inputFilesDirectory <b><span style='color:#0000ff;'>=</span></b> inputFilesDirectory)
+</pre>
+</body>
+</html>

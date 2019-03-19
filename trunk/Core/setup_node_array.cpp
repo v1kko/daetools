@@ -54,7 +54,7 @@ adouble_array adSetupDomainNodeArray::Evaluate(const daeExecutionContext* pExecu
     return tmp;
 }
 
-const quantity adSetupDomainNodeArray::GetQuantity(void) const
+quantity adSetupDomainNodeArray::GetQuantity(void) const
 {
     if(!m_pDomain)
         daeDeclareAndThrowException(exInvalidCall);
@@ -181,7 +181,7 @@ adouble_array adSetupParameterNodeArray::Evaluate(const daeExecutionContext* pEx
     return tmp;
 }
 
-const quantity adSetupParameterNodeArray::GetQuantity(void) const
+quantity adSetupParameterNodeArray::GetQuantity(void) const
 {
     if(!m_pParameter)
         daeDeclareAndThrowException(exInvalidCall);
@@ -314,7 +314,7 @@ adouble_array adCustomNodeArray::Evaluate(const daeExecutionContext* pExecutionC
     return tmp;
 }
 
-const quantity adCustomNodeArray::GetQuantity(void) const
+quantity adCustomNodeArray::GetQuantity(void) const
 {
     if(m_ptrarrNodes.empty())
         daeDeclareAndThrowException(exInvalidCall);
@@ -471,7 +471,7 @@ adouble_array adRuntimeCustomNodeArray::Evaluate(const daeExecutionContext* pExe
     return tmp;
 }
 
-const quantity adRuntimeCustomNodeArray::GetQuantity(void) const
+quantity adRuntimeCustomNodeArray::GetQuantity(void) const
 {
     if(m_ptrarrNodes.empty())
         daeDeclareAndThrowException(exInvalidCall);
@@ -686,7 +686,7 @@ adouble_array adSetupVariableNodeArray::Evaluate(const daeExecutionContext* pExe
     return tmp;
 }
 
-const quantity adSetupVariableNodeArray::GetQuantity(void) const
+quantity adSetupVariableNodeArray::GetQuantity(void) const
 {
     if(!m_pVariable)
         daeDeclareAndThrowException(exInvalidCall);
@@ -817,7 +817,7 @@ adouble_array adSetupTimeDerivativeNodeArray::Evaluate(const daeExecutionContext
     return tmp;
 }
 
-const quantity adSetupTimeDerivativeNodeArray::GetQuantity(void) const
+quantity adSetupTimeDerivativeNodeArray::GetQuantity(void) const
 {
     if(!m_pVariable)
         daeDeclareAndThrowException(exInvalidCall);
@@ -979,7 +979,7 @@ adouble_array adSetupPartialDerivativeNodeArray::Evaluate(const daeExecutionCont
     return tmp;
 }
 
-const quantity adSetupPartialDerivativeNodeArray::GetQuantity(void) const
+quantity adSetupPartialDerivativeNodeArray::GetQuantity(void) const
 {
     if(!m_pVariable)
         daeDeclareAndThrowException(exInvalidCall);
@@ -1159,7 +1159,7 @@ adouble_array adSetupExpressionPartialDerivativeNodeArray::Evaluate(const daeExe
     return tmp;
 }
 
-const quantity adSetupExpressionPartialDerivativeNodeArray::GetQuantity(void) const
+quantity adSetupExpressionPartialDerivativeNodeArray::GetQuantity(void) const
 {
     if(!m_pDomain)
         daeDeclareAndThrowException(exInvalidPointer);
@@ -1433,7 +1433,7 @@ adouble_array adVectorExternalFunctionNode::Evaluate(const daeExecutionContext* 
     return tmp;
 }
 
-const quantity adVectorExternalFunctionNode::GetQuantity(void) const
+quantity adVectorExternalFunctionNode::GetQuantity(void) const
 {
     if(!m_pExternalFunction)
         daeDeclareAndThrowException(exInvalidPointer);

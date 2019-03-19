@@ -15,6 +15,66 @@ DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 
 #include "adouble.h"
 #include "thermo_package.h"
+#include <typeindex>
+#include <mutex>
+
+// The most often used node types (in particular in FE models) are:
+// Constants, Unary and Binary operators/functions and FloatCoefficientVariableSum.
+// These types use a boost memory pool for allocation of setup and runtime nodes.
+#include <boost/pool/poolfwd.hpp>
+#include <boost/pool/singleton_pool.hpp>
+#include <boost/pool/pool_alloc.hpp>
+// In large-scale simulations the number of nodes is in millions, therefore
+// the size of blocks should also be large to avoid frequent memory allocations
+// and memory fragmentation. However, the effect of NEXT_SIZE template argument
+// has not been analysed in details.
+#define POOL_NEXT_SIZE 1024
+#define daePoolAllocator(Class) \
+    public: \
+        uint8_t memoryPool; \
+        struct default_pool_tag{}; \
+        struct setup_pool_tag{}; \
+        struct runtime_pool_tag{}; \
+        static void* operator new(std::size_t sz) \
+        { \
+            void* ptr; \
+            daeeMemoryPool memPool = adNodeImpl::GetMemoryPool(); \
+            if(memPool == eSetupNodesPool) \
+                ptr = boost::singleton_pool<setup_pool_tag, sizeof(Class), boost::default_user_allocator_new_delete, std::mutex, POOL_NEXT_SIZE>::malloc(); \
+            else if(memPool == eRuntimeNodesPool) \
+                ptr = boost::singleton_pool<runtime_pool_tag, sizeof(Class), boost::default_user_allocator_new_delete, std::mutex, POOL_NEXT_SIZE>::malloc(); \
+            else \
+                ptr = ::operator new(sz); \
+            Class* c = static_cast<Class*>(ptr); \
+            c->memoryPool = static_cast<uint8_t>(memPool); \
+            return ptr; \
+        } \
+        static void operator delete(void* ptr) \
+        { \
+            Class* c = static_cast<Class*>(ptr); \
+            if(c->memoryPool == eSetupNodesPool) \
+                boost::singleton_pool<setup_pool_tag, sizeof(Class), boost::default_user_allocator_new_delete, std::mutex, POOL_NEXT_SIZE>::free(ptr); \
+            else if(c->memoryPool == eRuntimeNodesPool) \
+                boost::singleton_pool<runtime_pool_tag, sizeof(Class), boost::default_user_allocator_new_delete, std::mutex, POOL_NEXT_SIZE>::free(ptr); \
+            else \
+                ::operator delete(ptr); \
+        } \
+        static bool release_setup_memory() \
+        { \
+            return boost::singleton_pool<setup_pool_tag, sizeof(Class), boost::default_user_allocator_new_delete, std::mutex, POOL_NEXT_SIZE>::release_memory(); \
+        } \
+        static bool purge_setup_memory() \
+        { \
+            return boost::singleton_pool<setup_pool_tag, sizeof(Class), boost::default_user_allocator_new_delete, std::mutex, POOL_NEXT_SIZE>::purge_memory(); \
+        } \
+        static bool release_runtime_memory() \
+        { \
+            return boost::singleton_pool<runtime_pool_tag, sizeof(Class), boost::default_user_allocator_new_delete, std::mutex, POOL_NEXT_SIZE>::release_memory(); \
+        } \
+        static bool purge_runtime_memory() \
+        { \
+            return boost::singleton_pool<runtime_pool_tag, sizeof(Class), boost::default_user_allocator_new_delete, std::mutex, POOL_NEXT_SIZE>::purge_memory(); \
+        }
 
 namespace dae
 {
@@ -28,50 +88,73 @@ bool condDoEnclose(const condNode* node);
 /*********************************************************************************************
     adNodeImpl
 **********************************************************************************************/
+enum daeeMemoryPool
+{
+    eHeapMemory = 0,
+    eSetupNodesPool,
+    eRuntimeNodesPool
+};
+
 class DAE_CORE_API adNodeImpl : public adNode
 {
 public:
+    adNodeImpl();
+    virtual ~adNodeImpl();
+
     void Export(std::string& strContent, daeeModelLanguage eLanguage, daeModelExportContext& c) const;
     void ExportAsLatex(string strFileName);
     bool IsLinear(void) const;
     bool IsFunctionOfVariables(void) const;
     bool IsDifferential(void) const;
     size_t SizeOf(void) const;
+    size_t GetHash() const;
+
+    // These two functions are used to keep track of the existing nodes (type and count)
+    // and used ONLY for debugging purposes.
+    template<typename T>
+    static void AddToNodeMap(T* self)
+    {
+        /*if(adNodeImpl::g_memoryPool != cSetupNodesPool)
+            return;
+        size_t type_id = typeid(*self).hash_code();
+        size_t addr = reinterpret_cast<size_t>(self);
+        std::lock_guard<std::mutex> lock(g_mutex);
+        std::map<size_t,adNode*>& node_map = adNodeImpl::g_allNodes[type_id];
+        node_map[addr] = self;*/
+    }
+    template<typename T>
+    static void RemoveFromNodeMap(T* self)
+    {
+        /*size_t type_id = typeid(*self).hash_code();
+        size_t addr = reinterpret_cast<size_t>(self);
+        std::lock_guard<std::mutex> lock(g_mutex);
+        std::map<size_t,adNode*>& node_map = adNodeImpl::g_allNodes[type_id];
+        node_map.erase(addr);*/
+    }
+
+    static void PurgeSetupNodesMemory();
+    static void PurgeRuntimeNodesMemory();
+    static void ReleaseSetupNodesMemory();
+    static void ReleaseRuntimeNodesMemory();
+
+    static void SetMemoryPool(daeeMemoryPool memPool);
+    static daeeMemoryPool GetMemoryPool();
+
+    static double HASH_FLOAT_CONSTANT_PRECISION;
+    //static std::mutex                                  g_mutex;
+    //static std::map<size_t, std::map<size_t,adNode*> > g_allNodes;
+private:
+    thread_local static daeeMemoryPool g_memoryPool;
 };
+
+// boost::hash support
+template<typename T>
+size_t hash_value(T const& obj)
+{
+    return obj.GetHash();
+}
 
 daeeEquationType DetectEquationType(adNodePtr node);
-
-/*********************************************************************************************
-    adConstantNode
-**********************************************************************************************/
-class DAE_CORE_API adConstantNode : public adNodeImpl
-{
-public:
-    daeDeclareDynamicClass(adConstantNode)
-    adConstantNode(void);
-    adConstantNode(real_t d);
-    adConstantNode(real_t d, const unit& units);
-    adConstantNode(const quantity& q);
-    virtual ~adConstantNode(void);
-
-public:
-    virtual adouble Evaluate(const daeExecutionContext* pExecutionContext) const;
-    virtual adNode* Clone(void) const;
-    virtual void	Open(io::xmlTag_t* pTag);
-    virtual void	Save(io::xmlTag_t* pTag) const;
-    virtual string  SaveAsLatex(const daeNodeSaveAsContext* c) const;
-    virtual void	Export(std::string& strContent, daeeModelLanguage eLanguage, daeModelExportContext& c) const;
-    virtual void	SaveAsContentMathML(io::xmlTag_t* pTag, const daeNodeSaveAsContext* c) const;
-    virtual void	SaveAsPresentationMathML(io::xmlTag_t* pTag, const daeNodeSaveAsContext* c) const;
-    virtual void	AddVariableIndexToArray(map<size_t, size_t>& mapIndexes, bool bAddFixed);
-    virtual bool	IsLinear(void) const;
-    virtual bool	IsFunctionOfVariables(void) const;
-    virtual const quantity GetQuantity(void) const;
-    virtual size_t  SizeOf(void) const;
-
-public:
-    quantity m_quantity;
-};
 
 /*********************************************************************************************
     adTimeNode
@@ -95,7 +178,7 @@ public:
     virtual void	AddVariableIndexToArray(map<size_t, size_t>& mapIndexes, bool bAddFixed);
     virtual bool	IsLinear(void) const;
     virtual bool	IsFunctionOfVariables(void) const;
-    virtual const quantity GetQuantity(void) const;
+    virtual quantity GetQuantity(void) const;
     virtual size_t  SizeOf(void) const;
 };
 
@@ -121,7 +204,7 @@ public:
     virtual void	AddVariableIndexToArray(map<size_t, size_t>& mapIndexes, bool bAddFixed);
     virtual bool	IsLinear(void) const;
     virtual bool	IsFunctionOfVariables(void) const;
-    virtual const quantity GetQuantity(void) const;
+    virtual quantity GetQuantity(void) const;
     virtual size_t  SizeOf(void) const;
 
 public:
@@ -153,7 +236,7 @@ public:
     virtual void	AddVariableIndexToArray(map<size_t, size_t>& mapIndexes, bool bAddFixed);
     virtual bool	IsLinear(void) const;
     virtual bool	IsFunctionOfVariables(void) const;
-    virtual const quantity GetQuantity(void) const;
+    virtual quantity GetQuantity(void) const;
     virtual size_t  SizeOf(void) const;
 
 public:
@@ -187,7 +270,7 @@ public:
     virtual void	AddVariableIndexToArray(map<size_t, size_t>& mapIndexes, bool bAddFixed);
     virtual bool	IsLinear(void) const;
     virtual bool	IsFunctionOfVariables(void) const;
-    virtual const quantity GetQuantity(void) const;
+    virtual quantity GetQuantity(void) const;
     virtual size_t  SizeOf(void) const;
 
 public:
@@ -222,7 +305,7 @@ public:
     virtual void	AddVariableIndexToArray(map<size_t, size_t>& mapIndexes, bool bAddFixed);
     virtual bool	IsLinear(void) const;
     virtual bool	IsFunctionOfVariables(void) const;
-    virtual const quantity GetQuantity(void) const;
+    virtual quantity GetQuantity(void) const;
     virtual size_t  SizeOf(void) const;
 
 public:
@@ -245,7 +328,6 @@ public:
     adRuntimeTimeDerivativeNode(void);
     adRuntimeTimeDerivativeNode(daeVariable* pVariable,
                                 size_t nOverallIndex,
-                                size_t nOrder,
                                 std::vector<size_t>& narrDomains);
     virtual ~adRuntimeTimeDerivativeNode(void);
 
@@ -259,16 +341,14 @@ public:
     virtual void	SaveAsContentMathML(io::xmlTag_t* pTag, const daeNodeSaveAsContext* c) const;
     virtual void	SaveAsPresentationMathML(io::xmlTag_t* pTag, const daeNodeSaveAsContext* c) const;
     virtual void	AddVariableIndexToArray(map<size_t, size_t>& mapIndexes, bool bAddFixed);
-    virtual const quantity GetQuantity(void) const;
+    virtual quantity GetQuantity(void) const;
     virtual bool    IsDifferential(void) const;
     virtual size_t  SizeOf(void) const;
 
 public:
 // Runtime part
-    real_t*			m_pdTimeDerivative;
     size_t			m_nOverallIndex;
     size_t		    m_nBlockIndex;
-    size_t			m_nOrder;
 // Report/GUI part
     daeVariable*        m_pVariable;
     std::vector<size_t>	m_narrDomains;
@@ -297,7 +377,7 @@ public:
     virtual void	AddVariableIndexToArray(map<size_t, size_t>& mapIndexes, bool bAddFixed);
     virtual bool	IsLinear(void) const;
     virtual bool	IsFunctionOfVariables(void) const;
-    virtual const quantity GetQuantity(void) const;
+    virtual quantity GetQuantity(void) const;
     virtual size_t  SizeOf(void) const;
 };
 
@@ -329,7 +409,7 @@ public:
     virtual void	AddVariableIndexToArray(map<size_t, size_t>& mapIndexes, bool bAddFixed);
     virtual bool	IsLinear(void) const;
     virtual bool	IsFunctionOfVariables(void) const;
-    virtual const quantity GetQuantity(void) const;
+    virtual quantity GetQuantity(void) const;
 
 public:
 // Runtime part
@@ -342,85 +422,6 @@ public:
     std::vector<size_t>		m_narrDomains;
 };
 */
-/*********************************************************************************************
-    adUnaryNode
-**********************************************************************************************/
-class DAE_CORE_API adUnaryNode : public adNodeImpl
-{
-public:
-    daeDeclareDynamicClass(adUnaryNode)
-    adUnaryNode(void);
-    adUnaryNode(daeeUnaryFunctions eFun, adNodePtr n);
-    virtual ~adUnaryNode(void);
-
-public:
-    virtual adouble Evaluate(const daeExecutionContext* pExecutionContext) const;
-    virtual adNode* Clone(void) const;
-    virtual void	Open(io::xmlTag_t* pTag);
-    virtual void	Save(io::xmlTag_t* pTag) const;
-    virtual string  SaveAsLatex(const daeNodeSaveAsContext* c) const;
-    virtual void	SaveAsContentMathML(io::xmlTag_t* pTag, const daeNodeSaveAsContext* c) const;
-    virtual void	SaveAsPresentationMathML(io::xmlTag_t* pTag, const daeNodeSaveAsContext* c) const;
-    virtual void	AddVariableIndexToArray(map<size_t, size_t>& mapIndexes, bool bAddFixed);
-    virtual bool	IsLinear(void) const;
-    virtual bool	IsFunctionOfVariables(void) const;
-    virtual void	Export(std::string& strContent, daeeModelLanguage eLanguage, daeModelExportContext& c) const;
-    virtual const quantity GetQuantity(void) const;
-    virtual bool    IsDifferential(void) const;
-    virtual size_t  SizeOf(void) const;
-
-    adNode* getNodeRawPtr() const
-    {
-        return node.get();
-    }
-
-public:
-    adNodePtr           node;
-    daeeUnaryFunctions	eFunction;
-};
-
-/*********************************************************************************************
-    adBinaryNode
-**********************************************************************************************/
-class DAE_CORE_API adBinaryNode : public adNodeImpl
-{
-public:
-    daeDeclareDynamicClass(adBinaryNode)
-    adBinaryNode(void);
-    adBinaryNode(daeeBinaryFunctions eFun, adNodePtr l, adNodePtr r);
-    virtual ~adBinaryNode(void);
-
-public:
-    virtual adouble Evaluate(const daeExecutionContext* pExecutionContext) const;
-    virtual adNode* Clone(void) const;
-    virtual void	Open(io::xmlTag_t* pTag);
-    virtual void	Save(io::xmlTag_t* pTag) const;
-    virtual string  SaveAsLatex(const daeNodeSaveAsContext* c) const;
-    virtual void	SaveAsContentMathML(io::xmlTag_t* pTag, const daeNodeSaveAsContext* c) const;
-    virtual void	SaveAsPresentationMathML(io::xmlTag_t* pTag, const daeNodeSaveAsContext* c) const;
-    virtual void	AddVariableIndexToArray(map<size_t, size_t>& mapIndexes, bool bAddFixed);
-    virtual bool	IsLinear(void) const;
-    virtual bool	IsFunctionOfVariables(void) const;
-    virtual void	Export(std::string& strContent, daeeModelLanguage eLanguage, daeModelExportContext& c) const;
-    virtual const quantity GetQuantity(void) const;
-    virtual bool    IsDifferential(void) const;
-    virtual size_t  SizeOf(void) const;
-
-    adNode* getLeftRawPtr() const
-    {
-        return left.get();
-    }
-
-    adNode* getRightRawPtr() const
-    {
-        return right.get();
-    }
-
-public:
-    adNodePtr           left;
-    adNodePtr           right;
-    daeeBinaryFunctions	eFunction;
-};
 
 /*********************************************************************************************
     condExpressionNode
@@ -577,7 +578,9 @@ public:
     virtual bool	IsLinear(void) const;
     virtual bool	IsFunctionOfVariables(void) const;
     virtual void	Export(std::string& strContent, daeeModelLanguage eLanguage, daeModelExportContext& c) const;
-    virtual const quantity GetQuantity(void) const;
+    virtual quantity GetQuantity(void) const;
+    virtual size_t  SizeOf(void) const;
+    virtual size_t  GetHash() const;
 
 public:
     daeParameter*			    m_pParameter;
@@ -607,7 +610,7 @@ public:
     virtual bool	IsLinear(void) const;
     virtual bool	IsFunctionOfVariables(void) const;
     virtual void	Export(std::string& strContent, daeeModelLanguage eLanguage, daeModelExportContext& c) const;
-    virtual const quantity GetQuantity(void) const;
+    virtual quantity GetQuantity(void) const;
 
 public:
     daeDistributedEquationDomainInfo* m_pDEDI;
@@ -637,7 +640,8 @@ public:
     virtual bool	IsFunctionOfVariables(void) const;
     virtual bool    IsDifferential(void) const;
     virtual void	Export(std::string& strContent, daeeModelLanguage eLanguage, daeModelExportContext& c) const;
-    virtual const quantity GetQuantity(void) const;
+    virtual quantity GetQuantity(void) const;
+    virtual size_t  SizeOf(void) const;
 
 public:
     daeDomainIndex	m_domainIndex;
@@ -668,7 +672,9 @@ public:
     virtual bool	IsLinear(void) const;
     virtual bool	IsFunctionOfVariables(void) const;
     virtual void	Export(std::string& strContent, daeeModelLanguage eLanguage, daeModelExportContext& c) const;
-    virtual const quantity GetQuantity(void) const;
+    virtual quantity GetQuantity(void) const;
+    virtual size_t  SizeOf(void) const;
+    virtual size_t  GetHash() const;
 
 public:
     daeVariable*			    m_pVariable;
@@ -684,7 +690,6 @@ public:
     daeDeclareDynamicClass(adSetupTimeDerivativeNode)
     adSetupTimeDerivativeNode(void);
     adSetupTimeDerivativeNode(daeVariable* pVariable,
-                              size_t nDegree,
                               std::vector<daeDomainIndex>& arrDomains);
     virtual ~adSetupTimeDerivativeNode(void);
 
@@ -698,12 +703,13 @@ public:
     virtual void	SaveAsPresentationMathML(io::xmlTag_t* pTag, const daeNodeSaveAsContext* c) const;
     virtual void	AddVariableIndexToArray(map<size_t, size_t>& mapIndexes, bool bAddFixed);
     virtual void	Export(std::string& strContent, daeeModelLanguage eLanguage, daeModelExportContext& c) const;
-    virtual const quantity GetQuantity(void) const;
+    virtual quantity GetQuantity(void) const;
     virtual bool    IsDifferential(void) const;
+    virtual size_t  SizeOf(void) const;
+    virtual size_t  GetHash() const;
 
 public:
     daeVariable*			    m_pVariable;
-    size_t					    m_nOrder;
     std::vector<daeDomainIndex>	m_arrDomains;
 };
 
@@ -733,7 +739,8 @@ public:
     virtual void	SaveAsPresentationMathML(io::xmlTag_t* pTag, const daeNodeSaveAsContext* c) const;
     virtual void	AddVariableIndexToArray(map<size_t, size_t>& mapIndexes, bool bAddFixed);
     virtual void	Export(std::string& strContent, daeeModelLanguage eLanguage, daeModelExportContext& c) const;
-    virtual const quantity GetQuantity(void) const;
+    virtual quantity GetQuantity(void) const;
+    virtual size_t  SizeOf(void) const;
 
 public:
     daeVariable*                        m_pVariable;
@@ -765,8 +772,9 @@ public:
     virtual void	SaveAsPresentationMathML(io::xmlTag_t* pTag, const daeNodeSaveAsContext* c) const;
     virtual void	AddVariableIndexToArray(map<size_t, size_t>& mapIndexes, bool bAddFixed);
     virtual void	Export(std::string& strContent, daeeModelLanguage eLanguage, daeModelExportContext& c) const;
-    virtual const quantity GetQuantity(void) const;
+    virtual quantity GetQuantity(void) const;
     virtual bool    IsDifferential(void) const;
+    virtual size_t  SizeOf(void) const;
 
 protected:
     adNodePtr calc_dt(adNodePtr n, const daeExecutionContext* pExecutionContext) const;
@@ -801,7 +809,8 @@ public:
     virtual void	SaveAsPresentationMathML(io::xmlTag_t* pTag, const daeNodeSaveAsContext* c) const;
     virtual void	AddVariableIndexToArray(map<size_t, size_t>& mapIndexes, bool bAddFixed);
     virtual void	Export(std::string& strContent, daeeModelLanguage eLanguage, daeModelExportContext& c) const;
-    virtual const quantity GetQuantity(void) const;
+    virtual quantity GetQuantity(void) const;
+    virtual size_t  SizeOf(void) const;
 
     static adNodePtr calc_d(adNodePtr                                 n,
                             daeDomain*                                pDomain,
@@ -845,7 +854,7 @@ public:
     virtual bool	IsFunctionOfVariables(void) const;
     virtual bool    IsDifferential(void) const;
     virtual void	Export(std::string& strContent, daeeModelLanguage eLanguage, daeModelExportContext& c) const;
-    virtual const quantity GetQuantity(void) const;
+    virtual quantity GetQuantity(void) const;
 
 public:
     daeScalarExternalFunction* m_pExternalFunction;
@@ -880,7 +889,8 @@ public:
     virtual bool	IsFunctionOfVariables(void) const;
     virtual bool    IsDifferential(void) const;
     virtual void	Export(std::string& strContent, daeeModelLanguage eLanguage, daeModelExportContext& c) const;
-    virtual const quantity GetQuantity(void) const;
+    virtual quantity GetQuantity(void) const;
+    virtual size_t  SizeOf(void) const;
 
 public:
     daeeThermoPackagePropertyType       propertyType;
@@ -925,7 +935,7 @@ public:
     virtual bool	IsFunctionOfVariables(void) const;
     virtual bool    IsDifferential(void) const;
     virtual void	Export(std::string& strContent, daeeModelLanguage eLanguage, daeModelExportContext& c) const;
-    virtual const quantity GetQuantity(void) const;
+    virtual quantity GetQuantity(void) const;
 
 public:
     string                          m_strMatrixName;
@@ -960,7 +970,7 @@ public:
     virtual bool	IsFunctionOfVariables(void) const;
     virtual bool    IsDifferential(void) const;
     virtual void	Export(std::string& strContent, daeeModelLanguage eLanguage, daeModelExportContext& c) const;
-    virtual const quantity GetQuantity(void) const;
+    virtual quantity GetQuantity(void) const;
 
 public:
     string                          m_strVectorName;
@@ -969,6 +979,129 @@ public:
     unit                            m_units;
 };
 */
+
+// Very important!!!
+//   The most often used node types (in particular in FE models) use the boost memory pool for memory allocation.
+//   They also contain an additional 1 byte long flag memoryPool to keep track about the pool they belong.
+//   The default data structure alignment should be changed to prevent much larger memory requirements.
+//   In the classes below the largest data members are 8 bytes wide requiring 1 byte wide memoryPool
+//   to be 8-byte aligned. This way, a lot of memory is wasted for bytes for padding.
+//   This can be addressed by specifying alignment to 1 byte boundary using the #pragma directives
+//   available in most of compilers (here, Microsoft VC++ and GNU g++ are of interest).
+//   They are not supported by OpenCL but the node classes are never used within OpenCL context.
+//   OpenCL supports __attribute__ ((aligned (x))) (where x must be a power of two):
+//   typedef struct StructName_
+//   {
+//   } __attribute__ ((aligned (8))) StructName
+#pragma pack(push, 1)
+
+/*********************************************************************************************
+    adConstantNode
+**********************************************************************************************/
+class DAE_CORE_API adConstantNode : public adNodeImpl
+{
+public:
+    daeDeclareDynamicClass(adConstantNode)
+    daePoolAllocator(adConstantNode)
+    adConstantNode(void);
+    adConstantNode(real_t d);
+    adConstantNode(real_t d, const unit& units);
+    adConstantNode(const quantity& q);
+    virtual ~adConstantNode(void);
+
+public:
+    virtual adouble Evaluate(const daeExecutionContext* pExecutionContext) const;
+    virtual adNode* Clone(void) const;
+    virtual void	Open(io::xmlTag_t* pTag);
+    virtual void	Save(io::xmlTag_t* pTag) const;
+    virtual string  SaveAsLatex(const daeNodeSaveAsContext* c) const;
+    virtual void	Export(std::string& strContent, daeeModelLanguage eLanguage, daeModelExportContext& c) const;
+    virtual void	SaveAsContentMathML(io::xmlTag_t* pTag, const daeNodeSaveAsContext* c) const;
+    virtual void	SaveAsPresentationMathML(io::xmlTag_t* pTag, const daeNodeSaveAsContext* c) const;
+    virtual void	AddVariableIndexToArray(map<size_t, size_t>& mapIndexes, bool bAddFixed);
+    virtual bool	IsLinear(void) const;
+    virtual bool	IsFunctionOfVariables(void) const;
+    virtual quantity GetQuantity(void) const;
+    virtual size_t  SizeOf(void) const;
+    virtual size_t  GetHash() const;
+
+public:
+    quantity m_quantity;
+};
+
+/*********************************************************************************************
+    adUnaryNode
+**********************************************************************************************/
+class DAE_CORE_API adUnaryNode : public adNodeImpl
+{
+public:
+    daeDeclareDynamicClass(adUnaryNode)
+    daePoolAllocator(adUnaryNode)
+    adUnaryNode(void);
+    adUnaryNode(daeeUnaryFunctions eFun, adNodePtr n);
+    virtual ~adUnaryNode(void);
+
+public:
+    virtual adouble Evaluate(const daeExecutionContext* pExecutionContext) const;
+    virtual adNode* Clone(void) const;
+    virtual void	Open(io::xmlTag_t* pTag);
+    virtual void	Save(io::xmlTag_t* pTag) const;
+    virtual string  SaveAsLatex(const daeNodeSaveAsContext* c) const;
+    virtual void	SaveAsContentMathML(io::xmlTag_t* pTag, const daeNodeSaveAsContext* c) const;
+    virtual void	SaveAsPresentationMathML(io::xmlTag_t* pTag, const daeNodeSaveAsContext* c) const;
+    virtual void	AddVariableIndexToArray(map<size_t, size_t>& mapIndexes, bool bAddFixed);
+    virtual bool	IsLinear(void) const;
+    virtual bool	IsFunctionOfVariables(void) const;
+    virtual void	Export(std::string& strContent, daeeModelLanguage eLanguage, daeModelExportContext& c) const;
+    virtual quantity GetQuantity(void) const;
+    virtual bool    IsDifferential(void) const;
+    virtual size_t  SizeOf(void) const;
+    virtual size_t  GetHash() const;
+
+    adNode* getNodeRawPtr() const;
+
+public:
+    adNodePtr           node;
+    daeeUnaryFunctions	eFunction;
+};
+
+/*********************************************************************************************
+    adBinaryNode
+**********************************************************************************************/
+class DAE_CORE_API adBinaryNode : public adNodeImpl
+{
+public:
+    daeDeclareDynamicClass(adBinaryNode)
+    daePoolAllocator(adBinaryNode)
+    adBinaryNode(void);
+    adBinaryNode(daeeBinaryFunctions eFun, adNodePtr l, adNodePtr r);
+    virtual ~adBinaryNode(void);
+
+public:
+    virtual adouble Evaluate(const daeExecutionContext* pExecutionContext) const;
+    virtual adNode* Clone(void) const;
+    virtual void	Open(io::xmlTag_t* pTag);
+    virtual void	Save(io::xmlTag_t* pTag) const;
+    virtual string  SaveAsLatex(const daeNodeSaveAsContext* c) const;
+    virtual void	SaveAsContentMathML(io::xmlTag_t* pTag, const daeNodeSaveAsContext* c) const;
+    virtual void	SaveAsPresentationMathML(io::xmlTag_t* pTag, const daeNodeSaveAsContext* c) const;
+    virtual void	AddVariableIndexToArray(map<size_t, size_t>& mapIndexes, bool bAddFixed);
+    virtual bool	IsLinear(void) const;
+    virtual bool	IsFunctionOfVariables(void) const;
+    virtual void	Export(std::string& strContent, daeeModelLanguage eLanguage, daeModelExportContext& c) const;
+    virtual quantity GetQuantity(void) const;
+    virtual bool    IsDifferential(void) const;
+    virtual size_t  SizeOf(void) const;
+    virtual size_t  GetHash() const;
+
+    adNode* getLeftRawPtr() const;
+    adNode* getRightRawPtr() const;
+
+public:
+    adNodePtr           left;
+    adNodePtr           right;
+    daeeBinaryFunctions	eFunction;
+};
 
 /*********************************************************************************************
     daeFloatCoefficientVariableProduct
@@ -990,6 +1123,22 @@ public:
         blockIndex  = ULONG_MAX;
     }
 
+    size_t GetHash() const
+    {
+        size_t seed = 0;
+        // Important:
+        //   When using a hash for equation-templates, it should include only the coefficient and the variable.
+        //   The block index is an equation-template argument.
+        //   Equations assembled using the FE method produce coefficients that, due to FP rounding, differ
+        //   on 12-14th decimal and therefore give different hashes. One way to deal with this is to multiply
+        //   with some constant and use only the integer part, i.e. 0.123456789012345*1e12 -> 123456789012.
+        long int coeff = (long int)(coefficient*adNodeImpl::HASH_FLOAT_CONSTANT_PRECISION);
+        boost::hash_combine(seed, coeff);
+        boost::hash_combine(seed, (std::intptr_t)variable);
+        //boost::hash_combine(seed, blockIndex);
+        return seed;
+    }
+
 public:
     real_t       coefficient;
     daeVariable* variable;
@@ -999,11 +1148,17 @@ public:
 /*********************************************************************************************
     adFloatCoefficientVariableSumNode
 **********************************************************************************************/
+// Using 16 chunks in a single allocator block produces the lowest peak RAM requirements and
+// lower requirements in individual phases of the simulation initialisation.
+#define POOL_ALLOCATOR_NEXT_SIZE 16
+
 class DAE_CORE_API adFloatCoefficientVariableSumNode : public adNodeImpl
 {
 public:
     daeDeclareDynamicClass(adFloatCoefficientVariableSumNode)
+    daePoolAllocator(adFloatCoefficientVariableSumNode)
     adFloatCoefficientVariableSumNode(void);
+    adFloatCoefficientVariableSumNode(const adFloatCoefficientVariableSumNode& n);
     virtual ~adFloatCoefficientVariableSumNode(void);
 
 public:
@@ -1018,19 +1173,35 @@ public:
     virtual void	AddVariableIndexToArray(map<size_t, size_t>& mapIndexes, bool bAddFixed);
     virtual bool	IsLinear(void) const;
     virtual bool	IsFunctionOfVariables(void) const;
-    virtual const quantity GetQuantity(void) const;
+    virtual quantity GetQuantity(void) const;
     virtual size_t  SizeOf(void) const;
+    virtual size_t  GetHash() const;
 
     void AddItem(double coefficient, daeVariable* variable, unsigned int variableIndex);
-
 public:
 // Runtime part
+    typedef boost::fast_pool_allocator< std::pair<const size_t, daeFloatCoefficientVariableProduct>,
+                                        boost::default_user_allocator_new_delete,
+                                        std::mutex,
+                                        POOL_ALLOCATOR_NEXT_SIZE,
+                                        0
+                                      > allocator;
+    typedef boost::singleton_pool< boost::fast_pool_allocator_tag,
+                                   sizeof(std::pair<const size_t, daeFloatCoefficientVariableProduct>),
+                                   boost::default_user_allocator_new_delete,
+                                   std::mutex,
+                                   POOL_ALLOCATOR_NEXT_SIZE,
+                                   0
+                                 > pool_allocator;
     bool                                                    m_bBlockIndexesFound;
-    std::map<size_t, daeFloatCoefficientVariableProduct>	m_sum;
     real_t                                                  m_base;
+    std::map<size_t, daeFloatCoefficientVariableProduct,
+             std::less<size_t>, allocator>                  m_sum;
+//    std::map<size_t, daeFloatCoefficientVariableProduct>	m_sum;
 };
 
-
+// Restore the original struct packing
+#pragma pack(pop)
 
 inline void FillDomains(const std::vector<daeDomainIndex>& arrDomains, std::vector<string>& strarrDomains)
 {

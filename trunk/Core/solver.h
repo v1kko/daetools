@@ -33,6 +33,12 @@ namespace dae
 {
 namespace solver
 {
+enum daeeIntegrationMode
+{
+    eNormalIntegration  = 0,
+    eOneStepIntegration = 1
+};
+
 class daeBlockOfEquations_t
 {
 public:
@@ -158,12 +164,15 @@ public:
     virtual void						SolveInitial(void)											= 0;
     virtual real_t						Solve(real_t dTime,
                                               daeeStopCriterion eCriterion,
-                                              bool bReportDataAroundDiscontinuities = true)			= 0;
+                                              bool bReportDataAroundDiscontinuities = true,
+                                              bool takeSingleStep = false)                          = 0;
     virtual size_t						GetNumberOfVariables(void) const                            = 0;
     virtual void						SetRelativeTolerance(real_t relTol)							= 0;
     virtual real_t						GetRelativeTolerance(void) const							= 0;
     virtual daeeInitialConditionMode	GetInitialConditionMode(void) const							= 0;
     virtual void						SetInitialConditionMode(daeeInitialConditionMode eMode)		= 0;
+    virtual void                        SetIntegrationMode(daeeIntegrationMode integrationMode)     = 0;
+    virtual daeeIntegrationMode         GetIntegrationMode() const                                  = 0;
     virtual daeBlock_t*					GetBlock(void) const										= 0;
     virtual daeLog_t*					GetLog(void) const											= 0;
     virtual daeLASolver_t*				GetLASolver(void) const										= 0;

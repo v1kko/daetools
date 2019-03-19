@@ -118,7 +118,7 @@ class modTutorial(daeModel):
                                                       faceQuadrature  = QGauss_1D(3),  # face quadrature formula
                                                       dofs            = dofs)          # degrees of freedom
 
-        self.fe_model = daeFiniteElementModel('Boussinesq', self, 'The Boussinesq equation', self.fe_system)
+        self.fe_model = daeFiniteElementModel('StokesFlow', self, 'The Stokes equations', self.fe_system)
 
     def DeclareEquations(self):
         daeModel.DeclareEquations(self)

@@ -49,6 +49,10 @@ for i in range(1, 9 + 1):
     tutorial_modules.append(('tutorial_che_%d' % i, []))
 for i in range(1, 3 + 1):
     tutorial_modules.append(('tutorial_sa_%d' % i, []))
+for i in range(1, 3 + 1):
+    tutorial_modules.append(('tutorial_opencs_dae_%d' % i, []))
+for i in range(1, 3 + 1):
+    tutorial_modules.append(('tutorial_opencs_ode_%d' % i, []))
 for i in range(1, 6 + 1):
     tutorial_modules.append(('tutorial_che_opt_%d' % i, []))
 for i in range(1, 8 + 1):
@@ -236,7 +240,9 @@ class RunExamples(QtWidgets.QDialog):
                           "tutorial_cv_1", "tutorial_cv_2", "tutorial_cv_3", "tutorial_cv_4", 
                           "tutorial_cv_5", "tutorial_cv_6", "tutorial_cv_6", "tutorial_cv_7",
                           "tutorial_cv_8", "tutorial_cv_9", "tutorial_cv_10", "tutorial_cv_11",
-                          "tutorial_sa_1", "tutorial_sa_2", "tutorial_sa_3"]:
+                          "tutorial_sa_1", "tutorial_sa_2", "tutorial_sa_3",
+                          "tutorial_opencs_dae_1", "tutorial_opencs_dae_2", "tutorial_opencs_dae_3"
+                          "tutorial_opencs_ode_1", "tutorial_opencs_ode_2", "tutorial_opencs_ode_3"]:
                 self.consoleRunAndShowResults(module)
             else:
                 module.run(guiRun = True, qtApp = self.app)

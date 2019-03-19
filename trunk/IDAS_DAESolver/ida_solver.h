@@ -37,7 +37,10 @@ public:
                                                    const std::vector<size_t>& narrParametersIndexes);
     virtual void						Finalize(void);
     virtual void						SolveInitial(void);
-    virtual real_t						Solve(real_t dTime, daeeStopCriterion eCriterion, bool bReportDataAroundDiscontinuities = true);
+    virtual real_t						Solve(real_t dTime,
+                                              daeeStopCriterion eCriterion,
+                                              bool bReportDataAroundDiscontinuities = true,
+                                              bool takeSingleStep = false);
     virtual void						SetRelativeTolerance(real_t relTol);
     virtual size_t						GetNumberOfVariables(void) const;
     virtual real_t						GetRelativeTolerance(void) const;
@@ -53,6 +56,8 @@ public:
     virtual daeMatrix<real_t>&			GetSensitivities(void);
     virtual std::string					GetName(void) const;
     virtual void                        SetTimeHorizon(real_t timeHorizon);
+    virtual void                        SetIntegrationMode(daeeIntegrationMode integrationMode);
+    virtual daeeIntegrationMode         GetIntegrationMode() const;
 
     virtual void OnCalculateResiduals();
     virtual void OnCalculateConditions() ;
@@ -98,6 +103,8 @@ public:
     daePreconditioner_t*                m_pPreconditioner;
     size_t								m_nNumberOfEquations;
     real_t								m_dRelTolerance;
+    int                                 m_IntegrationMode;
+    bool                                m_bReportDataInOneStepMode;
     real_t								m_dSensRelTolerance;
     real_t								m_dSensAbsTolerance;
     real_t								m_timeStart;

@@ -111,6 +111,8 @@ std::vector<TYPE> getVectorFromList(boost::python::list l)
     return v;
 }
 
+std::string vector_csNodePtr__str__(std::vector<cs::csNodePtr>& self);
+
 boost::python::dict GetCallStats(daeSimulation& self);
 
 class daeSimulationWrapper : public daeSimulation_t,
@@ -702,6 +704,43 @@ public:
         }
 
         daeSimulation::SetReportingTimes(darrReportingTimes);
+    }
+
+    boost::python::dict GetOpenCSModelData()
+    {
+        boost::python::dict mb_data;
+
+        uint32_t                  Ndofs;
+        uint32_t                  Nvariables;
+        std::vector<std::string>  variableNames;
+        std::vector<real_t>       variableValues;
+        std::vector<real_t>       variableDerivatives;
+        std::vector<real_t>       absTolerances;
+        std::vector<std::string>  dofNames;
+        std::vector<real_t>       dofValues;
+        std::vector< std::shared_ptr<cs::csNode_t> > equations;
+
+        InitialiseModelBuilder(Nvariables,
+                               Ndofs,
+                               variableNames,
+                               variableValues,
+                               variableDerivatives,
+                               absTolerances,
+                               dofNames,
+                               dofValues,
+                               equations);
+
+        mb_data["Nvariables"]          = Nvariables;
+        mb_data["Ndofs"]               = Ndofs;
+        mb_data["variableNames"]       = variableNames;
+        mb_data["variableValues"]      = variableValues;
+        mb_data["variableDerivatives"] = variableDerivatives;
+        mb_data["absTolerances"]       = absTolerances;
+        mb_data["dofNames"]            = dofNames;
+        mb_data["dofValues"]           = dofValues;
+        mb_data["equations"]           = equations;
+
+        return mb_data;
     }
 
     void dExportComputeStackStructs(const std::string& filenameComputeStacks,

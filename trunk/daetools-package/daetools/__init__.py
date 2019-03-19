@@ -63,4 +63,4 @@ solibs_sodir = os.path.join(daetools_dir, 'solibs', '{0}_{1}'.format(daetools_sy
                                                                      daetools_machine))
 sys.path.append(solibs_sodir)
 
-#print sys.path
+#print(sys.path)

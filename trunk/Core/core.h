@@ -227,13 +227,6 @@ enum daeeStopCriterion
     eDoNotStopAtDiscontinuity
 };
 
-enum daeeIntegrationMode
-{
-    eIMUnknown = 0,
-    eContinueFor,
-    eContinueUntil
-};
-
 enum daeeSTNType
 {
     eSTNTUnknown = 0,

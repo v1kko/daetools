@@ -256,7 +256,10 @@ def run(**kwargs):
     #     - Sobol  (Variance based method)
     #     - FAST   (Variance based method)
     ###################################################################
-    SA_method = 'Sobol'
+    SA_available_methods = ['Morris', 'Sobol', 'FAST']
+    SA_method = kwargs.get('SA_method', 'Sobol')
+    if SA_method not in SA_available_methods:
+        raise RuntimeError('Invalid SA method specified: %s (can be one of: %s)' % (SA_method, SA_available_methods))
     
     ###################################################################
     # 2. Definition of the model inputs (used by all methods).
@@ -380,7 +383,7 @@ def run(**kwargs):
     
     print('')
     if SA_method == 'Morris':
-        res = analyze(problem, param_values, max_rise_T, conf_level=0.95, print_to_console=True, num_levels=4, grid_jump=2)
+        res = analyze(problem, param_values, max_rise_T, conf_level=0.95, print_to_console=False, num_levels=4, grid_jump=2)
         
         mu           = res['mu']
         mu_star      = res['mu_star']
@@ -439,8 +442,9 @@ def run(**kwargs):
     ###################################################################
     fontsize = 14
     fontsize_legend = 11
+        
     fig = plt.figure(figsize=(10,8), facecolor='white')
-    fig.canvas.set_window_title('Tutorial sa_3')
+    fig.canvas.set_window_title('Tutorial sa_3: Scatter plots')
 
     ax = plt.subplot(231)
     plt.scatter(B, max_rise_T, c='b', s=6)
@@ -473,7 +477,26 @@ def run(**kwargs):
     plt.xlim((0.4, 0.6))
     
     plt.tight_layout()
+
+    if SA_method == 'Morris':
+        from daetools.ext_libs.SALib.plotting.morris import horizontal_bar_plot, covariance_plot, sample_histograms
+        
+        fig1 = plt.figure(figsize=(10,4), facecolor='white')
+        fig1.canvas.set_window_title('Tutorial sa_3: Morris co-variance plots')
+        
+        ax1 = plt.subplot(121)
+        horizontal_bar_plot(ax1, res, {}, sortby='mu_star', unit=r"")
+        
+        ax2 = plt.subplot(122)
+        covariance_plot(ax2, res, {}, unit=r"")
+        plt.tight_layout()
+
+        fig2 = plt.figure(figsize=(10,4), facecolor='white')
+        fig2.canvas.set_window_title('Tutorial sa_3: Morris histograms')
+        sample_histograms(fig2, param_values, problem, {'color':'g'})
+        plt.tight_layout()
+
     plt.show()
     
 if __name__ == "__main__":
-    run()
+    run(SA_method = 'Sobol')

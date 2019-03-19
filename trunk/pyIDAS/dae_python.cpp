@@ -15,7 +15,6 @@ namespace boost
 
 POINTER_CONVERSION(daeLog_t)
 POINTER_CONVERSION(daeLASolver_t)
-POINTER_CONVERSION(daeLASolver_t)
 POINTER_CONVERSION(daeMatrix<real_t>)
 POINTER_CONVERSION(daeDenseMatrix)
 POINTER_CONVERSION(daeRawDataArray<real_t>)
@@ -77,6 +76,7 @@ BOOST_PYTHON_MODULE(pyIDAS)
         .add_property("InitialConditionMode",	&daeDAESolver_t::GetInitialConditionMode,
                                                 &daeDAESolver_t::SetInitialConditionMode, DOCSTR_daeDAESolver_t_InitialConditionMode)
         .add_property("Name",					&daeDAESolver_t::GetName, DOCSTR_daeDAESolver_t_Name)
+        .add_property("IntegrationMode",        &daeDAESolver_t::GetIntegrationMode, &daeDAESolver_t::SetIntegrationMode)
         .add_property("SensitivityMatrix",      make_function(&daeDAESolver_t::GetSensitivities, return_internal_reference<>()))
 
         .def("OnCalculateResiduals",		    pure_virtual(&daeDAESolver_t::OnCalculateResiduals),
@@ -102,7 +102,7 @@ BOOST_PYTHON_MODULE(pyIDAS)
         .add_property("EstLocalErrors",		    &daepython::daeIDASolverWrapper::GetEstLocalErrors_,  DOCSTR_daeIDAS_EstLocalErrors)
         .add_property("ErrWeights",		   	    &daepython::daeIDASolverWrapper::GetErrWeights_,      DOCSTR_daeIDAS_ErrWeights)
         .add_property("IntegratorStats",		&daepython::daeIDASolverWrapper::GetIntegratorStats_, DOCSTR_daeIDAS_IntegratorStats)
-        .add_property("CallStats",       &daepython::GetCallStats)
+        .add_property("CallStats",              &daepython::GetCallStats)
 
         .def("SetLASolver",		&daepython::daeIDASolverWrapper::SetLASolver1, ( arg("self"), arg("solverType"), arg("preconditioner") = boost::python::object() ), DOCSTR_daeIDAS_SetLASolver1)
         .def("SetLASolver",		&daepython::daeIDASolverWrapper::SetLASolver2, ( arg("self"), arg("lasolver") ),     DOCSTR_daeIDAS_SetLASolver2)

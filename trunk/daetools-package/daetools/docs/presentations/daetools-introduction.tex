@@ -146,13 +146,13 @@
 %-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 \title{DAE Tools Software}
 \subtitle{Introduction}
-\author{D.D. Nikolić}
+\author{Deagan D. Nikolić}
 \institute
 {
   DAE Tools Project, \url{http://www.daetools.com}
 }
 %\logo{\includegraphics{../images/[d][a][e]_Tools_project.png}}
-\date{20 March 2018} 
+\date{20 August 2018} 
 
 \hypersetup{
     pdfauthor = {Dragan Nikolić: dnikolic@daetools.com},
@@ -187,7 +187,8 @@
 
 \section{General Information}
 
-\begin{frame}{What is DAE Tools?} 
+\begin{frame}
+\frametitle{What is DAE Tools?} 
 \alert{Modelling}, \alert{simulation}, \alert{optimisation} \& \alert{parameter estimation} software
 \footnote{\tiny{Nikolić DD. (2016) \textit{DAE Tools: equation-based object-oriented modelling, simulation and optimisation software}.
           \href{https://doi.org/10.7717/peerj-cs.54}{PeerJ Computer Science 2:e54}}
@@ -208,7 +209,8 @@
 \end{itemize}
 \end{frame}
 
-\begin{frame}{What is DAE Tools? (cont'd)} 
+\begin{frame}
+\frametitle{What is DAE Tools? (cont'd)} 
   \begin{itemize}
     \item \textsc{DAE Tools} \alert{is not}:
         \begin{itemize}
@@ -232,7 +234,8 @@
   \end{itemize}
 \end{frame}
 
-\begin{frame}{What can be done with DAE Tools?} 
+\begin{frame}
+\frametitle{What can be done with DAE Tools?} 
 \begin{itemize}
   \item \alert{Simulation}
     \begin{itemize}
@@ -259,7 +262,8 @@
 \end{itemize}
 \end{frame}
 
-\begin{frame}{Types of systems that can be modelled}
+\begin{frame}
+\frametitle{Types of systems that can be modelled}
   \alert{Initial value problems of implicit form}:
     \begin{itemize}
       \item Described by \alert{systems of linear, non-linear, and (partial-)differential} algebraic equations
@@ -296,7 +300,8 @@ In general, two scenarios:
 \end{itemize}
 \end{frame}
 
-\begin{frame}{Why \textsc{yet another} modelling software?}
+\begin{frame}
+\frametitle{Why \textsc{yet another} modelling software?}
 Current approaches to mathematical modelling:
 \begin{enumerate}
    \item Use of \alert{modelling languages} (domain-specific or multi-domain):
@@ -322,7 +327,8 @@ Current approaches to mathematical modelling:
  \end{enumerate}
 \end{frame}
 
-\begin{frame}{Why \textsc{yet another} modelling software? (cont'd)}
+\begin{frame}
+\frametitle{Why \textsc{yet another} modelling software? (cont'd)}
   The advantages of the \alert{Hybrid} approach over the \alert{modelling} and \alert{general-purpose} programming languages:
     \begin{enumerate}
         \item Support for the \alert{runtime model generation}
@@ -334,7 +340,7 @@ Current approaches to mathematical modelling:
     \end{enumerate}
 \end{frame}
 % 
-% \begin{frame}{Why \textsc{yet another} modelling software? (cont'd)}
+% \begin{frame}\frametitle{Why \textsc{yet another} modelling software? (cont'd)}
 %     The \alert{shovel metaphor} about cleaning the snow in the winter:
 %     \begin{enumerate}
 %        \item \alert{Pay someone} to do it 
@@ -380,7 +386,7 @@ Current approaches to mathematical modelling:
 % %                 Like with shoveling - they do not do it during weekends and bank holidays (or you can, but it costs a lot)
 % \end{frame}
 % 
-% \begin{frame}{Why \textsc{yet another} modelling software? (cont'd)}
+% \begin{frame}\frametitle{Why \textsc{yet another} modelling software? (cont'd)}
 %   \begin{itemize}
 %       \item \alert{Modelling} $\equiv$ \alert{cleaning the snow} in the winter
 %         \begin{enumerate}
@@ -407,24 +413,26 @@ Current approaches to mathematical modelling:
 
 \section{Main Features}
 
-\begin{frame}[plain]{Parallel Computing}
+\begin{frame}[plain]
+\frametitle{Parallel Computing}
     The \alert{shared-memory} parallel programming model supported.
     \begin{itemize}
-      \item \alert{Evaluation of equations and derivatives} 
+      \item \alert{Evaluation of model equations} using \alert{OpenCS} framework
          \begin{itemize}
-            \item \alert{OpenMP}: general purpose processors and manycore devices
-            \item \alert{OpenCL}: streaming processors (GPU, GPGA) and heterogeneous systems
+            \item \alert{OpenMP} (general purpose processors)
+            \item \alert{OpenCL} (streaming processors/heterogeneous systems)
          \end{itemize}   
       \item \alert{Assembly of Finite Element systems} (OpenMP)
-      \item \alert{Solution of systems of linear equations} (SuperLU\_MT, Pardiso and Intel Pardiso solvers)
+      \item \alert{Solution of systems of linear equations} (OpenMP)
       \item \alert{Global Sensitivity Analysis} (multiprocessing.Pool)
     \end{itemize}
     \begin{center}
-        \includegraphics[align=c, height=0.30\paperheight]{Compute-Stack-Evaluator.png}
+        \includegraphics[align=c, height=0.37\paperheight]{Simulation-SharedMemorySystems.png}
     \end{center}
 \end{frame}
 
-\begin{frame}{Multiphysics Capabilities}
+\begin{frame}
+\frametitle{Multiphysics Capabilities}
     Modelling of multiple simultaneous physical phenomena
     \begin{columns}[c]
       \begin{column}{0.6\paperwidth}
@@ -450,7 +458,8 @@ Current approaches to mathematical modelling:
     \end{columns}
 \end{frame}
 
-\begin{frame}{Code Generation \& Co-Simulation}
+\begin{frame}
+\frametitle{Code Generation \& Co-Simulation}
     \begin{columns}[c]
       \begin{column}{0.5\paperwidth}
         {\small
@@ -480,7 +489,8 @@ Current approaches to mathematical modelling:
     \end{columns}
 \end{frame}
 
-\begin{frame}{Software As a Service}
+\begin{frame}
+\frametitle{Software As a Service}
     \begin{itemize}
       \item \alert{Web service with the RESTful API} 
         \begin{itemize}
@@ -500,7 +510,8 @@ Current approaches to mathematical modelling:
     \end{center}
 \end{frame}
 
-\begin{frame}[plain]{Sensitivity Analysis}
+\begin{frame}[plain]
+\frametitle{Sensitivity Analysis}
     \begin{itemize}
       \item \alert{Local sensitivity analysis} (derivative-based)
       \item \alert{Global sensitivity analysis} (SALib library):
@@ -522,7 +533,8 @@ Current approaches to mathematical modelling:
     \end{center}
 \end{frame}
 
-\begin{frame}[plain]{Code Verification}
+\begin{frame}[plain]
+\frametitle{Code Verification}
   \begin{itemize}
       \item The \alert{formal code verification techniques} applied to test almost all aspects of the software
       \item The \alert{most rigorous code verification methods} used:
@@ -542,7 +554,8 @@ Current approaches to mathematical modelling:
   \end{center}
 \end{frame}
 
-\begin{frame}{Additional \textsc{DAE Tools} features}
+\begin{frame}
+\frametitle{Additional \textsc{DAE Tools} features}
     \begin{itemize}
         \item Support for \alert{multiple platforms/architectures} 
         \item Support for the \alert{automatic differentiation} (ADOL-C)
@@ -554,7 +567,8 @@ Current approaches to mathematical modelling:
 
 \section{Programming Paradigms}
 
-\begin{frame}{The \textsc{hybrid} approach}
+\begin{frame}
+\frametitle{The \textsc{hybrid} approach}
   \begin{itemize}
     \item DAE Tools approach is a \alert{type of a hybrid approach}
     \item Combines strengths of \alert{modelling} and \alert{general purpose} programming languages:
@@ -572,7 +586,8 @@ Current approaches to mathematical modelling:
   \end{itemize}
 \end{frame}
 
-\begin{frame}[plain]{The \textsc{hybrid} approach (cont'd)}
+\begin{frame}[plain]
+\frametitle{The \textsc{hybrid} approach (cont'd)}
     \begin{columns}[c]
       \begin{column}{0.7\paperwidth}
         {\small
@@ -610,7 +625,8 @@ Current approaches to mathematical modelling:
     \end{columns}
 \end{frame}
 
-\begin{frame}{The \textsc{hybrid} approach (cont'd)}
+\begin{frame}
+\frametitle{The \textsc{hybrid} approach (cont'd)}
     \begin{center}
        \includegraphics[align=c, width=0.70\paperwidth]{daetools_model.png} \par
        {\scriptsize \textcolor{sthlmRed}{DAE Tools API}}
@@ -618,7 +634,8 @@ Current approaches to mathematical modelling:
 \end{frame}
 
 
-\begin{frame}[plain]{The \textsc{hybrid} approach (cont'd)}
+\begin{frame}[plain]
+\frametitle{The \textsc{hybrid} approach (cont'd)}
 \tiny
 {
 \begin{table}
@@ -680,7 +697,8 @@ Current approaches to mathematical modelling:
 }
 \end{frame}
 
-\begin{frame}{The \textsc{object-oriented} approach}
+\begin{frame}
+\frametitle{The \textsc{object-oriented} approach}
 \begin{itemize}
   \item Everything is an \alert{object} (variables, equations, models ...)
   \item All objects can be \alert{manipulated} in \alert{the runtime}
@@ -700,7 +718,8 @@ Current approaches to mathematical modelling:
 \end{itemize}
 \end{frame}
 
-\begin{frame}{The \textsc{equation-oriented} (\textsc{acausal}) approach}
+\begin{frame}
+\frametitle{The \textsc{equation-oriented} (\textsc{acausal}) approach}
 \begin{itemize}
   \item \alert{Equations given in an implicit form} (as a residual)
     \begin{center}
@@ -727,7 +746,8 @@ Current approaches to mathematical modelling:
 \end{itemize}
 \end{frame}
 
-\begin{frame}{Separation of \textsc{model definition} from its \textsc{applications}}
+\begin{frame}
+\frametitle{Separation of \textsc{model definition} from its \textsc{applications}}
 \begin{itemize}
   \item \alert{Model structure} specified in the \alert{model class}
   \item \alert{Runtime information} specified in the \alert{simulation class}
@@ -744,7 +764,7 @@ Current approaches to mathematical modelling:
 % 
 % \section{Architecture}
 % 
-% \begin{frame}[plain]{The fundamental concepts/software interfaces}
+% \begin{frame}[plain]\frametitle{The fundamental concepts/software interfaces}
 % \begin{columns}
 %     \begin{column}{0.28\paperwidth}
 %         \tiny{
@@ -788,7 +808,7 @@ Current approaches to mathematical modelling:
 %    \end{columns}
 % \end{frame}
 % 
-% \begin{frame}{Package \textsc{core}}
+% \begin{frame}\frametitle{Package \textsc{core}}
 % \scriptsize
 % {
 % \begin{table}
@@ -810,7 +830,7 @@ Current approaches to mathematical modelling:
 % }
 % \end{frame}
 % 
-% \begin{frame}{Package \textsc{core} (cont'd)}
+% \begin{frame}\frametitle{Package \textsc{core} (cont'd)}
 % \scriptsize
 % {
 % \begin{table}
@@ -833,7 +853,7 @@ Current approaches to mathematical modelling:
 % }
 % \end{frame}
 % 
-% \begin{frame}{Package \textsc{core} - interface implementations}
+% \begin{frame}\frametitle{Package \textsc{core} - interface implementations}
 %     \begin{center}
 %         \begin{figure}
 %             \includegraphics[width=0.8\paperwidth]{Supplemental_Figure_S3.png}      
@@ -842,7 +862,7 @@ Current approaches to mathematical modelling:
 %     \end{center}
 % \end{frame}
 % 
-% \begin{frame}{Package \textsc{activity}}
+% \begin{frame}\frametitle{Package \textsc{activity}}
 % \scriptsize
 % {
 % \begin{table}
@@ -859,7 +879,7 @@ Current approaches to mathematical modelling:
 % }
 % \end{frame}
 % 
-% \begin{frame}{Package \textsc{solvers}}
+% \begin{frame}\frametitle{Package \textsc{solvers}}
 % \scriptsize
 % {
 % \begin{table}
@@ -880,7 +900,7 @@ Current approaches to mathematical modelling:
 % }
 % \end{frame}
 % 
-% \begin{frame}{Package \textsc{solvers} - interface implementations}
+% \begin{frame}\frametitle{Package \textsc{solvers} - interface implementations}
 %     \begin{center}
 %         \begin{figure}
 %             \includegraphics[width=0.75\paperwidth]{Supplemental_Figure_S5.png}      
@@ -889,7 +909,7 @@ Current approaches to mathematical modelling:
 %     \end{center}
 % \end{frame}
 % 
-% \begin{frame}{Package \textsc{datareporting}}
+% \begin{frame}\frametitle{Package \textsc{datareporting}}
 % \scriptsize
 % {
 % \begin{table}
@@ -906,13 +926,13 @@ Current approaches to mathematical modelling:
 % }
 % \end{frame}
 % 
-% \begin{frame}{Package \textsc{datareporting} - interface implementations}
+% \begin{frame}\frametitle{Package \textsc{datareporting} - interface implementations}
 %     \begin{center}
 %         \includegraphics[width=0.8\paperwidth]{Supplemental_Figure_S6.png}      
 %     \end{center}
 % \end{frame}
 % 
-% \begin{frame}{Package \textsc{log} and its interface implementations}
+% \begin{frame}\frametitle{Package \textsc{log} and its interface implementations}
 % \scriptsize
 % {
 % \begin{table}
@@ -931,7 +951,7 @@ Current approaches to mathematical modelling:
 %     \end{center}
 % \end{frame}
 % 
-% \begin{frame}{Package \textsc{units}}
+% \begin{frame}\frametitle{Package \textsc{units}}
 % \scriptsize
 % {
 % \begin{table}
@@ -950,7 +970,8 @@ Current approaches to mathematical modelling:
 
 \section{Use Cases} 
 
-\begin{frame}[plain]{Use Case 1 - Chemical Engineering}
+\begin{frame}[plain]
+\frametitle{Use Case 1 - Chemical Engineering}
     \begin{itemize}
        {\small
           \item \alert{Continuously Stirred Tank Reactor} (Van de Vusse)
@@ -987,7 +1008,8 @@ Current approaches to mathematical modelling:
     \end{itemize}
 \end{frame}
 
-\begin{frame}[plain]{Use Case 2 - Finite Element Method}
+\begin{frame}[plain]
+\frametitle{Use Case 2 - Finite Element Method}
     \begin{itemize}
       {\small
           \item \alert{Transient heat conduction/convection}
@@ -1011,7 +1033,8 @@ Current approaches to mathematical modelling:
     \end{center}
 \end{frame}
 
-\begin{frame}[plain]{Use Case 3 - Parameter Estimation \& Optimisation}
+\begin{frame}[plain]
+\frametitle{Use Case 3 - Parameter Estimation \& Optimisation}
     \begin{center}
         {\small
             \alert{Large-scale Constrained Optimisation Problem Set (COPS)}
@@ -1034,7 +1057,8 @@ Current approaches to mathematical modelling:
 \end{frame}
 
 
-\begin{frame}[plain]{Use Case 4 - Multi-scale modelling}
+\begin{frame}[plain]
+\frametitle{Use Case 4 - Multi-scale modelling}
     \begin{center}
         \alert{Multi-scale model of phase-separating battery electrodes}
         \footnote{\tiny{Li et al. (2014) \textit{Current-induced transition
@@ -1068,7 +1092,8 @@ Current approaches to mathematical modelling:
     \end{columns}
 \end{frame}
 
-\begin{frame}{Use Case 4 - Multi-scale modelling (cont'd)}
+\begin{frame}
+\frametitle{Use Case 4 - Multi-scale modelling (cont'd)}
     \begin{columns}[c]
       \begin{column}{0.55\paperwidth}
         {\scriptsize
@@ -1112,7 +1137,8 @@ Current approaches to mathematical modelling:
     \end{columns}
 \end{frame}
 
-\begin{frame}[plain]{Use Case 5 - Sensitivity Analysis}
+\begin{frame}[plain]
+\frametitle{Use Case 5 - Sensitivity Analysis}
     \begin{center}
         \alert{Thermal analysis of a batch reactor \& exothermic reaction} \href{http://daetools.com/docs/tutorials-sa.html\#tutorial_sa_3}{\includegraphics[align=b, height=0.8em]{link.png}}
     \end{center}   
@@ -1143,7 +1169,8 @@ Current approaches to mathematical modelling:
     
 \end{frame}
 
-\begin{frame}[plain]{Use Case 6 - Embedded simulator (back end)}
+\begin{frame}[plain]
+\frametitle{Use Case 6 - Embedded simulator (back end)}
     \begin{center}
         \alert{Network Interchange format for NEuroscience (NineML)}
     \end{center}   
@@ -1193,7 +1220,8 @@ Current approaches to mathematical modelling:
     \end{columns}
 \end{frame}
 
-\begin{frame}[plain]{Use Case 7 - Software as a service}
+\begin{frame}[plain]
+\frametitle{Use Case 7 - Software as a service}
     \begin{center}
         \alert{DAE Tools simulations as a web service}
     \end{center}   
@@ -1217,7 +1245,8 @@ Current approaches to mathematical modelling:
     \end{center}
 \end{frame}
 
-\begin{frame}[plain]{Use Case 7 - Software as a service (cont'd)}
+\begin{frame}[plain]
+\frametitle{Use Case 7 - Software as a service (cont'd)}
     \small{Sample HTML GUI (JavaScript + plotly.js plotting library):}
     
     \begin{columns}[t]

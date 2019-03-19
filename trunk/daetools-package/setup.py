@@ -31,7 +31,7 @@ Create wheel:
 import os, sys, platform, shutil
 from setuptools import setup, Distribution
 
-daetools_version = '1.8.1'
+daetools_version = '1.9.0'
 
 # Python version
 python_major = str(sys.version_info[0])
@@ -83,6 +83,7 @@ boost_chrono     = 'boost_chrono-daetools-py{0}{1}'.format(python_major, python_
 dae_config       = 'cdaeConfig-py{0}{1}'.format(python_major, python_minor)
 cape_open_thermo = 'cdaeCapeOpenThermoPackage'
 vc_omp_lib       = 'vcomp'
+opencs_libs      = 'OpenCS_'
 deal_II          = 'deal_II-daetools'
 sim_loader       = 'cdaeSimulationLoader-py{0}{1}'.format(python_major, python_minor)
 fmu_so           = 'cdaeFMU_CS-py{0}{1}'.format(python_major, python_minor)
@@ -105,6 +106,9 @@ if os.path.isdir(shared_libs_dir):
             shared_libs.append(os.path.join(shared_libs_dir, f))
 
         if vc_omp_lib in f:
+            shared_libs.append(os.path.join(shared_libs_dir, f))
+
+        if opencs_libs in f:
             shared_libs.append(os.path.join(shared_libs_dir, f))
 
 print('shared_libs = ', shared_libs)
@@ -346,18 +350,10 @@ setup(name = 'daetools',
                                                    ] + docs_html_dirs, # <----------- EXCLUDE DOCS
                        'daetools.pyDAE':           solibs,
                        'daetools.solvers':         solibs,
-                       'daetools.solibs':          ['%s_%s/*.*' % (daetools_system, daetools_machine),
-                                                    #'%s_%s/*-py%s%s.*'           % (daetools_system, daetools_machine, python_major, python_minor),
-                                                    #'%s_%s/*deal_II-daetools*.*' % (daetools_system, daetools_machine),
-                                                    #'%s_%s/*CapeOpen*.*'         % (daetools_system, daetools_machine),
-                                                    #'%s_%s/*vcomp.*'             % (daetools_system, daetools_machine),
-                                                    #'%s_%s/libg*.*'              % (daetools_system, daetools_machine),
-                                                    #'%s_%s/libquadmath*.*'       % (daetools_system, daetools_machine),
-                                                    #'%s_%s/libstdc*.*'           % (daetools_system, daetools_machine)
-                                                   ],
+                       'daetools.solibs':          ['%s_%s/*.*' % (daetools_system, daetools_machine)],
                        'daetools.dae_plotter':     ['images/*.png'],
                        'daetools.code_generators': ['c99/*.h', 'c99/*.c', 'c99/*.pro', 'c99/*.vcproj', 'c99/Makefile-*',
-                                                    #'cxx/*.h', 'cxx/*.cpp', 'cxx/*.pro', 'cxx/*.vcproj', 'cxx/Makefile-*',
+                                                    'mpi/*.*', 
                                                     '*.css', '*.xsl', fmi_solibs
                                                    ],
                        'daetools.dae_simulator':   ['*.html',
@@ -366,7 +362,7 @@ setup(name = 'daetools',
                                                     'javascript/*.js',
                                                     'javascript/plotly/*.*',
                                                     'javascript/plotly/topojson/*.js'],
-                       'daetools.examples' :       ['*.pt', '*.init', '*.xsl', '*.css', '*.xml', '*.html', '*.sh',  '*.c', '*.so',
+                       'daetools.examples' :       ['*.pt', '*.init', '*.xsl', '*.css', '*.xml', '*.html', '*.sh',  '*.c', '*.so', '*.csv',
                                                     '*.dylib', '*.dll', '*.bat', '*.png', 'meshes/*.msh', 'meshes/*.geo', 'meshes/*.png'],
                        'daetools.ext_libs.SALib':  ['*.txt'],
                        'daetools.ext_libs.pyevtk': ['*.txt']
@@ -383,8 +379,8 @@ setup(name = 'daetools',
                  'scripts/daeplotter3.bat',
                  'scripts/daeexamples3.bat'],
       #requires = ['numpy', 'scipy', 'matplotlib', 'PyQt5', 'lxml', 'pandas', 'h5py', 'openpyxl'],
-      install_requires = ['numpy', 'scipy', 'matplotlib', 'lxml'],
-      python_requires = '>=2.7,<3.7,!=3.0.*,!=3.1.*,!=3.2.*,!=3.3.*',
+      install_requires = ['numpy', 'scipy', 'matplotlib', 'lxml', 'pandas', 'h5py', 'openpyxl'],
+      python_requires = '>=2.7,<3.8,!=3.0.*,!=3.1.*,!=3.2.*,!=3.3.*,!=3.4.*',
       platforms = ['GNU/Linux', 'macOS', 'Windows'],
       classifiers = [ 'Development Status :: 5 - Production/Stable',
                       'Intended Audience :: Developers',
@@ -398,9 +394,9 @@ setup(name = 'daetools',
                       'Programming Language :: Python :: 2',
                       'Programming Language :: Python :: 2.7',
                       'Programming Language :: Python :: 3',
-                      'Programming Language :: Python :: 3.4',
                       'Programming Language :: Python :: 3.5',
-                      'Programming Language :: Python :: 3.6'
+                      'Programming Language :: Python :: 3.6',
+                      'Programming Language :: Python :: 3.7'
                      ],
         keywords = 'modeling simulation optimization sensitivity_analysis parameter_estimation',
         

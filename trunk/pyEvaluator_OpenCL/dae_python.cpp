@@ -9,7 +9,7 @@
 using namespace boost::python;
 
 #include <OpenCS/evaluators/cs_opencl_platforms.h>
-#include <OpenCS/evaluators/cs_evaluator_opencl_factory.h>
+#include <OpenCS/evaluators/cs_evaluators.h>
 using namespace cs;
 
 template<typename ITEM>
@@ -53,7 +53,7 @@ static boost::python::list lAvailableOpenCLPlatforms()
 
 static csComputeStackEvaluator_t* CreateComputeStackEvaluator_s(int platformID, int deviceID, std::string buildProgramOptions)
 {
-    return csCreateOpenCLEvaluator(platformID, deviceID, buildProgramOptions);
+    return createEvaluator_OpenCL(platformID, deviceID, buildProgramOptions);
 }
 
 static csComputeStackEvaluator_t* CreateComputeStackEvaluator_m(boost::python::list ldevices,
@@ -80,7 +80,7 @@ static csComputeStackEvaluator_t* CreateComputeStackEvaluator_m(boost::python::l
         taskPortions.push_back(taskPortion);
     }
 
-    return csCreateOpenCLEvaluator_MultiDevice(platforms, devices, taskPortions, buildProgramOptions);
+    return createEvaluator_OpenCL_MultiDevice(platforms, devices, taskPortions, buildProgramOptions);
 }
 
 // Temporary workaround for Visual Studio 2015 update 3
@@ -91,7 +91,7 @@ namespace boost
 {
 #define POINTER_CONVERSION(CLASS_NAME)   template <> CLASS_NAME const volatile * get_pointer(class CLASS_NAME const volatile *c) {return c;}
 
-POINTER_CONVERSION(adComputeStackEvaluator_t)
+POINTER_CONVERSION(cs::csComputeStackEvaluator_t)
 }
 #endif
 #endif

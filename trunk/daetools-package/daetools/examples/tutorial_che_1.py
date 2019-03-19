@@ -159,7 +159,7 @@ class modTutorial(daeModel):
         dVrCd_dt = dt(self.VR() * self.Cd())
         dVrT_dt  = dt(self.VR() * self.T())
         dTk_dt   = dt(self.Tk())
-
+        
         # Intermediates
         r1 = k1 * VR * Ca
         r2 = k2 * VR * Cb
@@ -288,6 +288,30 @@ class simTutorial(daeSimulation):
         self.m.Cd.SetInitialCondition(0.91520 * mol/l)
         self.m.T.SetInitialCondition((273.15 + 79.591) * K)
         self.m.Tk.SetInitialCondition((273.15 + 77.69) * K)
+ 
+        # Variable types can be:
+        #  cnAlgebraic                          = algebraic state variables
+        #  cnDifferential                       = differential state variables
+        #  cnAssigned                           = assigned variables (degrees of freedom)
+        # Distributed variables can also be of a mixed type - i.e. some points can be differential, 
+        # while the others can be algebraic or assigned:
+        #  cnSomePointsAssigned                 = algebraic + some assigned
+        #  cnSomePointsDifferential             = algebraic + some differential
+        #  cnMixedAlgebraicAssignedDifferential = algebraic + assigned + differential
+        varTypes = {cnAlgebraic : [], cnDifferential : [], cnAssigned : []}
+        for var in self.m.Variables:
+            varTypes[var.Type].append(var.Name)
+        
+        for varType, varNames in varTypes.items():
+            if varType == cnAlgebraic:
+                print('Algebraic: %s' % varNames)
+            elif varType == cnDifferential:
+                print('Differential: %s' % varNames)
+            elif varType == cnAssigned:
+                print('Assigned: %s' % varNames)
+            else:
+                print('Mixed type: %s' % varNames)
+
 
 def run(**kwargs):
     simulation = simTutorial()

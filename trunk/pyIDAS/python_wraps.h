@@ -107,6 +107,14 @@ public:
     {
     }
 
+    ~daeIDASolverWrapper(void)
+    {
+        // daeIDASolverWrapper destructor is called first and the boot::python linear solver object
+        // might get out of scope and get destroyed causing the segmetation fault.
+        // Therefore, call Finalize while all objects are still in the memory.
+        daeIDASolver::Finalize();
+    }
+
     void Initialize(daeBlock_t* pBlock, daeLog_t* pLog, daeSimulation_t* pSimulation, daeeInitialConditionMode eMode, bool bCalculateSensitivities, boost::python::list l)
     {
         size_t index;

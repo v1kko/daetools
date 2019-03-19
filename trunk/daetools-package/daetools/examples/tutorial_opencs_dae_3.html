@@ -1,0 +1,443 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<meta name="Generator" content="Kate, the KDE Advanced Text Editor" />
+<title>tutorial_opencs_dae_3.py</title>
+</head>
+<!-- Highlighting: "Python" -->
+<body>
+<pre style='color:#1f1c1b;background-color:#ffffff;'>
+<span style='color:#017a31;'>#!/usr/bin/env python</span>
+<span style='color:#017a31;'># -*- coding: utf-8 -*-</span>
+
+<span style='color:#017a31;'>&quot;&quot;&quot;</span>
+<span style='color:#017a31;'>***********************************************************************************</span>
+<span style='color:#017a31;'>                           tutorial_opencs_dae_3.py</span>
+<span style='color:#017a31;'>                DAE Tools: pyOpenCS module, www.daetools.com</span>
+<span style='color:#017a31;'>                Copyright (C) Dragan Nikolic</span>
+<span style='color:#017a31;'>***********************************************************************************</span>
+<span style='color:#017a31;'>DAE Tools is free software; you can redistribute it and/or modify it under the</span>
+<span style='color:#017a31;'>terms of the GNU General Public License version 3 as published by the Free Software</span>
+<span style='color:#017a31;'>Foundation. DAE Tools is distributed in the hope that it will be useful, but WITHOUT</span>
+<span style='color:#017a31;'>ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A</span>
+<span style='color:#017a31;'>PARTICULAR PURPOSE. See the GNU General Public License for more details.</span>
+<span style='color:#017a31;'>You should have received a copy of the GNU General Public License along with the</span>
+<span style='color:#017a31;'>DAE Tools software; if not, see &lt;http://www.gnu.org/licenses/&gt;.</span>
+<span style='color:#017a31;'>************************************************************************************</span>
+<span style='color:#017a31;'>&quot;&quot;&quot;</span>
+__doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc0000;'>&quot;&quot;&quot;</span>
+<span style='color:#cc0000;'>Reimplementation of IDAS idasBruss_kry_bbd_p example.</span>
+<span style='color:#cc0000;'>The PDE system is a two-species time-dependent PDE known as</span>
+<span style='color:#cc0000;'>Brusselator PDE and models a chemically reacting system::</span>
+
+<span style='color:#cc0000;'>    du/dt = eps1(d2u/dx2  + d2u/dy2) + u^2 v - (B+1)u + A</span>
+<span style='color:#cc0000;'>    dv/dt = eps2(d2v/dx2  + d2v/dy2) - u^2 v + Bu</span>
+
+<span style='color:#cc0000;'>Boundary conditions: Homogenous Neumann.</span>
+<span style='color:#cc0000;'>Initial Conditions::</span>
+<span style='color:#cc0000;'>    </span>
+<span style='color:#cc0000;'>    u(x,y,t0) = u0(x,y) =  1  - 0.5*cos(pi*y/L)</span>
+<span style='color:#cc0000;'>    v(x,y,t0) = v0(x,y) = 3.5 - 2.5*cos(pi*x/L)</span>
+
+<span style='color:#cc0000;'>The PDEs are discretized by central differencing on a uniform (Nx, Ny) grid.</span>
+<span style='color:#cc0000;'>The model is described in:</span>
+
+<span style='color:#cc0000;'>- R. Serban and A. C. Hindmarsh. CVODES, the sensitivity-enabled ODE solver in SUNDIALS.</span>
+<span style='color:#cc0000;'>  In Proceedings of the 5th International Conference on Multibody Systems,</span>
+<span style='color:#cc0000;'>  Nonlinear Dynamics and Control, Long Beach, CA, 2005. ASME.</span>
+<span style='color:#cc0000;'>- M. R. Wittman. Testing of PVODE, a Parallel ODE Solver.</span>
+<span style='color:#cc0000;'>  Technical Report UCRL-ID-125562, LLNL, August 1996. </span>
+
+<span style='color:#cc0000;'>The original results are in tutorial_opencs_dae_3.csv file.</span>
+<span style='color:#cc0000;'>&quot;&quot;&quot;</span>
+
+<span style='color:#3605fb;'>import</span> os, sys, json, itertools
+<span style='color:#3605fb;'>from</span> daetools.pyDAE <span style='color:#3605fb;'>import</span> <b><span style='color:#0000ff;'>*</span></b>
+<span style='color:#3605fb;'>import</span> pyOpenCS
+<span style='color:#3605fb;'>from</span> pyOpenCS <span style='color:#3605fb;'>import</span> csModelBuilder_t, csNumber_t, csGraphPartitioner_t, csGraphPartitioner_2D_Npde, csSimulate
+<span style='color:#3605fb;'>from</span> tutorial_opencs_aux <span style='color:#3605fb;'>import</span> compareResults
+
+eps1 <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>0.002</span>
+eps2 <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>0.002</span>
+A    <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>1.000</span>
+B    <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>3.400</span>
+
+<b>class</b> Brusselator_2D:
+    <b>def</b> <b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#3605fb;'>self</span>, Nx, Ny, u_flux_bc, v_flux_bc):
+        <span style='color:#3605fb;'>self</span>.Nx <b><span style='color:#0000ff;'>=</span></b> Nx
+        <span style='color:#3605fb;'>self</span>.Ny <b><span style='color:#0000ff;'>=</span></b> Ny
+        <span style='color:#3605fb;'>self</span>.u_flux_bc <b><span style='color:#0000ff;'>=</span></b> u_flux_bc
+        <span style='color:#3605fb;'>self</span>.v_flux_bc <b><span style='color:#0000ff;'>=</span></b> v_flux_bc
+        
+        <span style='color:#3605fb;'>self</span>.x0 <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>0.0</span>
+        <span style='color:#3605fb;'>self</span>.x1 <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>1.0</span>
+        <span style='color:#3605fb;'>self</span>.y0 <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>0.0</span>
+        <span style='color:#3605fb;'>self</span>.y1 <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>1.0</span>
+        <span style='color:#3605fb;'>self</span>.dx <b><span style='color:#0000ff;'>=</span></b> (<span style='color:#3605fb;'>self</span>.x1<b><span style='color:#0000ff;'>-</span></b><span style='color:#3605fb;'>self</span>.x0) <b><span style='color:#0000ff;'>/</span></b> (Nx<b><span style='color:#0000ff;'>-</span></b><span style='color:#cc047c;'>1</span>)
+        <span style='color:#3605fb;'>self</span>.dy <b><span style='color:#0000ff;'>=</span></b> (<span style='color:#3605fb;'>self</span>.y1<b><span style='color:#0000ff;'>-</span></b><span style='color:#3605fb;'>self</span>.y0) <b><span style='color:#0000ff;'>/</span></b> (Ny<b><span style='color:#0000ff;'>-</span></b><span style='color:#cc047c;'>1</span>)
+
+        <span style='color:#3605fb;'>self</span>.x_domain <b><span style='color:#0000ff;'>=</span></b> []
+        <span style='color:#3605fb;'>self</span>.y_domain <b><span style='color:#0000ff;'>=</span></b> []
+        <b>for</b> x <b>in</b> <span style='color:#2a00d6;'>range</span>(<span style='color:#3605fb;'>self</span>.Nx):
+            <span style='color:#3605fb;'>self</span>.x_domain.append(<span style='color:#3605fb;'>self</span>.x0 <b><span style='color:#0000ff;'>+</span></b> x <b><span style='color:#0000ff;'>*</span></b> <span style='color:#3605fb;'>self</span>.dx)
+        <b>for</b> y <b>in</b> <span style='color:#2a00d6;'>range</span>(<span style='color:#3605fb;'>self</span>.Ny):
+            <span style='color:#3605fb;'>self</span>.y_domain.append(<span style='color:#3605fb;'>self</span>.y0 <b><span style='color:#0000ff;'>+</span></b> y <b><span style='color:#0000ff;'>*</span></b> <span style='color:#3605fb;'>self</span>.dy)
+
+        <span style='color:#3605fb;'>self</span>.u_start_index <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>0</span><b><span style='color:#0000ff;'>*</span></b>Nx<b><span style='color:#0000ff;'>*</span></b>Ny
+        <span style='color:#3605fb;'>self</span>.v_start_index <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>1</span><b><span style='color:#0000ff;'>*</span></b>Nx<b><span style='color:#0000ff;'>*</span></b>Ny
+
+        <span style='color:#3605fb;'>self</span>.Nequations <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>2</span><b><span style='color:#0000ff;'>*</span></b>Nx<b><span style='color:#0000ff;'>*</span></b>Ny
+
+    <b>def</b> GetInitialConditions(<span style='color:#3605fb;'>self</span>):
+        <span style='color:#017a31;'># Use numpy array so that setting u_0 and v_0 changes the original values</span>
+        uv0 <b><span style='color:#0000ff;'>=</span></b> numpy.zeros(<span style='color:#3605fb;'>self</span>.Nequations)
+        u_0 <b><span style='color:#0000ff;'>=</span></b> uv0[<span style='color:#3605fb;'>self</span>.u_start_index : <span style='color:#3605fb;'>self</span>.v_start_index]
+        v_0 <b><span style='color:#0000ff;'>=</span></b> uv0[<span style='color:#3605fb;'>self</span>.v_start_index : <span style='color:#3605fb;'>self</span>.Nequations]
+
+        dx <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.dx
+        dy <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.dy
+        x0 <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.x0
+        x1 <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.x1
+        y0 <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.y0
+        y1 <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.y1
+        
+        pi <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>3.1415926535898</span>
+        Lx <b><span style='color:#0000ff;'>=</span></b> x1 <b><span style='color:#0000ff;'>-</span></b> x0
+        Ly <b><span style='color:#0000ff;'>=</span></b> y1 <b><span style='color:#0000ff;'>-</span></b> y0
+        
+        <b>for</b> ix <b>in</b> <span style='color:#2a00d6;'>range</span>(<span style='color:#3605fb;'>self</span>.Nx):
+            <b>for</b> iy <b>in</b> <span style='color:#2a00d6;'>range</span>(<span style='color:#3605fb;'>self</span>.Ny):
+                index <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.GetIndex(ix,iy)
+                x <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.x_domain[ix]
+                y <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.y_domain[iy]
+
+                u_0[index] <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>1.0</span> <b><span style='color:#0000ff;'>-</span></b> <span style='color:#cc047c;'>0.5</span> <b><span style='color:#0000ff;'>*</span></b> numpy.cos(pi <b><span style='color:#0000ff;'>*</span></b> y <b><span style='color:#0000ff;'>/</span></b> Ly)
+                v_0[index] <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>3.5</span> <b><span style='color:#0000ff;'>-</span></b> <span style='color:#cc047c;'>2.5</span> <b><span style='color:#0000ff;'>*</span></b> numpy.cos(pi <b><span style='color:#0000ff;'>*</span></b> x <b><span style='color:#0000ff;'>/</span></b> Lx)
+
+        <b>return</b> uv0.tolist()
+
+    <b>def</b> GetVariableNames(<span style='color:#3605fb;'>self</span>):
+        x_y_inds <b><span style='color:#0000ff;'>=</span></b> [(x,y) <b>for</b> x,y <b>in</b> itertools.product(<span style='color:#2a00d6;'>range</span>(<span style='color:#3605fb;'>self</span>.Nx), <span style='color:#2a00d6;'>range</span>(<span style='color:#3605fb;'>self</span>.Ny))]
+        <b>return</b> [<span style='color:#cc0000;'>'u(</span><span style='color:#cc0000;'>%d</span><span style='color:#cc0000;'>,</span><span style='color:#cc0000;'>%d</span><span style='color:#cc0000;'>)'</span><b><span style='color:#0000ff;'>%</span></b>(x,y) <b>for</b> x,y <b>in</b> x_y_inds] <b><span style='color:#0000ff;'>+</span></b> [<span style='color:#cc0000;'>'v(</span><span style='color:#cc0000;'>%d</span><span style='color:#cc0000;'>,</span><span style='color:#cc0000;'>%d</span><span style='color:#cc0000;'>)'</span><b><span style='color:#0000ff;'>%</span></b>(x,y) <b>for</b> x,y <b>in</b> x_y_inds]
+
+    <b>def</b> CreateEquations(<span style='color:#3605fb;'>self</span>, y, dydt):
+        <span style='color:#017a31;'># y is a list of csNumber_t objects representing model variables</span>
+        <span style='color:#017a31;'># dydt is a list of csNumber_t objects representing time derivatives of model variables</span>
+        u_values    <b><span style='color:#0000ff;'>=</span></b> y   [<span style='color:#3605fb;'>self</span>.u_start_index : <span style='color:#3605fb;'>self</span>.v_start_index]
+        v_values    <b><span style='color:#0000ff;'>=</span></b> y   [<span style='color:#3605fb;'>self</span>.v_start_index : <span style='color:#3605fb;'>self</span>.Nequations]
+        dudt_values <b><span style='color:#0000ff;'>=</span></b> dydt[<span style='color:#3605fb;'>self</span>.u_start_index : <span style='color:#3605fb;'>self</span>.v_start_index]
+        dvdt_values <b><span style='color:#0000ff;'>=</span></b> dydt[<span style='color:#3605fb;'>self</span>.v_start_index : <span style='color:#3605fb;'>self</span>.Nequations]
+        
+        u_flux_bc <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.u_flux_bc
+        v_flux_bc <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.v_flux_bc
+        
+        dx <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.dx
+        dy <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.dy
+        Nx <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.Nx
+        Ny <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.Ny
+        x_domain <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.x_domain
+        y_domain <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.y_domain
+
+        <b>def</b> u(x, y):
+            index <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.GetIndex(x, y)
+            <b>return</b> u_values[index]
+        
+        <b>def</b> v(x, y):
+            index <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.GetIndex(x, y)
+            <b>return</b> v_values[index]
+
+        <b>def</b> du_dt(x, y):
+            index <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.GetIndex(x, y)
+            <b>return</b> dudt_values[index]
+
+        <b>def</b> dv_dt(x, y):
+            index <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.GetIndex(x, y)
+            <b>return</b> dvdt_values[index]
+
+        <span style='color:#017a31;'># First order partial derivative per x.</span>
+        <b>def</b> du_dx(x, y):
+            <b>if</b>(x <b><span style='color:#0000ff;'>==</span></b> <span style='color:#cc047c;'>0</span>): <span style='color:#017a31;'># left</span>
+                u0 <b><span style='color:#0000ff;'>=</span></b> u(<span style='color:#cc047c;'>0</span>, y)
+                u1 <b><span style='color:#0000ff;'>=</span></b> u(<span style='color:#cc047c;'>1</span>, y)
+                u2 <b><span style='color:#0000ff;'>=</span></b> u(<span style='color:#cc047c;'>2</span>, y)
+                <b>return</b> (<b><span style='color:#0000ff;'>-</span></b><span style='color:#cc047c;'>3</span><b><span style='color:#0000ff;'>*</span></b>u0 <b><span style='color:#0000ff;'>+</span></b> <span style='color:#cc047c;'>4</span><b><span style='color:#0000ff;'>*</span></b>u1 <b><span style='color:#0000ff;'>-</span></b> u2) <b><span style='color:#0000ff;'>/</span></b> (<span style='color:#cc047c;'>2</span><b><span style='color:#0000ff;'>*</span></b>dx)
+            <b>elif</b>(x <b><span style='color:#0000ff;'>==</span></b> Nx<b><span style='color:#0000ff;'>-</span></b><span style='color:#cc047c;'>1</span>): <span style='color:#017a31;'># right</span>
+                un  <b><span style='color:#0000ff;'>=</span></b> u(Nx<b><span style='color:#0000ff;'>-</span></b><span style='color:#cc047c;'>1</span>,   y)
+                un1 <b><span style='color:#0000ff;'>=</span></b> u(Nx<b><span style='color:#0000ff;'>-</span></b><span style='color:#cc047c;'>1</span><b><span style='color:#0000ff;'>-</span></b><span style='color:#cc047c;'>1</span>, y)
+                un2 <b><span style='color:#0000ff;'>=</span></b> u(Nx<b><span style='color:#0000ff;'>-</span></b><span style='color:#cc047c;'>1</span><b><span style='color:#0000ff;'>-</span></b><span style='color:#cc047c;'>2</span>, y)
+                <b>return</b> (<span style='color:#cc047c;'>3</span><b><span style='color:#0000ff;'>*</span></b>un <b><span style='color:#0000ff;'>-</span></b> <span style='color:#cc047c;'>4</span><b><span style='color:#0000ff;'>*</span></b>un1 <b><span style='color:#0000ff;'>+</span></b> un2) <b><span style='color:#0000ff;'>/</span></b> (<span style='color:#cc047c;'>2</span><b><span style='color:#0000ff;'>*</span></b>dx)
+            <b>else</b>:
+                u1 <b><span style='color:#0000ff;'>=</span></b> u(x<b><span style='color:#0000ff;'>+</span></b><span style='color:#cc047c;'>1</span>, y)
+                u2 <b><span style='color:#0000ff;'>=</span></b> u(x<b><span style='color:#0000ff;'>-</span></b><span style='color:#cc047c;'>1</span>, y)
+                <b>return</b> (u1 <b><span style='color:#0000ff;'>-</span></b> u2) <b><span style='color:#0000ff;'>/</span></b> (<span style='color:#cc047c;'>2</span><b><span style='color:#0000ff;'>*</span></b>dx)
+
+        <b>def</b> dv_dx(x, y):
+            <b>if</b>(x <b><span style='color:#0000ff;'>==</span></b> <span style='color:#cc047c;'>0</span>): <span style='color:#017a31;'># left</span>
+                u0 <b><span style='color:#0000ff;'>=</span></b> v(<span style='color:#cc047c;'>0</span>, y)
+                u1 <b><span style='color:#0000ff;'>=</span></b> v(<span style='color:#cc047c;'>1</span>, y)
+                u2 <b><span style='color:#0000ff;'>=</span></b> v(<span style='color:#cc047c;'>2</span>, y)
+                <b>return</b> (<b><span style='color:#0000ff;'>-</span></b><span style='color:#cc047c;'>3</span><b><span style='color:#0000ff;'>*</span></b>u0 <b><span style='color:#0000ff;'>+</span></b> <span style='color:#cc047c;'>4</span><b><span style='color:#0000ff;'>*</span></b>u1 <b><span style='color:#0000ff;'>-</span></b> u2) <b><span style='color:#0000ff;'>/</span></b> (<span style='color:#cc047c;'>2</span><b><span style='color:#0000ff;'>*</span></b>dx)
+            <b>elif</b>(x <b><span style='color:#0000ff;'>==</span></b> Nx<b><span style='color:#0000ff;'>-</span></b><span style='color:#cc047c;'>1</span>): <span style='color:#017a31;'># right</span>
+                un  <b><span style='color:#0000ff;'>=</span></b> v(Nx<b><span style='color:#0000ff;'>-</span></b><span style='color:#cc047c;'>1</span>,   y)
+                un1 <b><span style='color:#0000ff;'>=</span></b> v(Nx<b><span style='color:#0000ff;'>-</span></b><span style='color:#cc047c;'>1</span><b><span style='color:#0000ff;'>-</span></b><span style='color:#cc047c;'>1</span>, y)
+                un2 <b><span style='color:#0000ff;'>=</span></b> v(Nx<b><span style='color:#0000ff;'>-</span></b><span style='color:#cc047c;'>1</span><b><span style='color:#0000ff;'>-</span></b><span style='color:#cc047c;'>2</span>, y)
+                <b>return</b> (<span style='color:#cc047c;'>3</span><b><span style='color:#0000ff;'>*</span></b>un <b><span style='color:#0000ff;'>-</span></b> <span style='color:#cc047c;'>4</span><b><span style='color:#0000ff;'>*</span></b>un1 <b><span style='color:#0000ff;'>+</span></b> un2) <b><span style='color:#0000ff;'>/</span></b> (<span style='color:#cc047c;'>2</span><b><span style='color:#0000ff;'>*</span></b>dx)
+            <b>else</b>:
+                u1 <b><span style='color:#0000ff;'>=</span></b> v(x<b><span style='color:#0000ff;'>+</span></b><span style='color:#cc047c;'>1</span>, y)
+                u2 <b><span style='color:#0000ff;'>=</span></b> v(x<b><span style='color:#0000ff;'>-</span></b><span style='color:#cc047c;'>1</span>, y)
+                <b>return</b> (u1 <b><span style='color:#0000ff;'>-</span></b> u2) <b><span style='color:#0000ff;'>/</span></b> (<span style='color:#cc047c;'>2</span><b><span style='color:#0000ff;'>*</span></b>dx)
+
+        <span style='color:#017a31;'># First order partial derivative per y.</span>
+        <b>def</b> du_dy(x, y):
+            <b>if</b>(y <b><span style='color:#0000ff;'>==</span></b> <span style='color:#cc047c;'>0</span>): <span style='color:#017a31;'># bottom</span>
+                u0 <b><span style='color:#0000ff;'>=</span></b> u(x, <span style='color:#cc047c;'>0</span>)
+                u1 <b><span style='color:#0000ff;'>=</span></b> u(x, <span style='color:#cc047c;'>1</span>)
+                u2 <b><span style='color:#0000ff;'>=</span></b> u(x, <span style='color:#cc047c;'>2</span>)
+                <b>return</b> (<b><span style='color:#0000ff;'>-</span></b><span style='color:#cc047c;'>3</span><b><span style='color:#0000ff;'>*</span></b>u0 <b><span style='color:#0000ff;'>+</span></b> <span style='color:#cc047c;'>4</span><b><span style='color:#0000ff;'>*</span></b>u1 <b><span style='color:#0000ff;'>-</span></b> u2) <b><span style='color:#0000ff;'>/</span></b> (<span style='color:#cc047c;'>2</span><b><span style='color:#0000ff;'>*</span></b>dy)
+            <b>elif</b>(y <b><span style='color:#0000ff;'>==</span></b> Ny<b><span style='color:#0000ff;'>-</span></b><span style='color:#cc047c;'>1</span>): <span style='color:#017a31;'># top</span>
+                un  <b><span style='color:#0000ff;'>=</span></b> u(x, Ny<b><span style='color:#0000ff;'>-</span></b><span style='color:#cc047c;'>1</span>  )
+                un1 <b><span style='color:#0000ff;'>=</span></b> u(x, Ny<b><span style='color:#0000ff;'>-</span></b><span style='color:#cc047c;'>1</span><b><span style='color:#0000ff;'>-</span></b><span style='color:#cc047c;'>1</span>)
+                un2 <b><span style='color:#0000ff;'>=</span></b> u(x, Ny<b><span style='color:#0000ff;'>-</span></b><span style='color:#cc047c;'>1</span><b><span style='color:#0000ff;'>-</span></b><span style='color:#cc047c;'>2</span>)
+                <b>return</b> (<span style='color:#cc047c;'>3</span><b><span style='color:#0000ff;'>*</span></b>un <b><span style='color:#0000ff;'>-</span></b> <span style='color:#cc047c;'>4</span><b><span style='color:#0000ff;'>*</span></b>un1 <b><span style='color:#0000ff;'>+</span></b> un2) <b><span style='color:#0000ff;'>/</span></b> (<span style='color:#cc047c;'>2</span><b><span style='color:#0000ff;'>*</span></b>dy)
+            <b>else</b>:
+                ui1 <b><span style='color:#0000ff;'>=</span></b> u(x, y<b><span style='color:#0000ff;'>+</span></b><span style='color:#cc047c;'>1</span>)
+                ui2 <b><span style='color:#0000ff;'>=</span></b> u(x, y<b><span style='color:#0000ff;'>-</span></b><span style='color:#cc047c;'>1</span>)
+                <b>return</b> (ui1 <b><span style='color:#0000ff;'>-</span></b> ui2) <b><span style='color:#0000ff;'>/</span></b> (<span style='color:#cc047c;'>2</span><b><span style='color:#0000ff;'>*</span></b>dy)
+
+        <b>def</b> dv_dy(x, y):
+            <b>if</b>(y <b><span style='color:#0000ff;'>==</span></b> <span style='color:#cc047c;'>0</span>): <span style='color:#017a31;'># bottom</span>
+                u0 <b><span style='color:#0000ff;'>=</span></b> v(x, <span style='color:#cc047c;'>0</span>)
+                u1 <b><span style='color:#0000ff;'>=</span></b> v(x, <span style='color:#cc047c;'>1</span>)
+                u2 <b><span style='color:#0000ff;'>=</span></b> v(x, <span style='color:#cc047c;'>2</span>)
+                <b>return</b> (<b><span style='color:#0000ff;'>-</span></b><span style='color:#cc047c;'>3</span><b><span style='color:#0000ff;'>*</span></b>u0 <b><span style='color:#0000ff;'>+</span></b> <span style='color:#cc047c;'>4</span><b><span style='color:#0000ff;'>*</span></b>u1 <b><span style='color:#0000ff;'>-</span></b> u2) <b><span style='color:#0000ff;'>/</span></b> (<span style='color:#cc047c;'>2</span><b><span style='color:#0000ff;'>*</span></b>dy)
+            <b>elif</b>(y <b><span style='color:#0000ff;'>==</span></b> Ny<b><span style='color:#0000ff;'>-</span></b><span style='color:#cc047c;'>1</span>): <span style='color:#017a31;'># top</span>
+                un  <b><span style='color:#0000ff;'>=</span></b> v(x, Ny<b><span style='color:#0000ff;'>-</span></b><span style='color:#cc047c;'>1</span>  )
+                un1 <b><span style='color:#0000ff;'>=</span></b> v(x, Ny<b><span style='color:#0000ff;'>-</span></b><span style='color:#cc047c;'>1</span><b><span style='color:#0000ff;'>-</span></b><span style='color:#cc047c;'>1</span>)
+                un2 <b><span style='color:#0000ff;'>=</span></b> v(x, Ny<b><span style='color:#0000ff;'>-</span></b><span style='color:#cc047c;'>1</span><b><span style='color:#0000ff;'>-</span></b><span style='color:#cc047c;'>2</span>)
+                <b>return</b> (<span style='color:#cc047c;'>3</span><b><span style='color:#0000ff;'>*</span></b>un <b><span style='color:#0000ff;'>-</span></b> <span style='color:#cc047c;'>4</span><b><span style='color:#0000ff;'>*</span></b>un1 <b><span style='color:#0000ff;'>+</span></b> un2) <b><span style='color:#0000ff;'>/</span></b> (<span style='color:#cc047c;'>2</span><b><span style='color:#0000ff;'>*</span></b>dy)
+            <b>else</b>:
+                ui1 <b><span style='color:#0000ff;'>=</span></b> v(x, y<b><span style='color:#0000ff;'>+</span></b><span style='color:#cc047c;'>1</span>)
+                ui2 <b><span style='color:#0000ff;'>=</span></b> v(x, y<b><span style='color:#0000ff;'>-</span></b><span style='color:#cc047c;'>1</span>)
+                <b>return</b> (ui1 <b><span style='color:#0000ff;'>-</span></b> ui2) <b><span style='color:#0000ff;'>/</span></b> (<span style='color:#cc047c;'>2</span><b><span style='color:#0000ff;'>*</span></b>dy)
+
+        <span style='color:#017a31;'># Second order partial derivative per x.</span>
+        <b>def</b> d2u_dx2(x, y):
+            <b>if</b>(x <b><span style='color:#0000ff;'>==</span></b> <span style='color:#cc047c;'>0</span> <b>or</b> x <b><span style='color:#0000ff;'>==</span></b> Nx<b><span style='color:#0000ff;'>-</span></b><span style='color:#cc047c;'>1</span>):
+                <b>raise</b> <b><span style='color:#4e9a06;'>RuntimeError</span></b>(<span style='color:#cc0000;'>&quot;d2u_dx2 called at the boundary&quot;</span>)
+
+            ui1 <b><span style='color:#0000ff;'>=</span></b> u(x<b><span style='color:#0000ff;'>+</span></b><span style='color:#cc047c;'>1</span>, y)
+            ui  <b><span style='color:#0000ff;'>=</span></b> u(x,   y)
+            ui2 <b><span style='color:#0000ff;'>=</span></b> u(x<b><span style='color:#0000ff;'>-</span></b><span style='color:#cc047c;'>1</span>, y)
+            <b>return</b> (ui1 <b><span style='color:#0000ff;'>-</span></b> <span style='color:#cc047c;'>2</span><b><span style='color:#0000ff;'>*</span></b>ui <b><span style='color:#0000ff;'>+</span></b> ui2) <b><span style='color:#0000ff;'>/</span></b> (dx<b><span style='color:#0000ff;'>*</span></b>dx)
+
+        <b>def</b> d2v_dx2(x, y):
+            <b>if</b>(x <b><span style='color:#0000ff;'>==</span></b> <span style='color:#cc047c;'>0</span> <b>or</b> x <b><span style='color:#0000ff;'>==</span></b> Nx<b><span style='color:#0000ff;'>-</span></b><span style='color:#cc047c;'>1</span>):
+                <b>raise</b> <b><span style='color:#4e9a06;'>RuntimeError</span></b>(<span style='color:#cc0000;'>&quot;d2v_dx2 called at the boundary&quot;</span>)
+
+            vi1 <b><span style='color:#0000ff;'>=</span></b> v(x<b><span style='color:#0000ff;'>+</span></b><span style='color:#cc047c;'>1</span>, y)
+            vi  <b><span style='color:#0000ff;'>=</span></b> v(x,   y)
+            vi2 <b><span style='color:#0000ff;'>=</span></b> v(x<b><span style='color:#0000ff;'>-</span></b><span style='color:#cc047c;'>1</span>, y)
+            <b>return</b> (vi1 <b><span style='color:#0000ff;'>-</span></b> <span style='color:#cc047c;'>2</span><b><span style='color:#0000ff;'>*</span></b>vi <b><span style='color:#0000ff;'>+</span></b> vi2) <b><span style='color:#0000ff;'>/</span></b> (dx<b><span style='color:#0000ff;'>*</span></b>dx)
+
+        <span style='color:#017a31;'># Second order partial derivative per y.</span>
+        <b>def</b> d2u_dy2(x, y):
+            <b>if</b>(y <b><span style='color:#0000ff;'>==</span></b> <span style='color:#cc047c;'>0</span> <b>or</b> y <b><span style='color:#0000ff;'>==</span></b> Ny<b><span style='color:#0000ff;'>-</span></b><span style='color:#cc047c;'>1</span>):
+                <b>raise</b> <b><span style='color:#4e9a06;'>RuntimeError</span></b>(<span style='color:#cc0000;'>&quot;d2u_dy2 called at the boundary&quot;</span>)
+
+            ui1 <b><span style='color:#0000ff;'>=</span></b> u(x, y<b><span style='color:#0000ff;'>+</span></b><span style='color:#cc047c;'>1</span>)
+            ui  <b><span style='color:#0000ff;'>=</span></b> u(x,   y)
+            ui2 <b><span style='color:#0000ff;'>=</span></b> u(x, y<b><span style='color:#0000ff;'>-</span></b><span style='color:#cc047c;'>1</span>)
+            <b>return</b> (ui1 <b><span style='color:#0000ff;'>-</span></b> <span style='color:#cc047c;'>2</span><b><span style='color:#0000ff;'>*</span></b>ui <b><span style='color:#0000ff;'>+</span></b> ui2) <b><span style='color:#0000ff;'>/</span></b> (dy<b><span style='color:#0000ff;'>*</span></b>dy)
+
+        <b>def</b> d2v_dy2(x, y):
+            <b>if</b>(y <b><span style='color:#0000ff;'>==</span></b> <span style='color:#cc047c;'>0</span> <b>or</b> y <b><span style='color:#0000ff;'>==</span></b> Ny<b><span style='color:#0000ff;'>-</span></b><span style='color:#cc047c;'>1</span>):
+                <b>raise</b> <b><span style='color:#4e9a06;'>RuntimeError</span></b>(<span style='color:#cc0000;'>&quot;d2v_dy2 called at the boundary&quot;</span>)
+
+            vi1 <b><span style='color:#0000ff;'>=</span></b> v(x, y<b><span style='color:#0000ff;'>+</span></b><span style='color:#cc047c;'>1</span>)
+            vi  <b><span style='color:#0000ff;'>=</span></b> v(x,   y)
+            vi2 <b><span style='color:#0000ff;'>=</span></b> v(x, y<b><span style='color:#0000ff;'>-</span></b><span style='color:#cc047c;'>1</span>)
+            <b>return</b> (vi1 <b><span style='color:#0000ff;'>-</span></b> <span style='color:#cc047c;'>2</span><b><span style='color:#0000ff;'>*</span></b>vi <b><span style='color:#0000ff;'>+</span></b> vi2) <b><span style='color:#0000ff;'>/</span></b> (dy<b><span style='color:#0000ff;'>*</span></b>dy)
+
+        eq <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>0</span>
+        equations <b><span style='color:#0000ff;'>=</span></b> [<span style='color:#3605fb;'>None</span>] <b><span style='color:#0000ff;'>*</span></b> <span style='color:#3605fb;'>self</span>.Nequations
+        <span style='color:#017a31;'># Component u:</span>
+        <b>for</b> x <b>in</b> <span style='color:#2a00d6;'>range</span>(Nx):
+            <b>for</b> y <b>in</b> <span style='color:#2a00d6;'>range</span>(Ny):
+                <b>if</b>(x <b><span style='color:#0000ff;'>==</span></b> <span style='color:#cc047c;'>0</span>):       <span style='color:#017a31;'># Left BC: Neumann BCs</span>
+                    equations[eq] <b><span style='color:#0000ff;'>=</span></b> du_dx(x,y) <b><span style='color:#0000ff;'>-</span></b> u_flux_bc
+                <b>elif</b>(x <b><span style='color:#0000ff;'>==</span></b> Nx<b><span style='color:#0000ff;'>-</span></b><span style='color:#cc047c;'>1</span>):  <span style='color:#017a31;'># Right BC: Neumann BCs</span>
+                    equations[eq] <b><span style='color:#0000ff;'>=</span></b> du_dx(x,y) <b><span style='color:#0000ff;'>-</span></b> u_flux_bc
+                <b>elif</b>(y <b><span style='color:#0000ff;'>==</span></b> <span style='color:#cc047c;'>0</span>):     <span style='color:#017a31;'># Bottom BC: Neumann BCs</span>
+                    equations[eq] <b><span style='color:#0000ff;'>=</span></b> du_dy(x,y) <b><span style='color:#0000ff;'>-</span></b> u_flux_bc
+                <b>elif</b>(y <b><span style='color:#0000ff;'>==</span></b> Ny<b><span style='color:#0000ff;'>-</span></b><span style='color:#cc047c;'>1</span>):  <span style='color:#017a31;'># Top BC: Neumann BCs</span>
+                    equations[eq] <b><span style='color:#0000ff;'>=</span></b> du_dy(x,y) <b><span style='color:#0000ff;'>-</span></b> u_flux_bc
+                <b>else</b>:
+                    <span style='color:#017a31;'># Interior points</span>
+                    equations[eq] <b><span style='color:#0000ff;'>=</span></b> du_dt(x,y) <b><span style='color:#0000ff;'>\</span></b>
+                                    <b><span style='color:#0000ff;'>-</span></b> eps1 <b><span style='color:#0000ff;'>*</span></b> (d2u_dx2(x,y) <b><span style='color:#0000ff;'>+</span></b> d2u_dy2(x,y)) <b><span style='color:#0000ff;'>\</span></b>
+                                    <b><span style='color:#0000ff;'>-</span></b> (u(x,y)<b><span style='color:#0000ff;'>*</span></b>u(x,y)<b><span style='color:#0000ff;'>*</span></b>v(x,y) <b><span style='color:#0000ff;'>-</span></b> (B<b><span style='color:#0000ff;'>+</span></b><span style='color:#cc047c;'>1</span>)<b><span style='color:#0000ff;'>*</span></b>u(x,y) <b><span style='color:#0000ff;'>+</span></b> A)
+                eq <b><span style='color:#0000ff;'>+=</span></b> <span style='color:#cc047c;'>1</span>
+        
+        <span style='color:#017a31;'># Component v:</span>
+        <b>for</b> x <b>in</b> <span style='color:#2a00d6;'>range</span>(Nx):
+            <b>for</b> y <b>in</b> <span style='color:#2a00d6;'>range</span>(Ny):
+                <b>if</b>(x <b><span style='color:#0000ff;'>==</span></b> <span style='color:#cc047c;'>0</span>):       <span style='color:#017a31;'># Left BC: Neumann BCs</span>
+                    equations[eq] <b><span style='color:#0000ff;'>=</span></b> dv_dx(x,y) <b><span style='color:#0000ff;'>-</span></b> v_flux_bc
+                <b>elif</b>(x <b><span style='color:#0000ff;'>==</span></b> Nx<b><span style='color:#0000ff;'>-</span></b><span style='color:#cc047c;'>1</span>):  <span style='color:#017a31;'># Right BC: Neumann BCs</span>
+                    equations[eq] <b><span style='color:#0000ff;'>=</span></b> dv_dx(x,y) <b><span style='color:#0000ff;'>-</span></b> v_flux_bc
+                <b>elif</b>(y <b><span style='color:#0000ff;'>==</span></b> <span style='color:#cc047c;'>0</span>):     <span style='color:#017a31;'># Bottom BC: Neumann BCs</span>
+                    equations[eq] <b><span style='color:#0000ff;'>=</span></b> dv_dy(x,y) <b><span style='color:#0000ff;'>-</span></b> v_flux_bc
+                <b>elif</b>(y <b><span style='color:#0000ff;'>==</span></b> Ny<b><span style='color:#0000ff;'>-</span></b><span style='color:#cc047c;'>1</span>):  <span style='color:#017a31;'># Top BC: Neumann BCs</span>
+                    equations[eq] <b><span style='color:#0000ff;'>=</span></b> dv_dy(x,y) <b><span style='color:#0000ff;'>-</span></b> v_flux_bc
+                <b>else</b>:
+                    <span style='color:#017a31;'># Interior points</span>
+                    equations[eq] <b><span style='color:#0000ff;'>=</span></b> dv_dt(x,y) <b><span style='color:#0000ff;'>\</span></b>
+                                    <b><span style='color:#0000ff;'>-</span></b> eps2 <b><span style='color:#0000ff;'>*</span></b> (d2v_dx2(x,y) <b><span style='color:#0000ff;'>+</span></b> d2v_dy2(x,y)) <b><span style='color:#0000ff;'>\</span></b>
+                                    <b><span style='color:#0000ff;'>+</span></b> u(x,y)<b><span style='color:#0000ff;'>*</span></b>u(x,y)<b><span style='color:#0000ff;'>*</span></b>v(x,y) <b><span style='color:#0000ff;'>-</span></b> B<b><span style='color:#0000ff;'>*</span></b>u(x,y)
+                eq <b><span style='color:#0000ff;'>+=</span></b> <span style='color:#cc047c;'>1</span>
+        
+        <b>return</b> equations
+    
+    <b>def</b> GetIndex(<span style='color:#3605fb;'>self</span>, x, y):
+        <b>if</b> x <b><span style='color:#0000ff;'>&lt;</span></b> <span style='color:#cc047c;'>0</span> <b>or</b> x <b><span style='color:#0000ff;'>&gt;=</span></b> <span style='color:#3605fb;'>self</span>.Nx:
+            <b>raise</b> <b><span style='color:#4e9a06;'>RuntimeError</span></b>(<span style='color:#cc0000;'>&quot;Invalid x index&quot;</span>)
+        <b>if</b> y <b><span style='color:#0000ff;'>&lt;</span></b> <span style='color:#cc047c;'>0</span> <b>or</b> y <b><span style='color:#0000ff;'>&gt;=</span></b> <span style='color:#3605fb;'>self</span>.Ny:
+            <b>raise</b> <b><span style='color:#4e9a06;'>RuntimeError</span></b>(<span style='color:#cc0000;'>&quot;Invalid y index&quot;</span>)
+        <b>return</b> <span style='color:#3605fb;'>self</span>.Ny<b><span style='color:#0000ff;'>*</span></b>x <b><span style='color:#0000ff;'>+</span></b> y
+    
+    
+<b>class</b> myGraphPartitioner(csGraphPartitioner_t):
+    <span style='color:#017a31;'># Divides vertices into Npe partitions without an analysis </span>
+    <b>def</b> <b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#3605fb;'>self</span>):
+        csGraphPartitioner_t.<b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#3605fb;'>self</span>)
+
+    <b>def</b> GetName(<span style='color:#3605fb;'>self</span>):
+        <b>return</b> <span style='color:#cc0000;'>'myGraphPartitioner'</span>
+    
+    <b>def</b> Partition(<span style='color:#3605fb;'>self</span>, Npe, Nvertices, Nconstraints, rowIndices, colIndices, vertexWeights):
+        <b>if</b> Npe <b><span style='color:#0000ff;'>&gt;</span></b> Nvertices:
+            <b>raise</b> <b><span style='color:#4e9a06;'>RuntimeError</span></b>(<span style='color:#cc0000;'>'Npe larger than Nvertices'</span>)
+        
+        Neq_pe     <b><span style='color:#0000ff;'>=</span></b> <span style='color:#2a00d6;'>int</span>(Nvertices <b><span style='color:#0000ff;'>/</span></b> Npe)
+        equations  <b><span style='color:#0000ff;'>=</span></b> <span style='color:#2a00d6;'>list</span>(<span style='color:#2a00d6;'>range</span>(Nvertices))
+        partitions <b><span style='color:#0000ff;'>=</span></b> []
+        <b>for</b> i <b>in</b> <span style='color:#2a00d6;'>range</span>(Npe):
+            start <b><span style='color:#0000ff;'>=</span></b> i     <b><span style='color:#0000ff;'>*</span></b> Neq_pe
+            end   <b><span style='color:#0000ff;'>=</span></b> (i<b><span style='color:#0000ff;'>+</span></b><span style='color:#cc047c;'>1</span>) <b><span style='color:#0000ff;'>*</span></b> Neq_pe
+            <b>if</b> i <b><span style='color:#0000ff;'>==</span></b> Npe<b><span style='color:#0000ff;'>-</span></b><span style='color:#cc047c;'>1</span>:
+                end <b><span style='color:#0000ff;'>=</span></b> Nvertices
+            partitions.append(equations[start:end])
+        <span style='color:#2a00d6;'>print</span>(<span style='color:#cc0000;'>'myGraphPartitioner partitions: </span><span style='color:#cc0000;'>%s</span><span style='color:#cc0000;'>'</span> <b><span style='color:#0000ff;'>%</span></b> partitions)
+        <b>return</b> partitions
+
+<b>def</b> run(<b><span style='color:#0000ff;'>**</span></b>kwargs):
+    inputFilesDirectory <b><span style='color:#0000ff;'>=</span></b> kwargs.get(<span style='color:#cc0000;'>'inputFilesDirectory'</span>, os.path.splitext(os.path.basename(<span style='color:#3605fb;'>__file__</span>))[<span style='color:#cc047c;'>0</span>])
+    Nx        <b><span style='color:#0000ff;'>=</span></b> kwargs.get(<span style='color:#cc0000;'>'Nx'</span>,        <span style='color:#cc047c;'>82</span>)
+    Ny        <b><span style='color:#0000ff;'>=</span></b> kwargs.get(<span style='color:#cc0000;'>'Ny'</span>,        <span style='color:#cc047c;'>82</span>)
+    u_flux_bc <b><span style='color:#0000ff;'>=</span></b> kwargs.get(<span style='color:#cc0000;'>'u_flux_bc'</span>, <span style='color:#cc047c;'>0.0</span>)
+    v_flux_bc <b><span style='color:#0000ff;'>=</span></b> kwargs.get(<span style='color:#cc0000;'>'v_flux_bc'</span>, <span style='color:#cc047c;'>0.0</span>)
+    
+    <span style='color:#017a31;'># Instantiate the model being simulated.</span>
+    model <b><span style='color:#0000ff;'>=</span></b> Brusselator_2D(Nx, Ny, u_flux_bc, v_flux_bc)
+    
+    <span style='color:#017a31;'># 1. Initialise the DAE system with the number of variables and other inputs.</span>
+    mb <b><span style='color:#0000ff;'>=</span></b> csModelBuilder_t()
+    mb.Initialize_DAE_System(model.Nequations, <span style='color:#cc047c;'>0</span>, defaultAbsoluteTolerance <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>1e-5</span>)
+    
+    <span style='color:#017a31;'># 2. Specify the OpenCS model.</span>
+    <span style='color:#017a31;'># Create and set model equations using the provided time/variable/timeDerivative/dof objects.</span>
+    <span style='color:#017a31;'># The DAE system is defined as:</span>
+    <span style='color:#017a31;'>#     F(x',x,y,t) = 0</span>
+    <span style='color:#017a31;'># where x' are derivatives of state variables, x are state variables,</span>
+    <span style='color:#017a31;'># y are fixed variables (degrees of freedom) and t is the current simulation time.</span>
+    mb.ModelEquations <b><span style='color:#0000ff;'>=</span></b> model.CreateEquations(mb.Variables, mb.TimeDerivatives)    
+    <span style='color:#017a31;'># Set initial conditions.</span>
+    mb.VariableValues <b><span style='color:#0000ff;'>=</span></b> model.GetInitialConditions()
+    <span style='color:#017a31;'># Set variable names.</span>
+    mb.VariableNames  <b><span style='color:#0000ff;'>=</span></b> model.GetVariableNames()
+    
+    <span style='color:#017a31;'># 3. Generate a model for single CPU simulations.    </span>
+    <span style='color:#017a31;'># Set simulation options (specified as a string in JSON format).</span>
+    options <b><span style='color:#0000ff;'>=</span></b> json.loads(mb.SimulationOptions)
+    options[<span style='color:#cc0000;'>'Simulation'</span>][<span style='color:#cc0000;'>'OutputDirectory'</span>]             <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc0000;'>'results'</span>
+    options[<span style='color:#cc0000;'>'Simulation'</span>][<span style='color:#cc0000;'>'TimeHorizon'</span>]                 <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>20.0</span>
+    options[<span style='color:#cc0000;'>'Simulation'</span>][<span style='color:#cc0000;'>'ReportingInterval'</span>]           <b><span style='color:#0000ff;'>=</span></b>  <span style='color:#cc047c;'>0.1</span>
+    options[<span style='color:#cc0000;'>'Solver'</span>][<span style='color:#cc0000;'>'Parameters'</span>][<span style='color:#cc0000;'>'RelativeTolerance'</span>] <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>1e-5</span>
+    
+    <span style='color:#017a31;'># ILU options for Ncpu = 1: k = 3, rho = 1.0, alpha = 1e-1, w = 0.5</span>
+    options[<span style='color:#cc0000;'>'LinearSolver'</span>][<span style='color:#cc0000;'>'Preconditioner'</span>][<span style='color:#cc0000;'>'Parameters'</span>][<span style='color:#cc0000;'>'fact: level-of-fill'</span>]      <b><span style='color:#0000ff;'>=</span></b>    <span style='color:#cc047c;'>3</span>
+    options[<span style='color:#cc0000;'>'LinearSolver'</span>][<span style='color:#cc0000;'>'Preconditioner'</span>][<span style='color:#cc0000;'>'Parameters'</span>][<span style='color:#cc0000;'>'fact: relax value'</span>]        <b><span style='color:#0000ff;'>=</span></b>  <span style='color:#cc047c;'>0.5</span>
+    options[<span style='color:#cc0000;'>'LinearSolver'</span>][<span style='color:#cc0000;'>'Preconditioner'</span>][<span style='color:#cc0000;'>'Parameters'</span>][<span style='color:#cc0000;'>'fact: absolute threshold'</span>] <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>1e-1</span>
+    options[<span style='color:#cc0000;'>'LinearSolver'</span>][<span style='color:#cc0000;'>'Preconditioner'</span>][<span style='color:#cc0000;'>'Parameters'</span>][<span style='color:#cc0000;'>'fact: relative threshold'</span>] <b><span style='color:#0000ff;'>=</span></b>  <span style='color:#cc047c;'>1.0</span>
+    mb.SimulationOptions <b><span style='color:#0000ff;'>=</span></b> json.dumps(options, indent<b><span style='color:#0000ff;'>=</span></b><span style='color:#cc047c;'>4</span>)
+    
+    <span style='color:#017a31;'># Partition the system to create the OpenCS model for a single CPU simulation.</span>
+    <span style='color:#017a31;'># In this case (Npe = 1) the graph partitioner is not required.</span>
+    Npe <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>1</span>
+    graphPartitioner <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>None</span>
+    cs_models <b><span style='color:#0000ff;'>=</span></b> mb.PartitionSystem(Npe, graphPartitioner)
+    csModelBuilder_t.ExportModels(cs_models, inputFilesDirectory, mb.SimulationOptions)
+    <span style='color:#2a00d6;'>print</span>(<span style='color:#cc0000;'>&quot;Single CPU OpenCS model generated successfully!&quot;</span>)
+
+    <span style='color:#017a31;'># 4. Generate models for parallel simulations on message-passing multi-processors.    </span>
+    <span style='color:#017a31;'># ILU options for Ncpu = 8: k = 1, rho = 1.0, alpha = 1e-1, w = 0.0</span>
+    options[<span style='color:#cc0000;'>'LinearSolver'</span>][<span style='color:#cc0000;'>'Preconditioner'</span>][<span style='color:#cc0000;'>'Parameters'</span>][<span style='color:#cc0000;'>'fact: level-of-fill'</span>]      <b><span style='color:#0000ff;'>=</span></b>    <span style='color:#cc047c;'>1</span>
+    options[<span style='color:#cc0000;'>'LinearSolver'</span>][<span style='color:#cc0000;'>'Preconditioner'</span>][<span style='color:#cc0000;'>'Parameters'</span>][<span style='color:#cc0000;'>'fact: relax value'</span>]        <b><span style='color:#0000ff;'>=</span></b>  <span style='color:#cc047c;'>0.0</span>
+    options[<span style='color:#cc0000;'>'LinearSolver'</span>][<span style='color:#cc0000;'>'Preconditioner'</span>][<span style='color:#cc0000;'>'Parameters'</span>][<span style='color:#cc0000;'>'fact: absolute threshold'</span>] <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>1e-1</span>
+    options[<span style='color:#cc0000;'>'LinearSolver'</span>][<span style='color:#cc0000;'>'Preconditioner'</span>][<span style='color:#cc0000;'>'Parameters'</span>][<span style='color:#cc0000;'>'fact: relative threshold'</span>] <b><span style='color:#0000ff;'>=</span></b>  <span style='color:#cc047c;'>1.0</span>
+    mb.SimulationOptions <b><span style='color:#0000ff;'>=</span></b> json.dumps(options, indent<b><span style='color:#0000ff;'>=</span></b><span style='color:#cc047c;'>4</span>)
+    
+    <span style='color:#017a31;'># For distributed memory systems a graph partitioner must be specified.</span>
+    <span style='color:#017a31;'># Available partitioners:</span>
+    <span style='color:#017a31;'>#   1. csGraphPartitioner_Simple (splits the given set of equations into Npe parts with no analysis)</span>
+    <span style='color:#017a31;'>#   2. csGraphPartitioner_2D_Npde (distributes Npde equations on an uniform 2D grid split into Npe quadrants)</span>
+    <span style='color:#017a31;'>#   3. csGraphPartitioner_Metis (partitions the set of equations using the METIS graph partitioner)</span>
+    <span style='color:#017a31;'>#      Two algorithms are avaiable:</span>
+    <span style='color:#017a31;'>#       - PartGraphKway:      'Multilevel k-way partitioning' algorithm</span>
+    <span style='color:#017a31;'>#       - PartGraphRecursive: 'Multilevel recursive bisectioning' algorithm</span>
+    <span style='color:#017a31;'>#   4. User-defined graph partitioners</span>
+    <span style='color:#017a31;'># The Metis partitioner can additionally balance the specified quantities in all partitions </span>
+    <span style='color:#017a31;'># using the following balancing constraints:</span>
+    <span style='color:#017a31;'>#  - Ncs:      balance number of compute stack items in equations</span>
+    <span style='color:#017a31;'>#  - Nnz:      balance number of non-zero items in the incidence matrix</span>
+    <span style='color:#017a31;'>#  - Nflops:   balance number of FLOPS required to evaluate equations</span>
+    <span style='color:#017a31;'>#  - Nflops_j: balance number of FLOPS required to evaluate derivatives (Jacobian) matrix</span>
+    <span style='color:#017a31;'># PartitionSystem arguments:</span>
+    <span style='color:#017a31;'>#  - Npe: unsigned int specifying the number of processing elements (CPUs)</span>
+    <span style='color:#017a31;'>#  - graphPartitioner: csGraphPartitioner_t instance</span>
+    <span style='color:#017a31;'>#  - balancingConstraints: a list of balancing constraints as strings </span>
+    <span style='color:#017a31;'>#  - logPartitionResults: bool (default False); if true a log file is created</span>
+    <span style='color:#017a31;'>#  - unaryOperationsFlops: dictionary [csUnaryFunctions : unsigned int])</span>
+    <span style='color:#017a31;'>#  - binaryOperationsFlops: dictionary [csBinaryFunctions : unsigned int]</span>
+    Npe <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>8</span>
+    graphPartitioner <b><span style='color:#0000ff;'>=</span></b> csGraphPartitioner_2D_Npde(Nx <b><span style='color:#0000ff;'>=</span></b> model.Nx, 
+                                                  Ny <b><span style='color:#0000ff;'>=</span></b> model.Ny, 
+                                                  Npde <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>2</span>, 
+                                                  Npex_Npey_ratio <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>2.0</span>)
+    inputFilesDirectory_mpi <b><span style='color:#0000ff;'>=</span></b> inputFilesDirectory <b><span style='color:#0000ff;'>+</span></b> (<span style='color:#cc0000;'>'-Npe=</span><span style='color:#cc0000;'>%d</span><span style='color:#cc0000;'>-2D_Npde'</span> <b><span style='color:#0000ff;'>%</span></b> Npe)
+    cs_models_mpi <b><span style='color:#0000ff;'>=</span></b> mb.PartitionSystem(Npe, graphPartitioner, logPartitionResults <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>True</span>)
+    csModelBuilder_t.ExportModels(cs_models_mpi, inputFilesDirectory_mpi, mb.SimulationOptions)
+    <span style='color:#2a00d6;'>print</span>(<span style='color:#cc0000;'>&quot;Npe = </span><span style='color:#cc0000;'>%d</span><span style='color:#cc0000;'> CPUs OpenCS model generated successfully!&quot;</span> <b><span style='color:#0000ff;'>%</span></b> Npe)
+
+    <span style='color:#017a31;'># 5. Run simulation using the exported model from the specified directory.</span>
+    csSimulate(inputFilesDirectory)
+    
+    <span style='color:#017a31;'># Compare OpenCS and the original model results.</span>
+    compareResults(inputFilesDirectory, [<span style='color:#cc0000;'>'u(0,0)'</span>, <span style='color:#cc0000;'>'u(81,81)'</span>])
+    
+<b>if</b> <span style='color:#3605fb;'>__name__</span> <b><span style='color:#0000ff;'>==</span></b> <span style='color:#cc0000;'>&quot;__main__&quot;</span>:
+    Nx <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>82</span>
+    Ny <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>82</span>
+    u_flux_bc <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>0.0</span>
+    v_flux_bc <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>0.0</span>
+    inputFilesDirectory <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc0000;'>'tutorial_opencs_dae_3'</span>
+    run(Nx <b><span style='color:#0000ff;'>=</span></b> Nx, 
+        Ny <b><span style='color:#0000ff;'>=</span></b> Ny, 
+        u_flux_bc <b><span style='color:#0000ff;'>=</span></b> u_flux_bc, 
+        v_flux_bc <b><span style='color:#0000ff;'>=</span></b> v_flux_bc, 
+        inputFilesDirectory <b><span style='color:#0000ff;'>=</span></b> inputFilesDirectory)
+</pre>
+</body>
+</html>
