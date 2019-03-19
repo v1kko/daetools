@@ -100,7 +100,7 @@ class daeCodeGenerator_OpenCS(daeCodeGenerator):
                                       inputFilesDirectory, 
                                       modelBuilder.SimulationOptions)
         
-        csSimulate(inputFilesDirectory)
+        #csSimulate(inputFilesDirectory)
 
     @property
     def defaultSimulationOptions_DAE(self):
