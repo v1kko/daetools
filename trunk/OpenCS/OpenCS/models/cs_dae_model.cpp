@@ -17,21 +17,13 @@ the OpenCS software; if not, see <http://www.gnu.org/licenses/>.
 #include <boost/format.hpp>
 #include <mpi.h>
 
-#define daeThrowException(MSG) \
-   throw std::runtime_error( (boost::format("Exception in %s (%s:%d):\n%s\n") % std::string(__FUNCTION__) % std::string(__FILE__) % __LINE__ % (MSG)).str() );
+#define csThrowException(MSG) \
+   throw std::runtime_error(std::string("Exception in ") + std::string(__FUNCTION__) + " (" + std::string(__FILE__) + ":" + std::to_string(__LINE__) + "):\n" + std::string(MSG) + "\n");
 
 namespace cs
 {
 csDifferentialEquationModel::csDifferentialEquationModel()
 {
-    pe_rank     = -1;
-    csEvaluator = NULL;
-
-    structure.Nequations        = 0;
-    structure.Nequations_total  = 0;
-    structure.Ndofs             = 0;
-    structure.isODESystem       = false;
-
     m_activeEquationSetIndexes     = NULL;
     m_computeStacks                = NULL;
     m_incidenceMatrixItems         = NULL;
@@ -44,57 +36,46 @@ csDifferentialEquationModel::~csDifferentialEquationModel()
     Free();
 }
 
-void csDifferentialEquationModel::Load(const std::string& inputDirectory, csComputeStackEvaluator_t* csEvaluator_)
+void csDifferentialEquationModel::Load(int rank, const std::string& inputDirectory)
 {
-    csDifferentialEquationModel_t::LoadModel(inputDirectory);
-    FinishInitialization(csEvaluator_);
+    csModel.reset(new csModel_t);
+    csModel->LoadModel(rank, inputDirectory);
+    FinishInitialization();
 }
 
-void csDifferentialEquationModel::Load(const csModel_t* csModel, csComputeStackEvaluator_t* csEvaluator_)
+void csDifferentialEquationModel::Load(int rank, csModelPtr model)
 {
-    /* Finish this... */
-    daeThrowException("csDifferentialEquationModel::Load(model, evaluator) is not implemented");
+    if(!model)
+        csThrowException("Invalid Compute Stack Model specified");
 
-    FinishInitialization(csEvaluator_);
+    csModel = model;
+    FinishInitialization();
 }
 
-void csDifferentialEquationModel::FinishInitialization(csComputeStackEvaluator_t* csEvaluator_)
+void csDifferentialEquationModel::FinishInitialization()
 {
+    if(!csModel)
+        csThrowException("The Compute Stack Model is not loaded");
+
     /* Finalize data initialisation. */
-    if(structure.Ndofs > 0)
+    if(csModel->structure.Ndofs > 0)
     {
-        m_dofs.resize(structure.Ndofs, 0.0);
-        for(int i = 0; i < structure.Ndofs; i++)
-            m_dofs[i] = structure.dofValues[i];
+        m_dofs.resize(csModel->structure.Ndofs, 0.0);
+        for(int i = 0; i < csModel->structure.Ndofs; i++)
+            m_dofs[i] = csModel->structure.dofValues[i];
     }
 
-    m_activeEquationSetIndexes  = &equations.activeEquationSetIndexes[0];
-    m_computeStacks             = &equations.computeStacks[0];
-    m_numberOfComputeStackItems = equations.computeStacks.size();
+    m_activeEquationSetIndexes  = &csModel->equations.activeEquationSetIndexes[0];
+    m_computeStacks             = &csModel->equations.computeStacks[0];
+    m_numberOfComputeStackItems = csModel->equations.computeStacks.size();
 
-    m_incidenceMatrixItems  = &sparsityPattern.incidenceMatrixItems[0];
-    m_numberOfIncidenceMatrixItems = sparsityPattern.incidenceMatrixItems.size();
-
-    /* If CS Evalator has not been specified throw an exception. */
-    csEvaluator = csEvaluator_;
-    if(!csEvaluator)
-        daeThrowException( (boost::format("Invalid compute stack evaluator specified (node %d)") % pe_rank).str() );
-
-    csEvaluator->Initialize(false,
-                            structure.Nequations,
-                            structure.Nequations,
-                            structure.Ndofs,
-                            m_numberOfComputeStackItems,
-                            m_numberOfIncidenceMatrixItems,
-                            m_numberOfIncidenceMatrixItems,
-                            m_computeStacks,
-                            m_activeEquationSetIndexes,
-                            m_incidenceMatrixItems);
+    m_incidenceMatrixItems         = &csModel->sparsityPattern.incidenceMatrixItems[0];
+    m_numberOfIncidenceMatrixItems = csModel->sparsityPattern.incidenceMatrixItems.size();
 
     InitializeValuesReferences();
 
 /*
-    if(pe_rank == 0)
+    if(csModel->pe_rank == 0)
     {
         std::ofstream ofs;
         std::string filename = std::string("modInitialize-node-") + std::to_string(mpi_rank) + ".txt";
@@ -157,23 +138,84 @@ void csDifferentialEquationModel::FinishInitialization(csComputeStackEvaluator_t
 */
 }
 
+csComputeStackEvaluatorPtr csDifferentialEquationModel::GetComputeStackEvaluator() const
+{
+    if(!csModel)
+        csThrowException("The Compute Stack Model is not loaded");
+    return csModel->csEvaluator;
+}
+
+void csDifferentialEquationModel::SetComputeStackEvaluator(csComputeStackEvaluatorPtr evaluator)
+{
+    if(!csModel)
+        csThrowException("The Compute Stack Model is not loaded");
+
+    /* If CS Evalator has not been specified throw an exception. */
+    csModel->csEvaluator = evaluator;
+    if(!csModel->csEvaluator)
+        csThrowException( (boost::format("Invalid compute stack evaluator specified (node %d)") % csModel->pe_rank).str() );
+
+    csModel->csEvaluator->Initialize(false,
+                                     csModel->structure.Nequations,
+                                     csModel->structure.Nequations,
+                                     csModel->structure.Ndofs,
+                                     m_numberOfComputeStackItems,
+                                     m_numberOfIncidenceMatrixItems,
+                                     m_numberOfIncidenceMatrixItems,
+                                     m_computeStacks,
+                                     m_activeEquationSetIndexes,
+                                     m_incidenceMatrixItems);
+}
+
 void csDifferentialEquationModel::Free()
 {
     /* CS Evaluator is instantiated outside the model, just call FreeResources - do not delete the pointer. */
-    if(csEvaluator)
+    if(csModel)
     {
-        csEvaluator->FreeResources();
-        csEvaluator = NULL;
+        csModel->Free();
+
+        if(csModel->csEvaluator)
+        {
+            csModel->csEvaluator->FreeResources();
+            csModel->csEvaluator.reset();
+        }
     }
+
+    /* Free memory from internal arrys. */
+    m_activeEquationSetIndexes     = NULL;
+    m_computeStacks                = NULL;
+    m_incidenceMatrixItems         = NULL;
+    m_numberOfIncidenceMatrixItems = -1;
+    m_numberOfComputeStackItems    = -1;
+
+    std::vector<real_t>().swap(m_values);
+    std::vector<real_t>().swap(m_timeDerivatives);
+    std::vector<real_t>().swap(m_dofs);
+    std::vector<real_t>().swap(m_jacobian);
+
+    std::map<int, real_t*>().swap(m_mapValues);
+    std::map<int, real_t*>().swap(m_mapTimeDerivatives);
+
+    mpiSyncValuesMap()  .swap(m_mapValuesData.receiveFromIndexes);
+    mpiSyncValuesMap()  .swap(m_mapValuesData.sendToIndexes);
+    mpiSyncPointersMap().swap(m_mapPointersData.receiveFromIndexes);
+    mpiSyncPointersMap().swap(m_mapPointersData.sendToIndexes);
+}
+
+csModelPtr csDifferentialEquationModel::GetModel()
+{
+    return csModel;
 }
 
 void csDifferentialEquationModel::EvaluateEquations(real_t time, real_t* equations)
 {
     /* The current time, values and timeDerivatives have already been copied in SetAndSynchroniseData function. */
     if(time != currentTime)
-        daeThrowException( (boost::format("The current model time: %.15f does not match the time for which the equations are requested: %.15f (node %d)") % currentTime % time % pe_rank).str() );
-    if(!csEvaluator)
-        daeThrowException( (boost::format("Invalid compute stack evaluator (node %d)") % pe_rank).str() );
+        csThrowException( (boost::format("The current model time: %.15f does not match the time for which the equations are requested: %.15f (node %d)") % currentTime % time % csModel->pe_rank).str() );
+    if(!csModel)
+        csThrowException("The Compute Stack Model is not loaded");
+    if(!csModel->csEvaluator)
+        csThrowException( (boost::format("Invalid compute stack evaluator (node %d)") % csModel->pe_rank).str() );
 
     real_t* pdofs            = (m_dofs.size() > 0 ? &m_dofs[0] : NULL);
     real_t* pvalues          = &m_values[0];
@@ -183,8 +225,8 @@ void csDifferentialEquationModel::EvaluateEquations(real_t time, real_t* equatio
     EC.equationEvaluationMode       = cs::eEvaluateEquation;
     EC.sensitivityParameterIndex    = -1;
     EC.jacobianIndex                = -1;
-    EC.numberOfVariables            = structure.Nequations;
-    EC.numberOfEquations            = structure.Nequations; // ???
+    EC.numberOfVariables            = csModel->structure.Nequations;
+    EC.numberOfEquations            = csModel->structure.Nequations; // ???
     EC.numberOfDOFs                 = m_dofs.size();
     EC.numberOfComputeStackItems    = m_numberOfComputeStackItems;
     EC.numberOfIncidenceMatrixItems = 0;
@@ -196,7 +238,7 @@ void csDifferentialEquationModel::EvaluateEquations(real_t time, real_t* equatio
     EC.startEquationIndex           = 0; // !!!
     EC.startJacobianIndex           = 0; // !!!
 
-    csEvaluator->EvaluateEquations(EC, pdofs, pvalues, ptimeDerivatives, equations);
+    csModel->csEvaluator->EvaluateEquations(EC, pdofs, pvalues, ptimeDerivatives, equations);
 
 /*
     if(mpi_rank == 0)
@@ -230,9 +272,11 @@ void csDifferentialEquationModel::EvaluateJacobian(real_t time, real_t inverseTi
 {
     /* The current time, values and timeDerivatives have already been copied in SetAndSynchroniseData function. */
     if(time != currentTime)
-        daeThrowException( (boost::format("The current model time: %.15f does not match the time for which the Jacobian is requested: %.15f (node %d)") % currentTime % time % pe_rank).str() );
-    if(!csEvaluator)
-        daeThrowException( (boost::format("Invalid compute stack evaluator (node %d)") % pe_rank).str() );
+        csThrowException( (boost::format("The current model time: %.15f does not match the time for which the Jacobian is requested: %.15f (node %d)") % currentTime % time % csModel->pe_rank).str() );
+    if(!csModel)
+        csThrowException("The Compute Stack Model is not loaded");
+    if(!csModel->csEvaluator)
+        csThrowException( (boost::format("Invalid compute stack evaluator (node %d)") % csModel->pe_rank).str() );
 
     real_t* pdofs            = (m_dofs.size() > 0 ? const_cast<real_t*>(&m_dofs[0]) : NULL);
     real_t* pvalues          = &m_values[0];
@@ -244,8 +288,8 @@ void csDifferentialEquationModel::EvaluateJacobian(real_t time, real_t inverseTi
     EC.equationEvaluationMode       = cs::eEvaluateDerivative;
     EC.sensitivityParameterIndex    = -1;
     EC.jacobianIndex                = -1;
-    EC.numberOfVariables            = structure.Nequations;
-    EC.numberOfEquations            = structure.Nequations; // ???
+    EC.numberOfVariables            = csModel->structure.Nequations;
+    EC.numberOfEquations            = csModel->structure.Nequations; // ???
     EC.numberOfDOFs                 = m_dofs.size();
     EC.numberOfComputeStackItems    = m_numberOfComputeStackItems;
     EC.numberOfIncidenceMatrixItems = m_numberOfIncidenceMatrixItems;
@@ -257,7 +301,7 @@ void csDifferentialEquationModel::EvaluateJacobian(real_t time, real_t inverseTi
     EC.startEquationIndex           = 0; // !!!
     EC.startJacobianIndex           = 0; // !!!
 
-    csEvaluator->EvaluateDerivatives(EC, pdofs, pvalues, ptimeDerivatives, &m_jacobian[0]);
+    csModel->csEvaluator->EvaluateDerivatives(EC, pdofs, pvalues, ptimeDerivatives, &m_jacobian[0]);
 
     // Evaluated Jacobian values need to be copied to the Jacobian matrix.
     for(size_t ji = 0; ji < m_numberOfIncidenceMatrixItems; ji++)
@@ -274,7 +318,7 @@ void csDifferentialEquationModel::EvaluateJacobian(real_t time, real_t inverseTi
         // Important:
         //   Double check: is this a problem?
         //   Should the items that correspond to foreign varibles be removed from the csIncidenceMatrixItem_t array?
-        if(bi_local >= structure.Nequations)
+        if(bi_local >= csModel->structure.Nequations)
             continue;
 
         ma->SetItem(ei_local, bi_local, m_jacobian[ji]);
@@ -320,11 +364,14 @@ void csDifferentialEquationModel::EvaluateJacobian(real_t time, real_t inverseTi
 // Variable local indexes in DAE system equations as a CSR matrix.
 void csDifferentialEquationModel::GetSparsityPattern(int& N, int& NNZ, std::vector<int>& IA, std::vector<int>& JA)
 {
+    if(!csModel)
+        csThrowException("The Compute Stack Model is not loaded");
+
     std::vector<size_t> numColumnsInRows;
 
-    IA.reserve(structure.Nequations + 1);
+    IA.reserve(csModel->structure.Nequations + 1);
     JA.reserve(m_numberOfIncidenceMatrixItems);
-    numColumnsInRows.resize(structure.Nequations, 0);
+    numColumnsInRows.resize(csModel->structure.Nequations, 0);
 
     int removed = 0;
     for(size_t ji = 0; ji < m_numberOfIncidenceMatrixItems; ji++)
@@ -338,7 +385,7 @@ void csDifferentialEquationModel::GetSparsityPattern(int& N, int& NNZ, std::vect
         //
         // VERY IMPORTANT!!
         //   This causes a very slow convergence if direct sparse solvers are used.
-        if(bi_local >= structure.Nequations)
+        if(bi_local >= csModel->structure.Nequations)
         {
             removed++;
             continue;
@@ -351,21 +398,41 @@ void csDifferentialEquationModel::GetSparsityPattern(int& N, int& NNZ, std::vect
 
     int endOfRow = 0;
     IA.push_back(0);
-    for(size_t ri = 0; ri < structure.Nequations; ri++)
+    for(size_t ri = 0; ri < csModel->structure.Nequations; ri++)
     {
         endOfRow += numColumnsInRows[ri];
         IA.push_back(endOfRow);
     }
-    N   = structure.Nequations;
+    N   = csModel->structure.Nequations;
     NNZ = JA.size();
+}
+
+void csDifferentialEquationModel::SetDegreesOfFreedom(real_t* dofs)
+{
+    if(!csModel)
+        csThrowException("The Compute Stack Model is not loaded");
+
+    if(!dofs)
+        csThrowException( (boost::format("Invalid values of degrees of freedom specified (node %d)") % csModel->pe_rank).str() );
+
+    // Copy the DOFs into the local storage.
+    for(int i = 0; i < csModel->structure.Ndofs; i++)
+        m_dofs[i] = dofs[i];
 }
 
 void csDifferentialEquationModel::SetAndSynchroniseData(real_t time, real_t* daesolver_values, real_t* daesolver_time_derivatives)
 {
+    if(!csModel)
+        csThrowException("The Compute Stack Model is not loaded");
+    if(!daesolver_values)
+        csThrowException( (boost::format("Invalid variable values specified at time %.15f (node %d)") % time % csModel->pe_rank).str() );
+    if(!daesolver_time_derivatives)
+        csThrowException( (boost::format("Invalid variable derivatives specified at time %.15f (node %d)") % time % csModel->pe_rank).str() );
+
     currentTime = time;
 
     // Copy values/derivatives from DAE solver into the local storage.
-    for(int i = 0; i < structure.Nequations; i++)
+    for(int i = 0; i < csModel->structure.Nequations; i++)
     {
         m_values[i]          = daesolver_values[i];
         m_timeDerivatives[i] = daesolver_time_derivatives[i];
@@ -376,7 +443,7 @@ void csDifferentialEquationModel::SetAndSynchroniseData(real_t time, real_t* dae
     std::vector<MPI_Status>  statuses;
 
     // Send the data to the other nodes
-    for(csPartitionIndexMap::iterator it = partitionData.sendToIndexes.begin(); it != partitionData.sendToIndexes.end(); it++)
+    for(csPartitionIndexMap::iterator it = csModel->partitionData.sendToIndexes.begin(); it != csModel->partitionData.sendToIndexes.end(); it++)
     {
         int               send_to_mpi_rank = it->first;
         std::vector<int>& indexes          = it->second;
@@ -401,7 +468,7 @@ void csDifferentialEquationModel::SetAndSynchroniseData(real_t time, real_t* dae
     }
 
     // Receive the data from the other nodes
-    for(csPartitionIndexMap::iterator it = partitionData.receiveFromIndexes.begin(); it != partitionData.receiveFromIndexes.end(); it++)
+    for(csPartitionIndexMap::iterator it = csModel->partitionData.receiveFromIndexes.begin(); it != csModel->partitionData.receiveFromIndexes.end(); it++)
     {
         int receive_from_mpi_rank = it->first;
 
@@ -421,7 +488,7 @@ void csDifferentialEquationModel::SetAndSynchroniseData(real_t time, real_t* dae
     int ret = MPI_Waitall(Nrequests, &requests[0], &statuses[0]);
 
     // Copy the data from the pointer arrays to values arrays
-    for(csPartitionIndexMap::iterator it = partitionData.receiveFromIndexes.begin(); it != partitionData.receiveFromIndexes.end(); it++)
+    for(csPartitionIndexMap::iterator it = csModel->partitionData.receiveFromIndexes.begin(); it != csModel->partitionData.receiveFromIndexes.end(); it++)
     {
         int               receive_from_mpi_rank = it->first;
         std::vector<int>& indexes               = it->second;
@@ -436,7 +503,7 @@ void csDifferentialEquationModel::SetAndSynchroniseData(real_t time, real_t* dae
            indexes.size() != derivs.size()  ||
            indexes.size() != pvalues.size() ||
            indexes.size() != pderivs.size())
-            throw std::runtime_error(std::string("The received data do not match the requested ones, node: ") + std::to_string(pe_rank));
+            csThrowException(std::string("The received data do not match the requested ones, node: ") + std::to_string(csModel->pe_rank));
         //else
         //    std::cout << "Node [" << mpi_rank << "] transferred " << values.size() << " values" << std::endl;
 
@@ -449,7 +516,7 @@ void csDifferentialEquationModel::SetAndSynchroniseData(real_t time, real_t* dae
         if(false /*mpi_rank == 0*/)
         {
             std::stringstream ss;
-            ss << "Node [" << pe_rank << "] values from node [" << receive_from_mpi_rank << "]:" << std::endl;
+            ss << "Node [" << csModel->pe_rank << "] values from node [" << receive_from_mpi_rank << "]:" << std::endl;
             for(size_t i = 0; i < i_size; i++)
                 ss << *pvalues[i] << ", ";
             ss << std::endl;
@@ -527,24 +594,23 @@ csDiscontinuityType csDifferentialEquationModel::ExecuteActions(real_t time, rea
     return eNoDiscontinuity;
 }
 
-
 void csDifferentialEquationModel::InitializeValuesReferences()
 {
     // Reserve the size for internal vectors/maps
-    size_t Nforeign = partitionData.foreignIndexes.size();
-    size_t Ntot     = structure.Nequations + Nforeign;
+    size_t Nforeign = csModel->partitionData.foreignIndexes.size();
+    size_t Ntot     = csModel->structure.Nequations + Nforeign;
 
     m_values.resize(Ntot, 0.0);
     m_timeDerivatives.resize(Ntot, 0.0);
     //m_mapValues.reserve(Ntot);
     //m_mapTimeDerivatives.reserve(Ntot);
 
-    if(partitionData.biToBiLocal.size() != Ntot)
-        throw std::runtime_error("Invalid number of items in bi_to_bi_local map");
+    if(csModel->partitionData.biToBiLocal.size() != Ntot)
+        csThrowException("Invalid number of items in bi_to_bi_local map");
 
     // Insert the pointers to the owned and the foreign values
     // Owned data are always in the range: [0, Nequations_PE)
-    for(std::map<int32_t,int32_t>::iterator iter = partitionData.biToBiLocal.begin(); iter != partitionData.biToBiLocal.end(); iter++)
+    for(std::map<int32_t,int32_t>::iterator iter = csModel->partitionData.biToBiLocal.begin(); iter != csModel->partitionData.biToBiLocal.end(); iter++)
     {
         int bi = iter->first;  // global block index
         int li = iter->second; // local index
@@ -554,7 +620,7 @@ void csDifferentialEquationModel::InitializeValuesReferences()
     }
 
     // Initialize pointer maps
-    for(csPartitionIndexMap::iterator it = partitionData.sendToIndexes.begin(); it != partitionData.sendToIndexes.end(); it++)
+    for(csPartitionIndexMap::iterator it = csModel->partitionData.sendToIndexes.begin(); it != csModel->partitionData.sendToIndexes.end(); it++)
     {
         // it->first is int (rank)
         // it->second is vector<int>
@@ -576,7 +642,7 @@ void csDifferentialEquationModel::InitializeValuesReferences()
         m_mapPointersData.sendToIndexes[rank] = make_pair(pvalues_arr, pderivs_arr);
     }
 
-    for(csPartitionIndexMap::iterator it = partitionData.receiveFromIndexes.begin(); it != partitionData.receiveFromIndexes.end(); it++)
+    for(csPartitionIndexMap::iterator it = csModel->partitionData.receiveFromIndexes.begin(); it != csModel->partitionData.receiveFromIndexes.end(); it++)
     {
         // it->first is int (rank)
         // it->second is vector<int>
@@ -641,7 +707,7 @@ void csDifferentialEquationModel::CheckSynchronisationIndexes()
     csPartitionIndexMap received_indexes;
 
     // Send the indexes to the other nodes
-    for(csPartitionIndexMap::iterator it = partitionData.sendToIndexes.begin(); it != partitionData.sendToIndexes.end(); it++)
+    for(csPartitionIndexMap::iterator it = csModel->partitionData.sendToIndexes.begin(); it != csModel->partitionData.sendToIndexes.end(); it++)
     {
         int                   send_to_mpi_rank = it->first;
         std::vector<int32_t>& send_to_indexes  = it->second;
@@ -652,7 +718,7 @@ void csDifferentialEquationModel::CheckSynchronisationIndexes()
     }
 
     // Receive the indexes from the other nodes
-    for(csPartitionIndexMap::iterator it = partitionData.receiveFromIndexes.begin(); it != partitionData.receiveFromIndexes.end(); it++)
+    for(csPartitionIndexMap::iterator it = csModel->partitionData.receiveFromIndexes.begin(); it != csModel->partitionData.receiveFromIndexes.end(); it++)
     {
         int                   receive_from_mpi_rank = it->first;
         std::vector<int32_t>& indexes_to_receive    = it->second;
@@ -672,19 +738,19 @@ void csDifferentialEquationModel::CheckSynchronisationIndexes()
     int ret = MPI_Waitall(Nrequests, &requests[0], &statuses[0]);
 
     // Check if we received the correct indexes
-    for(csPartitionIndexMap::iterator it = partitionData.receiveFromIndexes.begin(); it != partitionData.receiveFromIndexes.end(); it++)
+    for(csPartitionIndexMap::iterator it = csModel->partitionData.receiveFromIndexes.begin(); it != csModel->partitionData.receiveFromIndexes.end(); it++)
     {
-        if(partitionData.receiveFromIndexes[it->first] != received_indexes[it->first])
-            throw std::runtime_error(std::string("The received indexes do not match the requested ones, node: ") + std::to_string(pe_rank));
+        if(csModel->partitionData.receiveFromIndexes[it->first] != received_indexes[it->first])
+            csThrowException(std::string("The received indexes do not match the requested ones, node: ") + std::to_string(csModel->pe_rank));
     }
 
 /*
     // Just for the debugging purposes print sent/received indexes to a file
     std::ofstream ofs;
-    std::string filename = std::string("node-") + std::to_string(pe_rank) + ".txt";
+    std::string filename = std::string("node-") + std::to_string(csModel->pe_rank) + ".txt";
     ofs.open(filename, std::ofstream::out);
 
-    ofs << "Node " << pe_rank << std::endl;
+    ofs << "Node " << csModel->pe_rank << std::endl;
     for(csPartitionIndexMap::iterator it = m_partitionData.receiveFromIndexes.begin(); it != m_partitionData.receiveFromIndexes.end(); it++)
     {
         ofs << "Expected from " << it->first << ": " << std::endl;

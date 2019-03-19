@@ -21,11 +21,29 @@ the OpenCS software; if not, see <http://www.gnu.org/licenses/>.
 #include "../cs_model.h"
 #include "cs_nodes.h"
 #include "cs_number.h"
-#include "cs_partitioners.h"
 
 namespace cs
 {
-typedef std::shared_ptr<csModel_t> csModelPtr;
+class OPENCS_MODELS_API csSimulationOptions_t
+{
+public:
+    virtual ~csSimulationOptions_t(){}
+
+    virtual void LoadString(const std::string& jsonOptions)       = 0;
+    virtual std::string ToString() const                          = 0;
+    virtual bool HasKey(const std::string& strPropertyPath) const = 0;
+
+    virtual bool        GetBoolean(const std::string& strPropertyPath) const = 0;
+    virtual double      GetDouble(const std::string& strPropertyPath) const  = 0;
+    virtual int         GetInteger(const std::string& strPropertyPath) const = 0;
+    virtual std::string GetString(const std::string& strPropertyPath) const  = 0;
+
+    virtual void SetBoolean(const std::string& strPropertyPath, const bool value)        = 0;
+    virtual void SetDouble(const std::string& strPropertyPath, const double value)       = 0;
+    virtual void SetInteger(const std::string& strPropertyPath, const int value)         = 0;
+    virtual void SetString(const std::string& strPropertyPath, const std::string& value) = 0;
+};
+typedef std::shared_ptr<csSimulationOptions_t> csSimulationOptionsPtr;
 
 class OPENCS_MODELS_API csModelBuilder_t
 {
@@ -37,27 +55,38 @@ public:
                                uint32_t           noDofs,
                                real_t             defaultVariableValue          = 0.0,
                                real_t             defaultAbsoluteTolerance      = 1e-5,
-                               const std::string& defaultVariableName           = "x");
+                               const std::string& defaultVariableName           = "x",
+                               const std::string& defaultDOFName                = "y");
 
     void Initialize_DAE_System(uint32_t           noVariables,
                                uint32_t           noDofs,
                                real_t             defaultVariableValue          = 0.0,
                                real_t             defaultVariableTimeDerivative = 0.0,
                                real_t             defaultAbsoluteTolerance      = 1e-5,
-                               const std::string& defaultVariableName           = "x");
+                               const std::string& defaultVariableName           = "x",
+                               const std::string& defaultDOFName                = "y");
 
     const csNumber_t&               GetTime() const;
     const std::vector<csNumber_t>&  GetDegreesOfFreedom() const;
     const std::vector<csNumber_t>&  GetVariables() const;
     const std::vector<csNumber_t>&  GetTimeDerivatives() const;
 
+    const std::vector<csNumber_t>&  GetModelEquations() const;
+    const std::vector<real_t>&      GetVariableValues() const;
+    const std::vector<real_t>&      GetVariableTimeDerivatives() const;
+    const std::vector<real_t>&      GetDegreeOfFreedomValues() const;
+    const std::vector<std::string>& GetVariableNames() const;
+    const std::vector<int32_t>&     GetVariableTypes() const;
+    const std::vector<real_t>&      GetAbsoluteTolerances() const;
+
     void SetModelEquations(const std::vector<csNumber_t>& equations);
     void SetVariableValues(const std::vector<real_t>& values);
     void SetVariableTimeDerivatives(const std::vector<real_t>& timeDerivatives);
     void SetDegreeOfFreedomValues(const std::vector<real_t>& dofs);
     void SetVariableNames(const std::vector<std::string>& names);
+    void SetDegreeOfFreedomNames(const std::vector<std::string>& names);
     void SetVariableTypes(const std::vector<int32_t>& types);
-    void SetAbsoluteToleances(const std::vector<real_t>& absTolerances);
+    void SetAbsoluteTolerances(const std::vector<real_t>& absTolerances);
 
     void EvaluateEquations(real_t               currentTime,
                            std::vector<real_t>& equations);
@@ -67,6 +96,8 @@ public:
                              std::vector<uint32_t>& JA,
                              std::vector<real_t>&   A,
                              bool                   generateIncidenceMatrix = false);
+
+    csSimulationOptionsPtr GetSimulationOptions();
 
     void GetSparsityPattern(std::vector< std::map<uint32_t,uint32_t> >& incidenceMatrix);
     void GetSparsityPattern(std::vector<uint32_t>& IA, std::vector<uint32_t>& JA);
@@ -78,7 +109,11 @@ public:
                                             const std::map<csUnaryFunctions,uint32_t>&  unaryOperationsFlops  = std::map<csUnaryFunctions,uint32_t>(),
                                             const std::map<csBinaryFunctions,uint32_t>& binaryOperationsFlops = std::map<csBinaryFunctions,uint32_t>());
 
-    void ExportModels(const std::vector<csModelPtr>& models, const std::string& outputDirectory, const std::string& simulationOptionsJSON);
+    static void        ExportModels(const std::vector<csModelPtr>&  models,
+                                    const std::string&              outputDirectory,
+                                    const std::string&              simulationOptionsJSON);
+    static std::string GetDefaultSimulationOptions_DAE();
+    static std::string GetDefaultSimulationOptions_ODE();
 
 protected:
     void Initialize(uint32_t           noVariables,
@@ -86,7 +121,8 @@ protected:
                     real_t             defaultVariableValue          = 0.0,
                     real_t             defaultVariableTimeDerivative = 0.0,
                     real_t             defaultAbsoluteTolerance      = 1e-5,
-                    const std::string& defaultVariableName           = "x");
+                    const std::string& defaultVariableName           = "x",
+                    const std::string& defaultDOFName                = "y");
 
 public:
     bool                     isODESystem;
@@ -108,8 +144,10 @@ public:
     std::vector<real_t>      sensitivityValues;
     std::vector<real_t>      sensitivityDerivatives;
     std::vector<std::string> variableNames;
+    std::vector<std::string> dofNames;
     std::vector<int32_t>     variableTypes;
     std::vector<real_t>      absoluteTolerances;
+    csSimulationOptionsPtr   simulationOptions;
 };
 
 }

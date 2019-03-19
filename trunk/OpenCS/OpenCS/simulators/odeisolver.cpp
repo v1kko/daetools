@@ -23,7 +23,7 @@ the OpenCS software; if not, see <http://www.gnu.org/licenses/>.
 #include "daesimulator.h"
 //#include "idas_la_functions.h"
 #include <boost/format.hpp>
-//#include <idas/idas_impl.h>
+#include <cvodes/cvodes_impl.h>
 #include <src/cvodes/cvodes_spils_impl.h>
 using namespace cs;
 
@@ -77,6 +77,20 @@ static int root(realtype t,
                 realtype *gout,
                 void *user_data);
 
+// Timed functions.
+static int cvode_spils_setup_la(CVodeMem cvode_mem, int convfail,
+                                N_Vector ypred, N_Vector fpred, booleantype *jcurPtr,
+                                N_Vector vtemp1, N_Vector vtemp2, N_Vector vtemp3);
+static int cvode_spils_solve_la(CVodeMem cvode_mem, N_Vector b, N_Vector weight,
+                                N_Vector ycur, N_Vector fcur);
+// Pointers to original functions.
+int (*cv_lsetup)(CVodeMem   CVode_mem,int convfail,
+                  N_Vector ypred, N_Vector fpred, booleantype *jcurPtr,
+                  N_Vector vtemp1, N_Vector vtemp2, N_Vector vtemp3);
+int (*cv_lsolve)(CVodeMem CVode_mem,N_Vector b, N_Vector weight,
+                  N_Vector ycur, N_Vector fcur);
+
+
 odeiSolver_t::odeiSolver_t()
 {
     currentTime = 0.0;
@@ -127,7 +141,7 @@ void odeiSolver_t::Initialize(csDifferentialEquationModel_t* pmodel,
     else if(integrationMode_s == "OneStep")
         integrationMode = CV_ONE_STEP;
     else
-        daeThrowException("Invalid integration mode specified: " + integrationMode_s);
+        csThrowException("Invalid integration mode specified: " + integrationMode_s);
 
     std::string linearMultistepMethod_s = cfg.GetString("Solver.Parameters.LinearMultistepMethod", "BDF");
     if(linearMultistepMethod_s == "BDF")
@@ -135,7 +149,7 @@ void odeiSolver_t::Initialize(csDifferentialEquationModel_t* pmodel,
     else if(linearMultistepMethod_s == "Adams")
         linearMultistepMethod = CV_ADAMS;
     else
-        daeThrowException("Invalid linear multistep method specified: " + integrationMode_s);
+        csThrowException("Invalid linear multistep method specified: " + linearMultistepMethod_s);
 
     std::string nonlinearSolverIteration_s = cfg.GetString("Solver.Parameters.IterationType", "Newton");
     if(nonlinearSolverIteration_s == "Newton")
@@ -143,34 +157,35 @@ void odeiSolver_t::Initialize(csDifferentialEquationModel_t* pmodel,
     else if(nonlinearSolverIteration_s == "Functional")
         nonlinearSolverIteration = CV_FUNCTIONAL;
     else
-        daeThrowException("Invalid nonlinear solver iteration mode specified: " + integrationMode_s);
+        csThrowException("Invalid nonlinear solver iteration mode specified: " + nonlinearSolverIteration_s);
 
     /* Allocate N-vectors. */
-    yy_nv = N_VNew_Parallel(comm, model->structure.Nequations, model->structure.Nequations_total);
+    yy_nv = N_VNew_Parallel(comm, Neq_local, Neq);
     if(yy_nv == NULL)
-        daeThrowException("Allocation of yy array failed");
+        csThrowException("Allocation of yy array failed");
     yy = yy_nv;
 
-    yp_nv = N_VNew_Parallel(comm, model->structure.Nequations, model->structure.Nequations_total);
+    yp_nv = N_VNew_Parallel(comm, Neq_local, Neq);
     if(yp_nv == NULL)
-        daeThrowException("Allocation of yp array failed");
+        csThrowException("Allocation of yp array failed");
     yp = yp_nv;
 
-    avtol_nv = N_VNew_Parallel(comm, model->structure.Nequations, model->structure.Nequations_total);
+    avtol_nv = N_VNew_Parallel(comm, Neq_local, Neq);
     if(avtol_nv == NULL)
-        daeThrowException("Allocation of avtol array failed");
+        csThrowException("Allocation of avtol array failed");
 
     /* Create and initialize  y, y', and absolute tolerance vectors. */
     yval = NV_DATA_P(yy_nv);
-    for(i = 0; i < model->structure.Nequations; i++)
+    for(i = 0; i < Neq_local; i++)
         yval[i] = initValues[i];
 
+    /* Initial derivatives are not relevant for ODE systems - set them to zero. */
     ypval = NV_DATA_P(yp_nv);
-    for(i = 0; i < model->structure.Nequations; i++)
-        ypval[i] = initDerivatives[i];
+    for(i = 0; i < Neq_local; i++)
+        ypval[i] = 0.0;
 
     atval = NV_DATA_P(avtol_nv);
-    for(i = 0; i < model->structure.Nequations; i++)
+    for(i = 0; i < Neq_local; i++)
         atval[i] = absTolerances[i];
 
     /* Integration limits */
@@ -179,15 +194,15 @@ void odeiSolver_t::Initialize(csDifferentialEquationModel_t* pmodel,
     /* Call CVodeCreate to initialize IDA memory */
     mem = CVodeCreate(linearMultistepMethod, nonlinearSolverIteration);
     if(mem == NULL)
-        daeThrowException("CVodeCreate failed");
+        csThrowException("CVodeCreate failed");
 
     retval = CVodeInit(mem, rhs, t0, yy_nv);
     if(retval < 0)
-        daeThrowException( (boost::format("CVodeInit failed: %s") % CVodeGetReturnFlagName(retval)).str() );
+        csThrowException( (boost::format("CVodeInit failed: %s") % CVodeGetReturnFlagName(retval)).str() );
 
     retval = CVodeSVtolerances(mem, rtol, avtol_nv);
     if(retval < 0)
-        daeThrowException( (boost::format("CVodeSVtolerances failed: %s") % CVodeGetReturnFlagName(retval)).str() );
+        csThrowException( (boost::format("CVodeSVtolerances failed: %s") % CVodeGetReturnFlagName(retval)).str() );
 
     /* Free avtol */
     N_VDestroy_Parallel(avtol_nv);
@@ -232,34 +247,18 @@ void odeiSolver_t::Initialize(csDifferentialEquationModel_t* pmodel,
     /* Set user data. */
     retval = CVodeSetUserData(mem, this);
     if(retval < 0)
-        daeThrowException( (boost::format("IDASetUserData failed: %s") % CVodeGetReturnFlagName(retval)).str() );
+        csThrowException( (boost::format("IDASetUserData failed: %s") % CVodeGetReturnFlagName(retval)).str() );
 
     /* Call IDARootInit to set the root function and number of roots. */
     int noRoots = model->NumberOfRoots();
     retval = CVodeRootInit(mem, noRoots, root);
     if(retval < 0)
-        daeThrowException( (boost::format("IDARootInit failed: %s") % CVodeGetReturnFlagName(retval)).str() );
+        csThrowException( (boost::format("IDARootInit failed: %s") % CVodeGetReturnFlagName(retval)).str() );
 
     /* Set up the linear solver. */
     std::string lasolverLibrary = cfg.GetString("LinearSolver.Library");
     if(lasolverLibrary == "Sundials")
     {
-        std::string preconditionerName = cfg.GetString("LinearSolver.Preconditioner.Library", "Not specified");
-
-        if(preconditionerName == "Ifpack")
-            preconditioner.reset(new daePreconditioner_Ifpack);
-        else if(preconditionerName == "ML")
-            preconditioner.reset(new daePreconditioner_ML);
-        else if(preconditionerName == "Jacobi")
-            preconditioner.reset(new daePreconditioner_Jacobi);
-        else
-            daeThrowException("Invalid preconditioner library specified: " + preconditionerName);
-
-        bool isODESystem = true;
-        retval = preconditioner->Initialize(pmodel, model->structure.Nequations, isODESystem);
-        if(retval < 0)
-            daeThrowException( (boost::format("Preconditioner initialize failed: %s") % CVodeGetReturnFlagName(retval)).str() );
-
         // Maximum dimension of the Krylov subspace to be used (if 0 use the default value MAXL = 5)
         int kspace = cfg.GetInteger("LinearSolver.Parameters.kspace", 0);
         int preconditioningType = PREC_RIGHT;
@@ -273,11 +272,26 @@ void odeiSolver_t::Initialize(csDifferentialEquationModel_t* pmodel,
         else if(preconditioningType_s == "none")
             preconditioningType = PREC_NONE;
         else
-            daeThrowException("Invalid preconditioning type specified: " + preconditioningType_s);
+            csThrowException("Invalid preconditioning type specified: " + preconditioningType_s);
 
         retval = CVSpgmr(mem, preconditioningType, kspace);
         if(retval < 0)
-            daeThrowException( (boost::format("CVSpgmr failed: %s") % CVodeGetReturnFlagName(retval)).str() );
+            csThrowException( (boost::format("CVSpgmr failed: %s") % CVodeGetReturnFlagName(retval)).str() );
+
+        std::string preconditionerName = cfg.GetString("LinearSolver.Preconditioner.Library", "Not specified");
+        if(preconditionerName == "Ifpack")
+            preconditioner.reset(new daePreconditioner_Ifpack);
+        else if(preconditionerName == "ML")
+            preconditioner.reset(new daePreconditioner_ML);
+        else if(preconditionerName == "Jacobi")
+            preconditioner.reset(new daePreconditioner_Jacobi);
+        else
+            csThrowException("Invalid preconditioner library specified: " + preconditionerName);
+
+        bool isODESystem = true;
+        retval = preconditioner->Initialize(pmodel, Neq_local, isODESystem);
+        if(retval < 0)
+            csThrowException( (boost::format("Preconditioner initialize failed: %s") % CVodeGetReturnFlagName(retval)).str() );
 
         CVSpilsSetEpsLin(mem, cfg.GetFloat("LinearSolver.Parameters.EpsLin", 0.05));
         std::string gstype = cfg.GetString("LinearSolver.Parameters.GSType", "MODIFIED_GS");
@@ -288,7 +302,7 @@ void odeiSolver_t::Initialize(csDifferentialEquationModel_t* pmodel,
 
         retval = CVSpilsSetPreconditioner(mem, setup_preconditioner, solve_preconditioner);
         if(retval < 0)
-            daeThrowException( (boost::format("IDASpilsSetPreconditioner failed: %s") % CVodeGetReturnFlagName(retval)).str() );
+            csThrowException( (boost::format("IDASpilsSetPreconditioner failed: %s") % CVodeGetReturnFlagName(retval)).str() );
 
         // This is very important for overall performance!!
         // For some reasons works very slow if jacobian_vector_multiply is used for Npe > 1.
@@ -308,17 +322,27 @@ void odeiSolver_t::Initialize(csDifferentialEquationModel_t* pmodel,
         }
         else
         {
-            daeThrowException( (boost::format("Not supported LinearSolver.Parameters.JacTimesVecFn option: %s") % jtimes).str() );
+            csThrowException( (boost::format("Not supported LinearSolver.Parameters.JacTimesVecFn option: %s") % jtimes).str() );
         }
+
+        // Replace lsolve/lsetup function with the timed versions.
+        CVodeMem cv_mem = (CVodeMem)mem;
+        // Save original CVodes function pointers.
+        cv_lsetup = cv_mem->cv_lsetup;
+        cv_lsolve = cv_mem->cv_lsolve;
+        // Replace the function pointers with the timed ones.
+        // They will call the original function with the same arguments.
+        cv_mem->cv_lsetup = cvode_spils_setup_la;
+        cv_mem->cv_lsolve = cvode_spils_solve_la;
     }
     else if(lasolverLibrary == "Trilinos")
     {
         /*
         lasolver.reset(new TrilinosAmesosLinearSolver_t);
         bool isODESystem = true;
-        retval = lasolver->Initialize(pmodel, model->structure.Nequations, isODESystem);
+        retval = lasolver->Initialize(pmodel, Neq_local, isODESystem);
         if(retval < 0)
-            daeThrowException( (boost::format("LA Solver initialize failed: %s") % CVodeGetReturnFlagName(retval)).str() );
+            csThrowException( (boost::format("LA Solver initialize failed: %s") % CVodeGetReturnFlagName(retval)).str() );
 
         IDAMem ida_mem = (IDAMem)mem;
 
@@ -338,7 +362,7 @@ void odeiSolver_t::Initialize(csDifferentialEquationModel_t* pmodel,
         int kspace = cfg.GetInteger("LinearSolver.Parameters.kspace", 0);
         retval = IDASpgmr(mem, kspace);
         if(retval < 0)
-            daeThrowException( (boost::format("IDASpgmr failed: %s") % CVodeGetReturnFlagName(retval)).str() );
+            csThrowException( (boost::format("IDASpgmr failed: %s") % CVodeGetReturnFlagName(retval)).str() );
 
         // Set up the BBD preconditioner.
         long int mudq      = 5; // Upper half-bandwidth to be used in the difference-quotient Jacobian approximation.
@@ -347,9 +371,9 @@ void odeiSolver_t::Initialize(csDifferentialEquationModel_t* pmodel,
         long int mlkeep    = 2; // Lower half-bandwidth of the retained banded approximate Jacobian block
         realtype dq_rel_yy = 0.0; // The relative increment in components of y used in the difference quotient approximations.
                                   // The default is dq_rel_yy = sqrt(unit roundoff), which can be specified by passing dq_rel_yy = 0.0
-        retval = IDABBDPrecInit(mem, model->structure.Nequations, mudq, mldq, mukeep, mlkeep, dq_rel_yy, bbd_local_fn, NULL);
+        retval = IDABBDPrecInit(mem, Neq_local, mudq, mldq, mukeep, mlkeep, dq_rel_yy, bbd_local_fn, NULL);
         if(retval < 0)
-            daeThrowException( (boost::format("IDABBDPrecInit failed: %s") % CVodeGetReturnFlagName(retval)).str() );
+            csThrowException( (boost::format("IDABBDPrecInit failed: %s") % CVodeGetReturnFlagName(retval)).str() );
         */
     }
 }
@@ -378,7 +402,7 @@ void odeiSolver_t::RefreshRootFunctions(int noRoots)
 {
     int retval = CVodeRootInit(mem, noRoots, root);
     if(retval < 0)
-        daeThrowException( (boost::format("IDARootInit failed: %s") % CVodeGetReturnFlagName(retval)).str() );
+        csThrowException( (boost::format("IDARootInit failed: %s") % CVodeGetReturnFlagName(retval)).str() );
 }
 
 void odeiSolver_t::ResetIDASolver(bool bCopyDataFromBlock, real_t dCurrentTime, bool bResetSensitivities)
@@ -386,7 +410,7 @@ void odeiSolver_t::ResetIDASolver(bool bCopyDataFromBlock, real_t dCurrentTime, 
     currentTime = dCurrentTime;
     int retval = CVodeReInit(mem, dCurrentTime, (N_Vector)yy);
     if(retval < 0)
-        daeThrowException( (boost::format("IDAReInit failed: %s") % CVodeGetReturnFlagName(retval)).str() );
+        csThrowException( (boost::format("IDAReInit failed: %s") % CVodeGetReturnFlagName(retval)).str() );
 }
 
 real_t odeiSolver_t::Solve(real_t dTime, daeeStopCriterion eCriterion, bool bReportDataAroundDiscontinuities)
@@ -402,18 +426,21 @@ real_t odeiSolver_t::Solve(real_t dTime, daeeStopCriterion eCriterion, bool bRep
 
         if(retval == CV_TOO_MUCH_WORK)
         {
-            printf("Warning: IDAS solver error at TIME = %f [IDA_TOO_MUCH_WORK]\n", currentTime);
-            printf("  Try to increase MaxNumSteps option\n");
+            std::snprintf(msgBuffer, msgBufferSize, "Warning: IDAS solver error at TIME = %f [IDA_TOO_MUCH_WORK]\n", currentTime);
+            simulation->log->Message(msgBuffer);
+            std::snprintf(msgBuffer, msgBufferSize, "  Try to increase MaxNumSteps option\n");
+            simulation->log->Message(msgBuffer);
             realtype tolsfac = 0;
             retval = CVodeGetTolScaleFactor(mem, &tolsfac);
-            printf("  Suggested factor by which the user’s tolerances should be scaled is %f\n", tolsfac);
+            std::snprintf(msgBuffer, msgBufferSize, "  Suggested factor by which the user’s tolerances should be scaled is %f\n", tolsfac);
+            simulation->log->Message(msgBuffer);
             continue;
         }
         else if(retval < 0)
         {
             std::string msg = (boost::format("Sundials IDAS solver cowardly failed to solve the system at time = %.15f; "
                                              "time horizon [%.15f]; %s\n") % currentTime % targetTime % CVodeGetReturnFlagName(retval)).str();
-            daeThrowException(msg);
+            csThrowException(msg);
         }
 
         /* If a root has been found, check if any of conditions are satisfied and do what is necessary */
@@ -424,7 +451,7 @@ real_t odeiSolver_t::Solve(real_t dTime, daeeStopCriterion eCriterion, bool bRep
             {
                 /* The data will be reported only if there is a discontinuity */
                 if(bReportDataAroundDiscontinuities)
-                    simulation->ReportData();
+                    simulation->ReportData(currentTime);
 
                 eDiscontinuityType = model->ExecuteActions(currentTime, yval, ypval);
 
@@ -434,7 +461,7 @@ real_t odeiSolver_t::Solve(real_t dTime, daeeStopCriterion eCriterion, bool bRep
 
                     /* The data will be reported again ONLY if there was a discontinuity */
                     if(bReportDataAroundDiscontinuities)
-                        simulation->ReportData();
+                        simulation->ReportData(currentTime);
 
                     if(eCriterion == eStopAtModelDiscontinuity)
                         return currentTime;
@@ -445,20 +472,25 @@ real_t odeiSolver_t::Solve(real_t dTime, daeeStopCriterion eCriterion, bool bRep
 
                     /* The data will be reported again ONLY if there was a discontinuity */
                     if(bReportDataAroundDiscontinuities)
-                        simulation->ReportData();
+                        simulation->ReportData(currentTime);
 
                     if(eCriterion == eStopAtModelDiscontinuity)
                         return currentTime;
                 }
                 else if(eDiscontinuityType == eGlobalDiscontinuity)
                 {
-                    daeThrowException("Not supported discontinuity type: eGlobalDiscontinuity");
+                    csThrowException("Not supported discontinuity type: eGlobalDiscontinuity");
                 }
             }
             else
             {
             }
         }
+
+        /* Get dy/dt at the current time (used for data reporting only). */
+        retval = CVodeGetDky(mem, currentTime, 1, (N_Vector)yp);
+        if(retval != CV_SUCCESS)
+            csThrowException("Erorr calling CVodeGetDky");
 
         if(printInfo && integrationMode == CV_ONE_STEP)
         {
@@ -507,7 +539,7 @@ void odeiSolver_t::Reinitialize(bool bCopyDataFromBlock, bool bResetSensitivitie
 //        {
 //            std::string msg = (boost::format("Sundials IDAS solver cowardly failed to re-initialize the system at time = %.15f; "
 //                                             "%s\n")  % currentTime % CVodeGetReturnFlagName(retval)).str();
-//            daeThrowException(msg);
+//            csThrowException(msg);
 //        }
 
 //        bool discontinuity_found = model->CheckForDiscontinuities(currentTime, yval, ypval);
@@ -528,13 +560,13 @@ void odeiSolver_t::Reinitialize(bool bCopyDataFromBlock, bool bResetSensitivitie
 //    {
 //        std::string msg = (boost::format("Sundials IDAS solver cowardly failed to re-initialize the system at time = %.15f: "
 //                                         "Max number of STN rebuilds reached; %s\n")  % currentTime % CVodeGetReturnFlagName(retval)).str();
-//        daeThrowException(msg);
+//        csThrowException(msg);
 //    }
 
 //    /* Get the corrected IC and send them to the block */
 //    retval = IDAGetConsistentIC(mem, (N_Vector)yy, (N_Vector)yp);
 //    if(retval < 0)
-//        daeThrowException("IDAGetConsistentIC failed");
+//        csThrowException("IDAGetConsistentIC failed");
 
 //   /* Get the corrected sensitivity IC */
 //    /*
@@ -600,27 +632,69 @@ void odeiSolver_t::PrintSolverStats()
     if(stats.empty())
         CollectSolverStats();
 
-    printf("ODE solver stats:\n");
-    printf("    NumSteps                    = %15d\n",    (int)stats["NumSteps"]);
-    printf("    NumRHSEvals                 = %15d\n",    (int)stats["NumEquationEvals"]);
-    printf("    NumErrTestFails             = %15d\n",    (int)stats["NumErrTestFails"]);
-    printf("    LastOrder                   = %15d\n",    (int)stats["LastOrder"]);
-    printf("    CurrentOrder                = %15d\n",    (int)stats["CurrentOrder"]);
-    printf("    LastStep                    = %15.12f\n", stats["LastStep"]);
-    printf("    CurrentStep                 = %15.12f\n", stats["CurrentStep"]);
+    std::string message;
 
-    printf("Nonlinear solver stats:\n");
-    printf("    NumNonlinSolvIters          = %15d\n", (int)stats["NumNonlinSolvIters"]);
-    printf("    NumNonlinSolvConvFails      = %15d\n", (int)stats["NumNonlinSolvConvFails"]);
+    std::snprintf(msgBuffer, msgBufferSize, "ODE solver stats:\n");
+    message += msgBuffer;
+    std::snprintf(msgBuffer, msgBufferSize, "    NumSteps                    = %15d\n",    (int)stats["NumSteps"]);
+    message += msgBuffer;
+    std::snprintf(msgBuffer, msgBufferSize, "    NumRHSEvals                 = %15d\n",    (int)stats["NumEquationEvals"]);
+    message += msgBuffer;
+    std::snprintf(msgBuffer, msgBufferSize, "    NumErrTestFails             = %15d\n",    (int)stats["NumErrTestFails"]);
+    message += msgBuffer;
+    std::snprintf(msgBuffer, msgBufferSize, "    LastOrder                   = %15d\n",    (int)stats["LastOrder"]);
+    message += msgBuffer;
+    std::snprintf(msgBuffer, msgBufferSize, "    CurrentOrder                = %15d\n",    (int)stats["CurrentOrder"]);
+    message += msgBuffer;
+    std::snprintf(msgBuffer, msgBufferSize, "    LastStep                    = %15.12f\n", stats["LastStep"]);
+    message += msgBuffer;
+    std::snprintf(msgBuffer, msgBufferSize, "    CurrentStep                 = %15.12f\n", stats["CurrentStep"]);
+    message += msgBuffer;
 
-    printf("Linear solver stats (Sundials spils):\n");
-    printf("    NumLinIters                 = %15d\n", (int)stats["NumLinIters"]);
-    printf("    NumRHSEvals                 = %15d\n", (int)stats["NumEquationEvals"]);
-    printf("    NumPrecEvals                = %15d\n", (int)stats["NumPrecEvals"]);
-    printf("    NumPrecSolves               = %15d\n", (int)stats["NumPrecSolves"]);
-    printf("    NumJtimesEvals              = %15d\n", (int)stats["NumJtimesEvals"]);
+    std::snprintf(msgBuffer, msgBufferSize, "Nonlinear solver stats:\n");
+    message += msgBuffer;
+    std::snprintf(msgBuffer, msgBufferSize, "    NumNonlinSolvIters          = %15d\n", (int)stats["NumNonlinSolvIters"]);
+    message += msgBuffer;
+    std::snprintf(msgBuffer, msgBufferSize, "    NumNonlinSolvConvFails      = %15d\n", (int)stats["NumNonlinSolvConvFails"]);
+    message += msgBuffer;
+
+    std::snprintf(msgBuffer, msgBufferSize, "Linear solver stats (Sundials spils):\n");
+    message += msgBuffer;
+    message += msgBuffer;
+    std::snprintf(msgBuffer, msgBufferSize, "    NumLinIters                 = %15d\n", (int)stats["NumLinIters"]);
+    message += msgBuffer;
+    std::snprintf(msgBuffer, msgBufferSize, "    NumRHSEvals                 = %15d\n", (int)stats["NumEquationEvals"]);
+    message += msgBuffer;
+    std::snprintf(msgBuffer, msgBufferSize, "    NumPrecEvals                = %15d\n", (int)stats["NumPrecEvals"]);
+    message += msgBuffer;
+    std::snprintf(msgBuffer, msgBufferSize, "    NumPrecSolves               = %15d\n", (int)stats["NumPrecSolves"]);
+    message += msgBuffer;
+    std::snprintf(msgBuffer, msgBufferSize, "    NumJtimesEvals              = %15d\n", (int)stats["NumJtimesEvals"]);
+    message += msgBuffer;
+
+    simulation->log->Message(message);
 }
 
+static int cvode_spils_setup_la(CVodeMem cvode_mem,int convfail,
+                                N_Vector ypred, N_Vector fpred, booleantype *jcurPtr,
+                                N_Vector vtemp1, N_Vector vtemp2, N_Vector vtemp3)
+{
+    auxiliary::daeTimesAndCounters& tcs = auxiliary::daeTimesAndCounters::GetTimesAndCounters();
+    auxiliary::TimerCounter tc(tcs.LASetup);
+
+    return cv_lsetup(cvode_mem, convfail,
+                     ypred, fpred, jcurPtr,
+                     vtemp1, vtemp2, vtemp3);
+}
+
+static int cvode_spils_solve_la(CVodeMem cvode_mem, N_Vector b, N_Vector weight,
+                                N_Vector ycur, N_Vector fcur)
+{
+    auxiliary::daeTimesAndCounters& tcs = auxiliary::daeTimesAndCounters::GetTimesAndCounters();
+    auxiliary::TimerCounter tc(tcs.LASolve);
+
+    return cv_lsolve(cvode_mem, b, weight, ycur, fcur);
+}
 
 /* Private functions */
 static int rhs(realtype time,

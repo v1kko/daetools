@@ -12,10 +12,16 @@ the OpenCS software; if not, see <http://www.gnu.org/licenses/>.
 ***********************************************************************************/
 #include <string>
 #include <stdexcept>
+#include "partitioner_simple.h"
 #include "cs_partitioners.h"
 
 namespace cs
 {
+std::shared_ptr<csGraphPartitioner_t> createGraphPartitioner_Simple()
+{
+    return std::shared_ptr<csGraphPartitioner_t>(new csGraphPartitioner_Simple);
+}
+
 csGraphPartitioner_Simple::csGraphPartitioner_Simple()
 {
 }

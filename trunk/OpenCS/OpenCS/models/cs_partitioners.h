@@ -21,75 +21,9 @@ the OpenCS software; if not, see <http://www.gnu.org/licenses/>.
 
 namespace cs
 {
-class csGraphPartitioner_t
-{
-public:
-    virtual ~csGraphPartitioner_t(){}
-
-    virtual std::string GetName() = 0;
-
-/* Arguments:
- *   [in]  Npe:                                   Number of partitions to create
- *   [in]  Nvertices:                             Number of graph vertices
- *   [in]  Nconstraints:                          Number of balancing constraints
- *   [in]  rowIndices, colIndices:                The system's incidence matrix (in CRS format)
- *   [in]  vertexWeights[Nconstraints,Nvertices]: 2D array with weights for every vertex
- *   [out] partitions[Npe,]:                      2D array of Npe sets with equation indexes
- */
-    virtual int Partition(int32_t                               Npe,           /* [in] */
-                          int32_t                               Nvertices,     /* [in] */
-                          int32_t                               Nconstraints,  /* [in] */
-                          std::vector<uint32_t>&                rowIndices,    /* [in] */
-                          std::vector<uint32_t>&                colIndices,    /* [in] */
-                          std::vector< std::vector<int32_t> >&  vertexWeights, /* [in] */
-                          std::vector< std::set<int32_t> >&     partitions     /* [out]*/) = 0;
-};
-
-class OPENCS_MODELS_API csGraphPartitioner_Simple: public csGraphPartitioner_t
-{
-public:
-    csGraphPartitioner_Simple();
-    virtual ~csGraphPartitioner_Simple();
-
-    virtual std::string GetName();
-    virtual int Partition(int32_t                               Npe,
-                          int32_t                               Nvertices,
-                          int32_t                               Nconstraints,
-                          std::vector<uint32_t>&                rowIndices,
-                          std::vector<uint32_t>&                colIndices,
-                          std::vector< std::vector<int32_t> >&  vertexWeights,
-                          std::vector< std::set<int32_t> >&     partitions);
-};
-
-enum MetisRoutine
-{
-    PartGraphKway,     /* Multilevel k-way partitioning */
-    PartGraphRecursive /* Multilevel recursive bisectioning */
-};
-
-class OPENCS_MODELS_API csGraphPartitioner_Metis: public csGraphPartitioner_t
-{
-public:
-    csGraphPartitioner_Metis(MetisRoutine routine);
-    virtual ~csGraphPartitioner_Metis();
-
-    virtual std::string GetName();
-    virtual int Partition(int32_t                               Npe,
-                          int32_t                               Nvertices,
-                          int32_t                               Nconstraints,
-                          std::vector<uint32_t>&                rowIndices,
-                          std::vector<uint32_t>&                colIndices,
-                          std::vector< std::vector<int32_t> >&  vertexWeights,
-                          std::vector< std::set<int32_t> >&     partitions);
-
-    std::vector<int32_t> GetOptions() const;
-    void SetOptions(const std::vector<int32_t>& options);
-
-protected:
-    MetisRoutine         metisRoutine;
-    std::vector<int32_t> metisOptions;
-};
-
+OPENCS_MODELS_API std::shared_ptr<csGraphPartitioner_t> createGraphPartitioner_Simple();
+OPENCS_MODELS_API std::shared_ptr<csGraphPartitioner_t> createGraphPartitioner_Metis(const std::string& algorithm);
+OPENCS_MODELS_API std::shared_ptr<csGraphPartitioner_t> createGraphPartitioner_2D_Npde(int N_x, int N_y, int N_pde, double Npex_Npey_ratio = 1.0);
 }
 
 #endif

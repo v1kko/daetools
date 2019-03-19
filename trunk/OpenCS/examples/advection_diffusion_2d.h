@@ -29,15 +29,15 @@ public:
     {
         // In the CVode example cvsAdvDiff_bnd.c they only modelled interior points,
         //   excluded the boundaries from the ODE system, and assumed homogenous Dirichlet BCs (0.0).
-        // There, they divided the 2D domain into (Nx+1)x(Ny+1) points and
-        //   the points at x=0, x=Nx-1, y=0 and y=Ny-1 are not used in the model.
+        // There, they divided the 2D domain into (Nx+1) by (Ny+1) points and
+        //   the points at x=0, x=Lx, y=0 and y=Ly are not used in the model.
         // Thus, x domain starts at x=1*dx, y domain starts at x=1*dy.
         x0 = 0.0;
         x1 = 2.0;
         y0 = 0.0;
         y1 = 1.0;
-        dx = (x1-x0) / (Nx+1);
-        dy = (y1-y0) / (Ny+1);
+        dx = (x1-x0) / (Nx+2-1);
+        dy = (y1-y0) / (Ny+2-1);
 
         Nequations = Nx*Ny;
         u_values   = NULL;
@@ -58,6 +58,24 @@ public:
                 real_t y = (iy+1) * dy;
 
                 u0[index] = x*(x1 - x)*y*(y1 - y)*std::exp(5*x*y);
+            }
+        }
+    }
+
+    void GetVariableNames(std::vector<std::string>& names)
+    {
+        const int bsize = 32;
+        char buffer[bsize];
+        int index = 0;
+
+        names.resize(Nequations);
+        for(int x = 0; x < Nx; x++)
+        {
+            for(int y = 0; y < Ny; y++)
+            {
+                std::snprintf(buffer, bsize, "%s(%d,%d)", "u", x, y);
+                names[index] = buffer;
+                index++;
             }
         }
     }

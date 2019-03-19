@@ -28,7 +28,7 @@ the OpenCS software; if not, see <http://www.gnu.org/licenses/>.
 
 namespace cs
 {
-class csComputeStackEvaluator_OpenCL : public csComputeStackEvaluator_t
+class OPENCS_EVALUATORS_API csComputeStackEvaluator_OpenCL : public csComputeStackEvaluator_t
 {
 public:
     csComputeStackEvaluator_OpenCL(int platformID, int deviceID, std::string buildProgramOptions = "");

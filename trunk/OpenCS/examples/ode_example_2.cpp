@@ -13,13 +13,8 @@ OpenCS software; if not, see <http://www.gnu.org/licenses/>.
 #include <mpi.h>
 #include "advection_diffusion_2d.h"
 #include <OpenCS/models/cs_model_builder.h>
-#include <OpenCS/evaluators/cs_evaluator_sequential.h>
 #include <OpenCS/simulators/cs_simulators.h>
 using namespace cs;
-
-const char* simulation_options_json =
-#include "simulation_options-ode.json"
-;
 
 /* Reimplementation of CVodes cvsAdvDiff_bnd example.
  * The problem is simple advection-diffusion in 2-D:
@@ -33,11 +28,33 @@ const char* simulation_options_json =
  *   u(x,y,t=0) = x(2-x)y(1-y)exp(5xy).
  *
  * The PDE is discretized on a uniform Nx+2 by Ny+2 grid with central differencing.
- * The boundary points are eliminated leaving an ODE system of size Nx*Ny. */
+ * The boundary points are eliminated leaving an ODE system of size Nx*Ny.
+ * The original results are in ode_example_2.csv file. */
 int main(int argc, char *argv[])
 {
-    uint32_t    Nx = 10;
-    uint32_t    Ny = 5;
+    uint32_t Nx = 10;
+    uint32_t Ny = 5;
+
+    if(argc == 3)
+    {
+        Nx = atoi(argv[1]);
+        Ny = atoi(argv[2]);
+    }
+    else if(argc == 1)
+    {
+        // Use the default grid size.
+    }
+    else
+    {
+        printf("Usage:\n");
+        printf("  %s (using the default grid: %u x %u)\n", argv[0], Nx, Ny);
+        printf("  %s Nx Ny\n", argv[0]);
+        return -1;
+    }
+
+    printf("############################################################\n");
+    printf(" Simple advection-diffusion in 2D: %u x %u grid\n", Nx, Ny);
+    printf("############################################################\n");
 
     // Homogenous Dirichlet BCs at all four edges: u|boundary = 0.0.
     // Boundaries are excluded from the system of equations, that's why the system is ODE (should be a DAE system).
@@ -72,6 +89,11 @@ int main(int argc, char *argv[])
     mb.SetModelEquations(equations);
     printf("Model equations set\n");
 
+    // Set variable names
+    std::vector<std::string> names;
+    adv_diff.GetVariableNames(names);
+    mb.SetVariableNames(names);
+
     /*
     printf("Equations expresions:\n");
     for(uint32_t i = 0; i < Nvariables; i++)
@@ -87,45 +109,33 @@ int main(int argc, char *argv[])
     adv_diff.SetInitialConditions(u0);
     mb.SetVariableValues(u0);
 
-    real_t startTime         = 0.0;
-    real_t timeHorizon       = 1.0;
-    real_t reportingInterval = 0.1;
-    real_t relativeTolerance = 1e-5;
+    // Set the simulation options.
+    csSimulationOptionsPtr options = mb.GetSimulationOptions();
+    options->SetDouble("Simulation.TimeHorizon",               1.0);
+    options->SetDouble("Simulation.ReportingInterval",         0.1);
+    options->SetDouble("Solver.Parameters.RelativeTolerance", 1e-5);
+    std::string simulationOptions = options->ToString();
 
-    const size_t bsize = 8192;
-    char buffer[bsize];
-    std::snprintf(buffer, bsize, simulation_options_json, startTime, timeHorizon, reportingInterval, relativeTolerance);
-    std::string simulationOptions = buffer;
-
+    // Generate a single model (no graph partitioner required).
     uint32_t Npe = 1;
     std::vector<std::string> balancingConstraints;
-    std::string inputFilesDirectory = "ode_example_2-Advection-Diffusion";
-    {
-        csGraphPartitioner_Simple partitioner;
-        std::vector<csModelPtr> models_sequential = mb.PartitionSystem(Npe, &partitioner, balancingConstraints, true);
-        mb.ExportModels(models_sequential, inputFilesDirectory, simulationOptions);
-        printf("Generated model for the Advection-Diffusion model\n");
-    }
+    std::string inputFilesDirectory = "ode_example_2-sequential";
+    csGraphPartitioner_t* gp = NULL;
+    std::vector<csModelPtr> models_sequential = mb.PartitionSystem(Npe, gp, balancingConstraints, true);
+    csModelBuilder_t::ExportModels(models_sequential, inputFilesDirectory, simulationOptions);
+    printf("Generated model for Npe = 1\n");
 
-    /* 4. Simulate the exported model using the libOpenCS_Simulators. */
+    /* 4. Simulate the sequential model using the libOpenCS_Simulators. */
     printf("Simulation of '%s' (using libOpenCS_Simulators)\n\n", inputFilesDirectory.c_str());
     MPI_Init(&argc, &argv);
-    csSimulate_ODE(inputFilesDirectory);
+
+    // (a) Run simulation using the input files from the specified directory:
+    csSimulate(inputFilesDirectory);
+    // (b) Run simulation using the generated csModel_t, string with JSON options and the directory for simulation outputs:
+    //csModelPtr model = models_sequential[0];
+    //csSimulate(model, simulationOptions, inputFilesDirectory);
+
     MPI_Finalize();
 
     return 0;
 }
-
-/* Results from CVodes cvsAdvDiff_bnd:
-At t = 0      max.norm(u) =  8.954716e+01
-At t = 0.10   max.norm(u) =  4.132889e+00   nst =   85
-At t = 0.20   max.norm(u) =  1.039294e+00   nst =  103
-At t = 0.30   max.norm(u) =  2.979829e-01   nst =  113
-At t = 0.40   max.norm(u) =  8.765774e-02   nst =  120
-At t = 0.50   max.norm(u) =  2.625637e-02   nst =  126
-At t = 0.60   max.norm(u) =  7.830425e-03   nst =  130
-At t = 0.70   max.norm(u) =  2.329387e-03   nst =  134
-At t = 0.80   max.norm(u) =  6.953434e-04   nst =  137
-At t = 0.90   max.norm(u) =  2.115983e-04   nst =  140
-At t = 1.00   max.norm(u) =  6.556853e-05   nst =  142
-*/

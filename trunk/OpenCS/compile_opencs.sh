@@ -30,7 +30,8 @@ OPTIONS:
     --clean                     Clean  the specified library(ies)/solver(s).
 
 LIBRARY:
-    all             All libraries and solvers: boost cblas_clapack idas trilinos opencs
+    all             All libraries, solvers and OpenCS: boost cblas_clapack idas cvodes metis hdf5 trilinos opencs
+    libs            Only libraries and solvers: boost cblas_clapack idas cvodes metis hdf5 trilinos
 
     Individual libraries/solvers:
     boost           Boost (static) libraries (no building required, only headers)
@@ -39,6 +40,7 @@ LIBRARY:
     idas            IDAS solver with MPI interface enabled
     trilinos        Trilinos Amesos and AztecOO solvers
     metis           METIS graph partitioning library
+    hdf5            HDF5 library
     opencs          OpenCS libraries
 EOF
 }
@@ -158,6 +160,8 @@ vCVODES=2.8.2
 vIDAS=1.3.0
 vTRILINOS=12.10.1
 vMETIS=5.1.0
+vHDF5=1.10.5
+
 DAETOOLS_HTTP=http://sourceforge.net/projects/daetools/files/gnu-linux-libs
 DAETOOLS_WIN_HTTP=http://sourceforge.net/projects/daetools/files/windows-libs
 CLAPACK_HTTP=${DAETOOLS_HTTP}
@@ -165,6 +169,7 @@ IDAS_HTTP=${DAETOOLS_HTTP}
 CVODES_HTTP=${DAETOOLS_HTTP}
 TRILINOS_HTTP=http://sourceforge.net/projects/daetools/files/gnu-linux-libs
 METIS_HTTP=http://glaros.dtc.umn.edu/gkhome/fetch/sw/metis
+HDF5_HTTP=https://s3.amazonaws.com/hdf-wordpress-1/wp-content/uploads/manual/HDF5/HDF5_1_10_5/source
 
 # If no option is set use defaults
 if [ "${DO_CONFIGURE}" = "no" -a "${DO_BUILD}" = "no" -a "${DO_CLEAN}" = "no" ]; then
@@ -183,6 +188,7 @@ else
     do
     case "$solver" in
         all)              ;;
+        libs)             ;;
         boost)            ;;
         cblas_clapack)    ;;
         cvodes)           ;;
@@ -190,6 +196,7 @@ else
         opencs)           ;;
         metis)            ;;
         trilinos)         ;;
+        hdf5)             ;;
         *) echo Unrecognized solver: "$solver"
         exit
         ;;
@@ -741,6 +748,79 @@ clean_metis()
 }
 
 #######################################################
+#                      HDF5                           #
+#######################################################
+configure_hdf5()
+{
+  if [ -e hdf5 ]; then
+    rm -r hdf5
+  fi
+  
+  echo ""
+  echo "[*] Setting-up HDF5..."
+  if [ ${PLATFORM} = "Windows" ]; then
+    if [ ! -e CMake-hdf5-${vHDF5}.zip ]; then
+      $WGET ${HDF5_HTTP}/CMake-hdf5-${vHDF5}.zip
+    fi
+    unzip CMake-hdf5-${vHDF5}.zip
+    mv CMake-hdf5-${vHDF5} hdf5    
+  else
+    if [ ! -e CMake-hdf5-${vHDF5}.tar.gz ]; then
+      $WGET ${HDF5_HTTP}/CMake-hdf5-${vHDF5}.tar.gz
+    fi
+
+    tar -xzf CMake-hdf5-${vHDF5}.tar.gz
+    mv CMake-hdf5-${vHDF5} hdf5    
+  fi
+
+  cd "${ROOT_DIR}"
+}
+
+compile_hdf5()
+{
+  echo ""
+  echo "[*] Building HDF5..."
+  echo ""
+  cd hdf5
+  if [ ${PLATFORM} = "Windows" ]; then
+    if [ ${HOST_ARCH} = "win32" ]; then
+      cmd "/C build-VS2015-32.bat"
+      unzip HDF5-${vHDF5}-win32.zip
+      mv HDF5-${vHDF5}-win32 install    
+    else
+      cmd "/C build-VS2015-64.bat"
+      unzip HDF5-${vHDF5}-win64.zip
+      mv HDF5-${vHDF5}-win64 install    
+    fi
+  
+  elif [ ${PLATFORM} = "Linux" ]; then
+    sh build-unix.sh
+    tar -xzf HDF5-${vHDF5}-Linux.tar.gz
+    mv HDF5-${vHDF5}-Linux/HDF_Group/HDF5/${vHDF5} install
+  
+  elif [ ${PLATFORM} = "Darwin" ]; then
+    sh build-unix.sh
+    tar -xzf HDF5-${vHDF5}-Darwin.tar.gz
+    mv HDF5-${vHDF5}-Darwin/HDF_Group/HDF5/${vHDF5} install
+  fi
+  cd "${ROOT_DIR}"
+  echo ""
+  echo "[*] Done!"
+  echo ""
+}
+
+clean_hdf5()
+{
+  echo ""
+  echo "[*] Cleaning HDF5..."
+  echo ""
+  cd "${ROOT_DIR}"
+  echo ""
+  echo "[*] Done!"
+  echo ""
+}
+
+#######################################################
 #                     OpenCS                          #
 #######################################################
 configure_opencs()
@@ -806,7 +886,9 @@ do
     all)              if [ "${DO_CONFIGURE}" = "yes" ]; then
                           configure_boost_static
                           configure_cblas_clapack
-                          configure_idas  "ON"
+                          configure_idas   "ON"
+                          configure_cvodes "ON"
+                          configure_hdf5
                           configure_trilinos
                           configure_metis
                           configure_opencs
@@ -816,6 +898,8 @@ do
                           compile_boost_static
                           compile_cblas_clapack
                           compile_idas
+                          compile_cvodes
+                          compile_hdf5
                           compile_trilinos
                           compile_metis
                           compile_opencs
@@ -825,9 +909,42 @@ do
                           clean_boost_static
                           clean_cblas_clapack
                           clean_idas
+                          clean_cvodes
+                          clean_hdf5
                           clean_trilinos
                           clean_metis
                           clean_opencs
+                      fi
+                      ;;
+
+    libs)             if [ "${DO_CONFIGURE}" = "yes" ]; then
+                          configure_boost_static
+                          configure_cblas_clapack
+                          configure_idas   "ON"
+                          configure_cvodes "ON"
+                          configure_hdf5
+                          configure_trilinos
+                          configure_metis
+                      fi
+
+                      if [ "${DO_BUILD}" = "yes" ]; then
+                          compile_boost_static
+                          compile_cblas_clapack
+                          compile_idas
+                          compile_cvodes
+                          compile_hdf5
+                          compile_trilinos
+                          compile_metis
+                      fi
+
+                      if [ "${DO_CLEAN}" = "yes" ]; then
+                          clean_boost_static
+                          clean_cblas_clapack
+                          clean_idas
+                          clean_cvodes
+                          clean_hdf5
+                          clean_trilinos
+                          clean_metis
                       fi
                       ;;
 
@@ -906,6 +1023,19 @@ do
 
                       if [ "${DO_CLEAN}" = "yes" ]; then
                         clean_metis
+                      fi
+                      ;;
+                      
+    hdf5)             if [ "${DO_CONFIGURE}" = "yes" ]; then
+                        configure_hdf5
+                      fi
+
+                      if [ "${DO_BUILD}" = "yes" ]; then
+                        compile_hdf5
+                      fi
+
+                      if [ "${DO_CLEAN}" = "yes" ]; then
+                        clean_hdf5
                       fi
                       ;;
 

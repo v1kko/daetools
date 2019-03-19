@@ -44,14 +44,14 @@ static void loadModelStructure(csModel_t* model, const std::string& inputDirecto
     std::string filePath = formatFilename(inputDirectory, csModel_t::modelStructureFileName, model->pe_rank);
     f.open(filePath, std::ios_base::binary);
     if(!f.is_open())
-        throw std::runtime_error("Cannot open " + filePath + " file");
+        csThrowException("Cannot open " + filePath + " file");
 
     int32_t fileType;
     int32_t opencsVersion;
     f.read((char*)&fileType,       sizeof(int32_t));
     f.read((char*)&opencsVersion,  sizeof(int32_t));
     if(fileType != eInputFile_ModelStructure)
-        throw std::runtime_error("File: " + filePath + " does not contain model variables");
+        csThrowException("File: " + filePath + " does not contain model variables");
 
     f.read((char*)&model->structure.Nequations_total,   sizeof(uint32_t));
     f.read((char*)&model->structure.Nequations,         sizeof(uint32_t));
@@ -100,23 +100,27 @@ static void loadModelStructure(csModel_t* model, const std::string& inputDirecto
         f.read((char*)(&model->structure.variableTypes[0]), sizeof(int32_t) * Nitems);
     }
 
-    // variable_names (skipped)
+    // Variable names
     f.read((char*)&Nitems,  sizeof(int32_t));
     if(Nitems == 0)
     {
         model->structure.variableNames.resize(model->structure.Nequations);
+
         const size_t vnsize = 1024;
         char varname[vnsize];
 
         /* Format file name. */
         for(int i = 0; i < model->structure.Nequations; i++)
         {
-            snprintf(varname, vnsize, "y(%d)", i);
+            snprintf(varname, vnsize, "x(%d)", i);
             model->structure.variableNames[i] = varname;
         }
     }
     else
     {
+        if(Nitems != model->structure.Nequations)
+            csThrowException("Invalid number of variable names: " + std::to_string(Nitems) + " - should be " + std::to_string(model->structure.Nequations));
+
         model->structure.variableNames.resize(Nitems);
 
         int32_t length;
@@ -134,6 +138,44 @@ static void loadModelStructure(csModel_t* model, const std::string& inputDirecto
         }
     }
 
+    // DOF names
+    f.read((char*)&Nitems,  sizeof(int32_t));
+    if(Nitems == 0)
+    {
+        model->structure.dofNames.resize(model->structure.Ndofs);
+
+        const size_t vnsize = 1024;
+        char varname[vnsize];
+
+        /* Format file name. */
+        for(int i = 0; i < model->structure.Ndofs; i++)
+        {
+            snprintf(varname, vnsize, "y(%d)", i);
+            model->structure.dofNames[i] = varname;
+        }
+    }
+    else
+    {
+        if(Nitems != model->structure.Ndofs)
+            csThrowException("Invalid number of DOF names: " + std::to_string(Nitems) + " - should be " + std::to_string(model->structure.Ndofs));
+
+        model->structure.dofNames.resize(Nitems);
+
+        int32_t length;
+        char name[4096];
+        for(int i = 0; i < Nitems; i++)
+        {
+            // name length
+            f.read((char*)&length,  sizeof(int32_t));
+
+            // name contents
+            f.read((char*)(&name[0]), sizeof(char) * length);
+            name[length] = '\0';
+
+            model->structure.dofNames[i] = std::string(name);
+        }
+    }
+
     f.close();
 }
 
@@ -143,7 +185,7 @@ static void saveModelStructure(csModel_t* model, const std::string& outputDirect
     std::string filePath = formatFilename(outputDirectory, csModel_t::modelStructureFileName, model->pe_rank);
     f.open(filePath, std::ios_base::binary);
     if(!f.is_open())
-        throw std::runtime_error("Cannot open " + filePath + " file");
+        csThrowException("Cannot open " + filePath + " file");
 
     /* Write header. */
     int32_t fileType      = eInputFile_ModelStructure;
@@ -198,14 +240,32 @@ static void saveModelStructure(csModel_t* model, const std::string& outputDirect
         f.write((char*)(&model->structure.variableTypes[0]), sizeof(int32_t) * Nitems);
     }
 
-    // variable_names (skipped)
+    // Variable names
     Nitems = model->structure.variableNames.size();
     f.write((char*)&Nitems,  sizeof(int32_t));
     if(Nitems > 0)
     {
         for(int i = 0; i < Nitems; i++)
         {
-            std::string name = model->structure.variableNames[i];
+            std::string& name = model->structure.variableNames[i];
+            int32_t length = name.size();
+
+            // name length
+            f.write((char*)&length,  sizeof(int32_t));
+
+            // name contents
+            f.write((char*)(&name[0]), sizeof(char) * length);
+        }
+    }
+
+    // DOF names
+    Nitems = model->structure.dofNames.size();
+    f.write((char*)&Nitems,  sizeof(int32_t));
+    if(Nitems > 0)
+    {
+        for(int i = 0; i < Nitems; i++)
+        {
+            std::string& name = model->structure.dofNames[i];
             int32_t length = name.size();
 
             // name length
@@ -225,18 +285,18 @@ static void loadPartitionData(csModel_t* model, const std::string& inputDirector
     std::string filePath = formatFilename(inputDirectory, csModel_t::partitionDataFileName, model->pe_rank);
     f.open(filePath, std::ios_base::binary);
     if(!f.is_open())
-        throw std::runtime_error("Cannot open " + filePath + " file");
+        csThrowException("Cannot open " + filePath + " file");
 
     int32_t fileType;
     int32_t opencsVersion;
     f.read((char*)&fileType,       sizeof(int32_t));
     f.read((char*)&opencsVersion,  sizeof(int32_t));
     if(fileType != eInputFile_PartitionData)
-        throw std::runtime_error("File: " + filePath + " does not contain partition data");
+        csThrowException("File: " + filePath + " does not contain partition data");
 
     // MPI functions require integers so everything is saved as singed integers
     if(sizeof(int32_t) != sizeof(int))
-        throw std::runtime_error("Invalid size of int (must be 4 bytes)");
+        csThrowException("Invalid size of int (must be 4 bytes)");
 
     // foreign_indexes
     int32_t Nforeign;
@@ -273,7 +333,7 @@ static void loadPartitionData(csModel_t* model, const std::string& inputDirector
         model->partitionData.sendToIndexes[rank] = indexes;
 
         if(!std::is_sorted(indexes.begin(), indexes.end()))
-            throw std::runtime_error("sendToIndexes indexes are not sorted");
+            csThrowException("sendToIndexes indexes are not sorted");
     }
 
     // receiveFromIndexes
@@ -291,7 +351,7 @@ static void loadPartitionData(csModel_t* model, const std::string& inputDirector
         model->partitionData.receiveFromIndexes[rank] = indexes;
 
         if(!std::is_sorted(indexes.begin(), indexes.end()))
-            throw std::runtime_error("receiveFromIndexes indexes are not sorted");
+            csThrowException("receiveFromIndexes indexes are not sorted");
     }
 
     f.close();
@@ -303,7 +363,7 @@ static void savePartitionData(csModel_t* model, const std::string& outputDirecto
     std::string filePath = formatFilename(outputDirectory, csModel_t::partitionDataFileName, model->pe_rank);
     f.open(filePath, std::ios_base::binary);
     if(!f.is_open())
-        throw std::runtime_error("Cannot open " + filePath + " file");
+        csThrowException("Cannot open " + filePath + " file");
 
     /* Write header. */
     int32_t fileType      = eInputFile_PartitionData;
@@ -313,7 +373,7 @@ static void savePartitionData(csModel_t* model, const std::string& outputDirecto
 
     // MPI functions require integers so everything is saved as singed integers
     if(sizeof(int32_t) != sizeof(int))
-        throw std::runtime_error("Invalid size of int (must be 4 bytes)");
+        csThrowException("Invalid size of int (must be 4 bytes)");
 
     // foreign_indexes
     int32_t Nforeign = model->partitionData.foreignIndexes.size();
@@ -376,14 +436,14 @@ static void loadModelEquations(csModel_t* model, const std::string& inputDirecto
     std::string filePath = formatFilename(inputDirectory, csModel_t::modelEquationsFileName, model->pe_rank);
     f.open(filePath, std::ios_base::binary);
     if(!f.is_open())
-        throw std::runtime_error("Cannot open " + filePath + " file");
+        csThrowException("Cannot open " + filePath + " file");
 
     int32_t fileType;
     int32_t opencsVersion;
     f.read((char*)&fileType,       sizeof(int32_t));
     f.read((char*)&opencsVersion,  sizeof(int32_t));
     if(fileType != eInputFile_ModelEquations)
-        throw std::runtime_error("File: " + filePath + " does not contain model equations");
+        csThrowException("File: " + filePath + " does not contain model equations");
 
     uint32_t Ncs  = 0;
     uint32_t Nasi = 0;
@@ -406,7 +466,7 @@ static void saveModelEquations(csModel_t* model, const std::string& outputDirect
     std::string filePath = formatFilename(outputDirectory, csModel_t::modelEquationsFileName, model->pe_rank);
     f.open(filePath, std::ios_base::binary);
     if(!f.is_open())
-        throw std::runtime_error("Cannot open " + filePath + " file");
+        csThrowException("Cannot open " + filePath + " file");
 
     /* Write header. */
     int32_t fileType      = eInputFile_ModelEquations;
@@ -432,14 +492,14 @@ static void loadIncidenceMatrix(csModel_t* model, const std::string& inputDirect
     std::string filePath = formatFilename(inputDirectory, csModel_t::sparsityPatternFileName, model->pe_rank);
     f.open(filePath, std::ios_base::binary);
     if(!f.is_open())
-        throw std::runtime_error("Cannot open " + filePath + " file");
+        csThrowException("Cannot open " + filePath + " file");
 
     int32_t fileType;
     int32_t opencsVersion;
     f.read((char*)&fileType,       sizeof(int32_t));
     f.read((char*)&opencsVersion,  sizeof(int32_t));
     if(fileType != eInputFile_SparsityPattern)
-        throw std::runtime_error("File: " + filePath + " does not contain incidence matrix");
+        csThrowException("File: " + filePath + " does not contain incidence matrix");
 
     uint32_t Nequations = 0;
     uint32_t Nji        = 0;
@@ -469,7 +529,7 @@ static void saveIncidenceMatrix(csModel_t* model, const std::string& outputDirec
     std::string filePath = formatFilename(outputDirectory, csModel_t::sparsityPatternFileName, model->pe_rank);
     f.open(filePath, std::ios_base::binary);
     if(!f.is_open())
-        throw std::runtime_error("Cannot open " + filePath + " file");
+        csThrowException("Cannot open " + filePath + " file");
 
     /* Write header. */
     int32_t fileType      = eInputFile_SparsityPattern;
@@ -481,9 +541,9 @@ static void saveIncidenceMatrix(csModel_t* model, const std::string& outputDirec
     uint32_t Nji        = model->sparsityPattern.incidenceMatrixItems.size();
 
     if(model->sparsityPattern.Nequations != Nequations)
-        throw std::runtime_error("Invalid number of equations");
+        csThrowException("Invalid number of equations");
     if(model->sparsityPattern.Nnz != Nji)
-        throw std::runtime_error("Invalid number of non-zero items");
+        csThrowException("Invalid number of non-zero items");
 
     f.write((char*)&Nequations, sizeof(uint32_t));
     f.write((char*)&Nji,        sizeof(uint32_t));
@@ -506,11 +566,20 @@ csModel_t::~csModel_t()
 
 csModel_t::csModel_t()
 {
-    pe_rank  = 0;
+    pe_rank     = -1;
+    csEvaluator = NULL;
+
+    structure.Nequations        = 0;
+    structure.Nequations_total  = 0;
+    structure.Ndofs             = 0;
+    structure.isODESystem       = false;
 }
 
-void csModel_t::LoadModel(const std::string& inputDirectory)
+void csModel_t::LoadModel(int rank, const std::string& inputDirectory)
 {
+    pe_rank     = rank;
+    csEvaluator = NULL;
+
     /* Load model structure. */
     loadModelStructure(this, inputDirectory);
 
@@ -542,6 +611,27 @@ void csModel_t::SaveModel(const std::string& outputDirectory)
 
     /* Save incidence matrix. */
     saveIncidenceMatrix(this, outputDirectory);
+}
+
+void csModel_t::Free()
+{
+    std::vector<real_t>()     .swap(structure.dofValues);
+    std::vector<real_t>()     .swap(structure.variableValues);
+    std::vector<real_t>()     .swap(structure.variableDerivatives);
+    std::vector<std::string>().swap(structure.variableNames);
+    std::vector<int32_t>()    .swap(structure.variableTypes);
+    std::vector<real_t>()     .swap(structure.absoluteTolerances);
+
+    std::vector<csComputeStackItem_t>().swap(equations.computeStacks);
+    std::vector<uint32_t>().swap(equations.activeEquationSetIndexes);
+
+    std::vector<uint32_t>()               .swap(sparsityPattern.rowIndexes);
+    std::vector<csIncidenceMatrixItem_t>().swap(sparsityPattern.incidenceMatrixItems);
+
+    std::vector<int32_t>()     .swap(partitionData.foreignIndexes);
+    std::map<int32_t,int32_t>().swap(partitionData.biToBiLocal);
+    csPartitionIndexMap()      .swap(partitionData.sendToIndexes);
+    csPartitionIndexMap()      .swap(partitionData.receiveFromIndexes);
 }
 
 }

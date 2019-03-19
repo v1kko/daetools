@@ -1,9 +1,24 @@
 R"=====({
     "Simulation": {
-        "StartTime":         %.15f,
-        "TimeHorizon":       %.15f,
-        "ReportingInterval": %.15f,
-        "OutputDirectory":   "results"
+        "StartTime":         0.0,
+        "TimeHorizon":       0.0,
+        "ReportingInterval": 0.0,
+        "OutputDirectory":   "",
+        "Log": {
+            "Name": "StdOut",
+            "Parameters": {
+            }
+        },
+        "DataReporter": {
+            "Name": "CSV",
+            "Parameters": {
+                "fileNameResults":     "results.csv",
+                "fileNameDerivatives": "derivatives.csv",
+                "outputFormat":        "fixed",
+                "delimiter":            ";",
+                "precision":            15
+            }
+        }
     },
     "Model" : {
         "ComputeStackEvaluator" : {
@@ -18,7 +33,7 @@ R"=====({
         "Name": "IDAS",
         "PrintInfo": false,
         "Parameters": {
-            "RelativeTolerance":  %.15f,
+            "RelativeTolerance":  1e-5,
             "IntegrationMode":    "Normal",
             "MaxOrd":             5,
             "MaxNumSteps":        500,
@@ -28,7 +43,7 @@ R"=====({
             "MaxNonlinIters":     4,
             "MaxConvFails":       10,
             "NonlinConvCoef":     0.33,
-            
+
             "NoInactiveRootWarn": false,
             "SuppressAlg":        false,
             "NonlinConvCoefIC":   0.0033,

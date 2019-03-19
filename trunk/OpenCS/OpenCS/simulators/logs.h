@@ -10,22 +10,56 @@ PARTICULAR PURPOSE. See the GNU Lesser General Public License for more details.
 You should have received a copy of the GNU Lesser General Public License along with
 the OpenCS software; if not, see <http://www.gnu.org/licenses/>.
 ***********************************************************************************/
-#if !defined(CS_OPENCL_FACTORY_H)
-#define CS_OPENCL_FACTORY_H
+#ifndef CS_LOGS_H
+#define CS_LOGS_H
 
 #include <string>
-#include <vector>
-#include "../cs_evaluator.h"
+#include <iostream>
+#include <fstream>
+#include "../cs_model.h"
 
 namespace cs
 {
-OPENCS_EVALUATORS_API csComputeStackEvaluator_t* csCreateOpenCLEvaluator(int platformID,
-                                                                         int deviceID,
-                                                                         std::string buildProgramOptions = "");
+class csLog_StdOut : public csLog_t
+{
+public:
+    csLog_StdOut();
+    virtual ~csLog_StdOut();
 
-OPENCS_EVALUATORS_API csComputeStackEvaluator_t* csCreateOpenCLEvaluator_MultiDevice(const std::vector<int>&    platforms,
-                                                                                     const std::vector<int>&    devices,
-                                                                                     const std::vector<double>& taskPortions,
-                                                                                     std::string                buildProgramOptions = "");
+public:
+    bool Connect(int rank);
+    void Disconnect();
+    bool IsConnected();
+    std::string	GetName(void) const;
+    void Message(const std::string& strMessage);
+
+protected:
+    int         pe_rank;
+    std::string m_strName;
+};
+
+class csLog_TextFile : public csLog_t
+{
+public:
+    csLog_TextFile(const std::string& strFileName);
+    virtual ~csLog_TextFile();
+
+public:
+    bool Connect(int rank);
+    void Disconnect();
+    bool IsConnected();
+    std::string GetName(void) const;
+    void Message(const std::string& strMessage);
+
+    std::string GetFilename() const;
+
+protected:
+    int           pe_rank;
+    std::string   m_strName;
+    std::ofstream file;
+    std::string   m_strFilename;
+};
+
 }
+
 #endif

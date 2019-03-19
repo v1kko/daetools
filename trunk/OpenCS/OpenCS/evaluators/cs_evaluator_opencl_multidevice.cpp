@@ -25,7 +25,7 @@ csComputeStackEvaluator_OpenCL_MultiDevice::csComputeStackEvaluator_OpenCL_Multi
                                                                                        std::string                buildProgramOptions)
 {
     if(platforms.size() != devices.size() || platforms.size() != taskPortions.size())
-        throw std::runtime_error("Invalid number of platforms/devices/taskPortions specifed");
+        csThrowException("Invalid number of platforms/devices/taskPortions specifed");
 
     m_platforms    = platforms;
     m_devices      = devices;

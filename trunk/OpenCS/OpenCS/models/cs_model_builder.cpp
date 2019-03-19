@@ -14,6 +14,7 @@ the OpenCS software; if not, see <http://www.gnu.org/licenses/>.
 #include <math.h>
 #include <locale.h>
 #include <set>
+#include <iostream>
 #include <fstream>
 #include <iomanip>
 #include <iterator>
@@ -21,8 +22,16 @@ the OpenCS software; if not, see <http://www.gnu.org/licenses/>.
 #include <functional>
 #include <algorithm>
 #include "cs_model_builder.h"
+#include "cs_simulation_options.h"
 #include <experimental/filesystem>
 namespace filesystem = std::experimental::filesystem;
+
+const char* default_simulation_options_ode =
+#include "default_simulation_options-ode.json"
+;
+const char* default_simulation_options_dae =
+#include "default_simulation_options-dae.json"
+;
 
 namespace cs
 {
@@ -38,7 +47,8 @@ void csModelBuilder_t::Initialize_ODE_System(uint32_t           noVariables,
                                              uint32_t           noDofs,
                                              real_t             defaultVariableValue,
                                              real_t             defaultAbsoluteTolerance,
-                                             const std::string& defaultVariableName)
+                                             const std::string& defaultVariableName,
+                                             const std::string& defaultDOFName)
 {
     isODESystem = true;
     Initialize(noVariables,
@@ -46,7 +56,11 @@ void csModelBuilder_t::Initialize_ODE_System(uint32_t           noVariables,
                defaultVariableValue,
                0.0, /* Not relevant in ODE systems. */
                defaultAbsoluteTolerance,
-               defaultVariableName);
+               defaultVariableName,
+               defaultDOFName);
+
+    simulationOptions.reset(new csSimulationOptions);
+    simulationOptions->LoadString(default_simulation_options_ode);
 }
 
 void csModelBuilder_t::Initialize_DAE_System(uint32_t           noVariables,
@@ -54,7 +68,8 @@ void csModelBuilder_t::Initialize_DAE_System(uint32_t           noVariables,
                                              real_t             defaultVariableValue,
                                              real_t             defaultVariableTimeDerivative,
                                              real_t             defaultAbsoluteTolerance,
-                                             const std::string& defaultVariableName)
+                                             const std::string& defaultVariableName,
+                                             const std::string& defaultDOFName)
 {
     isODESystem = false;
     Initialize(noVariables,
@@ -62,7 +77,11 @@ void csModelBuilder_t::Initialize_DAE_System(uint32_t           noVariables,
                defaultVariableValue,
                defaultVariableTimeDerivative,
                defaultAbsoluteTolerance,
-               defaultVariableName);
+               defaultVariableName,
+               defaultDOFName);
+
+    simulationOptions.reset(new csSimulationOptions);
+    simulationOptions->LoadString(default_simulation_options_dae);
 }
 
 void csModelBuilder_t::Initialize(uint32_t           noVariables,
@@ -70,10 +89,11 @@ void csModelBuilder_t::Initialize(uint32_t           noVariables,
                                   real_t             defaultVariableValue,
                                   real_t             defaultVariableTimeDerivative,
                                   real_t             defaultAbsoluteTolerance,
-                                  const std::string& defaultVariableName)
+                                  const std::string& defaultVariableName,
+                                  const std::string& defaultDOFName)
 {
     if(noVariables == 0)
-        throw std::runtime_error("Invalid number of variables specified");
+        csThrowException("Invalid number of variables specified");
 
     Nvariables = noVariables;
     Ndofs      = noDofs;
@@ -85,7 +105,10 @@ void csModelBuilder_t::Initialize(uint32_t           noVariables,
     equationNodes_ptrs.resize(Nvariables);
 
     if(Ndofs > 0)
+    {
         dofValues.resize(Ndofs, defaultVariableValue);
+        dofNames.resize(Ndofs, defaultDOFName);
+    }
     variableValues.resize(Nvariables, defaultVariableValue);
     variableDerivatives.resize(Nvariables, defaultVariableTimeDerivative);
     //sensitivityValues.resize(Nvariables, 0.0);
@@ -117,7 +140,15 @@ void csModelBuilder_t::Initialize(uint32_t           noVariables,
         csDegreeOfFreedomNode* dof_node = new csDegreeOfFreedomNode(Nvariables+i, i);
         csNumber_t& dof = dofs_ptrs[i];
         dof.node.reset(dof_node);
+
+        std::snprintf(buffer, bsize, "%s[%d]", defaultDOFName.c_str(), i);
+        dofNames[i] = buffer;
     }
+}
+
+csSimulationOptionsPtr csModelBuilder_t::GetSimulationOptions()
+{
+    return simulationOptions;
 }
 
 const csNumber_t& csModelBuilder_t::GetTime() const
@@ -140,10 +171,45 @@ const std::vector<csNumber_t>& csModelBuilder_t::GetTimeDerivatives() const
     return timeDerivatives_ptrs;
 }
 
+const std::vector<csNumber_t>& csModelBuilder_t::GetModelEquations() const
+{
+    return equationNodes_ptrs;
+}
+
+const std::vector<real_t>& csModelBuilder_t::GetVariableValues() const
+{
+    return variableValues;
+}
+
+const std::vector<real_t>& csModelBuilder_t::GetVariableTimeDerivatives() const
+{
+    return variableDerivatives;
+}
+
+const std::vector<real_t>& csModelBuilder_t::GetDegreeOfFreedomValues() const
+{
+    return dofValues;
+}
+
+const std::vector<std::string>& csModelBuilder_t::GetVariableNames() const
+{
+    return variableNames;
+}
+
+const std::vector<int32_t>& csModelBuilder_t::GetVariableTypes() const
+{
+    return variableTypes;
+}
+
+const std::vector<real_t>& csModelBuilder_t::GetAbsoluteTolerances() const
+{
+    return absoluteTolerances;
+}
+
 void csModelBuilder_t::SetModelEquations(const std::vector<csNumber_t>& equations)
 {
     if(equations.size() != Nvariables)
-        throw std::runtime_error("Invalid equations size specified");
+        csThrowException("Invalid equations size specified");
 
     equationNodes_ptrs = equations;
 
@@ -158,49 +224,56 @@ void csModelBuilder_t::SetModelEquations(const std::vector<csNumber_t>& equation
 void csModelBuilder_t::SetVariableValues(const std::vector<real_t>& values)
 {
     if(values.size() != Nvariables)
-        throw std::runtime_error("Invalid variable values size specified");
+        csThrowException("Invalid variable values size specified");
     variableValues = values;
 }
 
 void csModelBuilder_t::SetVariableTimeDerivatives(const std::vector<real_t>& timeDerivatives)
 {
     if(timeDerivatives.size() != Nvariables)
-        throw std::runtime_error("Invalid variable derivatives size specified");
+        csThrowException("Invalid variable derivatives size specified");
     variableDerivatives = timeDerivatives;
 }
 
 void csModelBuilder_t::SetDegreeOfFreedomValues(const std::vector<real_t>& dofs)
 {
     if(dofs.size() != Ndofs)
-        throw std::runtime_error("Invalid dofs size specified");
+        csThrowException("Invalid dofs size specified");
     dofValues = dofs;
 }
 
 void csModelBuilder_t::SetVariableNames(const std::vector<std::string>& names)
 {
     if(names.size() != Nvariables)
-        throw std::runtime_error("Invalid variable names size specified");
+        csThrowException("Invalid variable names size specified");
     variableNames = names;
+}
+
+void csModelBuilder_t::SetDegreeOfFreedomNames(const std::vector<std::string>& names)
+{
+    if(names.size() != Ndofs)
+        csThrowException("Invalid degrees of freedom names size specified");
+    dofNames = names;
 }
 
 void csModelBuilder_t::SetVariableTypes(const std::vector<int32_t>& types)
 {
     if(types.size() != Nvariables)
-        throw std::runtime_error("Invalid variable types size specified");
+        csThrowException("Invalid variable types size specified");
     variableTypes = types;
 }
 
-void csModelBuilder_t::SetAbsoluteToleances(const std::vector<real_t>& absTolerances)
+void csModelBuilder_t::SetAbsoluteTolerances(const std::vector<real_t>& absTolerances)
 {
     if(absTolerances.size() != Nvariables)
-        throw std::runtime_error("Invalid variable abs. tolerances size specified");
+        csThrowException("Invalid variable abs. tolerances size specified");
     absoluteTolerances = absTolerances;
 }
 
 void csModelBuilder_t::GetSparsityPattern(std::vector< std::map<uint32_t,uint32_t> >& incidenceMatrix)
 {
     if(equationNodes_ptrs.size() != Nvariables)
-        throw std::runtime_error("Model equations have not been set");
+        csThrowException("Model equations have not been set");
 
     incidenceMatrix.clear();
     incidenceMatrix.resize(Nvariables);
@@ -349,7 +422,7 @@ void csModelBuilder_t::EvaluateDerivatives(real_t                 currentTime,
     }
 
     if(IA.size() != Nvariables+1 || JA.size() == 0)
-        throw std::runtime_error("Invalid incidence matrix specified");
+        csThrowException("Invalid incidence matrix specified");
 
     /*
     printf("System incidence matrix (CRS):\n");
@@ -393,6 +466,19 @@ static std::string formatFilenameJson(const std::string& inputDirectory, const s
     return filePath;
 }
 
+// static function
+std::string csModelBuilder_t::GetDefaultSimulationOptions_DAE()
+{
+    return std::string(default_simulation_options_dae);
+}
+
+// static function
+std::string csModelBuilder_t::GetDefaultSimulationOptions_ODE()
+{
+    return std::string(default_simulation_options_ode);
+}
+
+// static function
 void csModelBuilder_t::ExportModels(const std::vector<csModelPtr>& models, const std::string& outputDirectory, const std::string& simulationOptionsJSON)
 {
     for(int i = 0; i < models.size(); i++)
@@ -406,7 +492,7 @@ void csModelBuilder_t::ExportModels(const std::vector<csModelPtr>& models, const
     std::string filePath = formatFilenameJson(outputDirectory, csModel_t::simulationOptionsFileName);
     f.open(filePath, std::ios_base::binary);
     if(!f.is_open())
-        throw std::runtime_error("Cannot open " + filePath + " file");
+        csThrowException("Cannot open " + filePath + " file");
 
     f.write(simulationOptionsJSON.c_str(), simulationOptionsJSON.size());
 
@@ -426,7 +512,6 @@ static void GenerateModel(csModelPtr                               model,
     uint32_t Nvariables       = owned_oi_pe.size();
     uint32_t Nvariables_total = modelBuilder.Nvariables;
 
-    std::vector<real_t>      dofValues(Ndofs);
     std::vector<real_t>      variableValues(Nvariables);
     std::vector<real_t>      variableDerivatives(Nvariables);
     std::vector<std::string> variableNames(Nvariables);
@@ -434,7 +519,6 @@ static void GenerateModel(csModelPtr                               model,
     std::vector<real_t>      absoluteTolerances(Nvariables);
     std::vector<csNumber_t>  equationNodes_ptrs(Nvariables);
 
-    dofValues = modelBuilder.dofValues;
     int32_t vi = 0;
     for(std::set<int32_t>::const_iterator it = owned_oi_pe.begin(); it != owned_oi_pe.end(); it++)
     {
@@ -468,7 +552,8 @@ static void GenerateModel(csModelPtr                               model,
     model->structure.Nequations          = Nvariables;
     model->structure.isODESystem         = modelBuilder.isODESystem;
 
-    model->structure.dofValues           = dofValues;
+    model->structure.dofValues           = modelBuilder.dofValues;// Every PE has all DOFs
+    model->structure.dofNames            = modelBuilder.dofNames; // Every PE has all DOFs
     model->structure.variableValues      = variableValues;
     model->structure.variableDerivatives = variableDerivatives;
     model->structure.variableNames       = variableNames;
@@ -518,7 +603,7 @@ static void GenerateModel(csModelPtr                               model,
     for(uint32_t i = 0; i < Nvariables; i++)
     {
         csNodePtr eqNode = equationNodes_ptrs[i].node;
-        uint32_t Ncs_i = csNode_t::GetComputeStackSize(eqNode.get());
+        uint32_t Ncs_i = eqNode->GetComputeStackSize();
         cs_sizes[i] = Ncs_i;
         model->equations.activeEquationSetIndexes.push_back(Ncs);
         Ncs += Ncs_i;
@@ -558,12 +643,17 @@ static void GenerateModel(csModelPtr                               model,
     // The problem with this for loop was with push_back to the incidenceMatrixItems
     //   whose size was not reserved in advance. Resolved now.
 
+    int perc = 0;
     //#pragma omp parallel for private(indexes, computeStack_i)
     for(uint32_t ei = 0; ei < Nvariables; ei++)
     {
-        //int omp_tid = omp_get_thread_num();
-        //if(omp_tid == 0)
-        //    printf("  processing equation %d\r", (int)ei);
+        int perc_new = 100*ei/Nvariables;
+        if(perc_new > perc)
+        {
+            perc = perc_new;
+            printf("Generating compute stack %02d%%...\r", perc);
+            fflush(stdout);
+        }
 
         uint32_t firstIndex = model->equations.activeEquationSetIndexes[ei];
         uint32_t Ncs_i      = cs_sizes[ei];
@@ -575,7 +665,7 @@ static void GenerateModel(csModelPtr                               model,
         csNodePtr eqNode = equationNodes_ptrs[ei].node;
         csNode_t::CreateComputeStack(eqNode.get(), computeStack_i);
         if(Ncs_i != computeStack_i.size())
-            throw std::runtime_error("Invalid size of the local compute stack");
+            csThrowException("Invalid size of the local compute stack");
         std::copy(computeStack_i.begin(), computeStack_i.end(), model->equations.computeStacks.begin()+firstIndex);
 
         // Update block indexes in the compute stack to mpi-node block indexes.
@@ -589,7 +679,7 @@ static void GenerateModel(csModelPtr                               model,
             {
                 bi_cit = bi_to_bi_local_pe.find(item.data.indexes.blockIndex);
                 if(bi_cit == bi_end)
-                    throw std::runtime_error("Invalid index");
+                    csThrowException("Invalid index");
                 item.data.indexes.blockIndex = bi_cit->second;
             }
             else if(item.opCode == eOP_DegreeOfFreedom)
@@ -600,7 +690,7 @@ static void GenerateModel(csModelPtr                               model,
             {
                 bi_cit = bi_to_bi_local_pe.find(item.data.indexes.blockIndex);
                 if(bi_cit == bi_end)
-                    throw std::runtime_error("Invalid index");
+                    csThrowException("Invalid index");
                 item.data.indexes.blockIndex = bi_cit->second;
             }
         }
@@ -634,6 +724,8 @@ static void GenerateModel(csModelPtr                               model,
             jiStart++;
         }
     }
+    printf("Generating compute stack 100%%    \n");
+    fflush(stdout);
 }
 
 std::vector<csModelPtr> csModelBuilder_t::PartitionSystem(uint32_t                                    Npe,
@@ -646,9 +738,10 @@ std::vector<csModelPtr> csModelBuilder_t::PartitionSystem(uint32_t              
     std::vector<csModelPtr>  models;
 
     if(Npe == 0)
-        throw std::runtime_error("Invalid number of processing elements (0)");
-    if(!graphPartitioner)
-        throw std::runtime_error("Invalid partitioner specified");
+        csThrowException("Invalid number of processing elements (0)");
+    // For Npe > 1 a graph partitioner must be specified.
+    if(Npe > 1 && !graphPartitioner)
+        csThrowException("Invalid partitioner specified");
 
     std::vector<uint32_t> IA, JA;
     std::vector< std::vector<int32_t> >                     loads_oi;
@@ -714,8 +807,8 @@ std::vector<csModelPtr> csModelBuilder_t::PartitionSystem(uint32_t              
     {
         csNodePtr eqNode = equationNodes_ptrs[i].node;
         int32_t Nnz      = IA[i+1] - IA[i];
-        int32_t Ncs      = csNode_t::GetComputeStackSize(eqNode.get());
-        int32_t Nflops   = csNode_t::GetComputeStackFlops(eqNode.get(), unaryOperationsFlops, binaryOperationsFlops);
+        int32_t Ncs      = eqNode->GetComputeStackSize();
+        int32_t Nflops   = eqNode->GetComputeStackFlops(unaryOperationsFlops, binaryOperationsFlops);
         int32_t Nflops_j = Nnz * Nflops;
 
         weights_Ncs[i]      = Ncs;
@@ -728,6 +821,7 @@ std::vector<csModelPtr> csModelBuilder_t::PartitionSystem(uint32_t              
     //printf("Partition the system\n");
     if(Npe == 1)
     {
+        // For Npe = 1 there is no need to use a graph partitioner.
         std::set<int32_t>& partition = partitions[0];
         for(int32_t ei = 0; ei < Nvariables; ei++)
            partition.insert(ei);
@@ -749,7 +843,7 @@ std::vector<csModelPtr> csModelBuilder_t::PartitionSystem(uint32_t              
             else if(constraint == "Nflops_j")
                 vweights[c] = weights_Nflops_j;
             else
-                throw std::runtime_error("Invalid balancing constraint requested: " + constraint);
+                csThrowException("Invalid balancing constraint requested: " + constraint);
         }
 
         graphPartitioner->Partition(Npe,
@@ -902,14 +996,12 @@ std::vector<csModelPtr> csModelBuilder_t::PartitionSystem(uint32_t              
     /* Print partition info */
     if(logPartitionResults)
     {
-        std::string log_filename;
-        if(Nconstraints == 0)
-            log_filename = "partition-Npe=" + std::to_string(Npe) + "-" + graphPartitioner->GetName() + ".log";
-        else
-            log_filename = "partition-Npe=" + std::to_string(Npe) + "-" + graphPartitioner->GetName() + "-[" + constraints_s + "].log";
+        std::string gpName = (graphPartitioner ? graphPartitioner->GetName() : "none");
+        std::string log_filename = "partition-Npe=" + std::to_string(Npe) + "-" + gpName.c_str() + "-[" + constraints_s + "].log";
+
         FILE* f = fopen(log_filename.c_str(), "w");
         fprintf(f, "Npe:         %u\n",   Npe);
-        fprintf(f, "Partitioner: %s\n",   graphPartitioner->GetName().c_str());
+        fprintf(f, "Partitioner: %s\n",   gpName.c_str());
 
         fprintf(f, "Balancing constraints (deviation from average, in %%):\n");
 

@@ -110,8 +110,36 @@ HEADERS += ../../examples/advection_diffusion_2d.h \
            ../../examples/roberts.h \
            ../../examples/heat_conduction_2d.h
 
-SOURCES += cs_dae_simulator.cpp \
-           auxiliary.cpp \
+HEADERS +=  ../models/cs_dae_model.h \
+            ../models/cs_model_builder.h \
+            ../cs_machine.h \
+            ../cs_model.h \
+            ../cs_evaluator.h \
+            ../cs_model.h \
+            ../models/cs_nodes.h \
+            ../models/cs_number.h \
+            ../models/cs_partitioners.h \
+            ../models/cs_simulation_options.h \
+            ../models/partitioner_2d_npde.h \
+            ../models/partitioner_metis.h \
+            ../models/partitioner_simple.h \
+            ../evaluators/cs_evaluator_opencl_multidevice.h \
+            ../evaluators/cs_evaluator_opencl.h \
+            ../evaluators/cs_evaluator_openmp.h \
+            ../evaluators/cs_evaluator_sequential.h \
+            ../evaluators/cs_evaluators.h \
+            ../evaluators/cs_opencl_platforms.h \
+            auxiliary.h \
+            cs_data_reporters.h \
+            cs_logs.h \
+            cs_simulators.h \
+            daesimulator.h \
+            data_reporter_csv.h \
+            data_reporter_hdf5.h \
+            idas_la_functions.h \
+            logs.h
+
+SOURCES += auxiliary.cpp \
            config.cpp \
            odeisolver.cpp \
            daesolver.cpp \
@@ -120,16 +148,19 @@ SOURCES += cs_dae_simulator.cpp \
            preconditioner_jacobi.cpp \
            preconditioner_ifpack.cpp \
            preconditioner_ml.cpp \
+           data_reporter_csv.cpp \
+           data_reporter_hdf5.cpp \
+           logs.cpp \
            cs_simulators.cpp \
-           cs_ode_simulator.cpp \
-           cs_dae_simulator.cpp \
+           cs_simulator_binary.cpp \
            ../models/cs_dae_model.cpp \
            ../models/cs_model_builder.cpp \
            ../models/cs_model_io.cpp \
            ../models/cs_nodes.cpp \
            ../models/cs_number.cpp \
-           ../models/cs_partitioner_metis.cpp \
-           ../models/cs_partitioner_simple.cpp \
+           ../models/partitioner_metis.cpp \
+           ../models/partitioner_simple.cpp \
+           ../models/partitioner_2d_npde.cpp \
            ../evaluators/cs_evaluator_opencl_factory.cpp \
            ../evaluators/cs_evaluator_opencl_multidevice.cpp \
            ../evaluators/cs_evaluator_opencl.cpp \
@@ -140,6 +171,7 @@ SOURCES += cs_dae_simulator.cpp \
            ../../examples/dae_example_3.cpp \
            ../../examples/ode_example_1.cpp \
            ../../examples/ode_example_2.cpp \
-           ../../examples/ode_example_3.cpp
+           ../../examples/ode_example_3.cpp \
+           ../../examples/dae_example_4.cpp
 
 OTHER_FILES += ../evaluators/cs_machine_kernels.cl

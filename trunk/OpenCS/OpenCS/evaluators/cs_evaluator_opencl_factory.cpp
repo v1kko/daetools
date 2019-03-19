@@ -1,18 +1,18 @@
 #include "cs_evaluator_opencl_multidevice.h"
 #include "cs_opencl_platforms.h"
-#include "cs_evaluator_opencl_factory.h"
+#include "cs_evaluators.h"
 
 namespace cs
 {
-csComputeStackEvaluator_t* csCreateOpenCLEvaluator(int platformID, int deviceID, std::string buildProgramOptions)
+csComputeStackEvaluator_t* createEvaluator_OpenCL(int platformID, int deviceID, std::string buildProgramOptions)
 {
     return new csComputeStackEvaluator_OpenCL(platformID, deviceID, buildProgramOptions);
 }
 
-csComputeStackEvaluator_t* csCreateOpenCLEvaluator_MultiDevice(const std::vector<int>&    platforms,
-                                                               const std::vector<int>&    devices,
-                                                               const std::vector<double>& taskPortions,
-                                                               std::string                buildProgramOptions)
+csComputeStackEvaluator_t* createEvaluator_OpenCL_MultiDevice(const std::vector<int>&    platforms,
+                                                              const std::vector<int>&    devices,
+                                                              const std::vector<double>& taskPortions,
+                                                              std::string                buildProgramOptions)
 {
     return new csComputeStackEvaluator_OpenCL_MultiDevice(platforms, devices, taskPortions, buildProgramOptions);
 }

@@ -12,6 +12,7 @@ the OpenCS software; if not, see <http://www.gnu.org/licenses/>.
 ***********************************************************************************/
 #include <string>
 #include <stdexcept>
+#include "partitioner_metis.h"
 #include "cs_partitioners.h"
 
 // Metis also defines real_t, therefore disable daetools version.
@@ -22,6 +23,17 @@ the OpenCS software; if not, see <http://www.gnu.org/licenses/>.
 
 namespace cs
 {
+std::shared_ptr<csGraphPartitioner_t> createGraphPartitioner_Metis(const std::string& algorithm)
+{
+    if(algorithm == "PartGraphKway")
+        return std::shared_ptr<csGraphPartitioner_t>(new csGraphPartitioner_Metis(PartGraphKway));
+    else if(algorithm == "PartGraphRecursive")
+        return std::shared_ptr<csGraphPartitioner_t>(new csGraphPartitioner_Metis(PartGraphRecursive));
+
+    csThrowException("Inalid algorithm for Metis hraph partitioner specified");
+    return std::shared_ptr<csGraphPartitioner_t>(nullptr);
+}
+
 csGraphPartitioner_Metis::csGraphPartitioner_Metis(MetisRoutine routine)
 {
     metisRoutine = routine;
@@ -53,7 +65,7 @@ std::vector<int32_t> csGraphPartitioner_Metis::GetOptions() const
 void csGraphPartitioner_Metis::SetOptions(const std::vector<int32_t>& options)
 {
     if(options.size() != METIS_NOPTIONS)
-        throw std::runtime_error("Metis: Invalid size of the options array");
+        csThrowException("Metis: Invalid size of the options array");
     metisOptions = options;
 }
 
@@ -67,10 +79,10 @@ int csGraphPartitioner_Metis::Partition(int32_t                               Np
 {
     // Check inputs
     if(vertexWeights.size() != Nconstraints)
-        throw std::runtime_error("Metis: Invalid size of the vertexWeights array");
+        csThrowException("Metis: Invalid size of the vertexWeights array");
     for(uint32_t c = 0; c < Nconstraints; c++)
         if(vertexWeights[c].size() != Nvertices)
-            throw std::runtime_error("Metis: Invalid size of the vertexWeights[" + std::to_string(c) + "] array");
+            csThrowException("Metis: Invalid size of the vertexWeights[" + std::to_string(c) + "] array");
 
     // metisOptions array is of type int32_t that can be different from idx_t (could be defined as int64_t).
     // Therefore, copy the options to a local std::vector<idx_t> array.
@@ -192,7 +204,7 @@ int csGraphPartitioner_Metis::Partition(int32_t                               Np
         else if(res == METIS_ERROR)
             msg += "METIS_ERROR";
 
-        throw std::runtime_error(msg);
+        csThrowException(msg);
     }
 
     return (int)edgecut;

@@ -13,16 +13,23 @@ the OpenCS software; if not, see <http://www.gnu.org/licenses/>.
 #ifndef CS_COMPUTE_STACK_EVALUATOR_H
 #define CS_COMPUTE_STACK_EVALUATOR_H
 
+#include <memory>
+#include <stdexcept>
 #include "cs_machine.h"
 
 #if !defined(__MINGW32__) && (defined(_WIN32) || defined(WIN32) || defined(WIN64) || defined(_WIN64))
-#ifdef OpenCS_Evaluators_EXPORTS
+#ifdef OpenCS_EVALUATORS_EXPORTS
 #define OPENCS_EVALUATORS_API __declspec(dllexport)
 #else
 #define OPENCS_EVALUATORS_API __declspec(dllimport)
 #endif
 #else
 #define OPENCS_EVALUATORS_API
+#endif
+
+#ifndef csThrowException
+#define csThrowException(MSG) \
+    throw std::runtime_error(std::string("Exception in ") + std::string(__FUNCTION__) + " (" + std::string(__FILE__) + ":" + std::to_string(__LINE__) + "):\n" + std::string(MSG) + "\n");
 #endif
 
 namespace cs
@@ -66,6 +73,7 @@ public:
                                                 real_t*               sdvalues,
                                                 real_t*               sderivatives) = 0;
 };
+typedef std::shared_ptr<csComputeStackEvaluator_t> csComputeStackEvaluatorPtr;
 
 }
 

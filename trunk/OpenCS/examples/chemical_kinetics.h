@@ -39,10 +39,9 @@ public:
         H    = 737.00;
     }
 
-    void SetInitialConditions(std::vector<real_t>& y0, std::vector<real_t>& dy0_dt)
+    void SetInitialConditions(std::vector<real_t>& y0)
     {
-        y0.assign    (Nequations, 0.0);
-        dy0_dt.assign(Nequations, 0.0);
+        y0.assign(Nequations, 0.0);
 
         y0[0] = 0.444;
         y0[1] = 0.00123;
@@ -50,6 +49,12 @@ public:
         y0[3] = 0.007;
         y0[4] = 0.0;
         y0[5] = Ks * y0[0] * y0[3];
+    }
+
+    void GetVariableNames(std::vector<std::string>& names)
+    {
+        std::vector<std::string> vars = {"y1", "y2", "y3", "y4", "y5", "y6"};
+        names = vars;
     }
 
     void CreateEquations(const std::vector<csNumber_t>& y,

@@ -25,7 +25,7 @@ the OpenCS software; if not, see <http://www.gnu.org/licenses/>.
 #include "../models/cs_dae_model.h"
 
 #if !defined(__MINGW32__) && (defined(_WIN32) || defined(WIN32) || defined(WIN64) || defined(_WIN64))
-#ifdef OpenCS_Simulators_EXPORTS
+#ifdef OpenCS_SIMULATORS_EXPORTS
 #define OPENCS_SIMULATORS_API __declspec(dllexport)
 #else
 #define OPENCS_SIMULATORS_API __declspec(dllimport)
@@ -36,8 +36,7 @@ the OpenCS software; if not, see <http://www.gnu.org/licenses/>.
 
 namespace cs_dae_simulator
 {
-#define daeThrowException(MSG) \
-   throw std::runtime_error( (boost::format("Exception in %s (%s:%d):\n%s\n") % std::string(__FUNCTION__) % std::string(__FILE__) % __LINE__ % (MSG)).str() );
+const int msgBufferSize = 10240;
 
 typedef enum
 {
@@ -62,6 +61,7 @@ public:
     static daeSimulationOptions& GetConfig();
 
     void        Load(const std::string& jsonFilePath);
+    void        LoadString(const std::string& jsonOptions);
     bool        HasKey(const std::string& strPropertyPath) const;
     std::string ToString() const;
 
@@ -316,6 +316,7 @@ public:
     void* mem;
     void* yy;
     void* yp;
+    char msgBuffer[msgBufferSize];
 };
 
 class OPENCS_SIMULATORS_API odeiSolver_t : public csDifferentialEquationSolver_t
@@ -364,6 +365,7 @@ public:
     void* mem;
     void* yy;
     void* yp;
+    char msgBuffer[msgBufferSize];
 };
 
 class OPENCS_SIMULATORS_API daeSimulation_t
@@ -376,6 +378,8 @@ public:
     void   LoadInitializationValues(const char* strFileName);
 
     void   Initialize(cs::csDifferentialEquationModel_t* model,
+                      cs::csLog_t* plog,
+                      cs::csDataReporter_t* pdata_reporter,
                       csDifferentialEquationSolver_t* dae_solver,
                       real_t dStartTime,
                       real_t dTimeHorizon,
@@ -386,8 +390,7 @@ public:
     void   Run();
     void   Reinitialize();
     void   Finalize();
-    void   ReportData();
-    void   ReportData_dx();
+    void   ReportData(real_t currentTime);
     real_t Integrate(daeeStopCriterion eStopCriterion, bool bReportDataAroundDiscontinuities);
     real_t IntegrateForTimeInterval(real_t time_interval, bool bReportDataAroundDiscontinuities);
     real_t IntegrateUntilTime(real_t time, daeeStopCriterion eStopCriterion, bool bReportDataAroundDiscontinuities);
@@ -396,16 +399,20 @@ public:
     void PrintStats();
 
 public:
-    cs::csDifferentialEquationModel_t*   model;
-    csDifferentialEquationSolver_t*      daesolver;
+    cs::csDifferentialEquationModel_t*  model;
+    csDifferentialEquationSolver_t*     daesolver;
+    cs::csLog_t*                        log;
+    cs::csDataReporter_t*               data_reporter;
     bool                calculateSensitivities;
     bool                isInitialized;
     std::string         outputDirectory;
     std::vector<real_t> reportingTimes;
+    bool                reportData;
     real_t              currentTime;
     real_t              startTime;
     real_t              timeHorizon;
     real_t              reportingInterval;
+    char                msgBuffer[msgBufferSize];
 };
 
 }

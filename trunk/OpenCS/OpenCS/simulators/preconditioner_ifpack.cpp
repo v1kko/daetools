@@ -63,7 +63,7 @@ public:
 
         m_diagonal.reset(new Epetra_Vector(*m_map, true));
         if(numberOfVariables != m_diagonal->GlobalLength())
-            throw std::runtime_error("Diagonal array length mismatch");
+            csThrowException("Diagonal array length mismatch");
 
         m_matJacobian.InitMatrix(numberOfVariables, m_matEPETRA.get());
         m_matJacobian.ResetCounters();
@@ -79,7 +79,7 @@ public:
         Ifpack factory;
         Ifpack_Preconditioner* preconditioner = factory.Create(strPreconditionerName, m_matEPETRA.get());
         if(!preconditioner)
-            daeThrowException("Failed to create Ifpack preconditioner " + strPreconditionerName);
+            csThrowException("Failed to create Ifpack preconditioner " + strPreconditionerName);
 
         m_pPreconditionerIfpack.reset(preconditioner);
         if(printInfo)
@@ -155,11 +155,11 @@ public:
     void FillSparseMatrix(dae::daeSparseMatrix<real_t>* pmatrix)
     {
         if(numberOfVariables != N)
-            throw std::runtime_error("");
+            csThrowException("");
         if(numberOfVariables+1 != IA.size())
-            throw std::runtime_error("");
+            csThrowException("");
         if(JA.size() != NNZ)
-            throw std::runtime_error("");
+            csThrowException("");
 
         std::map<size_t, size_t> mapIndexes;
         for(int row = 0; row < numberOfVariables; row++)
@@ -239,7 +239,7 @@ int daePreconditioner_Ifpack::Setup(real_t  time,
 
     // Here, we do not use recomputeJacobian since if we update the Jacobian with [I] - gamma*[Jrhs]
     //   we cannot do it again with the different gamma.
-    // Therefore, alwayscompute the Jacobian.
+    // Therefore, always compute the Jacobian.
     // Double check about the performance penalty it might cause!!
     p_data->m_matJacobian.ClearMatrix();
     cs::csMatrixAccess_t* ma = p_data;
@@ -255,10 +255,10 @@ int daePreconditioner_Ifpack::Setup(real_t  time,
         // (1) Scale the Jrhs with the -gamma factor:
         p_data->m_matEPETRA->Scale(-jacobianScaleFactor);
 
-        // (2) Extract the diagonal items and repleace them with diag[i] = 1 + diag[i]:
+        // (2) Extract the diagonal items and replace them with diag[i] = 1 + diag[i]:
         int ret = p_data->m_matEPETRA->ExtractDiagonalCopy(*p_data->m_diagonal);
         if(ret != 0)
-            throw std::runtime_error("Failed to extract the diagonal copy of the Jacobian matrix.");
+            csThrowException("Failed to extract the diagonal copy of the Jacobian matrix.");
 
         for(uint32_t i = 0; i < p_data->numberOfVariables; i++)
             (*p_data->m_diagonal)[i] = 1.0 + (*p_data->m_diagonal)[i];
@@ -268,7 +268,7 @@ int daePreconditioner_Ifpack::Setup(real_t  time,
         if(ret != 0)
         {
             printf("ret = %d\n", ret);
-            throw std::runtime_error("Failed to replace the diagonal items in the Jacobian matrix.");
+            csThrowException("Failed to replace the diagonal items in the Jacobian matrix.");
         }
     }
 

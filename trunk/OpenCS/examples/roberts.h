@@ -38,6 +38,12 @@ public:
         y0[2] = 0.0;
     }
 
+    void GetVariableNames(std::vector<std::string>& names)
+    {
+        std::vector<std::string> vars = {"y1", "y2", "y3"};
+        names = vars;
+    }
+
     void CreateEquations(const std::vector<csNumber_t>& y_vars,
                          std::vector<csNumber_t>& equations)
     {

@@ -190,6 +190,12 @@ typedef struct lifo_stack_
     int       top;
 } lifo_stack_t;
 
+typedef struct lifo_stack_fp_
+{
+    int    size;
+    real_t data[20];
+    int    top;
+} lifo_stack_fp_t;
 
 /*************************************************************************************************
  *  adouble_t implementation
@@ -782,17 +788,323 @@ CS_DECL void lifo_push(lifo_stack_t* stack, adouble_t* item)
     }
 }
 
+/*************************************************************************************************
+ *  LIFO stack implementation (floating point values only)
+ *************************************************************************************************/
+CS_DECL void lifo_init_fp(lifo_stack_fp_t* stack, int stack_size)
+{
+    if(stack_size > 0)
+    {
+        stack->size = stack_size;
+        /*stack->data = (real_t*)malloc(stack_size * sizeof(real_t));*/
+    }
+    else
+    {
+        stack->size = 0;
+        /*stack->data = NULL;*/
+    }
+    stack->top = -1;
+}
+
+CS_DECL void lifo_free_fp(lifo_stack_fp_t* stack)
+{
+    stack->size = 0;
+    /*free(stack->data);*/
+    stack->top = -1;
+}
+
+CS_DECL int lifo_isempty_fp(lifo_stack_fp_t* stack)
+{
+    if(stack->top == -1)
+        return 1;
+    else
+        return 0;
+}
+
+CS_DECL int lifo_isfull_fp(lifo_stack_fp_t* stack)
+{
+    if(stack->top == stack->size - 1)
+        return 1;
+    else
+        return 0;
+}
+
+CS_DECL real_t lifo_top_fp(lifo_stack_fp_t* stack)
+{
+#ifdef __cplusplus
+    if(stack->top < 0)
+        throw std::runtime_error("lifo_top_fp: top < 0");
+#endif
+    return stack->data[stack->top];
+}
+
+CS_DECL void lifo_pop_fp(lifo_stack_fp_t* stack)
+{
+    if(!lifo_isempty_fp(stack))
+    {
+        stack->top = stack->top - 1;
+    }
+    else
+    {
+#ifdef __cplusplus
+        throw std::runtime_error("lifo_pop_fp: stack is empty");
+#endif
+    }
+}
+
+CS_DECL void lifo_push_fp(lifo_stack_fp_t* stack, real_t item)
+{
+    if(!lifo_isfull_fp(stack))
+    {
+        stack->top = stack->top + 1;
+        stack->data[stack->top] = item;
+    }
+    else
+    {
+#ifdef __cplusplus
+        throw std::runtime_error("lifo_pop_fp: stack is full");
+#endif
+    }
+}
+
 
 /*************************************************************************************************
  *  Evaluate function
-**************************************************************************************************/
-CS_DECL adouble_t evaluateComputeStack(CS_KERNEL_FLAG const csComputeStackItem_t*  computeStack,
-                                       csEvaluationContext_t                       EC,
-                                       CS_KERNEL_FLAG const real_t*                dofs,
-                                       CS_KERNEL_FLAG const real_t*                values,
-                                       CS_KERNEL_FLAG const real_t*                timeDerivatives,
-                                       CS_KERNEL_FLAG const real_t*                svalues,
-                                       CS_KERNEL_FLAG const real_t*                sdvalues)
+ *************************************************************************************************/
+CS_DECL real_t evaluateComputeStack(CS_KERNEL_FLAG const csComputeStackItem_t*  computeStack,
+                                    csEvaluationContext_t                       EC,
+                                    CS_KERNEL_FLAG const real_t*                dofs,
+                                    CS_KERNEL_FLAG const real_t*                values,
+                                    CS_KERNEL_FLAG const real_t*                timeDerivatives)
+{
+    lifo_stack_fp_t  value, lvalue, rvalue;
+    lifo_init_fp(&value,  EC.valuesStackSize);
+    lifo_init_fp(&lvalue, EC.lvaluesStackSize);
+    lifo_init_fp(&rvalue, EC.rvaluesStackSize);
+
+    /* Get the length of the compute stack (it is always in the 'size' member in the adComputeStackItem_t struct). */
+    csComputeStackItem_t item0 = computeStack[0];
+    uint32_t computeStackSize  = item0.size;
+
+    real_t result, scaling;
+    for(uint32_t i = 0; i < computeStackSize; i++)
+    {
+        const csComputeStackItem_t item = computeStack[i];
+
+        result = 0.0; /* is this required now? */
+
+        if(item.opCode == eOP_Constant)
+        {
+            result = item.data.value;
+        }
+        else if(item.opCode == eOP_Time)
+        {
+            result = EC.currentTime;
+        }
+        else if(item.opCode == eOP_InverseTimeStep)
+        {
+            result = EC.inverseTimeStep;
+        }
+        else if(item.opCode == eOP_Variable)
+        {
+            /* Take the value from the values array. */
+            result = values[item.data.indexes.blockIndex];
+        }
+        else if(item.opCode == eOP_DegreeOfFreedom)
+        {
+            /* Take the value from the dofs array. */
+            result = dofs[item.data.dof_indexes.dofIndex];
+        }
+        else if(item.opCode == eOP_TimeDerivative)
+        {
+            /* Take the value from the time derivatives array. */
+            result = timeDerivatives[item.data.indexes.blockIndex];
+        }
+        else if(item.opCode == eOP_Unary)
+        {
+            real_t arg = lifo_top_fp(&value);
+
+            switch(item.function)
+            {
+                case eSign:
+                    result = -arg;
+                    break;
+                case eSin:
+                    result = sin(arg);
+                    break;
+                case eCos:
+                    result = cos(arg);
+                    break;
+                case eTan:
+                    result = tan(arg);
+                    break;
+                case eArcSin:
+                    result = asin(arg);
+                    break;
+                case eArcCos:
+                    result = acos(arg);
+                    break;
+                case eArcTan:
+                    result = atan(arg);
+                    break;
+                case eSqrt:
+                    result = sqrt(arg);
+                    break;
+                case eExp:
+                    result = exp(arg);
+                    break;
+                case eLn:
+                    result = log(arg);
+                    break;
+                case eLog:
+                    result = log10(arg);
+                    break;
+                case eAbs:
+                    result = fabs(arg);
+                    break;
+                case eCeil:
+                    result = ceil(arg);
+                    break;
+                case eFloor:
+                    result = floor(arg);
+                    break;
+                case eSinh:
+                    result = sinh(arg);
+                    break;
+                case eCosh:
+                    result = cosh(arg);
+                    break;
+                case eTanh:
+                    result = tanh(arg);
+                    break;
+                case eArcSinh:
+                    result = asinh(arg);
+                    break;
+                case eArcCosh:
+                    result = acosh(arg);
+                    break;
+                case eArcTanh:
+                    result = atanh(arg);
+                    break;
+                case eErf:
+                    result = erf(arg);
+                    break;
+                case eScaling:
+                    /* Scaling op code only exists in compute stacks to inlude the equation scaling
+                     * in the compute stack (stored in the data.value member). */
+                    scaling = item.data.value;
+                    result = scaling * arg;
+                    break;
+                default:
+#ifdef __cplusplus
+                    throw std::runtime_error("Invalid unary function");
+#endif
+                    break;
+            }
+
+            lifo_pop_fp(&value);
+        }
+        else if(item.opCode == eOP_Binary)
+        {
+            real_t left  = lifo_top_fp(&lvalue);
+            real_t right = lifo_top_fp(&rvalue);
+
+            switch(item.function)
+            {
+                case ePlus:
+                    result = left + right;
+                    break;
+                case eMinus:
+                    result = left - right;
+                    break;
+                case eMulti:
+                    result = left * right;
+                    break;
+                case eDivide:
+                    result = left / right;
+                    break;
+                case ePower:
+                    result = pow(left, right);
+                    break;
+                case eMin:
+                    result = fmin(left, right);
+                    break;
+                case eMax:
+                    result = fmax(left, right);
+                    break;
+                case eArcTan2:
+                    result = atan2(left, right);
+                    break;
+                default:
+#ifdef __cplusplus
+                    throw std::runtime_error("Invalid binary function");
+#endif
+                    break;
+            }
+
+            lifo_pop_fp(&lvalue);
+            lifo_pop_fp(&rvalue);
+        }
+        else
+        {
+#ifdef __cplusplus
+            throw std::runtime_error("Invalid op code");
+#endif
+        }
+
+        /* At the end push the result into the requested stack. */
+        if(item.resultLocation == eOP_Result_to_value)
+        {
+            lifo_push_fp(&value, result);
+        }
+        else if(item.resultLocation == eOP_Result_to_lvalue)
+        {
+            lifo_push_fp(&lvalue, result);
+        }
+        else if(item.resultLocation == eOP_Result_to_rvalue)
+        {
+            lifo_push_fp(&rvalue, result);
+        }
+        else
+        {
+#ifdef __cplusplus
+            throw std::runtime_error("Invalid resultLocation code");
+#endif
+        }
+    }
+
+    real_t result_final = lifo_top_fp(&value);
+    lifo_pop_fp(&value);
+
+    /* printf("  Result final = %.14f \n", result_final); */
+
+    /* Everything that has been put on stack must be removed during the evaluation. */
+#ifdef __cplusplus
+    if(!lifo_isempty_fp(&value))
+        throw std::runtime_error("Length of the value list is not zero");
+    if(!lifo_isempty_fp(&lvalue))
+        throw std::runtime_error("Length of the lvalue list is not zero");
+    if(!lifo_isempty_fp(&rvalue))
+        throw std::runtime_error("Length of the rvalue list is not zero");
+#endif
+
+    lifo_free_fp(&value);
+    lifo_free_fp(&lvalue);
+    lifo_free_fp(&rvalue);
+
+    return result_final;
+}
+
+/*************************************************************************************************
+ *  Evaluate derivative function
+ *************************************************************************************************/
+CS_DECL adouble_t evaluateComputeStackDerivative(CS_KERNEL_FLAG const csComputeStackItem_t*  computeStack,
+                                                 csEvaluationContext_t                       EC,
+                                                 CS_KERNEL_FLAG const real_t*                dofs,
+                                                 CS_KERNEL_FLAG const real_t*                values,
+                                                 CS_KERNEL_FLAG const real_t*                timeDerivatives,
+                                                 CS_KERNEL_FLAG const real_t*                svalues,
+                                                 CS_KERNEL_FLAG const real_t*                sdvalues)
 {
     lifo_stack_t  value, lvalue, rvalue;
     lifo_init(&value,  EC.valuesStackSize);

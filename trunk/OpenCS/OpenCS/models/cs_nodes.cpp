@@ -11,6 +11,7 @@ You should have received a copy of the GNU Lesser General Public License along w
 the OpenCS software; if not, see <http://www.gnu.org/licenses/>.
 ***********************************************************************************/
 #include "cs_nodes.h"
+#include "cs_model_builder.h"
 
 namespace cs
 {
@@ -33,7 +34,7 @@ void csConstantNode::CollectVariableTypes(std::vector<int32_t>& variableTypes) c
 {
 }
 
-std::string csConstantNode::ToLatex() const
+std::string csConstantNode::ToLatex(const csModelBuilder_t* mb) const
 {
     char buffer[256];
     std::snprintf(buffer, 256, "%.15f", value);
@@ -65,7 +66,7 @@ void csTimeNode::CollectVariableTypes(std::vector<int32_t>& variableTypes) const
 {
 }
 
-std::string csTimeNode::ToLatex() const
+std::string csTimeNode::ToLatex(const csModelBuilder_t* mb) const
 {
     return "time";
 }
@@ -80,7 +81,7 @@ csDegreeOfFreedomNode::csDegreeOfFreedomNode(uint32_t overallIndex_, uint32_t do
 adouble_t csDegreeOfFreedomNode::Evaluate(const csNodeEvaluationContext_t& EC) const
 {
     if(!EC.dofs)
-        throw std::runtime_error("DOF values not set in csNodeEvaluationContext_t");
+        csThrowException("DOF values not set in csNodeEvaluationContext_t");
 
     return adouble_t_(EC.dofs[dofIndex], 0.0);
 }
@@ -93,11 +94,18 @@ void csDegreeOfFreedomNode::CollectVariableTypes(std::vector<int32_t>& variableT
 {
 }
 
-std::string csDegreeOfFreedomNode::ToLatex() const
+std::string csDegreeOfFreedomNode::ToLatex(const csModelBuilder_t* mb) const
 {
-    char buffer[256];
-    std::snprintf(buffer, 256, "y[%d]", dofIndex);
-    return std::string(buffer);
+    if(mb)
+    {
+        return mb->dofNames[dofIndex];
+    }
+    else
+    {
+        char buffer[256];
+        std::snprintf(buffer, 256, "y[%d]", dofIndex);
+        return std::string(buffer);
+    }
 }
 
 
@@ -110,7 +118,7 @@ csVariableNode::csVariableNode(uint32_t overallIndex_, uint32_t blockIndex_)
 adouble_t csVariableNode::Evaluate(const csNodeEvaluationContext_t& EC) const
 {
     if(!EC.values)
-        throw std::runtime_error("Variable values not set in csNodeEvaluationContext_t");
+        csThrowException("Variable values not set in csNodeEvaluationContext_t");
 
     if(EC.jacobianIndex == overallIndex)
         return adouble_t_(EC.values[blockIndex], 1.0);
@@ -127,11 +135,18 @@ void csVariableNode::CollectVariableTypes(std::vector<int32_t>& variableTypes) c
 {
 }
 
-std::string csVariableNode::ToLatex() const
+std::string csVariableNode::ToLatex(const csModelBuilder_t* mb) const
 {
-    char buffer[256];
-    std::snprintf(buffer, 256, "x[%d]", blockIndex);
-    return std::string(buffer);
+    if(mb)
+    {
+        return mb->variableNames[blockIndex];
+    }
+    else
+    {
+        char buffer[256];
+        std::snprintf(buffer, 256, "x[%d]", blockIndex);
+        return std::string(buffer);
+    }
 }
 
 /* Variable time derivatives */
@@ -144,7 +159,7 @@ csTimeDerivativeNode::csTimeDerivativeNode(uint32_t overallIndex_, uint32_t bloc
 adouble_t csTimeDerivativeNode::Evaluate(const csNodeEvaluationContext_t& EC) const
 {
     if(!EC.timeDerivatives)
-        throw std::runtime_error("Derivative values not set in csNodeEvaluationContext_t");
+        csThrowException("Derivative values not set in csNodeEvaluationContext_t");
 
     if(EC.jacobianIndex == overallIndex)
         return adouble_t_(EC.timeDerivatives[blockIndex], EC.inverseTimeStep);
@@ -162,18 +177,25 @@ void csTimeDerivativeNode::CollectVariableTypes(std::vector<int32_t>& variableTy
     variableTypes[blockIndex] = csDifferentialVariable;
 }
 
-std::string csTimeDerivativeNode::ToLatex() const
+std::string csTimeDerivativeNode::ToLatex(const csModelBuilder_t* mb) const
 {
-    char buffer[256];
-    std::snprintf(buffer, 256, "x_t[%d]", blockIndex);
-    return std::string(buffer);
+    if(mb)
+    {
+        return "d" + mb->variableNames[blockIndex] + "/dt";
+    }
+    else
+    {
+        char buffer[256];
+        std::snprintf(buffer, 256, "x_t[%d]", blockIndex);
+        return std::string(buffer);
+    }
 }
 
 /* Unary operators and functions: -, sqrt, log, log10, exp, sin, cos, ... */
 csUnaryNode::csUnaryNode(csUnaryFunctions function_, csNodePtr operand_)
 {
     if(!operand_)
-        throw std::runtime_error("Invalid csUnaryNode operand");
+        csThrowException("Invalid csUnaryNode operand");
 
     function = function_;
     operand  = operand_;
@@ -182,7 +204,7 @@ csUnaryNode::csUnaryNode(csUnaryFunctions function_, csNodePtr operand_)
 adouble_t csUnaryNode::Evaluate(const csNodeEvaluationContext_t& EC) const
 {
     if(!operand)
-        throw std::runtime_error("Operand not set in csUnaryNode");
+        csThrowException("Operand not set in csUnaryNode");
 
     adouble_t res;
     adouble_t operand_val = operand->Evaluate(EC);
@@ -253,7 +275,7 @@ adouble_t csUnaryNode::Evaluate(const csNodeEvaluationContext_t& EC) const
         res = _erf_(operand_val);
         break;
     default:
-        throw std::runtime_error("exNotImplemented");
+        csThrowException("exNotImplemented");
     }
     return res;
 }
@@ -261,7 +283,7 @@ adouble_t csUnaryNode::Evaluate(const csNodeEvaluationContext_t& EC) const
 void csUnaryNode::CollectVariableIndexes(std::map<uint32_t,uint32_t>& variableIndexes) const
 {
     if(!operand)
-        throw std::runtime_error("Operand not set in csUnaryNode");
+        csThrowException("Operand not set in csUnaryNode");
 
     operand->CollectVariableIndexes(variableIndexes);
 }
@@ -269,18 +291,18 @@ void csUnaryNode::CollectVariableIndexes(std::map<uint32_t,uint32_t>& variableIn
 void csUnaryNode::CollectVariableTypes(std::vector<int32_t>& variableTypes) const
 {
     if(!operand)
-        throw std::runtime_error("Operand not set in csUnaryNode");
+        csThrowException("Operand not set in csUnaryNode");
 
     operand->CollectVariableTypes(variableTypes);
 }
 
-std::string csUnaryNode::ToLatex() const
+std::string csUnaryNode::ToLatex(const csModelBuilder_t* mb) const
 {
     if(!operand)
-        throw std::runtime_error("Operand not set in csUnaryNode");
+        csThrowException("Operand not set in csUnaryNode");
 
     std::string res;
-    std::string s_operand = operand->ToLatex();
+    std::string s_operand = operand->ToLatex(mb);
 
     switch(function)
     {
@@ -411,7 +433,7 @@ std::string csUnaryNode::ToLatex() const
         res += " \\right)";
         break;
     default:
-        throw std::runtime_error("exNotImplemented");
+        csThrowException("exNotImplemented");
     }
     return res;
 }
@@ -420,9 +442,9 @@ std::string csUnaryNode::ToLatex() const
 csBinaryNode::csBinaryNode(csBinaryFunctions function_, csNodePtr leftOperand_, csNodePtr rightOperand_)
 {
     if(!leftOperand_)
-        throw std::runtime_error("Invalid left csBinaryNode operand");
+        csThrowException("Invalid left csBinaryNode operand");
     if(!rightOperand_)
-        throw std::runtime_error("Invald right csBinaryNode operand");
+        csThrowException("Invald right csBinaryNode operand");
 
     function     = function_;
     leftOperand  = leftOperand_;
@@ -432,9 +454,9 @@ csBinaryNode::csBinaryNode(csBinaryFunctions function_, csNodePtr leftOperand_, 
 adouble_t csBinaryNode::Evaluate(const csNodeEvaluationContext_t& EC) const
 {
     if(!leftOperand)
-        throw std::runtime_error("Left operand not set in csBinaryNode");
+        csThrowException("Left operand not set in csBinaryNode");
     if(!rightOperand)
-        throw std::runtime_error("Right operand not set in csBinaryNode");
+        csThrowException("Right operand not set in csBinaryNode");
 
     adouble_t res;
     adouble_t l_operand = leftOperand->Evaluate(EC);
@@ -467,7 +489,7 @@ adouble_t csBinaryNode::Evaluate(const csNodeEvaluationContext_t& EC) const
         res = _atan2_(l_operand, r_operand);
         break;
     default:
-        throw std::runtime_error("exNotImplemented");
+        csThrowException("exNotImplemented");
     }
     return res;
 }
@@ -475,9 +497,9 @@ adouble_t csBinaryNode::Evaluate(const csNodeEvaluationContext_t& EC) const
 void csBinaryNode::CollectVariableIndexes(std::map<uint32_t,uint32_t>& variableIndexes) const
 {
     if(!leftOperand)
-        throw std::runtime_error("Left operand not set in csBinaryNode");
+        csThrowException("Left operand not set in csBinaryNode");
     if(!rightOperand)
-        throw std::runtime_error("Right operand not set in csBinaryNode");
+        csThrowException("Right operand not set in csBinaryNode");
 
     leftOperand->CollectVariableIndexes(variableIndexes);
     rightOperand->CollectVariableIndexes(variableIndexes);
@@ -486,24 +508,24 @@ void csBinaryNode::CollectVariableIndexes(std::map<uint32_t,uint32_t>& variableI
 void csBinaryNode::CollectVariableTypes(std::vector<int32_t>& variableTypes) const
 {
     if(!leftOperand)
-        throw std::runtime_error("Left operand not set in csBinaryNode");
+        csThrowException("Left operand not set in csBinaryNode");
     if(!rightOperand)
-        throw std::runtime_error("Right operand not set in csBinaryNode");
+        csThrowException("Right operand not set in csBinaryNode");
 
     leftOperand->CollectVariableTypes(variableTypes);
     rightOperand->CollectVariableTypes(variableTypes);
 }
 
-std::string csBinaryNode::ToLatex() const
+std::string csBinaryNode::ToLatex(const csModelBuilder_t* mb) const
 {
     if(!leftOperand)
-        throw std::runtime_error("Left operand not set in csBinaryNode");
+        csThrowException("Left operand not set in csBinaryNode");
     if(!rightOperand)
-        throw std::runtime_error("Right operand not set in csBinaryNode");
+        csThrowException("Right operand not set in csBinaryNode");
 
     std::string res;
-    std::string l_operand = leftOperand->ToLatex();
-    std::string r_operand = rightOperand->ToLatex();
+    std::string l_operand = leftOperand->ToLatex(mb);
+    std::string r_operand = rightOperand->ToLatex(mb);
 
     res = "\\left("; // Start
     switch(function)
@@ -559,18 +581,273 @@ std::string csBinaryNode::ToLatex() const
         res += "\\right)";
         break;
     default:
-        throw std::runtime_error("exNotImplemented");
+        csThrowException("exNotImplemented");
     }
     res += "\\right)"; // End
 
     return res;
 }
 
+/* CreateComputeStack functions. */
+uint32_t csConstantNode::CreateComputeStack(std::vector<csComputeStackItem_t>& computeStack)
+{
+    csComputeStackItem_t item;
+    memset(&item, 0, sizeof(csComputeStackItem_t));
+    item.opCode         = eOP_Constant;
+    item.resultLocation = eOP_Result_to_value;
+    item.data.value     = value;
+    computeStack.push_back(item);
+
+    return 1; // single item added
+}
+
+uint32_t csTimeNode::CreateComputeStack(std::vector<csComputeStackItem_t>& computeStack)
+{
+    csComputeStackItem_t item;
+    memset(&item, 0, sizeof(csComputeStackItem_t));
+    item.opCode         = eOP_Time;
+    item.resultLocation = eOP_Result_to_value;
+    computeStack.push_back(item);
+
+    return 1; // single item added
+}
+
+uint32_t csDegreeOfFreedomNode::CreateComputeStack(std::vector<csComputeStackItem_t>& computeStack)
+{
+    csComputeStackItem_t item;
+    memset(&item, 0, sizeof(csComputeStackItem_t));
+    item.opCode                        = eOP_DegreeOfFreedom;
+    item.resultLocation                = eOP_Result_to_value;
+    item.data.dof_indexes.overallIndex = overallIndex;
+    item.data.dof_indexes.dofIndex     = dofIndex;
+    computeStack.push_back(item);
+
+    return 1; // single item added
+}
+
+uint32_t csVariableNode::CreateComputeStack(std::vector<csComputeStackItem_t>& computeStack)
+{
+    csComputeStackItem_t item;
+    memset(&item, 0, sizeof(csComputeStackItem_t));
+    item.opCode                    = eOP_Variable;
+    item.resultLocation            = eOP_Result_to_value;
+    item.data.indexes.overallIndex = overallIndex;
+    item.data.indexes.blockIndex   = blockIndex;
+    computeStack.push_back(item);
+
+    return 1; // single item added
+}
+
+uint32_t csTimeDerivativeNode::CreateComputeStack(std::vector<csComputeStackItem_t>& computeStack)
+{
+    csComputeStackItem_t item;
+    memset(&item, 0, sizeof(csComputeStackItem_t));
+    item.opCode                    = eOP_TimeDerivative;
+    item.resultLocation            = eOP_Result_to_value;
+    item.data.indexes.overallIndex = overallIndex;
+    item.data.indexes.blockIndex   = blockIndex;
+    computeStack.push_back(item);
+
+    return 1; // single item added
+}
+
+uint32_t csUnaryNode::CreateComputeStack(std::vector<csComputeStackItem_t>& computeStack)
+{
+    uint32_t noItems = 0;
+
+    // 1. Process operand:
+    noItems += operand->CreateComputeStack(computeStack);
+
+    // 2. Add the unary operation:
+    csComputeStackItem_t item;
+    memset(&item, 0, sizeof(csComputeStackItem_t));
+    item.opCode         = eOP_Unary;
+    item.resultLocation = eOP_Result_to_value;
+    item.function       = function;
+    computeStack.push_back(item);
+    noItems += 1;
+
+    return noItems;
+}
+
+uint32_t csBinaryNode::CreateComputeStack(std::vector<csComputeStackItem_t>& computeStack)
+{
+    uint32_t noItems = 0;
+
+    // 1. Process left operand:
+    // Add ops to produce left value.
+    uint32_t noItemsLeft = leftOperand->CreateComputeStack(computeStack);
+    if(noItemsLeft == 0)
+        csThrowException("exInvalidCall");
+    csComputeStackItem_t& litem = computeStack.back();
+    litem.resultLocation = eOP_Result_to_lvalue;
+    noItems += noItemsLeft;
+
+    // 2. Process right operand:
+    // Add ops to produce right value.
+    uint32_t noItemsRight = rightOperand->CreateComputeStack(computeStack);
+    if(noItemsRight == 0)
+        csThrowException("exInvalidCall");
+    csComputeStackItem_t& ritem = computeStack.back();
+    ritem.resultLocation = eOP_Result_to_rvalue;
+    noItems += noItemsRight;
+
+    // 3. Add the binary operation:
+    csComputeStackItem_t item;
+    memset(&item, 0, sizeof(csComputeStackItem_t));
+    item.opCode         = eOP_Binary;
+    item.resultLocation = eOP_Result_to_value;
+    item.function       = function;
+    computeStack.push_back(item);
+    noItems += 1;
+
+    return noItems;
+}
+
+/* Static function. */
+uint32_t csNode_t::CreateComputeStack(csNode_t* adnode, std::vector<csComputeStackItem_t>& computeStack)
+{
+    if(!adnode)
+        csThrowException("Invalid node");
+
+    // Get the index of the first item (to set the size member).
+    uint32_t start = computeStack.size();
+
+    // Create Compute Stack items.
+    uint32_t noItemsCreated = adnode->CreateComputeStack(computeStack);
+
+    // "size" member of the first item contains the stack size.
+    uint32_t stackSize = computeStack.size() - start;
+    if(stackSize == 0)
+        csThrowException("The size of the compute stack is zero");
+    computeStack[start].size = stackSize;
+
+    return noItemsCreated;
+}
+
+/* GetComputeStackSize functions. */
+uint32_t csConstantNode::GetComputeStackSize()
+{
+    return 1;
+}
+
+uint32_t csTimeNode::GetComputeStackSize()
+{
+    return 1;
+}
+
+uint32_t csVariableNode::GetComputeStackSize()
+{
+    return 1;
+}
+
+uint32_t csDegreeOfFreedomNode::GetComputeStackSize()
+{
+    return 1;
+}
+
+uint32_t csTimeDerivativeNode::GetComputeStackSize()
+{
+    return 1;
+}
+
+uint32_t csUnaryNode::GetComputeStackSize()
+{
+    // 1. Process the operand
+    uint32_t noItems = operand->GetComputeStackSize();
+
+    // 2. Add the unary operation
+    noItems++;
+
+    return noItems;
+}
+
+uint32_t csBinaryNode::GetComputeStackSize()
+{
+    // 1. Process left operand
+    uint32_t noItems = leftOperand->GetComputeStackSize();
+
+    // 2. Process right operand
+    noItems += rightOperand->GetComputeStackSize();
+
+    // 3. Add the binary operation
+    noItems++;
+
+    return noItems;
+}
+
+/* GetComputeStackFlops functions. */
+uint32_t csConstantNode::GetComputeStackFlops(const std::map<csUnaryFunctions,uint32_t>&  unaryOps,
+                                              const std::map<csBinaryFunctions,uint32_t>& binaryOps)
+{
+    return 0;
+}
+
+uint32_t csTimeNode::GetComputeStackFlops(const std::map<csUnaryFunctions,uint32_t>&  unaryOps,
+                                          const std::map<csBinaryFunctions,uint32_t>& binaryOps)
+{
+    return 0;
+}
+
+uint32_t csDegreeOfFreedomNode::GetComputeStackFlops(const std::map<csUnaryFunctions,uint32_t>&  unaryOps,
+                                                     const std::map<csBinaryFunctions,uint32_t>& binaryOps)
+{
+    return 0;
+}
+
+uint32_t csVariableNode::GetComputeStackFlops(const std::map<csUnaryFunctions,uint32_t>&  unaryOps,
+                                              const std::map<csBinaryFunctions,uint32_t>& binaryOps)
+{
+    return 0;
+}
+
+uint32_t csTimeDerivativeNode::GetComputeStackFlops(const std::map<csUnaryFunctions,uint32_t>&  unaryOps,
+                                                    const std::map<csBinaryFunctions,uint32_t>& binaryOps)
+{
+    return 0;
+}
+
+uint32_t csUnaryNode::GetComputeStackFlops(const std::map<csUnaryFunctions,uint32_t>&  unaryOps,
+                                           const std::map<csBinaryFunctions,uint32_t>& binaryOps)
+{
+    // 1. Process the operand
+    uint32_t flops = operand->GetComputeStackFlops(unaryOps, binaryOps);
+
+    // 2. Add the unary operation
+    std::map<csUnaryFunctions,uint32_t>::const_iterator it = unaryOps.find(function);
+    if(it != unaryOps.end())
+        flops += it->second;
+    else
+        flops += 1;
+
+    return flops;
+}
+
+uint32_t csBinaryNode::GetComputeStackFlops(const std::map<csUnaryFunctions,uint32_t>&  unaryOps,
+                                            const std::map<csBinaryFunctions,uint32_t>& binaryOps)
+{
+    // 1. Process left operand
+    uint32_t flops = leftOperand->GetComputeStackFlops(unaryOps, binaryOps);
+
+    // 2. Process right operand
+    flops += rightOperand->GetComputeStackFlops(unaryOps, binaryOps);
+
+    // 3. Add the binary operation
+    std::map<csBinaryFunctions,uint32_t>::const_iterator it = binaryOps.find(function);
+    if(it != binaryOps.end())
+        flops += it->second;
+    else
+        flops += 1;
+
+    return flops;
+}
+
 /* Static functions. */
+/*
 void csNode_t::CreateComputeStack(csNode_t* adnode, std::vector<csComputeStackItem_t>& computeStack)
 {
     if(!adnode)
-        throw std::runtime_error("exInvalidCall");
+        csThrowException("exInvalidCall");
 
     uint32_t start = computeStack.size();
     if( dynamic_cast<csConstantNode*>(adnode) )
@@ -649,10 +926,10 @@ void csNode_t::CreateComputeStack(csNode_t* adnode, std::vector<csComputeStackIt
         // 1. Process left node:
         // Add ops to produce left value.
         if(!bnode->leftOperand)
-            throw std::runtime_error("exInvalidCall");
+            csThrowException("exInvalidCall");
         csNode_t::CreateComputeStack(bnode->leftOperand.get(), computeStack);
         if(computeStack.size() == 0)
-            throw std::runtime_error("exInvalidCall");
+            csThrowException("exInvalidCall");
         csComputeStackItem_t& litem = computeStack.back();
         litem.resultLocation = eOP_Result_to_lvalue;
 
@@ -660,7 +937,7 @@ void csNode_t::CreateComputeStack(csNode_t* adnode, std::vector<csComputeStackIt
         // Add ops to produce right value.
         csNode_t::CreateComputeStack(bnode->rightOperand.get(), computeStack);
         if(computeStack.size() == 0)
-            throw std::runtime_error("exInvalidCall");
+            csThrowException("exInvalidCall");
         csComputeStackItem_t& ritem = computeStack.back();
         ritem.resultLocation = eOP_Result_to_rvalue;
 
@@ -674,20 +951,20 @@ void csNode_t::CreateComputeStack(csNode_t* adnode, std::vector<csComputeStackIt
     }
     else
     {
-        throw std::runtime_error("Invalid node");
+        csThrowException("Invalid node");
     }
 
     // "size" member of the first item contains the stack size.
     uint32_t stackSize = computeStack.size() - start;
     if(stackSize == 0)
-        throw std::runtime_error("The size of the compute stack is zero");
+        csThrowException("The size of the compute stack is zero");
     computeStack[start].size = stackSize;
 }
 
 uint32_t csNode_t::GetComputeStackSize(csNode_t* adnode)
 {
     if(!adnode)
-        throw std::runtime_error("exInvalidPointer");
+        csThrowException("exInvalidPointer");
 
     uint32_t noItems = 0;
     if( dynamic_cast<csConstantNode*>(adnode) )
@@ -735,7 +1012,7 @@ uint32_t csNode_t::GetComputeStackSize(csNode_t* adnode)
     }
     else
     {
-        throw std::runtime_error("Invalid runtime node");
+        csThrowException("Invalid runtime node");
     }
 
     return noItems;
@@ -781,6 +1058,6 @@ uint32_t csNode_t::GetComputeStackFlops(csNode_t*                               
 
     return flops;
 }
-
+*/
 
 }

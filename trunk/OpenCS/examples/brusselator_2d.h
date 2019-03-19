@@ -49,7 +49,7 @@ public:
         eps1 = 0.002;
         eps2 = 0.002;
         A    = 1.000;
-        B    = 3.000;
+        B    = 3.400;
 
         u_data     = NULL;
         u_data     = NULL;
@@ -57,13 +57,14 @@ public:
         dv_dt_data = NULL;
     }
 
-    void SetInitialConditions(std::vector<real_t>& uv0, std::vector<real_t>& uv0_dt)
+    void SetInitialConditions(std::vector<real_t>& uv0)
     {
         int ix, iy;
-        uv0.assign   (Nequations, 0.0);
-        uv0_dt.assign(Nequations, 0.0);
+        uv0.assign(Nequations, 0.0);
 
         real_t pi = 3.1415926535898;
+        real_t Lx = x1 - x0;
+        real_t Ly = y1 - y0;
 
         real_t* u_0 = &uv0[u_start_index];
         real_t* v_0 = &uv0[v_start_index];
@@ -77,8 +78,35 @@ public:
                 real_t x = x_domain[ix];
                 real_t y = y_domain[iy];
 
-                u_0[index] = 1.0 - 0.5 * std::cos(pi*y);
-                v_0[index] = 3.5 - 2.5 * std::cos(pi*x);
+                u_0[index] = 1.0 - 0.5 * std::cos(pi * y / Ly);
+                v_0[index] = 3.5 - 2.5 * std::cos(pi * x / Lx);
+            }
+        }
+    }
+
+    void GetVariableNames(std::vector<std::string>& names)
+    {
+        const int bsize = 32;
+        char buffer[bsize];
+        int index = 0;
+
+        names.resize(Nequations);
+        for(int x = 0; x < Nx; x++)
+        {
+            for(int y = 0; y < Ny; y++)
+            {
+                std::snprintf(buffer, bsize, "%s(%d,%d)", "u", x, y);
+                names[index] = buffer;
+                index++;
+            }
+        }
+        for(int x = 0; x < Nx; x++)
+        {
+            for(int y = 0; y < Ny; y++)
+            {
+                std::snprintf(buffer, bsize, "%s(%d,%d)", "v", x, y);
+                names[index] = buffer;
+                index++;
             }
         }
     }
@@ -119,11 +147,9 @@ public:
                 else
                 {
                     // Interior points
-                    equations[eq++]  = du_dt(x,y) -                              /* accumulation term */
-                                       (
-                                         eps1 * (d2u_dx2(x,y) + d2u_dy2(x,y)) +  /* diffusion term    */
-                                         u(x,y)*u(x,y)*v(x,y) - (B+1)*u(x,y) + A /* generation term   */
-                                       );
+                    equations[eq++]  = du_dt(x,y)                                   /* accumulation term */
+                                       - eps1 * (d2u_dx2(x,y) + d2u_dy2(x,y))       /* diffusion term    */
+                                       - (u(x,y)*u(x,y)*v(x,y) - (B+1)*u(x,y) + A); /* generation term   */
                 }
             }
         }
@@ -151,11 +177,9 @@ public:
                 else
                 {
                     // Interior points
-                    equations[eq++]  = dv_dt(x,y) -                             /* accumulation term */
-                                       (
-                                         eps2 * (d2v_dx2(x,y) + d2v_dy2(x,y)) - /* diffusion term    */
-                                         u(x,y)*u(x,y)*v(x,y) + B*u(x,y)        /* generation term   */
-                                       );
+                    equations[eq++]  = dv_dt(x,y)                              /* accumulation term */
+                                       - eps2 * (d2v_dx2(x,y) + d2v_dy2(x,y))  /* diffusion term    */
+                                       + u(x,y)*u(x,y)*v(x,y) - B*u(x,y);   /* generation term   */
                 }
             }
         }

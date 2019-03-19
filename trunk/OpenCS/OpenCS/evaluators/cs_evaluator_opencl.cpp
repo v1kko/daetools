@@ -41,9 +41,9 @@ csComputeStackEvaluator_OpenCL::csComputeStackEvaluator_OpenCL(int platformID, i
     num_platforms = arrPlatforms.size();
 
     if(num_platforms == 0)
-         throw std::runtime_error("No OpenCL platforms found");
+         csThrowException("No OpenCL platforms found");
     if(platformID >= num_platforms)
-         throw std::runtime_error("Invalid OpenCL PlatformsID");
+         csThrowException("Invalid OpenCL PlatformsID");
 
     std::vector<cl_platform_id> platform_ids(num_platforms, NULL);
     cl_device_id device_id;
@@ -78,7 +78,7 @@ csComputeStackEvaluator_OpenCL::csComputeStackEvaluator_OpenCL(int platformID, i
     clCheck(ret);
 
     if(deviceID >= num_devices)
-         throw std::runtime_error("Invalid OpenCL DeviceID");
+         csThrowException("Invalid OpenCL DeviceID");
 
     device_id = device_ids[deviceID];
 

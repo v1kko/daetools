@@ -10,34 +10,21 @@ PARTICULAR PURPOSE. See the GNU Lesser General Public License for more details.
 You should have received a copy of the GNU Lesser General Public License along with
 the OpenCS software; if not, see <http://www.gnu.org/licenses/>.
 ***********************************************************************************/
-#include <mpi.h>
-#include "cs_simulators.h"
-#include "../models/cs_model_builder.h"
+#include <string>
+#include "../cs_model.h"
 
-/* Run using:
-    $ mpirun -np 4 ./csSimulator_ODE inputDataDir
-    $ mpirun -np 4 --hostfile mpi-hosts ./csSimulator_ODE inputDataDir
-    $ mpirun -np 4 konsole --hold -e ./csSimulator_ODE inputDataDir
-    $ mpirun -np 4 konsole --hold -e gdb -ex run --args ./csSimulator_ODE inputDataDir
-*/
-int main(int argc, char *argv[])
+#if !defined(__MINGW32__) && (defined(_WIN32) || defined(WIN32) || defined(WIN64) || defined(_WIN64))
+#ifdef OpenCS_SIMULATORS_EXPORTS
+#define OPENCS_SIMULATORS_API __declspec(dllexport)
+#else
+#define OPENCS_SIMULATORS_API __declspec(dllimport)
+#endif
+#else
+#define OPENCS_SIMULATORS_API
+#endif
+
+namespace cs
 {
-    if(argc < 2)
-    {
-        printf("Usage: csSimulator_ODE inputDataDir\n");
-        return -1;
-    }
-
-    int rank;
-    MPI_Init(&argc, &argv);
-    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
-
-    std::string inputDirectory = argv[1];
-    cs::csSimulate_ODE(inputDirectory);
-
-    MPI_Finalize();
-
-    return 0;
+OPENCS_SIMULATORS_API std::shared_ptr<csLog_t> createLog_StdOut();
+OPENCS_SIMULATORS_API std::shared_ptr<csLog_t> createLog_TextFile(const std::string& fileName);
 }
-
-

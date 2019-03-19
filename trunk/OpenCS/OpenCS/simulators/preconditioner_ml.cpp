@@ -29,7 +29,7 @@ public:
 
         m_diagonal.reset(new Epetra_Vector(*m_map, true));
         if(numberOfVariables != m_diagonal->GlobalLength())
-            throw std::runtime_error("Diagonal array length mismatch");
+            csThrowException("Diagonal array length mismatch");
 
         m_matJacobian.InitMatrix(numberOfVariables, m_matEPETRA.get());
         m_matJacobian.ResetCounters();
@@ -49,7 +49,7 @@ public:
            strPreconditionerName != "maxwell"  &&
            strPreconditionerName != "NSSA")
         {
-            throw std::runtime_error("Invalid preconditioner: " + strPreconditionerName);
+            csThrowException("Invalid preconditioner: " + strPreconditionerName);
         }
 
         Teuchos::ParameterList parameters;
@@ -108,7 +108,7 @@ public:
 
         ML_Epetra::MultiLevelPreconditioner* preconditioner = new ML_Epetra::MultiLevelPreconditioner(*m_matEPETRA.get(), parameters, false);
         if(preconditioner == NULL)
-            throw std::runtime_error("Failed to create ML preconditioner " + strPreconditionerName);
+            csThrowException("Failed to create ML preconditioner " + strPreconditionerName);
 
         m_pPreconditionerML.reset(preconditioner);
 
@@ -123,11 +123,11 @@ public:
     void FillSparseMatrix(dae::daeSparseMatrix<real_t>* pmatrix)
     {
         if(numberOfVariables != N)
-            throw std::runtime_error("");
+            csThrowException("");
         if(numberOfVariables+1 != IA.size())
-            throw std::runtime_error("");
+            csThrowException("");
         if(JA.size() != NNZ)
-            throw std::runtime_error("");
+            csThrowException("");
 
         std::map<size_t, size_t> mapIndexes;
         for(int row = 0; row < numberOfVariables; row++)
@@ -218,7 +218,7 @@ int daePreconditioner_ML::Setup(real_t  time,
         // (2) Extract the diagonal items and repleace them with diag[i] = 1 + diag[i]:
         int ret = p_data->m_matEPETRA->ExtractDiagonalCopy(*p_data->m_diagonal);
         if(ret != 0)
-            throw std::runtime_error("Failed to extract the diagonal copy of the Jacobian matrix.");
+            csThrowException("Failed to extract the diagonal copy of the Jacobian matrix.");
 
         for(uint32_t i = 0; i < p_data->numberOfVariables; i++)
             (*p_data->m_diagonal)[i] = 1.0 + (*p_data->m_diagonal)[i];
@@ -226,7 +226,7 @@ int daePreconditioner_ML::Setup(real_t  time,
         // (3) Put the modified diagonal back to the Epetra matrix.
         ret = p_data->m_matEPETRA->ReplaceDiagonalValues(*p_data->m_diagonal);
         if(ret != 0)
-            throw std::runtime_error("Failed to replace the diagonal items in the Jacobian matrix.");
+            csThrowException("Failed to replace the diagonal items in the Jacobian matrix.");
     }
 
     // Compute the preconditioner.

@@ -1,0 +1,55 @@
+Requirements
+------------
+ 1. MPI (MSMPI on Windows)
+ 2. OpenMP
+ 3. OpenCL drivers/runtime libraries 
+    Intel:  https://software.intel.com/en-us/articles/opencl-drivers
+    AMD:    https://support.amd.com/en-us/kb-articles/Pages/OpenCL2-Driver.aspx
+    NVidia: https://developer.nvidia.com/opencl
+
+GNU/Linux, macOS
+----------------
+Compile the third party libraries:
+$ sh compile_opencs.sh libs
+
+Compile OpenCS:
+$ sh compile_opencs.sh opencs
+
+Alternatively, OpenCS can be compiled using CMake GUI.
+
+
+Windows
+-------
+Additional requirements:
+1. bash environment. 
+   Git for Windows (https://git-scm.com/download/win) has been successfully tested. 
+   During installation, when asked select the following options:
+    - Use Git and optional Unix tools from the Windows Command Prompt
+    - Use Windows’ default console window
+    - Add all bash commands to the PATH (note: it might 'hide' some Windows commands such as find): 
+      i.e. C:\Program Files\Git\cmd;C:\Program Files\Git\mingw32\bin;C:\Program Files\Git\usr\bin
+2. wget is required for downloading the source archives. 
+   If wget is missing it can be downloaded from http://gnuwin32.sourceforge.net/packages/wget.htm. 
+   The source archives of all libraries can also be downloaded manually to the OpenCS root directory.
+
+Compile the third party libraries:
+$ sh compile_opencs.sh libs
+
+Compile OpenCS:
+$ sh compile_opencs.sh opencs
+
+Alternatively, OpenCS can be compiled using CMake GUI.
+
+Known issues
+------------
+- macOS
+  The binary OpenCS distribution is compiled using gcc 6.3 since the C++11 features are required.
+  Therefore, it expects the following libraries (typically in /usr/local/lib):
+    - libgcc_s.1.dylib
+    - libgfortran.3.dylib
+    - libgomp.1.dylib
+    - libquadmath.0.dylib
+    - libstdc++.6.dylib
+
+- Windows
+  Microsoft Visual C++ 2015 Redistributable is required

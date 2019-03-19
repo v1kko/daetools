@@ -123,28 +123,28 @@ public:
 
     double GetItem(size_t i, size_t j) const
     {
-        daeThrowException(exNotImplemented);
+        csThrowException(exNotImplemented);
         return 0.0;
     }
 
     void SetItem(size_t i, size_t j, double val)
     {
         if(!matrix)
-            daeThrowException(exInvalidPointer);
+            csThrowException(exInvalidPointer);
         if(i >= N || j >= N)
-            daeThrowException(exOutOfBounds);
+            csThrowException(exOutOfBounds);
 
         int indices = j;
         double values = val;
         int res = matrix->ReplaceGlobalValues((int)i, 1, &values, &indices);
         if(res != 0)
-            daeThrowException(exInvalidCall);
+            csThrowException(exInvalidCall);
     }
 
     void ClearMatrix(void)
     {
         if(!matrix)
-            daeThrowException(exInvalidPointer);
+            csThrowException(exInvalidPointer);
         matrix->PutScalar(0.0);
     }
 
@@ -160,13 +160,13 @@ public:
 
     real_t* GetRow(size_t row)
     {
-        daeThrowException(exNotImplemented);
+        csThrowException(exNotImplemented);
         return NULL;
     }
 
     real_t* GetColumn(size_t col)
     {
-        daeThrowException(exNotImplemented);
+        csThrowException(exNotImplemented);
         return NULL;
     }
 
@@ -177,7 +177,7 @@ public:
         std::map<size_t, size_t>::const_iterator iter;
 
         if(!matrix)
-            daeThrowException(exInvalidPointer);
+            csThrowException(exInvalidPointer);
 
         n = mapIndexes.size();
         values  = new double[n];
@@ -191,7 +191,7 @@ public:
 
         int res = matrix->InsertGlobalValues(rowCounter, n, values, indexes);
         if(res != 0)
-            daeThrowException(exInvalidCall);
+            csThrowException(exInvalidCall);
 
         delete[] values;
         delete[] indexes;
@@ -207,14 +207,14 @@ public:
     void Sort(void)
     {
         if(!matrix)
-            daeThrowException(exInvalidPointer);
+            csThrowException(exInvalidPointer);
         matrix->FillComplete(true);
     }
 
     void Print(bool bStructureOnly = false) const
     {
         if(!matrix)
-            daeThrowException(exInvalidPointer);
+            csThrowException(exInvalidPointer);
         std::cout << "Epetra CRS Matrix:" << std::endl;
         matrix->Print(std::cout);
     }

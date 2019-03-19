@@ -40,15 +40,19 @@ public:
     csDifferentialEquationModel();
     virtual ~csDifferentialEquationModel();
 
-    void Load(const std::string& inputDirectory, csComputeStackEvaluator_t* csEvaluator);
-    void Load(const csModel_t* csModel, csComputeStackEvaluator_t* csEvaluator);
+    void Load(int rank, const std::string& inputDirectory);
+    void Load(int rank, csModelPtr model);
     void Free();
+    csComputeStackEvaluatorPtr GetComputeStackEvaluator() const;
+    void SetComputeStackEvaluator(csComputeStackEvaluatorPtr evaluator);
+    csModelPtr GetModel();
     void GetSparsityPattern(int& N,
                             int& NNZ,
                             std::vector<int>& IA,
                             std::vector<int>& JA);
     void EvaluateEquations(real_t time, real_t* equations);
     void EvaluateJacobian(real_t time, real_t inverseTimeStep, csMatrixAccess_t* ma);
+    void SetDegreesOfFreedom(real_t* dofs);
     void SetAndSynchroniseData(real_t  time, real_t* values, real_t* time_derivatives);
     int  NumberOfRoots();
     void Roots(real_t time, real_t* values, real_t* time_derivatives, real_t* roots);
@@ -56,11 +60,13 @@ public:
     csDiscontinuityType ExecuteActions(real_t time, real_t* values, real_t* time_derivatives);
 
 protected:
-    void FinishInitialization(csComputeStackEvaluator_t* csEvaluator);
+    void FinishInitialization();
     void InitializeValuesReferences();
     void CheckSynchronisationIndexes();
 
 protected:
+    csModelPtr csModel;
+
     /* Current time in model, set by SetAndSynchroniseData function. */
     real_t                   currentTime;
 

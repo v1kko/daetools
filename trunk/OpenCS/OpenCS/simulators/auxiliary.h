@@ -13,7 +13,7 @@ the OpenCS software; if not, see <http://www.gnu.org/licenses/>.
 #ifndef CS_SIMULATOR_AUXILIARY_H
 #define CS_SIMULATOR_AUXILIARY_H
 
-#include <omp.h>
+#include <mpi.h>
 #include <vector>
 
 namespace auxiliary
@@ -63,7 +63,8 @@ public:
     // Returns time in seconds.
     double GetTime()
     {
-        return omp_get_wtime();
+        //return omp_get_wtime();
+        return MPI_Wtime();
     }
 
 public:

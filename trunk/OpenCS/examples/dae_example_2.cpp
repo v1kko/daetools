@@ -13,17 +13,15 @@ OpenCS software; if not, see <http://www.gnu.org/licenses/>.
 #include <mpi.h>
 #include "heat_conduction_2d.h"
 #include <OpenCS/models/cs_model_builder.h>
-#include <OpenCS/evaluators/cs_evaluator_sequential.h>
+#include <OpenCS/evaluators/cs_evaluators.h>
 #include <OpenCS/simulators/cs_simulators.h>
+#include <OpenCS/simulators/daesimulator.h>
 using namespace cs;
-
-const char* simulation_options_json =
-#include "simulation_options-dae.json"
-;
 
 /* Reimplementation of DAE Tools tutorial1.py example.
  * A simple heat conduction problem: conduction through a very thin, rectangular copper plate.
- * Two-dimensional Cartesian grid (x,y) of 20 x 20 elements. */
+ * Two-dimensional Cartesian grid (x,y) of 20 x 20 elements.
+ * The original results are in dae_example_2.csv file. */
 int main(int argc, char *argv[])
 {
     /*************************************************************************************************
@@ -34,6 +32,28 @@ int main(int argc, char *argv[])
      * among processing elements. */
     uint32_t Nx = 20;
     uint32_t Ny = 20;
+
+    if(argc == 3)
+    {
+        Nx = atoi(argv[1]);
+        Ny = atoi(argv[2]);
+    }
+    else if(argc == 1)
+    {
+        // Use the default grid size.
+    }
+    else
+    {
+        printf("Usage:\n");
+        printf("  %s (using the default grid: %u x %u)\n", argv[0], Nx, Ny);
+        printf("  %s Nx Ny\n", argv[0]);
+        return -1;
+    }
+
+    printf("###################################################################\n");
+    printf(" Simple heat conduction problem in 2D: %u x %u grid\n", Nx, Ny);
+    printf("###################################################################\n");
+
     HeatConduction_2D hc(Nx, Ny);
 
     uint32_t    Ndofs                         = 0;
@@ -67,6 +87,11 @@ int main(int argc, char *argv[])
     mb.SetModelEquations(equations);
     printf("Model equations generated and set\n");
 
+    // Set variable names
+    std::vector<std::string> names;
+    hc.GetVariableNames(names);
+    mb.SetVariableNames(names);
+
     /*
     printf("Equations expresions:\n");
     for(uint32_t i = 0; i < Nvariables; i++)
@@ -84,195 +109,60 @@ int main(int argc, char *argv[])
     std::vector<real_t> T    (Nvariables, 0.0);
     std::vector<real_t> dT_dt(Nvariables, 0.0);
 
-    hc.SetInitialConditions(T, dT_dt);
+    hc.SetInitialConditions(T);
 
     mb.SetVariableValues         (T);
     mb.SetVariableTimeDerivatives(dT_dt);
 
     /*************************************************************************************************
-     * Use Case 1: Export model(s) to a specified directory for simulation using csSimulator_DAE
+     * Use Case 1: Export model(s) to a specified directory for simulation using the csSimulator
      *************************************************************************************************/
-    real_t startTime         =   0.0;
-    real_t timeHorizon       = 500.0;
-    real_t reportingInterval =   5.0;
-    real_t relativeTolerance = 1e-5;
+    /* Model export requires partitioning of the system and simulation options (in JSON format). */
+    /* 1. Set the model options. */
+    csSimulationOptionsPtr options = mb.GetSimulationOptions();
+    options->SetDouble("Simulation.TimeHorizon",              500.0);
+    options->SetDouble("Simulation.ReportingInterval",          5.0);
+    options->SetDouble("Solver.Parameters.RelativeTolerance",  1e-5);
+    std::string simulationOptions = options->ToString();
 
-    /* Model export requires partitioning of the system and simulation options (in JSON format).
-     * a) Available partitioners:
-     *    - Simple
-     *    - Metis:
-     *      - PartGraphKway:      'Multilevel k-way partitioning' algorithm
-     *      - PartGraphRecursive: 'Multilevel recursive bisectioning' algorithm
-     *    Metis partitioner can additionally balance specified quantities in all partitions using the balancing constraints.
-     *    Available balancing constraints:
-     *    - Ncs:      balance number of compute stack items in equations
-     *    - Nnz:      balance number of non-zero items in the incidence matrix
-     *    - Nflops:   balance number of FLOPS required to evaluate equations
-     *    - Nflops_j: balance number of FLOPS required to evaluate derivatives (Jacobian) matrix
-     *
-     * b) Sample simulation options are given in "simulation_options-Sundials_Ifpack_ILU.json" file
-     *    loaded in "heat_conduction_2d.h" as "simulation_options_json" variable.
-     *    simulation_options_json variable serves as a template for setting the values of
-     *    StartTime, TimeHorizon, ReportingInterval and RelativeTolerance that must be set.
-     *    Here, use snprintf to format the simulation options string. */
-    const size_t bsize = 8192;
-    char buffer[bsize];
-    std::snprintf(buffer, bsize, simulation_options_json, startTime, timeHorizon, reportingInterval, relativeTolerance);
-    std::string simulationOptions = buffer;
-
-    /* 1. For Npe = 1 the partitioner creates a single model for a sequential simulation (a single MPI node).
-     *    Here, Simple partitioner can be used to simply split equations into Npe parts (with no analysis). */
+    /* 2. Partition the system to create a single model for a sequential simulation (a single MPI node).
+     *    For Npe = 1, graph partitioner is not required. */
     uint32_t Npe = 1;
     std::vector<std::string> balancingConstraints;
-    std::string inputFilesDirectory = "dae_example_2-Npe_1";
-    csGraphPartitioner_Simple partitioner;
-    std::vector<csModelPtr> models_sequential = mb.PartitionSystem(Npe, &partitioner, balancingConstraints, true);
-    mb.ExportModels(models_sequential, inputFilesDirectory, simulationOptions);
-    printf("Case 1.1 Generated models for Npe = %u\n", Npe);
-
-    /* 2. For Npe > 1 the partitioner creates Npe models for a parallel simulation.
-     * 2.1 Use the Simple partitioner (does not use balancing constraints). */
-    Npe = 4;
-    {
-        std::vector<std::string> balancingConstraints;
-        std::string inputFilesDirectory = "dae_example_2-Npe_4-Simple";
-        csGraphPartitioner_Simple partitioner;
-        std::vector<csModelPtr> models_parallel = mb.PartitionSystem(Npe, &partitioner, balancingConstraints, true);
-        mb.ExportModels(models_parallel, inputFilesDirectory, simulationOptions);
-        printf("Case 1.2 Generated models for Npe = %u %s\n", Npe, partitioner.GetName().c_str());
-    }
-
-    /* 2.2 Use the Metis partitioner and 'Multilevel k-way partitioning' algorithm. No additional balancing constraints. */
-    {
-        std::string inputFilesDirectory = "dae_example_2-Npe_4-PartGraphKway";
-        std::vector<std::string> balancingConstraints;
-
-        csGraphPartitioner_Metis partitioner(PartGraphKway);
-
-        // Options can be set using the SetOptions options.
-        // First, obtain the array with options already initialised to default values.
-        std::vector<int32_t> options = partitioner.GetOptions();
-        // Then, set the options (as describe in the Section 5.4 of the METIS manual; requires <metis.h> included).
-        // options[METIS_OPTION_DBGLVL]  = METIS_DBG_INFO | METIS_DBG_TIME;
-        // options[METIS_OPTION_NITER]   = 10;
-        // options[METIS_OPTION_UFACTOR] = 30;
-        // Finally, set the updated options to the Metis partitioner.
-        partitioner.SetOptions(options);
-
-        // Graph partitioners can optionally use dictionaries with a number of FLOPS required for individual mathematical operations.
-        // This way, the total number of FLOPS can be precisely estimated for every equation.
-        // Number of FLOPS are specified using two dictionaries:
-        //  1. unaryOperationsFlops for:
-        //      - unary operators (+, -)
-        //      - unary functions (sqrt, log, log10, exp, sin, cos, tan, asin, acos, atan, sinh, cosh,
-        //                         tanh, asinh, acosh, atanh, erf, floor, ceil, and abs)
-        //  2. binaryOperationsFlops for:
-        //      - binary operators (+, -, *, /, ^)
-        //      - binary functions (pow, min, max, atan2)
-        // For instance:
-        //   unaryOperationsFlops[eSqrt] = 12
-        //   unaryOperationsFlops[eExp]   = 5
-        //   binaryOperationsFlops[eMulti]  = 4
-        //   binaryOperationsFlops[eDivide] = 6
-        // If a mathematical operation is not in the dictionary, it is assumed that it requires a single FLOP.
-        // In this example the dictionaries are not used (all operations require a single FLOP).
-        std::map<csUnaryFunctions,uint32_t>  unaryOperationsFlops;
-        std::map<csBinaryFunctions,uint32_t> binaryOperationsFlops;
-
-        std::vector<csModelPtr> models_parallel = mb.PartitionSystem(Npe,
-                                                                     &partitioner,
-                                                                     balancingConstraints,
-                                                                     true,
-                                                                     unaryOperationsFlops,
-                                                                     binaryOperationsFlops);
-
-        mb.ExportModels(models_parallel, inputFilesDirectory, simulationOptions);
-        printf("Case 1.2 Generated models for Npe = %u %s\n", Npe, partitioner.GetName().c_str());
-    }
-
-    /* 2.3 Use the Metis partitioner and 'Multilevel recursive bisectioning' algorithm. No additional balancing constraints. */
-    {
-        std::vector<std::string> balancingConstraints;
-        std::string inputFilesDirectory = "dae_example_2-Npe_4-PartGraphRecursive";
-        csGraphPartitioner_Metis partitioner(PartGraphRecursive);
-        std::vector<csModelPtr> models_parallel = mb.PartitionSystem(Npe, &partitioner, balancingConstraints, true);
-        mb.ExportModels(models_parallel, inputFilesDirectory, simulationOptions);
-        printf("Case 1.3 Generated models for Npe = %u %s\n", Npe, partitioner.GetName().c_str());
-    }
-
-    /* 2.4 Use the Metis partitioner and 'Multilevel recursive bisectioning' algorithm. Balance 'Ncs'. */
-    {
-        std::vector<std::string> balancingConstraints = {"Ncs"};
-        std::string inputFilesDirectory = "dae_example_2-Npe_4-[Ncs]";
-        csGraphPartitioner_Metis partitioner(PartGraphRecursive);
-        std::vector<csModelPtr> models_parallel = mb.PartitionSystem(Npe, &partitioner, balancingConstraints);
-        mb.ExportModels(models_parallel, inputFilesDirectory, simulationOptions);
-        printf("Case 1.4 Generated models for Npe = %u %s-[%s]\n", Npe, partitioner.GetName().c_str(), "Ncs");
-    }
-
-    /* 2.5 Use the Metis partitioner and 'Multilevel recursive bisectioning' algorithm. Balance 'Ncs' and 'Nflops'. */
-    {
-        std::vector<std::string> balancingConstraints = {"Ncs", "Nflops"};
-        std::string inputFilesDirectory = "dae_example_2-Npe_4-[Ncs,Nflops]";
-        csGraphPartitioner_Metis partitioner(PartGraphRecursive);
-        std::vector<csModelPtr> models_parallel = mb.PartitionSystem(Npe, &partitioner, balancingConstraints, true);
-        mb.ExportModels(models_parallel, inputFilesDirectory, simulationOptions);
-        printf("Case 1.5 Generated models for Npe = %u %s-[%s]\n", Npe, partitioner.GetName().c_str(), "Ncs,Nflops");
-    }
-
-    /* 2.6 Use the Metis partitioner and 'Multilevel recursive bisectioning' algorithm. Balance all available constraints. */
-    {
-        std::vector<std::string> balancingConstraints = {"Ncs", "Nnz", "Nflops", "Nflops_j"};
-        std::string inputFilesDirectory = "dae_example_2-Npe_4-[Ncs,Nnz,Nflops,Nflops_j]";
-        csGraphPartitioner_Metis partitioner(PartGraphRecursive);
-        std::vector<csModelPtr> models_parallel = mb.PartitionSystem(Npe, &partitioner, balancingConstraints, true);
-        mb.ExportModels(models_parallel, inputFilesDirectory, simulationOptions);
-        printf("Case 1.6 Generated models for Npe = %u %s-[%s]\n", Npe, partitioner.GetName().c_str(), "Ncs,Nnz,Nflops,Nflops_j");
-    }
-
-    /* 2.7 Try the Metis partitioner for a large number of processing elements. */
-    {
-        uint32_t Npe = 100;
-        std::vector<std::string> balancingConstraints = {"Ncs"};
-        std::string inputFilesDirectory = "dae_example_2-Npe_100-[Ncs]";
-        csGraphPartitioner_Metis partitioner(PartGraphRecursive);
-        std::vector<csModelPtr> models_parallel = mb.PartitionSystem(Npe, &partitioner, balancingConstraints, true);
-        mb.ExportModels(models_parallel, inputFilesDirectory, simulationOptions);
-        printf("Case 1.7 Generated models for Npe = %u %s-[%s]\n", Npe, partitioner.GetName().c_str(), "Ncs");
-    }
+    std::string inputFilesDirectory = "dae_example_2-sequential";
+    csGraphPartitioner_t* gp = NULL;
+    std::vector<csModelPtr> models_sequential = mb.PartitionSystem(Npe, gp, balancingConstraints);
+    csModelBuilder_t::ExportModels(models_sequential, inputFilesDirectory, simulationOptions);
+    printf("Case 1. Generated model for Npe = 1\n");
 
     /* 3. Simulation in GNU/Linux.
      * 3.1 The sequential simulation (for Npe = 1) can be started using:
-     *   $ csSimulator_DAE "inputFilesDirectory" */
-    //std::system("./../bin/csSimulator_DAE dae_example_2-Npe_1 > dae_example_2-sequential.out");
+     *   $ csSimulator "inputFilesDirectory" */
+    //std::system("./../bin/csSimulator dae_example_2-sequential);
 
     /* 3.2 The parallel simulation (for Npe > 1) can be started using:
-     *   $ mpirun -np Npe csSimulator_DAE "inputFilesDirectory"
-     * or
-     *   $ mpirun -np Npe konsole --hold -e csSimulator_DAE "inputFilesDirectory"
-     * where the arguments "konsole --hold -e" are used to start each process in a separate shell
-     * and to keep it open after the simulation ends. */
-    //std::system("mpirun -np 4 konsole --hold -e ./../bin/csSimulator_DAE dae_example_2-Npe_4 > dae_example_2-parallel.out");
+     *   $ mpirun -np Npe csSimulator "inputFilesDirectory" */
+    //std::system("mpirun -np 4 ./../bin/csSimulator dae_example_2-Npe_4");
 
     /* 4. Simulation in Windows.
      * 4.1 The sequential simulation (for Npe = 1) can be started using:
-     *   $ csSimulator_DAE "inputFilesDirectory" */
-    //std::system("..\bin\csSimulator_DAE.exe dae_example_2-Npe_1 > dae_example_2-sequential.out");
+     *   $ csSimulator "inputFilesDirectory" */
+    //std::system("..\bin\csSimulator.exe dae_example_2-Npe_1");
 
     /* 4.2 The parallel simulation (for Npe > 1) can be started using:
-     *   $ mpiexec -n Npe csSimulator_DAE "inputFilesDirectory" */
-    //std::system("mpiexec -n 4 ..\bin\csSimulator_DAE.exe dae_example_2-Npe_4 > dae_example_2-parallel.out");
+     *   $ mpiexec -n Npe csSimulator "inputFilesDirectory" */
+    //std::system("mpiexec -n 4 ..\bin\csSimulator.exe dae_example_2-Npe_4");
 
     /*************************************************************************************************
-     * Use Case 2: Evaluation of equations
+     * Use Case 2: Evaluation of equations - low level method)
      *************************************************************************************************/
     // Select a model to use for evaluations.
     csModelPtr model = models_sequential[0];
 
+    std::vector<real_t> residuals_nodes;
+    std::vector<real_t> residuals_cse;
     {
         // 1. Declare arrays for the results.
-        std::vector<real_t> residuals_nodes;
-        std::vector<real_t> residuals_cse;
         residuals_nodes.resize(Nvariables);
         residuals_cse.resize(Nvariables);
 
@@ -283,8 +173,7 @@ int main(int argc, char *argv[])
         mb.EvaluateEquations(currentTime, residuals_nodes);
 
         // 3.2 Use the Compute Stack Evaluator to evaluate equations.
-        std::shared_ptr<csComputeStackEvaluator_t> csEvaluator;
-        csEvaluator.reset( new cs::csComputeStackEvaluator_Sequential() );
+        std::shared_ptr<csComputeStackEvaluator_t> csEvaluator(createEvaluator_Sequential());
         csEvaluator->Initialize(false,
                                 model->structure.Nequations,
                                 model->structure.Nequations,
@@ -321,8 +210,8 @@ int main(int argc, char *argv[])
 
         // 4. Compare the results from csNode_t::Evaluate and csComputeStackEvaluator_t::Evaluate functions.
         //    Print only the items that are different (if any). */
-        printf("Case 2.  Evaluation of equation residuals\n");
-        printf("         Comparison of residuals (only equations where fabs(F_cse[i] - F_nodes[i]) > %.0e are printed, if any):\n", epsilon);
+        printf("Case 2. Evaluation of equation residuals (low-level method)\n");
+        printf("        Comparison of residuals (only equations where fabs(F_cse[i] - F_nodes[i]) > %.0e are printed, if any):\n", epsilon);
         for(uint32_t i = 0; i < Nvariables; i++)
         {
             real_t difference = residuals_cse[i] - residuals_nodes[i];
@@ -333,8 +222,10 @@ int main(int argc, char *argv[])
     }
 
     /*************************************************************************************************
-     * Use Case 3: Evaluation of derivatives (the Jacobian matrix).
+     * Use Case 3: Evaluation of derivatives (the Jacobian matrix) - low level method.
      *************************************************************************************************/
+    std::vector<real_t> J_nodes;
+    std::vector<real_t> J_cse;
     {
         // 1. Set the current time and the time step
         real_t currentTime = 1.0;
@@ -344,23 +235,20 @@ int main(int argc, char *argv[])
         //    The Jacobian matrix is stored in the CRS format.
         //    Declare arrays for the results.
         std::vector<uint32_t> IA, JA;
-        std::vector<real_t> A_nodes;
-        std::vector<real_t> A_cse;
 
         mb.GetSparsityPattern(IA, JA);
 
         uint32_t Nnz = JA.size();
-        A_nodes.resize(Nnz);
-        A_cse.resize(Nnz);
+        J_nodes.resize(Nnz);
+        J_cse.resize(Nnz);
 
         // 3.1 Use csModelBuilder_t::EvaluateDerivatives function to evaluate derivatives.
         //     The incidence matrix will be populated during the first call to EvaluateDerivatives.
         bool generateIncidenceMatrix = false;
-        mb.EvaluateDerivatives(currentTime, timeStep, IA, JA, A_nodes, generateIncidenceMatrix);
+        mb.EvaluateDerivatives(currentTime, timeStep, IA, JA, J_nodes, generateIncidenceMatrix);
 
         // 3.2 Use the Compute Stack Evaluator to evaluate equations.
-        std::shared_ptr<csComputeStackEvaluator_t> csEvaluator;
-        csEvaluator.reset( new cs::csComputeStackEvaluator_Sequential() );
+        std::shared_ptr<csComputeStackEvaluator_t> csEvaluator(createEvaluator_Sequential());
         csEvaluator->Initialize(false,
                                 model->structure.Nequations,
                                 model->structure.Nequations,
@@ -393,134 +281,131 @@ int main(int argc, char *argv[])
         EC.startEquationIndex           = 0;
         EC.startJacobianIndex           = 0;
 
-        csEvaluator->EvaluateDerivatives(EC, pdofs, pvalues, ptimeDerivatives, &A_cse[0]);
+        csEvaluator->EvaluateDerivatives(EC, pdofs, pvalues, ptimeDerivatives, &J_cse[0]);
 
         // 4. Compare the results from csNode_t::Evaluate and csComputeStackEvaluator_t::Evaluate functions.
         //    Print only the items that are different (if any). */
-        printf("Case 3.  Evaluation of equation derivatives\n");
-        printf("         Comparison of derivatives (only Jacobian items where fabs(J_cse[i,j] - J_nodes[i,j]) > %.0e are printed, if any):\n", epsilon);
+        printf("Case 3. Evaluation of equation derivatives (low-level method)\n");
+        printf("        Comparison of derivatives (only Jacobian items where fabs(J_cse[i,j] - J_nodes[i,j]) > %.0e are printed, if any):\n", epsilon);
         for(uint32_t i = 0; i < Nnz; i++)
         {
-            real_t difference = A_cse[i] - A_nodes[i];
+            real_t difference = J_cse[i] - J_nodes[i];
             if(std::fabs(difference) > epsilon)
-                printf("           [%5d] %.2e (%20.15f, %20.15f)\n", i, difference, A_cse[i], A_nodes[i]);
+                printf("           [%5d] %.2e (%20.15f, %20.15f)\n", i, difference, J_cse[i], J_nodes[i]);
         }
         printf("\n");
     }
 
     /*************************************************************************************************
-     * Use Case 4: Simulate the exported model using the DAE simulator from libOpenCS_Simulators
+     * Use Case 4: Model exchange
      *************************************************************************************************/
-    printf("Case 4.  Simulation of '%s' (using libOpenCS_Simulators)\n\n", inputFilesDirectory.c_str());
+    // 1. Initialise MPI
+    int rank;
     MPI_Init(&argc, &argv);
-    csSimulate_DAE(inputFilesDirectory);
+    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+
+    {
+        /* 2. Instantiate the Compute Stack model implementation of the
+         *    csDifferentialEquationModel_t interface.
+         *    A reference implementation (csDifferentialEquationModel) is provided
+         *    in the libOpenCS_Models shared library. */
+        csDifferentialEquationModel de_model;
+
+        /* 3. Load the model from the specified directory with input files
+         *    or use the model generated by Model Builder. */
+        de_model.Load(rank, inputFilesDirectory);
+
+        /* 4. Instantiate and set the Compute Stack Evaluator.
+         *    For simplicity, the sequential one is used here. */
+        std::shared_ptr<csComputeStackEvaluator_t> csEvaluator(createEvaluator_Sequential());
+        de_model.SetComputeStackEvaluator(csEvaluator);
+
+        /* 5. Obtain the information from the model such as
+         *    number of variables, variable names, types,
+         *    absolute tolerances, initial conditions
+         *    and the sparsity pattern. */
+        int              N, Nnz;
+        std::vector<int> IA, JA;
+        de_model.GetSparsityPattern(N, Nnz, IA, JA);
+
+        /* 6. In a loop: evaluation of equations and derivatives. */
+        /*    6.1 Set the current values of state variables and derivatives
+         *        using the time, x and dx_dt values from the ODE/DAE solver.
+         *        In parallel simulations, the MPI C interface will be used
+         *        to exchange the values and derivatives of adjacent variables
+         *        between the processing elements. */
+        real_t time = 1.01;
+        de_model.SetAndSynchroniseData(time, &T[0], &dT_dt[0]);
+
+        /*    6.2 Evaluate residuals. */
+        std::vector<real_t> residuals(Nvariables, 0.0);
+        de_model.EvaluateEquations(time, &residuals[0]);
+        {
+            // Compare the results from csNode_t::Evaluate and csComputeStackEvaluator_t::Evaluate functions.
+            // Print only the items that are different (if any). */
+            printf("Case 4. Model exchange for the model in %s\n", inputFilesDirectory.c_str());
+            printf("        Comparison of residuals (only equations where fabs(F_cs_model[i] - F_nodes[i]) > %.0e are printed, if any):\n", epsilon);
+            for(uint32_t i = 0; i < Nvariables; i++)
+            {
+                real_t difference = residuals[i] - residuals_nodes[i];
+                if(std::fabs(difference) > epsilon)
+                    printf("           [%5d] %.2e (%20.15f, %20.15f)\n", i, difference, residuals[i], residuals_nodes[i]);
+            }
+            printf("\n");
+        }
+
+        /*    6.2 Evaluate derivatives (the Jacobian matrix).
+         *        csMatrixAccess_t is used as a generic interface for sparse matrix storage.
+         *        inverseTimeStep is an inverse of the current step taken by the solver (1/h).
+         *        It is assumed that a call to SetAndSynchroniseData has already been performed
+         *        (therefore the current values set and exchanged between processing elements)
+         *        which is a typical procedure in ODE/DAE solvers where the residuals/RHS are
+         *        always evaluated first and then, if necessary, the derivatives evaluated and
+         *        a preconditioner recomputed (in iterative methods) or a matrix re-factored
+         *        (in direct methods). */
+        class testMatrixAccess : public csMatrixAccess_t
+        {
+        public:
+            testMatrixAccess(uint32_t Nnz)
+            {
+                J.resize(Nnz);
+            }
+
+            ~testMatrixAccess()
+            {
+            }
+
+            virtual void SetItem(size_t row, size_t col, real_t value)
+            {
+                //printf("  J(%u,%u) = %10.3e\n", row, col, value);
+            }
+
+            std::vector<real_t> J;
+        };
+
+        testMatrixAccess ma(Nnz);
+        real_t inverseTimeStep = 1E5;
+        de_model.EvaluateJacobian(time, inverseTimeStep, &ma);
+
+        /* 7. Free the resources allocated in the model and the evaluator. */
+        de_model.Free();
+
+        /* 8. Finalise MPI. */
+        //MPI_Finalize(); // will be called later at the end of program
+    }
+
+    /*************************************************************************************************
+     * Use Case 5: Simulate the sequential model using the DAE simulator from libOpenCS_Simulators
+     *************************************************************************************************/
+    printf("Case 5. Simulation of '%s' (using libOpenCS_Simulators)\n\n", inputFilesDirectory.c_str());
+
+    // (a) Run simulation using the input files from the specified directory:
+    csSimulate(inputFilesDirectory);
+    // (b) Run simulation using the generated csModel_t, string with JSON options and the directory for simulation outputs:
+    //Simulate(model, simulationOptions, inputFilesDirectory);
+
+    // Finalise MPI
     MPI_Finalize();
 
     return 0;
 }
-
-/* Results from DAE Tools tutorial1.py:
-
-"Time (s)","tutorial1.T(*, 0.0, 0.0)"
-0.00000000000000e+00,3.00831255195860e+02
-5.00000000000000e+00,3.06837451188856e+02
-1.00000000000000e+01,3.09631631862243e+02
-1.50000000000000e+01,3.11776479684250e+02
-2.00000000000000e+01,3.13561375251053e+02
-2.50000000000000e+01,3.15087894848071e+02
-3.00000000000000e+01,3.16405209652843e+02
-3.50000000000000e+01,3.17545869627578e+02
-4.00000000000000e+01,3.18533721627763e+02
-4.50000000000000e+01,3.19389033832041e+02
-5.00000000000000e+01,3.20130019723842e+02
-5.50000000000000e+01,3.20772153204060e+02
-6.00000000000000e+01,3.21328685311137e+02
-6.50000000000000e+01,3.21811042591061e+02
-7.00000000000000e+01,3.22229085929137e+02
-7.50000000000000e+01,3.22590969989233e+02
-8.00000000000000e+01,3.22904487889583e+02
-8.50000000000000e+01,3.23175792270656e+02
-9.00000000000000e+01,3.23410728619497e+02
-9.50000000000000e+01,3.23614136403836e+02
-1.00000000000000e+02,3.23790528925655e+02
-1.05000000000000e+02,3.23943478546197e+02
-1.10000000000000e+02,3.24075972416751e+02
-1.15000000000000e+02,3.24190997743872e+02
-1.20000000000000e+02,3.24290746258327e+02
-1.25000000000000e+02,3.24377072886934e+02
-1.30000000000000e+02,3.24451643770463e+02
-1.35000000000000e+02,3.24516464088734e+02
-1.40000000000000e+02,3.24572661049033e+02
-1.45000000000000e+02,3.24621040843894e+02
-1.50000000000000e+02,3.24663122138114e+02
-1.55000000000000e+02,3.24700111995483e+02
-1.60000000000000e+02,3.24731828777483e+02
-1.65000000000000e+02,3.24759168100337e+02
-1.70000000000000e+02,3.24783045653244e+02
-1.75000000000000e+02,3.24803856620891e+02
-1.80000000000000e+02,3.24821680808070e+02
-1.85000000000000e+02,3.24837195495440e+02
-1.90000000000000e+02,3.24850972713202e+02
-1.95000000000000e+02,3.24862673502914e+02
-2.00000000000000e+02,3.24872536111687e+02
-2.05000000000000e+02,3.24881457148674e+02
-2.10000000000000e+02,3.24889199353647e+02
-2.15000000000000e+02,3.24895861816951e+02
-2.20000000000000e+02,3.24901579580994e+02
-2.25000000000000e+02,3.24906513595854e+02
-2.30000000000000e+02,3.24910894200529e+02
-2.35000000000000e+02,3.24914775625652e+02
-2.40000000000000e+02,3.24918104345982e+02
-2.45000000000000e+02,3.24920932880687e+02
-2.50000000000000e+02,3.24923506745139e+02
-2.55000000000000e+02,3.24925668843272e+02
-2.60000000000000e+02,3.24927419175085e+02
-2.65000000000000e+02,3.24928962842201e+02
-2.70000000000000e+02,3.24930349884284e+02
-2.75000000000000e+02,3.24931483464292e+02
-2.80000000000000e+02,3.24932370609579e+02
-2.85000000000000e+02,3.24933239011289e+02
-2.90000000000000e+02,3.24933957821262e+02
-2.95000000000000e+02,3.24934527039499e+02
-3.00000000000000e+02,3.24934982673785e+02
-3.05000000000000e+02,3.24935378627018e+02
-3.10000000000000e+02,3.24935702345441e+02
-3.15000000000000e+02,3.24935969185557e+02
-3.20000000000000e+02,3.24936183478552e+02
-3.25000000000000e+02,3.24936361181539e+02
-3.30000000000000e+02,3.24936516592071e+02
-3.35000000000000e+02,3.24936651286492e+02
-3.40000000000000e+02,3.24936740909997e+02
-3.45000000000000e+02,3.24936808285029e+02
-3.50000000000000e+02,3.24936858521826e+02
-3.55000000000000e+02,3.24936896730627e+02
-3.60000000000000e+02,3.24936928021671e+02
-3.65000000000000e+02,3.24936957505199e+02
-3.70000000000000e+02,3.24936992221172e+02
-3.75000000000000e+02,3.24937041584628e+02
-3.80000000000000e+02,3.24937090537838e+02
-3.85000000000000e+02,3.24937139080803e+02
-3.90000000000000e+02,3.24937187213522e+02
-3.95000000000000e+02,3.24937234935995e+02
-4.00000000000000e+02,3.24937282248223e+02
-4.05000000000000e+02,3.24937329150205e+02
-4.10000000000000e+02,3.24937345141902e+02
-4.15000000000000e+02,3.24937360435058e+02
-4.20000000000000e+02,3.24937375728214e+02
-4.25000000000000e+02,3.24937391021369e+02
-4.30000000000000e+02,3.24937406314525e+02
-4.35000000000000e+02,3.24937421607681e+02
-4.40000000000000e+02,3.24937436900836e+02
-4.45000000000000e+02,3.24937452193992e+02
-4.50000000000000e+02,3.24937467487147e+02
-4.55000000000000e+02,3.24937482780303e+02
-4.60000000000000e+02,3.24937498073459e+02
-4.65000000000000e+02,3.24937513366614e+02
-4.70000000000000e+02,3.24937528659770e+02
-4.75000000000000e+02,3.24937543952925e+02
-4.80000000000000e+02,3.24937555217247e+02
-4.85000000000000e+02,3.24937564387100e+02
-4.90000000000000e+02,3.24937573556953e+02
-4.95000000000000e+02,3.24937582726806e+02
-5.00000000000000e+02,3.24937591896659e+02
-*/

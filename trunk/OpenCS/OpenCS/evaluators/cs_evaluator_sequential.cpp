@@ -11,9 +11,15 @@ You should have received a copy of the GNU Lesser General Public License along w
 the OpenCS software; if not, see <http://www.gnu.org/licenses/>.
 ***********************************************************************************/
 #include "cs_evaluator_sequential.h"
+#include "cs_evaluators.h"
 
 namespace cs
 {
+csComputeStackEvaluator_t* createEvaluator_Sequential()
+{
+    return new csComputeStackEvaluator_Sequential();
+}
+
 csComputeStackEvaluator_Sequential::csComputeStackEvaluator_Sequential()
 {
 
@@ -60,16 +66,14 @@ void csComputeStackEvaluator_Sequential::EvaluateEquations(csEvaluationContext_t
         const csComputeStackItem_t* computeStack = &m_computeStacks[firstIndex];
 
         /* Evaluate the compute stack (scaling is included). */
-        adouble_t res_cs = evaluateComputeStack(computeStack,
-                                                EC,
-                                                dofs,
-                                                values,
-                                                timeDerivatives,
-                                                NULL,
-                                                NULL);
+        real_t res_cs = evaluateComputeStack(computeStack,
+                                             EC,
+                                             dofs,
+                                             values,
+                                             timeDerivatives);
 
         /* Set the value in the residuals array. */
-        residuals[ei] = res_cs.m_dValue;
+        residuals[ei] = res_cs;
     }
 }
 
@@ -90,13 +94,13 @@ void csComputeStackEvaluator_Sequential::EvaluateDerivatives(csEvaluationContext
         EC.jacobianIndex = jacobianItem.overallIndex;
 
         /* Evaluate the compute stack (scaling is included). */
-        adouble_t jac_cs = evaluateComputeStack(computeStack,
-                                                EC,
-                                                dofs,
-                                                values,
-                                                timeDerivatives,
-                                                NULL,
-                                                NULL);
+        adouble_t jac_cs = evaluateComputeStackDerivative(computeStack,
+                                                        EC,
+                                                        dofs,
+                                                        values,
+                                                        timeDerivatives,
+                                                        NULL,
+                                                        NULL);
 
         /* Set the value in the jacobian array. */
         jacobianItems[ji] = jac_cs.m_dDeriv;
@@ -118,13 +122,13 @@ void csComputeStackEvaluator_Sequential::EvaluateSensitivityDerivatives(csEvalua
         const csComputeStackItem_t* computeStack = &m_computeStacks[firstIndex];
 
         /* Evaluate the compute stack (scaling is included). */
-        adouble_t res_cs = evaluateComputeStack(computeStack,
-                                                EC,
-                                                dofs,
-                                                values,
-                                                timeDerivatives,
-                                                svalues,
-                                                sdvalues);
+        adouble_t res_cs = evaluateComputeStackDerivative(computeStack,
+                                                        EC,
+                                                        dofs,
+                                                        values,
+                                                        timeDerivatives,
+                                                        svalues,
+                                                        sdvalues);
 
         /* Set the value in the sensitivity array matrix (here we access the data using its row pointers). */
         sresiduals[ei] = res_cs.m_dDeriv;

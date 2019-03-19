@@ -90,6 +90,22 @@ static int root(realtype t,
                 realtype *gout,
                 void *user_data);
 
+// Timed functions.
+static int ida_spils_setup_la(IDAMem   ida_mem,
+                              N_Vector yy_p, N_Vector yp_p, N_Vector rr_p,
+                              N_Vector tmp1, N_Vector tmp2, N_Vector tmp3);
+static int ida_spils_solve_la(IDAMem IDA_mem,
+                              N_Vector bb, N_Vector weight,
+                              N_Vector yy_now, N_Vector yp_now, N_Vector rr_now);
+// Pointers to original functions.
+int (*ida_lsetup)(IDAMem IDA_mem,
+                  N_Vector yy_p, N_Vector yp_p, N_Vector rr_p,
+                  N_Vector tmp1, N_Vector tmp2, N_Vector tmp3);
+
+int (*ida_lsolve)(IDAMem IDA_mem,
+                  N_Vector bb, N_Vector weight,
+                  N_Vector yy_now, N_Vector yp_now, N_Vector rr_now);
+
 daeSolver_t::daeSolver_t()
 {
     currentTime = 0.0;
@@ -139,42 +155,42 @@ void daeSolver_t::Initialize(csDifferentialEquationModel_t* pmodel,
     else if(integrationMode_s == "OneStep")
         integrationMode = IDA_ONE_STEP;
     else
-        daeThrowException("Invalid integration mode specified: " + integrationMode_s);
+        csThrowException("Invalid integration mode specified: " + integrationMode_s);
 
     /* Allocate N-vectors. */
-    yy_nv = N_VNew_Parallel(comm, model->structure.Nequations, model->structure.Nequations_total);
+    yy_nv = N_VNew_Parallel(comm, Neq_local, Neq);
     if(yy_nv == NULL)
-        daeThrowException("Allocation of yy array failed");
+        csThrowException("Allocation of yy array failed");
     yy = yy_nv;
 
-    yp_nv = N_VNew_Parallel(comm, model->structure.Nequations, model->structure.Nequations_total);
+    yp_nv = N_VNew_Parallel(comm, Neq_local, Neq);
     if(yp_nv == NULL)
-        daeThrowException("Allocation of yp array failed");
+        csThrowException("Allocation of yp array failed");
     yp = yp_nv;
 
-    avtol_nv = N_VNew_Parallel(comm, model->structure.Nequations, model->structure.Nequations_total);
+    avtol_nv = N_VNew_Parallel(comm, Neq_local, Neq);
     if(avtol_nv == NULL)
-        daeThrowException("Allocation of avtol array failed");
+        csThrowException("Allocation of avtol array failed");
 
-    ids_nv = N_VNew_Parallel(comm, model->structure.Nequations, model->structure.Nequations_total);
+    ids_nv = N_VNew_Parallel(comm, Neq_local, Neq);
     if(ids_nv == NULL)
-        daeThrowException("Allocation of ids array failed");
+        csThrowException("Allocation of ids array failed");
 
     /* Create and initialize  y, y', and absolute tolerance vectors. */
     yval = NV_DATA_P(yy_nv);
-    for(i = 0; i < model->structure.Nequations; i++)
+    for(i = 0; i < Neq_local; i++)
         yval[i] = initValues[i];
 
     ypval = NV_DATA_P(yp_nv);
-    for(i = 0; i < model->structure.Nequations; i++)
+    for(i = 0; i < Neq_local; i++)
         ypval[i] = initDerivatives[i];
 
     atval = NV_DATA_P(avtol_nv);
-    for(i = 0; i < model->structure.Nequations; i++)
+    for(i = 0; i < Neq_local; i++)
         atval[i] = absTolerances[i];
 
     idsval = NV_DATA_P(ids_nv);
-    for(i = 0; i < model->structure.Nequations; i++)
+    for(i = 0; i < Neq_local; i++)
         idsval[i] = (real_t)variableTypes[i];
 
     /* Integration limits */
@@ -183,19 +199,19 @@ void daeSolver_t::Initialize(csDifferentialEquationModel_t* pmodel,
     /* Call IDACreate to initialize IDA memory */
     mem = IDACreate();
     if(mem == NULL)
-        daeThrowException("IDACreate failed");
+        csThrowException("IDACreate failed");
 
     retval = IDASetId(mem, ids_nv);
     if(retval < 0)
-        daeThrowException( (boost::format("IDASetId failed: %s") % IDAGetReturnFlagName(retval)).str() );
+        csThrowException( (boost::format("IDASetId failed: %s") % IDAGetReturnFlagName(retval)).str() );
 
     retval = IDAInit(mem, resid, t0, yy_nv, yp_nv);
     if(retval < 0)
-        daeThrowException( (boost::format("IDAInit failed: %s") % IDAGetReturnFlagName(retval)).str() );
+        csThrowException( (boost::format("IDAInit failed: %s") % IDAGetReturnFlagName(retval)).str() );
 
     retval = IDASVtolerances(mem, rtol, avtol_nv);
     if(retval < 0)
-        daeThrowException( (boost::format("IDASVtolerances failed: %s") % IDAGetReturnFlagName(retval)).str() );
+        csThrowException( (boost::format("IDASVtolerances failed: %s") % IDAGetReturnFlagName(retval)).str() );
 
     /* Free avtol */
     N_VDestroy_Parallel(avtol_nv);
@@ -235,20 +251,25 @@ void daeSolver_t::Initialize(csDifferentialEquationModel_t* pmodel,
     /* Set user data. */
     retval = IDASetUserData(mem, this);
     if(retval < 0)
-        daeThrowException( (boost::format("IDASetUserData failed: %s") % IDAGetReturnFlagName(retval)).str() );
+        csThrowException( (boost::format("IDASetUserData failed: %s") % IDAGetReturnFlagName(retval)).str() );
 
     /* Call IDARootInit to set the root function and number of roots. */
     int noRoots = model->NumberOfRoots();
     retval = IDARootInit(mem, noRoots, root);
     if(retval < 0)
-        daeThrowException( (boost::format("IDARootInit failed: %s") % IDAGetReturnFlagName(retval)).str() );
+        csThrowException( (boost::format("IDARootInit failed: %s") % IDAGetReturnFlagName(retval)).str() );
 
     /* Set up the linear solver. */
     std::string lasolverLibrary = cfg.GetString("LinearSolver.Library");
     if(lasolverLibrary == "Sundials")
     {
-        std::string preconditionerName = cfg.GetString("LinearSolver.Preconditioner.Library", "Not specified");
+        // Maximum dimension of the Krylov subspace to be used (if 0 use the default value MAXL = 5)
+        int kspace = cfg.GetInteger("LinearSolver.Parameters.kspace", 0);
+        retval = IDASpgmr(mem, kspace);
+        if(retval < 0)
+            csThrowException( (boost::format("IDASpgmr failed: %s") % IDAGetReturnFlagName(retval)).str() );
 
+        std::string preconditionerName = cfg.GetString("LinearSolver.Preconditioner.Library", "Not specified");
         if(preconditionerName == "Ifpack")
             preconditioner.reset(new daePreconditioner_Ifpack);
         else if(preconditionerName == "ML")
@@ -256,18 +277,12 @@ void daeSolver_t::Initialize(csDifferentialEquationModel_t* pmodel,
         else if(preconditionerName == "Jacobi")
             preconditioner.reset(new daePreconditioner_Jacobi);
         else
-            daeThrowException("Invalid preconditioner library specified: " + preconditionerName);
+            csThrowException("Invalid preconditioner library specified: " + preconditionerName);
 
         bool isODESystem = false;
-        retval = preconditioner->Initialize(pmodel, model->structure.Nequations, isODESystem);
+        retval = preconditioner->Initialize(pmodel, Neq_local, isODESystem);
         if(retval < 0)
-            daeThrowException( (boost::format("Preconditioner initialize failed: %s") % IDAGetReturnFlagName(retval)).str() );
-
-        // Maximum dimension of the Krylov subspace to be used (if 0 use the default value MAXL = 5)
-        int kspace = cfg.GetInteger("LinearSolver.Parameters.kspace", 0);
-        retval = IDASpgmr(mem, kspace);
-        if(retval < 0)
-            daeThrowException( (boost::format("IDASpgmr failed: %s") % IDAGetReturnFlagName(retval)).str() );
+            csThrowException( (boost::format("Preconditioner initialize failed: %s") % IDAGetReturnFlagName(retval)).str() );
 
         IDASpilsSetEpsLin(mem,      cfg.GetFloat  ("LinearSolver.Parameters.EpsLin",      0.05));
         IDASpilsSetMaxRestarts(mem, cfg.GetInteger("LinearSolver.Parameters.MaxRestarts",    5));
@@ -279,7 +294,7 @@ void daeSolver_t::Initialize(csDifferentialEquationModel_t* pmodel,
 
         retval = IDASpilsSetPreconditioner(mem, setup_preconditioner, solve_preconditioner);
         if(retval < 0)
-            daeThrowException( (boost::format("IDASpilsSetPreconditioner failed: %s") % IDAGetReturnFlagName(retval)).str() );
+            csThrowException( (boost::format("IDASpilsSetPreconditioner failed: %s") % IDAGetReturnFlagName(retval)).str() );
 
         // This is very important for overall performance!!
         // For some reasons works very slow if jacobian_vector_multiply is used for Npe > 1.
@@ -300,17 +315,27 @@ void daeSolver_t::Initialize(csDifferentialEquationModel_t* pmodel,
         }
         else
         {
-            daeThrowException( (boost::format("Not supported LinearSolver.Parameters.JacTimesVecFn option: %s") % jtimes).str() );
+            csThrowException( (boost::format("Not supported LinearSolver.Parameters.JacTimesVecFn option: %s") % jtimes).str() );
         }
+
+        // Replace lsolve/lsetup function with the timed versions.
+        IDAMem ida_mem = (IDAMem)mem;
+        // Save original IDAS function pointers.
+        ida_lsetup = ida_mem->ida_lsetup;
+        ida_lsolve = ida_mem->ida_lsolve;
+        // Replace the function pointers with the timed ones.
+        // They will call the original function with the same arguments.
+        ida_mem->ida_lsetup = ida_spils_setup_la;
+        ida_mem->ida_lsolve = ida_spils_solve_la;
     }
     else if(lasolverLibrary == "Trilinos")
     {
         /*
         lasolver.reset(new TrilinosAmesosLinearSolver_t);
         bool isODESystem = false;
-        retval = lasolver->Initialize(pmodel, model->structure.Nequations, isODESystem);
+        retval = lasolver->Initialize(pmodel, Neq_local, isODESystem);
         if(retval < 0)
-            daeThrowException( (boost::format("LA Solver initialize failed: %s") % IDAGetReturnFlagName(retval)).str() );
+            csThrowException( (boost::format("LA Solver initialize failed: %s") % IDAGetReturnFlagName(retval)).str() );
 
         IDAMem ida_mem = (IDAMem)mem;
 
@@ -329,7 +354,7 @@ void daeSolver_t::Initialize(csDifferentialEquationModel_t* pmodel,
         int kspace = cfg.GetInteger("LinearSolver.Parameters.kspace", 0);
         retval = IDASpgmr(mem, kspace);
         if(retval < 0)
-            daeThrowException( (boost::format("IDASpgmr failed: %s") % IDAGetReturnFlagName(retval)).str() );
+            csThrowException( (boost::format("IDASpgmr failed: %s") % IDAGetReturnFlagName(retval)).str() );
 
         /* Set up the BBD preconditioner. */
         long int mudq      = 5; // Upper half-bandwidth to be used in the difference-quotient Jacobian approximation.
@@ -338,9 +363,9 @@ void daeSolver_t::Initialize(csDifferentialEquationModel_t* pmodel,
         long int mlkeep    = 2; // Lower half-bandwidth of the retained banded approximate Jacobian block
         realtype dq_rel_yy = 0.0; // The relative increment in components of y used in the difference quotient approximations.
                                   // The default is dq_rel_yy = sqrt(unit roundoff), which can be specified by passing dq_rel_yy = 0.0
-        retval = IDABBDPrecInit(mem, model->structure.Nequations, mudq, mldq, mukeep, mlkeep, dq_rel_yy, bbd_local_fn, NULL);
+        retval = IDABBDPrecInit(mem, Neq_local, mudq, mldq, mukeep, mlkeep, dq_rel_yy, bbd_local_fn, NULL);
         if(retval < 0)
-            daeThrowException( (boost::format("IDABBDPrecInit failed: %s") % IDAGetReturnFlagName(retval)).str() );
+            csThrowException( (boost::format("IDABBDPrecInit failed: %s") % IDAGetReturnFlagName(retval)).str() );
     }
 }
 
@@ -368,7 +393,7 @@ void daeSolver_t::RefreshRootFunctions(int noRoots)
 {
     int retval = IDARootInit(mem, noRoots, root);
     if(retval < 0)
-        daeThrowException( (boost::format("IDARootInit failed: %s") % IDAGetReturnFlagName(retval)).str() );
+        csThrowException( (boost::format("IDARootInit failed: %s") % IDAGetReturnFlagName(retval)).str() );
 }
 
 void daeSolver_t::ResetIDASolver(bool bCopyDataFromBlock, real_t dCurrentTime, bool bResetSensitivities)
@@ -376,7 +401,7 @@ void daeSolver_t::ResetIDASolver(bool bCopyDataFromBlock, real_t dCurrentTime, b
     currentTime = dCurrentTime;
     int retval = IDAReInit(mem, dCurrentTime, (N_Vector)yy, (N_Vector)yp);
     if(retval < 0)
-        daeThrowException( (boost::format("IDAReInit failed: %s") % IDAGetReturnFlagName(retval)).str() );
+        csThrowException( (boost::format("IDAReInit failed: %s") % IDAGetReturnFlagName(retval)).str() );
 }
 
 real_t daeSolver_t::Solve(real_t dTime, daeeStopCriterion eCriterion, bool bReportDataAroundDiscontinuities)
@@ -403,7 +428,7 @@ real_t daeSolver_t::Solve(real_t dTime, daeeStopCriterion eCriterion, bool bRepo
         {
             std::string msg = (boost::format("Sundials IDAS solver cowardly failed to solve the system at time = %.15f; "
                                              "time horizon [%.15f]; %s\n") % currentTime % targetTime % IDAGetReturnFlagName(retval)).str();
-            daeThrowException(msg);
+            csThrowException(msg);
         }
 
         /* If a root has been found, check if any of conditions are satisfied and do what is necessary */
@@ -414,7 +439,7 @@ real_t daeSolver_t::Solve(real_t dTime, daeeStopCriterion eCriterion, bool bRepo
             {
                 /* The data will be reported only if there is a discontinuity */
                 if(bReportDataAroundDiscontinuities)
-                    simulation->ReportData();
+                    simulation->ReportData(currentTime);
 
                 eDiscontinuityType = model->ExecuteActions(currentTime, yval, ypval);
 
@@ -424,7 +449,7 @@ real_t daeSolver_t::Solve(real_t dTime, daeeStopCriterion eCriterion, bool bRepo
 
                     /* The data will be reported again ONLY if there was a discontinuity */
                     if(bReportDataAroundDiscontinuities)
-                        simulation->ReportData();
+                        simulation->ReportData(currentTime);
 
                     if(eCriterion == eStopAtModelDiscontinuity)
                         return currentTime;
@@ -435,14 +460,14 @@ real_t daeSolver_t::Solve(real_t dTime, daeeStopCriterion eCriterion, bool bRepo
 
                     /* The data will be reported again ONLY if there was a discontinuity */
                     if(bReportDataAroundDiscontinuities)
-                        simulation->ReportData();
+                        simulation->ReportData(currentTime);
 
                     if(eCriterion == eStopAtModelDiscontinuity)
                         return currentTime;
                 }
                 else if(eDiscontinuityType == eGlobalDiscontinuity)
                 {
-                    daeThrowException("Not supported discontinuity type: eGlobalDiscontinuity");
+                    csThrowException("Not supported discontinuity type: eGlobalDiscontinuity");
                 }
             }
             else
@@ -485,12 +510,12 @@ void daeSolver_t::SolveInitial()
         //    retval = IDACalcIC(mem, IDA_YA_YDP_INIT, 1e-5);
         retval = IDACalcIC(mem, IDA_YA_YDP_INIT, 1e-5);
         if(retval < 0)
-            daeThrowException( (boost::format("IDACalcIC failed: %s") % IDAGetReturnFlagName(retval)).str() );
+            csThrowException( (boost::format("IDACalcIC failed: %s") % IDAGetReturnFlagName(retval)).str() );
 
         if(retval < 0)
         {
             std::string msg = (boost::format("Sundials IDAS solver cowardly failed to solve initial; %s\n")  % IDAGetReturnFlagName(retval)).str();
-            daeThrowException(msg);
+            csThrowException(msg);
         }
 
         bool discontinuity_found = model->CheckForDiscontinuities(currentTime, yval, ypval);
@@ -511,13 +536,13 @@ void daeSolver_t::SolveInitial()
     {
         std::string msg = (boost::format("Sundials IDAS solver cowardly failed to solve initial: Max number of STN rebuilds reached; "
                                          "%s\n")  % IDAGetReturnFlagName(retval)).str();
-        daeThrowException(msg);
+        csThrowException(msg);
     }
 
     /* Get the corrected IC and send them to the block */
     retval = IDAGetConsistentIC(mem, (N_Vector)yy, (N_Vector)yp);
     if(retval < 0)
-        daeThrowException( (boost::format("IDAGetConsistentIC failed: %s") % IDAGetReturnFlagName(retval)).str() );
+        csThrowException( (boost::format("IDAGetConsistentIC failed: %s") % IDAGetReturnFlagName(retval)).str() );
 
     /* Get the corrected sensitivity IC */
     /*
@@ -530,7 +555,8 @@ void daeSolver_t::Reinitialize(bool bCopyDataFromBlock, bool bResetSensitivities
 {
     int retval, iCounter;
 
-    printf("    Reinitializing at time: %f\n", currentTime);
+    std::snprintf(msgBuffer, msgBufferSize, "    Reinitializing at time: %f\n", currentTime);
+    simulation->log->Message(msgBuffer);
 
     int noRoots = model->NumberOfRoots();
     RefreshRootFunctions(noRoots);
@@ -547,7 +573,7 @@ void daeSolver_t::Reinitialize(bool bCopyDataFromBlock, bool bResetSensitivities
         {
             std::string msg = (boost::format("Sundials IDAS solver cowardly failed to re-initialize the system at time = %.15f; "
                                              "%s\n")  % currentTime % IDAGetReturnFlagName(retval)).str();
-            daeThrowException(msg);
+            csThrowException(msg);
         }
 
         bool discontinuity_found = model->CheckForDiscontinuities(currentTime, yval, ypval);
@@ -568,13 +594,13 @@ void daeSolver_t::Reinitialize(bool bCopyDataFromBlock, bool bResetSensitivities
     {
         std::string msg = (boost::format("Sundials IDAS solver cowardly failed to re-initialize the system at time = %.15f: "
                                          "Max number of STN rebuilds reached; %s\n")  % currentTime % IDAGetReturnFlagName(retval)).str();
-        daeThrowException(msg);
+        csThrowException(msg);
     }
 
     /* Get the corrected IC and send them to the block */
     retval = IDAGetConsistentIC(mem, (N_Vector)yy, (N_Vector)yp);
     if(retval < 0)
-        daeThrowException("IDAGetConsistentIC failed");
+        csThrowException("IDAGetConsistentIC failed");
 
    /* Get the corrected sensitivity IC */
     /*
@@ -640,25 +666,46 @@ void daeSolver_t::PrintSolverStats()
     if(stats.empty())
         CollectSolverStats();
 
-    printf("DAE solver stats:\n");
-    printf("    NumSteps                    = %15d\n",    (int)stats["NumSteps"]);
-    printf("    NumResEvals                 = %15d\n",    (int)stats["NumResEvals"]);
-    printf("    NumErrTestFails             = %15d\n",    (int)stats["NumErrTestFails"]);
-    printf("    LastOrder                   = %15d\n",    (int)stats["LastOrder"]);
-    printf("    CurrentOrder                = %15d\n",    (int)stats["CurrentOrder"]);
-    printf("    LastStep                    = %15.12f\n", stats["LastStep"]);
-    printf("    CurrentStep                 = %15.12f\n", stats["CurrentStep"]);
+    std::string message;
 
-    printf("Nonlinear solver stats:\n");
-    printf("    NumNonlinSolvIters          = %15d\n", (int)stats["NumNonlinSolvIters"]);
-    printf("    NumNonlinSolvConvFails      = %15d\n", (int)stats["NumNonlinSolvConvFails"]);
+    std::snprintf(msgBuffer, msgBufferSize, "DAE solver stats:\n");
+    message += msgBuffer;
+    std::snprintf(msgBuffer, msgBufferSize, "    NumSteps                    = %15d\n",    (int)stats["NumSteps"]);
+    message += msgBuffer;
+    std::snprintf(msgBuffer, msgBufferSize, "    NumResEvals                 = %15d\n",    (int)stats["NumResEvals"]);
+    message += msgBuffer;
+    std::snprintf(msgBuffer, msgBufferSize, "    NumErrTestFails             = %15d\n",    (int)stats["NumErrTestFails"]);
+    message += msgBuffer;
+    std::snprintf(msgBuffer, msgBufferSize, "    LastOrder                   = %15d\n",    (int)stats["LastOrder"]);
+    message += msgBuffer;
+    std::snprintf(msgBuffer, msgBufferSize, "    CurrentOrder                = %15d\n",    (int)stats["CurrentOrder"]);
+    message += msgBuffer;
+    std::snprintf(msgBuffer, msgBufferSize, "    LastStep                    = %15.12f\n", stats["LastStep"]);
+    message += msgBuffer;
+    std::snprintf(msgBuffer, msgBufferSize, "    CurrentStep                 = %15.12f\n", stats["CurrentStep"]);
+    message += msgBuffer;
 
-    printf("Linear solver stats (Sundials spils):\n");
-    printf("    NumLinIters                 = %15d\n", (int)stats["NumLinIters"]);
-    printf("    NumResEvals                 = %15d\n", (int)stats["NumResEvals"]);
-    printf("    NumPrecEvals                = %15d\n", (int)stats["NumPrecEvals"]);
-    printf("    NumPrecSolves               = %15d\n", (int)stats["NumPrecSolves"]);
-    printf("    NumJtimesEvals              = %15d\n", (int)stats["NumJtimesEvals"]);
+    std::snprintf(msgBuffer, msgBufferSize, "Nonlinear solver stats:\n");
+    message += msgBuffer;
+    std::snprintf(msgBuffer, msgBufferSize, "    NumNonlinSolvIters          = %15d\n", (int)stats["NumNonlinSolvIters"]);
+    message += msgBuffer;
+    std::snprintf(msgBuffer, msgBufferSize, "    NumNonlinSolvConvFails      = %15d\n", (int)stats["NumNonlinSolvConvFails"]);
+    message += msgBuffer;
+
+    std::snprintf(msgBuffer, msgBufferSize, "Linear solver stats (Sundials spils):\n");
+    message += msgBuffer;
+    std::snprintf(msgBuffer, msgBufferSize, "    NumLinIters                 = %15d\n", (int)stats["NumLinIters"]);
+    message += msgBuffer;
+    std::snprintf(msgBuffer, msgBufferSize, "    NumResEvals                 = %15d\n", (int)stats["NumResEvals"]);
+    message += msgBuffer;
+    std::snprintf(msgBuffer, msgBufferSize, "    NumPrecEvals                = %15d\n", (int)stats["NumPrecEvals"]);
+    message += msgBuffer;
+    std::snprintf(msgBuffer, msgBufferSize, "    NumPrecSolves               = %15d\n", (int)stats["NumPrecSolves"]);
+    message += msgBuffer;
+    std::snprintf(msgBuffer, msgBufferSize, "    NumJtimesEvals              = %15d\n", (int)stats["NumJtimesEvals"]);
+    message += msgBuffer;
+
+    simulation->log->Message(message);
 }
 
 
@@ -796,6 +843,28 @@ static void save_step(FILE* f, double time, double* yval, double* ypval, double*
     fprintf(f, "]\n");
     fprintf(f, "results[%.15f] = (x,xdot)\n\n", time);
     fflush(f);
+}
+
+static int ida_spils_setup_la(IDAMem   ida_mem,
+                              N_Vector yy_p, N_Vector yp_p, N_Vector rr_p,
+                              N_Vector tmp1, N_Vector tmp2, N_Vector tmp3)
+{
+    auxiliary::daeTimesAndCounters& tcs = auxiliary::daeTimesAndCounters::GetTimesAndCounters();
+    auxiliary::TimerCounter tc(tcs.LASetup);
+
+    return ida_lsetup(ida_mem,
+                      yy_p, yp_p, rr_p,
+                      tmp1, tmp2, tmp3);
+}
+
+static int ida_spils_solve_la(IDAMem IDA_mem, N_Vector bb, N_Vector weight,
+                              N_Vector yy_now, N_Vector yp_now, N_Vector rr_now)
+{
+    auxiliary::daeTimesAndCounters& tcs = auxiliary::daeTimesAndCounters::GetTimesAndCounters();
+    auxiliary::TimerCounter tc(tcs.LASolve);
+
+    return ida_lsolve(IDA_mem, bb, weight,
+                      yy_now, yp_now, rr_now);
 }
 
 int resid(realtype tres,

@@ -44,10 +44,27 @@ public:
         Tt  =  300; // T at the top edge, K
     }
 
-    void SetInitialConditions(std::vector<real_t>& T0, std::vector<real_t>& dT0_dt)
+    void SetInitialConditions(std::vector<real_t>& T0)
     {
-        T0.assign   (Nequations,  300.0);
-        dT0_dt.assign(Nequations,   0.0);
+        T0.assign(Nequations, 300.0);
+    }
+
+    void GetVariableNames(std::vector<std::string>& names)
+    {
+        const int bsize = 32;
+        char buffer[bsize];
+        int index = 0;
+
+        names.resize(Nequations);
+        for(int x = 0; x < Nx; x++)
+        {
+            for(int y = 0; y < Ny; y++)
+            {
+                std::snprintf(buffer, bsize, "%s(%d,%d)", "T", x, y);
+                names[index] = buffer;
+                index++;
+            }
+        }
     }
 
     void CreateEquations(const std::vector<csNumber_t>& T_vars,

@@ -15,16 +15,16 @@ the OpenCS software; if not, see <http://www.gnu.org/licenses/>.
 #include "../models/cs_model_builder.h"
 
 /* Run using:
-    $ mpirun -np 4 ./csSimulator_DAE inputDataDir
-    $ mpirun -np 4 --hostfile mpi-hosts ./csSimulator_DAE inputDataDir
-    $ mpirun -np 4 konsole --hold -e ./csSimulator_DAE inputDataDir
-    $ mpirun -np 4 konsole --hold -e gdb -ex run --args ./csSimulator_DAE inputDataDir
+    $ mpirun -np 4 ./csSimulator inputDataDir
+    $ mpirun -np 4 --hostfile mpi-hosts ./csSimulator inputDataDir
+    $ mpirun -np 4 ./csSimulator inputDataDir
+    $ mpirun -np 4 gdb -ex run --args ./csSimulator inputDataDir
 */
 int main(int argc, char *argv[])
 {
     if(argc < 2)
     {
-        printf("Usage: csSimulator_DAE inputDataDir\n");
+        printf("Usage: csSimulator inputDataDir\n");
         return -1;
     }
 
@@ -33,7 +33,7 @@ int main(int argc, char *argv[])
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 
     std::string inputDirectory = argv[1];
-    cs::csSimulate_DAE(inputDirectory);
+    cs::csSimulate(inputDirectory);
 
     MPI_Finalize();
 

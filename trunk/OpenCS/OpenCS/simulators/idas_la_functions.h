@@ -18,7 +18,7 @@ the OpenCS software; if not, see <http://www.gnu.org/licenses/>.
 #include <nvector/nvector_parallel.h>
 
 #if !defined(__MINGW32__) && (defined(_WIN32) || defined(WIN32) || defined(WIN64) || defined(_WIN64))
-#ifdef OpenCS_Simulators_EXPORTS
+#ifdef OpenCS_SIMULATORS_EXPORTS
 #define OPENCS_SIMULATORS_API __declspec(dllexport)
 #else
 #define OPENCS_SIMULATORS_API __declspec(dllimport)

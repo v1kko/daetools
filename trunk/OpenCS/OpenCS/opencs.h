@@ -16,5 +16,6 @@ the OpenCS software; if not, see <http://www.gnu.org/licenses/>.
 #include "cs_machine.h"
 #include "cs_evaluator.h"
 #include "cs_model.h"
+#include "models/cs_model_builder.h"
 
 #endif

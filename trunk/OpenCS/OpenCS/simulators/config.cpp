@@ -10,6 +10,7 @@ PARTICULAR PURPOSE. See the GNU Lesser General Public License for more details.
 You should have received a copy of the GNU Lesser General Public License along with
 the OpenCS software; if not, see <http://www.gnu.org/licenses/>.
 ***********************************************************************************/
+#include <sstream>
 #include "daesimulator.h"
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/json_parser.hpp>
@@ -36,6 +37,14 @@ void daeSimulationOptions::Load(const std::string& jsonFilePath)
     pt.clear();
     boost::property_tree::json_parser::read_json(jsonFilePath, pt);
     configFile = jsonFilePath;
+}
+
+void daeSimulationOptions::LoadString(const std::string& jsonOptions)
+{
+    pt.clear();
+    std::stringstream ss(jsonOptions);
+    boost::property_tree::json_parser::read_json(ss, pt);
+    configFile.clear();
 }
 
 bool daeSimulationOptions::HasKey(const std::string& strPropertyPath) const
