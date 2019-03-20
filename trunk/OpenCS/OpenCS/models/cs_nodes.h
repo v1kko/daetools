@@ -35,7 +35,7 @@ namespace cs
 const int32_t csAlgebraicVariable	 = 0;
 const int32_t csDifferentialVariable = 1;
 
-class OPENCS_MODELS_API csNodeEvaluationContext_t
+class csNodeEvaluationContext_t
 {
 public:
     csNodeEvaluationContext_t()
@@ -63,9 +63,10 @@ public:
 };
 
 class csModelBuilder_t;
-class OPENCS_MODELS_API csNode_t
+class csNode_t
 {
 public:
+    csNode_t(){}
     virtual ~csNode_t(){}
 
     virtual std::string ToLatex(const csModelBuilder_t* mb = nullptr) const = 0;

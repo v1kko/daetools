@@ -27,6 +27,7 @@ POINTER_CONVERSION(daeVariableWrapper)
 POINTER_CONVERSION(daeModel_t)
 POINTER_CONVERSION(daeEquationExecutionInfo)
 POINTER_CONVERSION(cs::csComputeStackEvaluator_t)
+POINTER_CONVERSION(cs::csNode_t)
 }
 #endif
 #endif

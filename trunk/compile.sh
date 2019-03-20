@@ -172,18 +172,18 @@ QMAKE="qmake"
 QMAKE_SPEC="linux-g++"
 DAE_IF_CROSS_COMPILING=0
 
-if [ ${PLATFORM} = *"MSYS_"* ]; then
+if [[ ${PLATFORM} == *"MSYS_"* ]]; then
   PLATFORM="Windows"
   # Platform should be set by i.e. vcbuildtools.bat 
   VC_PLAT=`cmd "/C echo %Platform% "`
   echo $VC_PLAT
-  if [ ${VC_PLAT} = *"X86"* ]; then
+  if [[ ${VC_PLAT} == *"X86"* ]]; then
     HOST_ARCH="win32"
-  elif [ ${VC_PLAT} = *"x86"* ]; then
+  elif [[ ${VC_PLAT} == *"x86"* ]]; then
     HOST_ARCH="win32"
-  elif [ ${VC_PLAT} = *"x64"* ]; then
+  elif [[ ${VC_PLAT} == *"x64"* ]]; then
     HOST_ARCH="win64"
-  elif [ "${VC_PLAT}" = *"X64"* ]; then
+  elif [[ "${VC_PLAT}" == *"X64"* ]]; then
     HOST_ARCH="win64"
   else
     echo unknown HOST_ARCH: $HOST_ARCH

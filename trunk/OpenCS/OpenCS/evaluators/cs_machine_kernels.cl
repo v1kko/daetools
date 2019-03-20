@@ -5,9 +5,9 @@ R"=====(
 ***************************************************************/
 /* Start declarations for inclusion into kernel sources. */
 
-#define OPENCS_VERSION       10000
+#define OPENCS_VERSION       11000
 #define OPENCS_VERSION_MAJOR 1
-#define OPENCS_VERSION_MINOR 0
+#define OPENCS_VERSION_MINOR 1
 #define OPENCS_VERSION_BUILD 0
 
 #ifdef __OPENCL_C_VERSION__

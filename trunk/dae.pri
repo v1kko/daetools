@@ -197,8 +197,8 @@ CONFIG += rtti
 # c++11
 unix::QMAKE_CXXFLAGS  += -std=c++11
 unix::QMAKE_LFLAGS    += -std=c++11
-win32::QMAKE_CXXFLAGS += /std:c++11
-win32::QMAKE_LFLAGS   += /std:c++11
+win32::QMAKE_CXXFLAGS += /std:c++14
+win32::QMAKE_LFLAGS   += 
 
 # OpenMP
 unix::QMAKE_CXXFLAGS           += -fopenmp
