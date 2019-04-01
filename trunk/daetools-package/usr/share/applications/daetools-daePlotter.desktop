@@ -1,12 +1,9 @@
 [Desktop Entry]
+Name=DAE Tools Plotter
+Comment=Start DAE Tools Plotter GUI
 Categories=GNOME;Development;
-Comment=DAE Tools Plotter
 Exec=python -m daetools.dae_plotter.plotter
-GenericName=DAE Tools Plotter
 Icon=daetools-48x48
-MimeType=
-Name=daetools Plotter
 StartupNotify=true
 Terminal=false
-TerminalOptions=
 Type=Application

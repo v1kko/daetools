@@ -267,7 +267,10 @@ mass_concentration_t <b><span style='color:#0000ff;'>=</span></b> daeVariableTyp
     <span style='color:#017a31;'>#     - Sobol  (Variance based method)</span>
     <span style='color:#017a31;'>#     - FAST   (Variance based method)</span>
     <span style='color:#017a31;'>################################################################</span><span style='color:#81ca2d;'>###</span>
-    SA_method <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc0000;'>'Sobol'</span>
+    SA_available_methods <b><span style='color:#0000ff;'>=</span></b> [<span style='color:#cc0000;'>'Morris'</span>, <span style='color:#cc0000;'>'Sobol'</span>, <span style='color:#cc0000;'>'FAST'</span>]
+    SA_method <b><span style='color:#0000ff;'>=</span></b> kwargs.get(<span style='color:#cc0000;'>'SA_method'</span>, <span style='color:#cc0000;'>'Sobol'</span>)
+    <b>if</b> SA_method <b>not</b> <b>in</b> SA_available_methods:
+        <b>raise</b> <b><span style='color:#4e9a06;'>RuntimeError</span></b>(<span style='color:#cc0000;'>'Invalid SA method specified: </span><span style='color:#cc0000;'>%s</span><span style='color:#cc0000;'> (can be one of: </span><span style='color:#cc0000;'>%s</span><span style='color:#cc0000;'>)'</span> <b><span style='color:#0000ff;'>%</span></b> (SA_method, SA_available_methods))
     
     <span style='color:#017a31;'>################################################################</span><span style='color:#81ca2d;'>###</span>
     <span style='color:#017a31;'># 2. Definition of the model inputs (used by all methods).</span>
@@ -391,7 +394,7 @@ mass_concentration_t <b><span style='color:#0000ff;'>=</span></b> daeVariableTyp
     
     <span style='color:#2a00d6;'>print</span>(<span style='color:#cc0000;'>''</span>)
     <b>if</b> SA_method <b><span style='color:#0000ff;'>==</span></b> <span style='color:#cc0000;'>'Morris'</span>:
-        res <b><span style='color:#0000ff;'>=</span></b> analyze(problem, param_values, max_rise_T, conf_level<b><span style='color:#0000ff;'>=</span></b><span style='color:#cc047c;'>0.95</span>, print_to_console<b><span style='color:#0000ff;'>=</span></b><span style='color:#3605fb;'>True</span>, num_levels<b><span style='color:#0000ff;'>=</span></b><span style='color:#cc047c;'>4</span>, grid_jump<b><span style='color:#0000ff;'>=</span></b><span style='color:#cc047c;'>2</span>)
+        res <b><span style='color:#0000ff;'>=</span></b> analyze(problem, param_values, max_rise_T, conf_level<b><span style='color:#0000ff;'>=</span></b><span style='color:#cc047c;'>0.95</span>, print_to_console<b><span style='color:#0000ff;'>=</span></b><span style='color:#3605fb;'>False</span>, num_levels<b><span style='color:#0000ff;'>=</span></b><span style='color:#cc047c;'>4</span>, grid_jump<b><span style='color:#0000ff;'>=</span></b><span style='color:#cc047c;'>2</span>)
         
         mu           <b><span style='color:#0000ff;'>=</span></b> res[<span style='color:#cc0000;'>'mu'</span>]
         mu_star      <b><span style='color:#0000ff;'>=</span></b> res[<span style='color:#cc0000;'>'mu_star'</span>]
@@ -450,8 +453,9 @@ mass_concentration_t <b><span style='color:#0000ff;'>=</span></b> daeVariableTyp
     <span style='color:#017a31;'>################################################################</span><span style='color:#81ca2d;'>###</span>
     fontsize <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>14</span>
     fontsize_legend <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>11</span>
+        
     fig <b><span style='color:#0000ff;'>=</span></b> plt.figure(figsize<b><span style='color:#0000ff;'>=</span></b>(<span style='color:#cc047c;'>10</span>,<span style='color:#cc047c;'>8</span>), facecolor<b><span style='color:#0000ff;'>=</span></b><span style='color:#cc0000;'>'white'</span>)
-    fig.canvas.set_window_title(<span style='color:#cc0000;'>'Tutorial sa_3'</span>)
+    fig.canvas.set_window_title(<span style='color:#cc0000;'>'Tutorial sa_3: Scatter plots'</span>)
 
     ax <b><span style='color:#0000ff;'>=</span></b> plt.subplot(<span style='color:#cc047c;'>231</span>)
     plt.scatter(B, max_rise_T, c<b><span style='color:#0000ff;'>=</span></b><span style='color:#cc0000;'>'b'</span>, s<b><span style='color:#0000ff;'>=</span></b><span style='color:#cc047c;'>6</span>)
@@ -484,10 +488,29 @@ mass_concentration_t <b><span style='color:#0000ff;'>=</span></b> daeVariableTyp
     plt.xlim((<span style='color:#cc047c;'>0.4</span>, <span style='color:#cc047c;'>0.6</span>))
     
     plt.tight_layout()
+
+    <b>if</b> SA_method <b><span style='color:#0000ff;'>==</span></b> <span style='color:#cc0000;'>'Morris'</span>:
+        <span style='color:#3605fb;'>from</span> daetools.ext_libs.SALib.plotting.morris <span style='color:#3605fb;'>import</span> horizontal_bar_plot, covariance_plot, sample_histograms
+        
+        fig1 <b><span style='color:#0000ff;'>=</span></b> plt.figure(figsize<b><span style='color:#0000ff;'>=</span></b>(<span style='color:#cc047c;'>10</span>,<span style='color:#cc047c;'>4</span>), facecolor<b><span style='color:#0000ff;'>=</span></b><span style='color:#cc0000;'>'white'</span>)
+        fig1.canvas.set_window_title(<span style='color:#cc0000;'>'Tutorial sa_3: Morris co-variance plots'</span>)
+        
+        ax1 <b><span style='color:#0000ff;'>=</span></b> plt.subplot(<span style='color:#cc047c;'>121</span>)
+        horizontal_bar_plot(ax1, res, {}, sortby<b><span style='color:#0000ff;'>=</span></b><span style='color:#cc0000;'>'mu_star'</span>, unit<b><span style='color:#0000ff;'>=</span></b><span style='color:#cc0000;'>r&quot;&quot;</span>)
+        
+        ax2 <b><span style='color:#0000ff;'>=</span></b> plt.subplot(<span style='color:#cc047c;'>122</span>)
+        covariance_plot(ax2, res, {}, unit<b><span style='color:#0000ff;'>=</span></b><span style='color:#cc0000;'>r&quot;&quot;</span>)
+        plt.tight_layout()
+
+        fig2 <b><span style='color:#0000ff;'>=</span></b> plt.figure(figsize<b><span style='color:#0000ff;'>=</span></b>(<span style='color:#cc047c;'>10</span>,<span style='color:#cc047c;'>4</span>), facecolor<b><span style='color:#0000ff;'>=</span></b><span style='color:#cc0000;'>'white'</span>)
+        fig2.canvas.set_window_title(<span style='color:#cc0000;'>'Tutorial sa_3: Morris histograms'</span>)
+        sample_histograms(fig2, param_values, problem, {<span style='color:#cc0000;'>'color'</span>:<span style='color:#cc0000;'>'g'</span>})
+        plt.tight_layout()
+
     plt.show()
     
 <b>if</b> <span style='color:#3605fb;'>__name__</span> <b><span style='color:#0000ff;'>==</span></b> <span style='color:#cc0000;'>&quot;__main__&quot;</span>:
-    run()
+    run(SA_method <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc0000;'>'Sobol'</span>)
 </pre>
 </body>
 </html>

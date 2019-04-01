@@ -92,6 +92,7 @@ Third-party local data reporters
     daeHDF5FileDataReporter
     daePandasDataReporter
     daeVTKDataReporter
+    daePickleDataReporter
 
 .. autoclass:: daetools.pyDAE.data_reporters.daePlotDataReporter
     :members:
@@ -141,6 +142,11 @@ Third-party local data reporters
     :exclude-members: Connect, Disconnect, IsConnected, StartRegistration, RegisterDomain, RegisterVariable,
                       EndRegistration, StartNewResultSet, EndOfData, SendVariable
 
+.. autoclass:: daetools.pyDAE.data_reporters.daePickleDataReporter
+    :members:
+    :undoc-members:
+    :exclude-members: Connect, Disconnect, IsConnected, StartRegistration, RegisterDomain, RegisterVariable,
+                      EndRegistration, StartNewResultSet, EndOfData, SendVariable
 
 .. py:currentmodule:: pyDataReporting
 

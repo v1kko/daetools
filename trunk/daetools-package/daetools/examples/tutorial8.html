@@ -190,6 +190,8 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc0000;
 <span style='color:#017a31;'>       Exports the results in the binary VTK format (.vtr files).</span>
 <span style='color:#017a31;'>     - daeCSVFileDataReporter</span>
 <span style='color:#017a31;'>       Exports the results in the CSV format.</span>
+<span style='color:#017a31;'>     - daePickleDataReporter</span>
+<span style='color:#017a31;'>       Exports the results as the Python pickle.</span>
 
 <span style='color:#017a31;'>    The daeDelegateDataReporter does not process the data but simply delegates all calls</span>
 <span style='color:#017a31;'>    to the contained data reporters.</span>
@@ -207,6 +209,7 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc0000;
     dr9  <b><span style='color:#0000ff;'>=</span></b> daePandasDataReporter()
     dr10 <b><span style='color:#0000ff;'>=</span></b> daeVTKDataReporter()
     dr11 <b><span style='color:#0000ff;'>=</span></b> daeCSVFileDataReporter()
+    dr12 <b><span style='color:#0000ff;'>=</span></b> daePickleDataReporter()
 
     <span style='color:#017a31;'># Add all data reporters to a list and store the list in the simulation object.</span>
     <span style='color:#017a31;'># The reason is that the data reporter objects are destroyed at the exit of the</span>
@@ -227,19 +230,21 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc0000;
     datareporter.AddDataReporter(dr9)
     datareporter.AddDataReporter(dr10)
     datareporter.AddDataReporter(dr11)
+    datareporter.AddDataReporter(dr12)
 
     <span style='color:#017a31;'># Connect data reporters</span>
     modelName <b><span style='color:#0000ff;'>=</span></b> simulation.m.Name
     simName   <b><span style='color:#0000ff;'>=</span></b> modelName <b><span style='color:#0000ff;'>+</span></b> strftime(<span style='color:#cc0000;'>&quot; [</span><span style='color:#cc0000;'>%d</span><span style='color:#cc0000;'>.%m.%Y %H:%M:%S]&quot;</span>, localtime())
     directory <b><span style='color:#0000ff;'>=</span></b> tempfile.gettempdir()
-    out_filename  <b><span style='color:#0000ff;'>=</span></b> os.path.join(directory, <span style='color:#cc0000;'>&quot;</span><span style='color:#cc0000;'>%s</span><span style='color:#cc0000;'>.out&quot;</span>  <b><span style='color:#0000ff;'>%</span></b> modelName)
-    mat_filename  <b><span style='color:#0000ff;'>=</span></b> os.path.join(directory, <span style='color:#cc0000;'>&quot;</span><span style='color:#cc0000;'>%s</span><span style='color:#cc0000;'>.mat&quot;</span>  <b><span style='color:#0000ff;'>%</span></b> modelName)
-    xlsx_filename <b><span style='color:#0000ff;'>=</span></b> os.path.join(directory, <span style='color:#cc0000;'>&quot;</span><span style='color:#cc0000;'>%s</span><span style='color:#cc0000;'>.xlsx&quot;</span> <b><span style='color:#0000ff;'>%</span></b> modelName)
-    json_filename <b><span style='color:#0000ff;'>=</span></b> os.path.join(directory, <span style='color:#cc0000;'>&quot;</span><span style='color:#cc0000;'>%s</span><span style='color:#cc0000;'>.json&quot;</span> <b><span style='color:#0000ff;'>%</span></b> modelName)
-    xml_filename  <b><span style='color:#0000ff;'>=</span></b> os.path.join(directory, <span style='color:#cc0000;'>&quot;</span><span style='color:#cc0000;'>%s</span><span style='color:#cc0000;'>.xml&quot;</span>  <b><span style='color:#0000ff;'>%</span></b> modelName)
-    hdf5_filename <b><span style='color:#0000ff;'>=</span></b> os.path.join(directory, <span style='color:#cc0000;'>&quot;</span><span style='color:#cc0000;'>%s</span><span style='color:#cc0000;'>.hdf5&quot;</span> <b><span style='color:#0000ff;'>%</span></b> modelName)
-    vtk_directory <b><span style='color:#0000ff;'>=</span></b> os.path.join(directory, <span style='color:#cc0000;'>&quot;</span><span style='color:#cc0000;'>%s</span><span style='color:#cc0000;'>-vtk&quot;</span>  <b><span style='color:#0000ff;'>%</span></b> modelName)
-    csv_filename  <b><span style='color:#0000ff;'>=</span></b> os.path.join(directory, <span style='color:#cc0000;'>&quot;</span><span style='color:#cc0000;'>%s</span><span style='color:#cc0000;'>.csv&quot;</span>  <b><span style='color:#0000ff;'>%</span></b> modelName)
+    out_filename    <b><span style='color:#0000ff;'>=</span></b> os.path.join(directory, <span style='color:#cc0000;'>&quot;</span><span style='color:#cc0000;'>%s</span><span style='color:#cc0000;'>.out&quot;</span>  <b><span style='color:#0000ff;'>%</span></b> modelName)
+    mat_filename    <b><span style='color:#0000ff;'>=</span></b> os.path.join(directory, <span style='color:#cc0000;'>&quot;</span><span style='color:#cc0000;'>%s</span><span style='color:#cc0000;'>.mat&quot;</span>  <b><span style='color:#0000ff;'>%</span></b> modelName)
+    xlsx_filename   <b><span style='color:#0000ff;'>=</span></b> os.path.join(directory, <span style='color:#cc0000;'>&quot;</span><span style='color:#cc0000;'>%s</span><span style='color:#cc0000;'>.xlsx&quot;</span> <b><span style='color:#0000ff;'>%</span></b> modelName)
+    json_filename   <b><span style='color:#0000ff;'>=</span></b> os.path.join(directory, <span style='color:#cc0000;'>&quot;</span><span style='color:#cc0000;'>%s</span><span style='color:#cc0000;'>.json&quot;</span> <b><span style='color:#0000ff;'>%</span></b> modelName)
+    xml_filename    <b><span style='color:#0000ff;'>=</span></b> os.path.join(directory, <span style='color:#cc0000;'>&quot;</span><span style='color:#cc0000;'>%s</span><span style='color:#cc0000;'>.xml&quot;</span>  <b><span style='color:#0000ff;'>%</span></b> modelName)
+    hdf5_filename   <b><span style='color:#0000ff;'>=</span></b> os.path.join(directory, <span style='color:#cc0000;'>&quot;</span><span style='color:#cc0000;'>%s</span><span style='color:#cc0000;'>.hdf5&quot;</span> <b><span style='color:#0000ff;'>%</span></b> modelName)
+    vtk_directory   <b><span style='color:#0000ff;'>=</span></b> os.path.join(directory, <span style='color:#cc0000;'>&quot;</span><span style='color:#cc0000;'>%s</span><span style='color:#cc0000;'>-vtk&quot;</span>  <b><span style='color:#0000ff;'>%</span></b> modelName)
+    csv_filename    <b><span style='color:#0000ff;'>=</span></b> os.path.join(directory, <span style='color:#cc0000;'>&quot;</span><span style='color:#cc0000;'>%s</span><span style='color:#cc0000;'>.csv&quot;</span>  <b><span style='color:#0000ff;'>%</span></b> modelName)
+    pickle_filename <b><span style='color:#0000ff;'>=</span></b> os.path.join(directory, <span style='color:#cc0000;'>&quot;</span><span style='color:#cc0000;'>%s</span><span style='color:#cc0000;'>.simulation&quot;</span> <b><span style='color:#0000ff;'>%</span></b> modelName)
 
     dr1.Connect(out_filename,   simName)
     dr2.Connect(<span style='color:#cc0000;'>&quot;&quot;</span>,             simName)
@@ -252,6 +257,7 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc0000;
     dr9.Connect(<span style='color:#cc0000;'>&quot;&quot;</span>,             simName)
     dr10.Connect(vtk_directory, simName)
     dr11.Connect(csv_filename,  simName)
+    dr12.Connect(pickle_filename,  simName)
 
     <span style='color:#017a31;'># Print the connection status for all data reporters</span>
     <b>for</b> dr <b>in</b> simulation._data_reporters_:

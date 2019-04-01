@@ -136,10 +136,17 @@ fi
 if [ ${PLATFORM} = "Darwin" ]; then
   OPENCS_COMPILER_FLAGS="${OPENCS_COMPILER_FLAGS} -arch x86_64"
   BOOST_MACOSX_FLAGS="architecture=x86"
-  export CC=/usr/local/bin/gcc
-  export CXX=/usr/local/bin/g++
-  export FC=/usr/local/bin/gfortran
-  export F77=/usr/local/bin/gfortran
+  export CC=/usr/local/bin/gcc-8
+  export CXX=/usr/local/bin/g++-8
+  export CPP=/usr/local/bin/cpp-8
+  export LD=/usr/local/bin/gcc-8
+  export F77=/usr/local/bin/gfortran-8
+
+  alias gcc=/usr/local/bin/gcc-8
+  alias g++=/usr/local/bin/g++-8
+  alias cc=/usr/local/bin/gcc-8
+  alias c++=/usr/local/bin/c++-8
+  alias ld=/usr/local/bin/gcc-8
 
 elif [ ${PLATFORM} = "Linux" ]; then
   if [ ${HOST_ARCH} != "x86_64" ]; then
@@ -588,7 +595,9 @@ configure_trilinos()
   UMFPACK_ENABLED=OFF
   BLAS_LIBRARIES="${ROOT_DIR}/lapack/lib/libblas.a -lgfortran"
   LAPACK_LIBRARIES="${ROOT_DIR}/lapack/lib/liblapack.a -lgfortran"
+  TRILINOS_CXX_FLAGS=""
   if [ ${PLATFORM} = "Windows" ]; then
+    TRILINOS_CXX_FLAGS="/EHsc"
     UMFPACK_ENABLED=OFF
     BLAS_LIBRARIES="${ROOT_DIR}/clapack/build/lib/blas.lib ${ROOT_DIR}/clapack/build/lib/libf2c.lib"
     LAPACK_LIBRARIES="${ROOT_DIR}/clapack/build/lib/lapack.lib ${ROOT_DIR}/clapack/build/lib/libf2c.lib"
@@ -620,7 +629,7 @@ configure_trilinos()
     -DTPL_ENABLE_MPI:BOOL=OFF \
     -DDART_TESTING_TIMEOUT:STRING=600 \
     -DCMAKE_INSTALL_PREFIX:PATH=. \
-    -DCMAKE_CXX_FLAGS:STRING="-DNDEBUG ${OPENCS_COMPILER_FLAGS}" \
+    -DCMAKE_CXX_FLAGS:STRING="-DNDEBUG ${OPENCS_COMPILER_FLAGS} ${TRILINOS_CXX_FLAGS}" \
     -DCMAKE_C_FLAGS:STRING="-DNDEBUG ${OPENCS_COMPILER_FLAGS}" \
     -DCMAKE_Fortran_FLAGS:STRING="-DNDEBUG ${OPENCS_COMPILER_FLAGS}" \
     $EXTRA_ARGS \

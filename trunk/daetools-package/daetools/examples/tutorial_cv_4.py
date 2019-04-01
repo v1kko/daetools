@@ -347,7 +347,7 @@ def run(**kwargs):
     
     print('Eu2 =', Eu2)
     print('Ev2 =', Ev2)
-    print('pu ', pu)
+    print('pu =', pu)
     print('pv =', pv)
     
     fontsize = 14

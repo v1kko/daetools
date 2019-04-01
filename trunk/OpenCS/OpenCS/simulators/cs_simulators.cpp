@@ -14,6 +14,7 @@ the OpenCS software; if not, see <http://www.gnu.org/licenses/>.
 #include <iostream>
 #include <locale>
 #include <mpi.h>
+#include <boost/format.hpp>
 #include "cs_simulators.h"
 #include "daesimulator.h"
 #include "cs_logs.h"

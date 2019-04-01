@@ -29,86 +29,26 @@ folder of the Python installation. The structure of the folders is given in :num
 
 Running tutorials
 =================
+Start ``DAE Tools Tutorials`` program to try some examples:
 
-1. Start ``DAE Plotter``:
+* GNU/Linux:
 
-   * GNU/Linux:
+  Run ``Applications/Development/DAE Tools Examples`` from the system menu
 
-     Run ``Applications/Development/daetools-daePlotter.desktop`` from the system menu or execute the following shell command:
+* Windows:
 
-     .. code-block:: bash
+  Run i.e. ``Start/Programs/DAE Tools/daeExamples_1.9.0_py36`` from the Start menu
 
-        daeplotter
-      
-   * MacOS:
+Alternatively, run the following command from the command line (platform independent):
 
-     Execute the following shell command:
+.. code-block:: bash
 
-     .. code-block:: bash
+   python -m daetools.examples.run_examples
+   or:
+   daeexamples
 
-        daeplotter
-
-   * Windows:
-
-     Run i.e. ``Start/Programs/DAE Tools/daePlotter_1.7.1_py35`` from the Start menu or execute the following batch file:
-
-     .. code-block:: bash
-
-        daeplotter.bat
-
-   .. note:: ``daeplotter`` script is located in the ``Scripts`` folder (in Windows) or the ``bin`` folder (GNU/Linux)
-             of the python installation. Typically, those locations are added to the ``PATH`` by the python installation.
-
-   Alternatively, execute the following command from the command line (platform independent):
-
-   .. code-block:: bash
-
-      python -m daetools.dae_plotter.plotter
-
-   The ``DAE Tools Plotter`` main window should appear (given in :numref:`Figure-GetStarted-1`)
-
-   .. _Figure-GetStarted-1:
-   .. figure:: _static/Screenshot-DAEPlotter.png
-      :width: 250 pt
-      :figwidth: 300 pt
-      :align: center
-
-      **DAE Tools Plotter** main window.
-
-2. Start ``DAE Tools Tutorials`` program to try some examples:
-
-   * GNU/Linux:
-
-     Run ``Applications/Development/daetools-daeExamples.desktop`` from the system menu or execute the following shell command:
-
-     .. code-block:: bash
-
-        daeexamples
-
-   * MacOS:
-
-     Execute the following shell command:
-
-     .. code-block:: bash
-
-        daeexamples
-
-   * Windows:
-
-     Run i.e. ``Start/Programs/DAE Tools/daeExamples_1.7.1_py35`` from the Start menu or execute the following batch file:
-
-     .. code-block:: bash
-
-        daeexamples.bat
-
-   .. note:: ``daeexamples`` script is located in the ``Scripts`` folder (in Windows) or the ``bin`` folder (GNU/Linux)
-             of the python installation. Typically, those locations are added to the ``PATH`` by the python installation.
-
-   Alternatively, execute the following command from the command line (platform independent):
-
-   .. code-block:: bash
-
-      python -m daetools.examples.run_examples
+.. note:: ``daeexamples`` script is located in the ``Scripts`` folder (in Windows) or the ``bin`` folder (GNU/Linux)
+            of the python installation. Typically, those locations are added to the ``PATH`` by the python installation.
 
 The main window of ``DAE Tools Examples`` application is given in :numref:`Figure-GetStarted-2a` while
 the output from the simulation run in :numref:`Figure-GetStarted-2b`. There, tutorials can be run, their source code
@@ -135,12 +75,10 @@ Tutorials can also be started from the shell:
 
 .. code-block:: bash
 
-    # cd .../daetools/examples
-    # Or in windows:
-    # cd ...\daetools\examples
+    cd .../daetools/examples
     
     python tutorial1.py console
-    # or
+    or:
     python tutorial1.py gui
 
 The sample output is given in :numref:`Figure-GetStarted-3`:
@@ -152,6 +90,39 @@ The sample output is given in :numref:`Figure-GetStarted-3`:
    :align: center
 
    Shell output from the simulation.
+
+On GNU/Linux and Windows the ``DAE Plotter`` is started automatically.
+It can also be started manually: 
+
+* GNU/Linux:
+
+  Run ``Applications/Development/DAE Tools Plotter`` from the system menu.
+
+* Windows:
+
+  Run i.e. ``Start/Programs/DAE Tools/daePlotter_1.9.0_py36`` from the Start menu
+     
+Alternatively, run the following command from the command line (platform independent):
+
+.. code-block:: bash
+
+   python -m daetools.dae_plotter.plotter
+   or:      
+   daeplotter
+
+
+.. note:: ``daeplotter`` script is located in the ``Scripts`` folder (in Windows) or the ``bin`` folder (GNU/Linux)
+          of the python installation. Typically, those locations are added to the ``PATH`` by the python installation.
+
+The ``DAE Tools Plotter`` main window should appear (given in :numref:`Figure-GetStarted-1`)
+
+.. _Figure-GetStarted-1:
+.. figure:: _static/Screenshot-DAEPlotter.png
+    :width: 250 pt
+    :figwidth: 300 pt
+    :align: center
+
+    **DAE Tools Plotter** main window.
 
 Processing the results
 ======================

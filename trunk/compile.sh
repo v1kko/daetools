@@ -16,7 +16,7 @@ Compiling only specified projects:
     sh compile.sh trilinos superlu nlopt
 
 Achtung, Achtung!!
-On MACOS gcc should be used (the XCode does not provide OpenMP).
+On MACOS gcc should be used (the XCode does not provide Fortran compiler).
 getopt command might be missing - that line should be commented out.
 
 OPTIONS:
@@ -68,7 +68,7 @@ PROJECT:
         deal.ii                 Build deal.II FEM library and its python extension module (pyDealII).
         cape_open_thermo        Build Cape Open thermo-physical property package library (cdaeCapeOpenThermoPackage.dll, Windows only).
         opencl_evaluator        Build Evaluator_OpenCL library and its python extension module (pyEvaluator_OpenCL).
-        pyopencs                Build pyOpenCS python extension module.
+        pyopencs                Build pyOpenCS python extension module (pyOpenCS).
 EOF
 }
 
@@ -197,17 +197,27 @@ if [ ${PLATFORM} = "Darwin" ]; then
   Ncpu=2
   QMAKE="qmake"
   QMAKE_SPEC=macx-g++
-  export CC=/usr/local/bin/gcc
-  export CXX=/usr/local/bin/g++
-  export FC=/usr/local/bin/gfortran
-  export F77=/usr/local/bin/gfortran
+  export CC=/usr/local/bin/gcc-8
+  export CXX=/usr/local/bin/g++-8
+  export CPP=/usr/local/bin/cpp-8
+  export LD=/usr/local/bin/gcc-8
+  export F77=/usr/local/bin/gfortran-8
+
+  alias gcc=/usr/local/bin/gcc-8
+  alias g++=/usr/local/bin/g++-8
+  alias cc=/usr/local/bin/gcc-8
+  alias c++=/usr/local/bin/c++-8
+  alias ld=/usr/local/bin/gcc-8
+  
 elif [ ${PLATFORM} = "Linux" ]; then
   Ncpu=`cat /proc/cpuinfo | grep processor | wc -l`
   QMAKE="/usr/bin/qmake"
   QMAKE_SPEC=linux-g++
+  
 elif [ ${PLATFORM} = "Windows" ]; then
   Ncpu=4
   QMAKE_SPEC=win32-msvc
+  
 else
   Ncpu=4
   QMAKE_SPEC=win32-g++

@@ -23,7 +23,7 @@ DAE Tools version of the tutorial_opencs_dae_1.py example (IDAS idasAkzoNob_dns 
 import os, sys, json
 from time import localtime, strftime
 from daetools.pyDAE import *
-from tutorial_opencs_dae_1 import ChemicalKinetics
+from daetools.examples.tutorial_opencs_dae_1 import ChemicalKinetics
 
 y_type = daeVariableType("y_type", unit(), 0, 1E10,   0, 1e-10)
 

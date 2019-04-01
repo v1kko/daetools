@@ -19,7 +19,7 @@ QMAKE_LIBDIR += $${PYTHON_LIB_DIR}
 
 LIBS += $${SOLIBS_RPATH}
 
-unix::LIBS += $${OPEN_CS_EVALUATOR_LIBS} \
+unix::LIBS += $${OPEN_CS_LIBS} \
               $${INTEL_OPENCL_LIBS} \
               $${BOOST_PYTHON_LIB} \
               $${BOOST_LIBS}

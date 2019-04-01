@@ -116,6 +116,7 @@ Classes
     .. automethod:: Integrate
     .. automethod:: IntegrateForTimeInterval
     .. automethod:: IntegrateUntilTime
+    .. automethod:: IntegrateForOneStep
     .. automethod:: Reinitialize
     .. automethod:: Reset
 

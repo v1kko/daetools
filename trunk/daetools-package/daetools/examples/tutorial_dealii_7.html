@@ -129,7 +129,7 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc0000;
                                                       faceQuadrature  <b><span style='color:#0000ff;'>=</span></b> QGauss_1D(<span style='color:#cc047c;'>3</span>),  <span style='color:#017a31;'># face quadrature formula</span>
                                                       dofs            <b><span style='color:#0000ff;'>=</span></b> dofs)          <span style='color:#017a31;'># degrees of freedom</span>
 
-        <span style='color:#3605fb;'>self</span>.fe_model <b><span style='color:#0000ff;'>=</span></b> daeFiniteElementModel(<span style='color:#cc0000;'>'Boussinesq'</span>, <span style='color:#3605fb;'>self</span>, <span style='color:#cc0000;'>'The Boussinesq equation'</span>, <span style='color:#3605fb;'>self</span>.fe_system)
+        <span style='color:#3605fb;'>self</span>.fe_model <b><span style='color:#0000ff;'>=</span></b> daeFiniteElementModel(<span style='color:#cc0000;'>'StokesFlow'</span>, <span style='color:#3605fb;'>self</span>, <span style='color:#cc0000;'>'The Stokes equations'</span>, <span style='color:#3605fb;'>self</span>.fe_system)
 
     <b>def</b> DeclareEquations(<span style='color:#3605fb;'>self</span>):
         daeModel.DeclareEquations(<span style='color:#3605fb;'>self</span>)

@@ -15,4 +15,5 @@ SUBDIRS = LA_SuperLU \
     pyBONMIN \
     pyDealII \
     Evaluator_OpenCL \
-    pyEvaluator_OpenCL
+    pyEvaluator_OpenCL \
+    pyOpenCS

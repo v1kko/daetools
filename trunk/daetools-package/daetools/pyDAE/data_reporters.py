@@ -25,9 +25,13 @@ class daePickleDataReporter(daeDataReporterFile):
     """
     Saves data as the Python pickle which can be opened in DAE Plotter
     or unpickled directly:
+
+    .. code-block:: none
+    
         f = open(filename, 'rb')
         process = pickle.load(f)
         f.close()
+
     where process is the dataReceiverProcess instance identical to the 
     daeDataReceiverProcess objects used in the other data reporters below.
     """
@@ -48,9 +52,11 @@ class daeVTKDataReporter(daeDataReporterLocal):
     A separate file is written into the specified directory for every time point.
     In addition, the 'variableName.visit' files are written for use with the VisIt software.
     Notate bene:
-      - The original is available at https://pypi.python.org/pypi/PyEVTK. 
-        Install using: "pip install pyevtk".
-      - It is not an original module available at https://bitbucket.org/pauloh/pyevtk.
+        
+    - The original is available at https://pypi.python.org/pypi/PyEVTK. 
+      Install using: "pip install pyevtk".
+    - It is not an original module available at https://bitbucket.org/pauloh/pyevtk.
+    
     Does not require VTK installed.
     """
     def __init__(self):
@@ -198,11 +204,11 @@ class daeHDF5FileDataReporter(daeDataReporterFile):
     """
     Saves data in HDF5 format using the Python h5py library.
     A separate group is created for every variable and contain the following data sets:
-     - Values: multidimensional array with the variable values
-     - Times: 1d array with the time points
-     - DomainNames: names of the domains that the variable is distributed on
-     - Domains: multidimensional array with the domain points
-     - Units: variable units as a string
+    - Values: multidimensional array with the variable values
+    - Times: 1d array with the time points
+    - DomainNames: names of the domains that the variable is distributed on
+    - Domains: multidimensional array with the domain points
+    - Units: variable units as a string
     """
     def __init__(self):
         daeDataReporterFile.__init__(self)

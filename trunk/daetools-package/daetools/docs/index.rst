@@ -12,26 +12,10 @@ DAE Tools Documentation
     DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 
 
-Journal Articles
-================
+Publications
+============
 
-1. Nikolić DD. (2016) *DAE Tools: equation-based object-oriented modelling, simulation and optimisation software*.
-   **PeerJ Computer Science** 2:e54. `doi:10.7717/peerj-cs.54 <https://doi.org/10.7717/peerj-cs.54>`_
-
-2. Nikolić DD. (2018a) *Parallelisation of equation-based simulation programs on heterogeneous computing systems*.
-   **PeerJ Computer Science** 4:e160. `doi:10.7717/peerj-cs.160 <https://doi.org/10.7717/peerj-cs.160>`_
-
-3. Nikolić DD. (2018b) *Parallelisation of equation-based simulation programs on distributed memory systems*.
-   **Preprint** `link <parallelisation-dsm-preprint.pdf>`_
-
-Presentations
-=============
-
-1. `Overview of DAE Tools <daetools-overview.pdf>`_
-
-2. `Introduction to DAE Tools <daetools-introduction.pdf>`_
- 
-3. `Overview of the OpenCS framework <opencs-overview.pdf>`_
+Details on DAE Tools and OpenCS publications can be found on `Publications <../publications.html>`_ page.
 
 .. (on `ResearchGate <https://www.researchgate.net/publication/303260138_DAE_Tools_-_Introduction>`_)
 .. .. raw:: html

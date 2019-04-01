@@ -158,11 +158,11 @@ public:
     size_t                                              numberOfVariables;
     cs::csDifferentialEquationModel_t*                  model;
 
-    boost::shared_ptr<Epetra_Map>                           m_map;
-    boost::shared_ptr<Epetra_Vector>                        m_diagonal;
-    boost::shared_ptr<Epetra_CrsMatrix>                     m_matEPETRA;
+    std::shared_ptr<Epetra_Map>                             m_map;
+    std::shared_ptr<Epetra_Vector>                          m_diagonal;
+    std::shared_ptr<Epetra_CrsMatrix>                       m_matEPETRA;
     Epetra_SerialComm                                       m_Comm;
-    boost::shared_ptr<ML_Epetra::MultiLevelPreconditioner>	m_pPreconditionerML;
+    std::shared_ptr<ML_Epetra::MultiLevelPreconditioner>	m_pPreconditionerML;
     dae::solver::daeEpetraCSRMatrix                         m_matJacobian;
 };
 

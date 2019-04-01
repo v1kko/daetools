@@ -208,9 +208,6 @@ $PYTHON $ROOT/tutorial_dealii_4.py console
 echo tutorial_dealii_5.py
 $PYTHON $ROOT/tutorial_dealii_5.py console
 
-echo tutorial_dealii_5.py
-$PYTHON $ROOT/tutorial_dealii_5.py console
-
 echo tutorial_dealii_6.py
 $PYTHON $ROOT/tutorial_dealii_6.py console
 

@@ -146,13 +146,13 @@
 %-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 \title{DAE Tools Software}
 \subtitle{Introduction}
-\author{Deagan D. Nikolić}
+\author{Dragan D. Nikolić}
 \institute
 {
   DAE Tools Project, \url{http://www.daetools.com}
 }
 %\logo{\includegraphics{../images/[d][a][e]_Tools_project.png}}
-\date{20 August 2018} 
+\date{26 March 2019} 
 
 \hypersetup{
     pdfauthor = {Dragan Nikolić: dnikolic@daetools.com},
@@ -415,7 +415,7 @@ Current approaches to mathematical modelling:
 
 \begin{frame}[plain]
 \frametitle{Parallel Computing}
-    The \alert{shared-memory} parallel programming model supported.
+    The \alert{shared-memory} parallel programming model:
     \begin{itemize}
       \item \alert{Evaluation of model equations} using \alert{OpenCS} framework
          \begin{itemize}
@@ -428,6 +428,14 @@ Current approaches to mathematical modelling:
     \end{itemize}
     \begin{center}
         \includegraphics[align=c, height=0.37\paperheight]{Simulation-SharedMemorySystems.png}
+    \end{center}
+\end{frame}
+
+\begin{frame}[plain]
+\frametitle{Parallel Computing (cont'd)}
+    Simulation on \alert{message-passing} systems through OpenCS code generation.
+    \begin{center}
+        \includegraphics[align=c, height=0.70\paperheight]{Simulation-DistributedMemorySystems.png}
     \end{center}
 \end{frame}
 

@@ -20,10 +20,14 @@ namespace cs_dae_simulator
 {
 daeSimulationOptions::daeSimulationOptions()
 {
+    ptree = new boost::property_tree::ptree();
 }
 
 daeSimulationOptions::~daeSimulationOptions()
 {
+    boost::property_tree::ptree* pt = (boost::property_tree::ptree*)ptree;
+
+    delete pt;
 }
 
 daeSimulationOptions& daeSimulationOptions::GetConfig()
@@ -34,6 +38,8 @@ daeSimulationOptions& daeSimulationOptions::GetConfig()
 
 void daeSimulationOptions::Load(const std::string& jsonFilePath)
 {
+    boost::property_tree::ptree& pt = *((boost::property_tree::ptree*)ptree);
+
     pt.clear();
     boost::property_tree::json_parser::read_json(jsonFilePath, pt);
     configFile = jsonFilePath;
@@ -41,6 +47,8 @@ void daeSimulationOptions::Load(const std::string& jsonFilePath)
 
 void daeSimulationOptions::LoadString(const std::string& jsonOptions)
 {
+    boost::property_tree::ptree& pt = *((boost::property_tree::ptree*)ptree);
+
     pt.clear();
     std::stringstream ss(jsonOptions);
     boost::property_tree::json_parser::read_json(ss, pt);
@@ -49,6 +57,8 @@ void daeSimulationOptions::LoadString(const std::string& jsonOptions)
 
 bool daeSimulationOptions::HasKey(const std::string& strPropertyPath) const
 {
+    boost::property_tree::ptree& pt = *((boost::property_tree::ptree*)ptree);
+
     try
     {
         pt.get_child(strPropertyPath);
@@ -63,6 +73,8 @@ bool daeSimulationOptions::HasKey(const std::string& strPropertyPath) const
 
 std::string daeSimulationOptions::ToString(void) const
 {
+    boost::property_tree::ptree& pt = *((boost::property_tree::ptree*)ptree);
+
     std::stringstream ss;
     boost::property_tree::json_parser::write_json(ss, pt);
     return ss.str();
@@ -70,41 +82,57 @@ std::string daeSimulationOptions::ToString(void) const
 
 bool daeSimulationOptions::GetBoolean(const std::string& strPropertyPath)
 {
+    boost::property_tree::ptree& pt = *((boost::property_tree::ptree*)ptree);
+
     return pt.get<bool>(strPropertyPath);
 }
 
 double daeSimulationOptions::GetFloat(const std::string& strPropertyPath)
 {
+    boost::property_tree::ptree& pt = *((boost::property_tree::ptree*)ptree);
+
     return pt.get<double>(strPropertyPath);
 }
 
 int daeSimulationOptions::GetInteger(const std::string& strPropertyPath)
 {
+    boost::property_tree::ptree& pt = *((boost::property_tree::ptree*)ptree);
+
     return pt.get<int>(strPropertyPath);
 }
 
 std::string daeSimulationOptions::GetString(const std::string& strPropertyPath)
 {
+    boost::property_tree::ptree& pt = *((boost::property_tree::ptree*)ptree);
+
     return pt.get<std::string>(strPropertyPath);
 }
 
 bool daeSimulationOptions::GetBoolean(const std::string& strPropertyPath, const bool defValue)
 {
+    boost::property_tree::ptree& pt = *((boost::property_tree::ptree*)ptree);
+
     return pt.get<bool>(strPropertyPath, defValue);
 }
 
 double daeSimulationOptions::GetFloat(const std::string& strPropertyPath, const double defValue)
 {
+    boost::property_tree::ptree& pt = *((boost::property_tree::ptree*)ptree);
+
     return pt.get<double>(strPropertyPath, defValue);
 }
 
 int daeSimulationOptions::GetInteger(const std::string& strPropertyPath, const int defValue)
 {
+    boost::property_tree::ptree& pt = *((boost::property_tree::ptree*)ptree);
+
     return pt.get<int>(strPropertyPath, defValue);
 }
 
 std::string daeSimulationOptions::GetString(const std::string& strPropertyPath, const std::string& defValue)
 {
+    boost::property_tree::ptree& pt = *((boost::property_tree::ptree*)ptree);
+
     return pt.get<std::string>(strPropertyPath, defValue);
 }
 

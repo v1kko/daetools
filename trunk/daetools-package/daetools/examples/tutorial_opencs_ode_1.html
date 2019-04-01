@@ -44,11 +44,9 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc0000;
 <span style='color:#cc0000;'>The original results are in tutorial_opencs_ode_1.csv file.</span>
 <span style='color:#cc0000;'>&quot;&quot;&quot;</span>
 
-<span style='color:#3605fb;'>import</span> os, sys, json
-<span style='color:#3605fb;'>from</span> time <span style='color:#3605fb;'>import</span> localtime, strftime
-<span style='color:#3605fb;'>from</span> daetools.pyDAE <span style='color:#3605fb;'>import</span> <b><span style='color:#0000ff;'>*</span></b>
-<span style='color:#3605fb;'>from</span> pyOpenCS <span style='color:#3605fb;'>import</span> csModelBuilder_t, csNumber_t, csSimulate
-<span style='color:#3605fb;'>from</span> tutorial_opencs_aux <span style='color:#3605fb;'>import</span> compareResults
+<span style='color:#3605fb;'>import</span> os, sys, json, numpy
+<span style='color:#3605fb;'>from</span> daetools.solvers.opencs <span style='color:#3605fb;'>import</span> csModelBuilder_t, csNumber_t, csSimulate
+<span style='color:#3605fb;'>from</span> daetools.examples.tutorial_opencs_aux <span style='color:#3605fb;'>import</span> compareResults
 
 <b>class</b> Roberts:
     <b>def</b> <b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#3605fb;'>self</span>):
@@ -107,12 +105,12 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc0000;
     <span style='color:#017a31;'># Set simulation options (specified as a string in JSON format).</span>
     <span style='color:#017a31;'># The default options are returned by SimulationOptions function as a string in JSON format.</span>
     <span style='color:#017a31;'># The TimeHorizon and the ReportingInterval must be set.</span>
-    options <b><span style='color:#0000ff;'>=</span></b> json.loads(mb.SimulationOptions)
+    options <b><span style='color:#0000ff;'>=</span></b> mb.SimulationOptions
     options[<span style='color:#cc0000;'>'Simulation'</span>][<span style='color:#cc0000;'>'OutputDirectory'</span>]             <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc0000;'>'results'</span>
     options[<span style='color:#cc0000;'>'Simulation'</span>][<span style='color:#cc0000;'>'TimeHorizon'</span>]                 <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>4000.0</span>
     options[<span style='color:#cc0000;'>'Simulation'</span>][<span style='color:#cc0000;'>'ReportingInterval'</span>]           <b><span style='color:#0000ff;'>=</span></b>   <span style='color:#cc047c;'>10.0</span>
     options[<span style='color:#cc0000;'>'Solver'</span>][<span style='color:#cc0000;'>'Parameters'</span>][<span style='color:#cc0000;'>'RelativeTolerance'</span>] <b><span style='color:#0000ff;'>=</span></b>   <span style='color:#cc047c;'>1e-5</span>
-    mb.SimulationOptions <b><span style='color:#0000ff;'>=</span></b> json.dumps(options, indent<b><span style='color:#0000ff;'>=</span></b><span style='color:#cc047c;'>4</span>)
+    mb.SimulationOptions <b><span style='color:#0000ff;'>=</span></b> options
     
     <span style='color:#017a31;'># Partition the system to create the OpenCS model for a single CPU simulation.</span>
     <span style='color:#017a31;'># In this case (Npe = 1) the graph partitioner is not required.</span>

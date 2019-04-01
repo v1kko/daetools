@@ -50,11 +50,11 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc0000;
 <span style='color:#cc0000;'>The original results are in tutorial_opencs_ode_3.csv file.</span>
 <span style='color:#cc0000;'>&quot;&quot;&quot;</span>
 
-<span style='color:#3605fb;'>import</span> os, sys, json, itertools
-<span style='color:#3605fb;'>from</span> daetools.pyDAE <span style='color:#3605fb;'>import</span> <b><span style='color:#0000ff;'>*</span></b>
-<span style='color:#3605fb;'>import</span> pyOpenCS
-<span style='color:#3605fb;'>from</span> pyOpenCS <span style='color:#3605fb;'>import</span> csModelBuilder_t, csNumber_t, csGraphPartitioner_2D_Npde, csSimulate
-<span style='color:#3605fb;'>from</span> tutorial_opencs_aux <span style='color:#3605fb;'>import</span> compareResults
+<span style='color:#3605fb;'>import</span> os, sys, json, itertools, numpy
+<span style='color:#3605fb;'>from</span> daetools.solvers.opencs <span style='color:#3605fb;'>import</span> pyOpenCS
+<span style='color:#3605fb;'>from</span> daetools.solvers.opencs <span style='color:#3605fb;'>import</span> csModelBuilder_t, csNumber_t, csSimulate
+<span style='color:#3605fb;'>from</span> daetools.solvers.opencs <span style='color:#3605fb;'>import</span> csGraphPartitioner_t, createGraphPartitioner_2D_Npde
+<span style='color:#3605fb;'>from</span> daetools.examples.tutorial_opencs_aux <span style='color:#3605fb;'>import</span> compareResults
 
 V   <b><span style='color:#0000ff;'>=</span></b>  <span style='color:#cc047c;'>1.00E-03</span>
 Kh  <b><span style='color:#0000ff;'>=</span></b>  <span style='color:#cc047c;'>4.00E-06</span>
@@ -310,7 +310,7 @@ a4  <b><span style='color:#0000ff;'>=</span></b>  <span style='color:#cc047c;'>7
     
     <span style='color:#017a31;'># 3. Generate a model for single CPU simulations.    </span>
     <span style='color:#017a31;'># Set simulation options (specified as a string in JSON format).</span>
-    options <b><span style='color:#0000ff;'>=</span></b> json.loads(mb.SimulationOptions)
+    options <b><span style='color:#0000ff;'>=</span></b> mb.SimulationOptions
     options[<span style='color:#cc0000;'>'Simulation'</span>][<span style='color:#cc0000;'>'OutputDirectory'</span>]             <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc0000;'>'results'</span>
     options[<span style='color:#cc0000;'>'Simulation'</span>][<span style='color:#cc0000;'>'TimeHorizon'</span>]                 <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>86400.0</span>
     options[<span style='color:#cc0000;'>'Simulation'</span>][<span style='color:#cc0000;'>'ReportingInterval'</span>]           <b><span style='color:#0000ff;'>=</span></b>   <span style='color:#cc047c;'>100.0</span>
@@ -321,7 +321,7 @@ a4  <b><span style='color:#0000ff;'>=</span></b>  <span style='color:#cc047c;'>7
     options[<span style='color:#cc0000;'>'LinearSolver'</span>][<span style='color:#cc0000;'>'Preconditioner'</span>][<span style='color:#cc0000;'>'Parameters'</span>][<span style='color:#cc0000;'>'fact: relax value'</span>]        <b><span style='color:#0000ff;'>=</span></b>  <span style='color:#cc047c;'>0.0</span>
     options[<span style='color:#cc0000;'>'LinearSolver'</span>][<span style='color:#cc0000;'>'Preconditioner'</span>][<span style='color:#cc0000;'>'Parameters'</span>][<span style='color:#cc0000;'>'fact: absolute threshold'</span>] <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>1e-5</span>
     options[<span style='color:#cc0000;'>'LinearSolver'</span>][<span style='color:#cc0000;'>'Preconditioner'</span>][<span style='color:#cc0000;'>'Parameters'</span>][<span style='color:#cc0000;'>'fact: relative threshold'</span>] <b><span style='color:#0000ff;'>=</span></b>  <span style='color:#cc047c;'>1.0</span>
-    mb.SimulationOptions <b><span style='color:#0000ff;'>=</span></b> json.dumps(options, indent<b><span style='color:#0000ff;'>=</span></b><span style='color:#cc047c;'>4</span>)
+    mb.SimulationOptions <b><span style='color:#0000ff;'>=</span></b> options
     
     <span style='color:#017a31;'># Partition the system to create the OpenCS model for a single CPU simulation.</span>
     <span style='color:#017a31;'># In this case (Npe = 1) the graph partitioner is not required.</span>
@@ -337,7 +337,7 @@ a4  <b><span style='color:#0000ff;'>=</span></b>  <span style='color:#cc047c;'>7
     options[<span style='color:#cc0000;'>'LinearSolver'</span>][<span style='color:#cc0000;'>'Preconditioner'</span>][<span style='color:#cc0000;'>'Parameters'</span>][<span style='color:#cc0000;'>'fact: relax value'</span>]        <b><span style='color:#0000ff;'>=</span></b>  <span style='color:#cc047c;'>0.0</span>
     options[<span style='color:#cc0000;'>'LinearSolver'</span>][<span style='color:#cc0000;'>'Preconditioner'</span>][<span style='color:#cc0000;'>'Parameters'</span>][<span style='color:#cc0000;'>'fact: absolute threshold'</span>] <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>1e-1</span>
     options[<span style='color:#cc0000;'>'LinearSolver'</span>][<span style='color:#cc0000;'>'Preconditioner'</span>][<span style='color:#cc0000;'>'Parameters'</span>][<span style='color:#cc0000;'>'fact: relative threshold'</span>] <b><span style='color:#0000ff;'>=</span></b>  <span style='color:#cc047c;'>1.0</span>
-    mb.SimulationOptions <b><span style='color:#0000ff;'>=</span></b> json.dumps(options, indent<b><span style='color:#0000ff;'>=</span></b><span style='color:#cc047c;'>4</span>)
+    mb.SimulationOptions <b><span style='color:#0000ff;'>=</span></b> options
     
     <span style='color:#017a31;'># For distributed memory systems a graph partitioner must be specified.</span>
     <span style='color:#017a31;'># Available partitioners:</span>
@@ -362,10 +362,10 @@ a4  <b><span style='color:#0000ff;'>=</span></b>  <span style='color:#cc047c;'>7
     <span style='color:#017a31;'>#  - unaryOperationsFlops: dictionary [csUnaryFunctions : unsigned int])</span>
     <span style='color:#017a31;'>#  - binaryOperationsFlops: dictionary [csBinaryFunctions : unsigned int]</span>
     Npe <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>8</span>
-    graphPartitioner <b><span style='color:#0000ff;'>=</span></b> csGraphPartitioner_2D_Npde(Nx <b><span style='color:#0000ff;'>=</span></b> model.Nx, 
-                                                  Ny <b><span style='color:#0000ff;'>=</span></b> model.Ny, 
-                                                  Npde <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>2</span>, 
-                                                  Npex_Npey_ratio <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>0.5</span>)
+    graphPartitioner <b><span style='color:#0000ff;'>=</span></b> createGraphPartitioner_2D_Npde(Nx <b><span style='color:#0000ff;'>=</span></b> model.Nx, 
+                                                      Ny <b><span style='color:#0000ff;'>=</span></b> model.Ny, 
+                                                      Npde <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>2</span>, 
+                                                      Npex_Npey_ratio <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>0.5</span>)
     inputFilesDirectory_mpi <b><span style='color:#0000ff;'>=</span></b> inputFilesDirectory <b><span style='color:#0000ff;'>+</span></b> <span style='color:#cc0000;'>'-Npe=</span><span style='color:#cc0000;'>%d</span><span style='color:#cc0000;'>-2D_Npde'</span> <b><span style='color:#0000ff;'>%</span></b> Npe
     cs_models_mpi <b><span style='color:#0000ff;'>=</span></b> mb.PartitionSystem(Npe, graphPartitioner, logPartitionResults <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>True</span>)
     csModelBuilder_t.ExportModels(cs_models_mpi, inputFilesDirectory_mpi, mb.SimulationOptions)
@@ -378,8 +378,16 @@ a4  <b><span style='color:#0000ff;'>=</span></b>  <span style='color:#cc047c;'>7
     compareResults(inputFilesDirectory, [<span style='color:#cc0000;'>'C1(0,0)'</span>])
     
 <b>if</b> <span style='color:#3605fb;'>__name__</span> <b><span style='color:#0000ff;'>==</span></b> <span style='color:#cc0000;'>&quot;__main__&quot;</span>:
-    Nx <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>80</span>
-    Ny <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>80</span>
+    <b>if</b> <span style='color:#2a00d6;'>len</span>(sys.argv) <b><span style='color:#0000ff;'>==</span></b> <span style='color:#cc047c;'>1</span>:
+        Nx <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>80</span>
+        Ny <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>80</span>
+    <b>elif</b> <span style='color:#2a00d6;'>len</span>(sys.argv) <b><span style='color:#0000ff;'>==</span></b> <span style='color:#cc047c;'>3</span>:
+        Nx <b><span style='color:#0000ff;'>=</span></b> <span style='color:#2a00d6;'>int</span>(sys.argv[<span style='color:#cc047c;'>1</span>])
+        Ny <b><span style='color:#0000ff;'>=</span></b> <span style='color:#2a00d6;'>int</span>(sys.argv[<span style='color:#cc047c;'>2</span>])
+    <b>else</b>:
+        <span style='color:#2a00d6;'>print</span>(<span style='color:#cc0000;'>'Usage: python tutorial_opencs_ode_3.py Nx Ny'</span>)
+        sys.exit()
+        
     inputFilesDirectory <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc0000;'>'tutorial_opencs_ode_3'</span>
     run(Nx <b><span style='color:#0000ff;'>=</span></b> Nx, Ny <b><span style='color:#0000ff;'>=</span></b> Ny, inputFilesDirectory <b><span style='color:#0000ff;'>=</span></b> inputFilesDirectory)
 </pre>

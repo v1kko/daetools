@@ -235,7 +235,7 @@ class daeSimulationExplorer(QtWidgets.QDialog):
             print('Done!')
         
     def generateCode(self, language):
-        if not language in ['c99', 'c++ (MPI)', 'Modelica', 'gPROMS', 'FMI (Co-Simulation)']:
+        if not language in ['c99', 'OpenCS', 'Modelica', 'gPROMS', 'FMI (Co-Simulation)']:
             return
         
         options = QtWidgets.QFileDialog.ShowDirsOnly | QtWidgets.QFileDialog.DontResolveSymlinks
@@ -243,32 +243,32 @@ class daeSimulationExplorer(QtWidgets.QDialog):
         if language == 'c99':
             from daetools.code_generators.c99 import daeCodeGenerator_c99
             directory = QtWidgets.QFileDialog.getExistingDirectory(self, "Code generator: %s" % language, 
-                                                                       '', 
-                                                                       options)
+                                                                         '', 
+                                                                         options)
             if not directory:
                 return
             cg = daeCodeGenerator_c99()
             cg.generateSimulation(self._simulation, str(directory))
         
-        elif language == 'c++ (MPI)':
-            nproc, ok = QtWidgets.QInputDialog.getInt(self, "Code generator", "Set the # of MPI processes:", 4, min=2)
+        elif language == 'OpenCS':
+            nproc, ok = QtWidgets.QInputDialog.getInt(self, "Code generator", "Set the number of Processing Elements:", 1, min=1)
             if not ok:
                 return
 
-            from daetools.code_generators.cxx_mpi import daeCodeGenerator_cxx_mpi
+            from daetools.code_generators.opencs import daeCodeGenerator_OpenCS
             directory = QtWidgets.QFileDialog.getExistingDirectory(self, "Code generator: %s" % language,
-                                                                       '',
-                                                                       options)
+                                                                         '',
+                                                                         options)
             if not directory:
                 return
-            cg = daeCodeGenerator_cxx_mpi()
+            cg = daeCodeGenerator_OpenCS()
             cg.generateSimulation(self._simulation, str(directory), nproc)
 
         elif language == 'Modelica':
             from daetools.code_generators.modelica import daeCodeGenerator_Modelica
             directory = QtWidgets.QFileDialog.getExistingDirectory(self, "Code generator: %s" % language,
-                                                                       '',
-                                                                       options)
+                                                                         '',
+                                                                         options)
             if not directory:
                 return
             cg = daeCodeGenerator_Modelica()
@@ -277,8 +277,8 @@ class daeSimulationExplorer(QtWidgets.QDialog):
         elif language == 'gPROMS':
             from daetools.code_generators.gproms import daeCodeGenerator_gPROMS
             directory = QtWidgets.QFileDialog.getExistingDirectory(self, "Code generator: %s" % language,
-                                                                   '',
-                                                                   options)
+                                                                         '',
+                                                                         options)
             if not directory:
                 return
             cg = daeCodeGenerator_gPROMS()
@@ -683,7 +683,7 @@ class daeSimulationExplorer(QtWidgets.QDialog):
     
     def _slotGenerateCode(self):
         #try:
-        languages = ['Modelica', 'gPROMS', 'c99', 'c++ (MPI)', 'FMI (Co-Simulation)']
+        languages = ['Modelica', 'gPROMS', 'c99', 'OpenCS', 'FMI (Co-Simulation)']
         language, ok = QtWidgets.QInputDialog.getItem(self, "Code generator", "Choose the target language:", languages, 0, False)
         if not ok:
             return

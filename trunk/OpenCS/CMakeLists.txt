@@ -231,7 +231,7 @@ project(examples)
 
 include_directories(${Boost_DIR})
 
-foreach(example dae_example_1 dae_example_2 dae_example_3 dae_example_4
+foreach(example dae_example_1 dae_example_2 dae_example_3
                 ode_example_1 ode_example_2 ode_example_3)
   
   set(SOURCES_EXAMPLE_${example} examples/${example}.cpp)
@@ -256,87 +256,3 @@ foreach(example dae_example_1 dae_example_2 dae_example_3 dae_example_4
 
   install(TARGETS ${example} DESTINATION examples)
 endforeach(example)
-
-# set(SOURCES_DAE_EXAMPLE_1 examples/dae_example_1.cpp)
-# set(SOURCES_DAE_EXAMPLE_2 examples/dae_example_2.cpp)
-# set(SOURCES_DAE_EXAMPLE_3 examples/dae_example_3.cpp)
-# set(SOURCES_DAE_EXAMPLE_4 examples/dae_example_4.cpp)
-# set(SOURCES_ODE_EXAMPLE_1 examples/ode_example_1.cpp)
-# set(SOURCES_ODE_EXAMPLE_2 examples/ode_example_2.cpp)
-# set(SOURCES_ODE_EXAMPLE_3 examples/ode_example_3.cpp)
-# 
-# add_executable(dae_example_1 ${SOURCES_DAE_EXAMPLE_1})
-# add_executable(dae_example_2 ${SOURCES_DAE_EXAMPLE_2})
-# add_executable(dae_example_3 ${SOURCES_DAE_EXAMPLE_3})
-# add_executable(dae_example_4 ${SOURCES_DAE_EXAMPLE_4})
-# add_executable(ode_example_1 ${SOURCES_ODE_EXAMPLE_1})
-# add_executable(ode_example_2 ${SOURCES_ODE_EXAMPLE_2})
-# add_executable(ode_example_3 ${SOURCES_ODE_EXAMPLE_3})
-# 
-# add_dependencies(dae_example_1 OpenCS_Evaluators OpenCS_Models OpenCS_Simulators)
-# add_dependencies(dae_example_2 OpenCS_Evaluators OpenCS_Models OpenCS_Simulators)
-# add_dependencies(dae_example_3 OpenCS_Evaluators OpenCS_Models OpenCS_Simulators)
-# add_dependencies(dae_example_4 OpenCS_Evaluators OpenCS_Models OpenCS_Simulators)
-# add_dependencies(ode_example_1 OpenCS_Evaluators OpenCS_Models OpenCS_Simulators)
-# add_dependencies(ode_example_2 OpenCS_Evaluators OpenCS_Models OpenCS_Simulators)
-# add_dependencies(ode_example_3 OpenCS_Evaluators OpenCS_Models OpenCS_Simulators)
-# 
-# include_directories(${Boost_DIR})
-# 
-# target_link_libraries(dae_example_1 OpenCS_Simulators)
-# target_link_libraries(dae_example_1 OpenCS_Models)
-# target_link_libraries(dae_example_1 OpenCS_Evaluators)
-# target_link_libraries(dae_example_1 "${MPI_CXX_LIBRARIES}")
-# target_link_libraries(dae_example_1 "${MPI_C_LIBRARIES}")
-# 
-# target_link_libraries(dae_example_2 OpenCS_Simulators)
-# target_link_libraries(dae_example_2 OpenCS_Models)
-# target_link_libraries(dae_example_2 OpenCS_Evaluators)
-# target_link_libraries(dae_example_2 "${MPI_CXX_LIBRARIES}")
-# target_link_libraries(dae_example_2 "${MPI_C_LIBRARIES}")
-# 
-# target_link_libraries(dae_example_3 OpenCS_Simulators)
-# target_link_libraries(dae_example_3 OpenCS_Models)
-# target_link_libraries(dae_example_3 OpenCS_Evaluators)
-# target_link_libraries(dae_example_3 "${MPI_CXX_LIBRARIES}")
-# target_link_libraries(dae_example_3 "${MPI_C_LIBRARIES}")
-# 
-# target_link_libraries(dae_example_4 OpenCS_Simulators)
-# target_link_libraries(dae_example_4 OpenCS_Models)
-# target_link_libraries(dae_example_4 OpenCS_Evaluators)
-# target_link_libraries(dae_example_4 "${MPI_CXX_LIBRARIES}")
-# target_link_libraries(dae_example_4 "${MPI_C_LIBRARIES}")
-# 
-# target_link_libraries(ode_example_1 OpenCS_Simulators)
-# target_link_libraries(ode_example_1 OpenCS_Models)
-# target_link_libraries(ode_example_1 OpenCS_Evaluators)
-# target_link_libraries(ode_example_1 "${MPI_CXX_LIBRARIES}")
-# target_link_libraries(ode_example_1 "${MPI_C_LIBRARIES}")
-# 
-# target_link_libraries(ode_example_2 OpenCS_Simulators)
-# target_link_libraries(ode_example_2 OpenCS_Models)
-# target_link_libraries(ode_example_2 OpenCS_Evaluators)
-# target_link_libraries(ode_example_2 "${MPI_CXX_LIBRARIES}")
-# target_link_libraries(ode_example_2 "${MPI_C_LIBRARIES}")
-# 
-# target_link_libraries(ode_example_3 OpenCS_Simulators)
-# target_link_libraries(ode_example_3 OpenCS_Models)
-# target_link_libraries(ode_example_3 OpenCS_Evaluators)
-# target_link_libraries(ode_example_3 "${MPI_CXX_LIBRARIES}")
-# target_link_libraries(ode_example_3 "${MPI_C_LIBRARIES}")
-# 
-# # Not required anymore on GNU/Linux, since the rpath is set to "$ORIGIN:$ORIGIN/../lib"
-# if(MSVC)
-#   install(TARGETS OpenCS_Evaluators   DESTINATION examples)
-#   install(TARGETS OpenCS_Models       DESTINATION examples)
-#   install(TARGETS OpenCS_Simulators   DESTINATION examples)
-# endif(MSVC)
-# 
-# install(TARGETS dae_example_1 DESTINATION examples)
-# install(TARGETS dae_example_2 DESTINATION examples)
-# install(TARGETS dae_example_3 DESTINATION examples)
-# install(TARGETS dae_example_4 DESTINATION examples)
-# 
-# install(TARGETS ode_example_1 DESTINATION examples)
-# install(TARGETS ode_example_2 DESTINATION examples)
-# install(TARGETS ode_example_3 DESTINATION examples)

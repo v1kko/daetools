@@ -179,7 +179,7 @@ int main(int argc, char *argv[])
         // Create METIS graph partitioner (instantiate directly to be able to set the options).
         csGraphPartitioner_Metis partitioner(PartGraphRecursive);
 
-        // Partitioner options can be set using the SetOptions options.
+        // Partitioner options can be set using the SetOptions function.
         // First, obtain the array with options already initialised to default values.
         std::vector<int32_t> metis_options = partitioner.GetOptions();
         // Then, set the options (as described in the Section 5.4 of the METIS manual; requires <metis.h> included).
@@ -189,9 +189,9 @@ int main(int argc, char *argv[])
         // Finally, set the updated options to the Metis partitioner.
         partitioner.SetOptions(metis_options);
 
-        // Graph partitioners can optionally use dictionaries with a number of FLOPS required for individual mathematical operations.
-        // This way, the total number of FLOPS can be precisely estimated for every equation.
-        // Number of FLOPS are specified using two dictionaries:
+        // Graph partitioners can optionally use dictionaries with a number of FLOPs required for individual mathematical operations.
+        // This way, the total number of FLOPs can be precisely estimated for every equation.
+        // Number of FLOPs are specified using two dictionaries:
         //  1. unaryOperationsFlops for:
         //      - unary operators (+, -)
         //      - unary functions (sqrt, log, log10, exp, sin, cos, tan, asin, acos, atan, sinh, cosh,

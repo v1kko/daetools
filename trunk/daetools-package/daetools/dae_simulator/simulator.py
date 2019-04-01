@@ -94,6 +94,7 @@ class daeSimulator(QtWidgets.QDialog):
         menuRun.addAction(actionShowExplorerAndRun)
         self.ui.RunButton.setMenu(menuRun)
 
+        self.ui.AboutButton.clicked.connect(self.slotAbout)
         self.ui.ResumeButton.clicked.connect(self.slotResume)
         self.ui.PauseButton.clicked.connect(self.slotPause)
         self.ui.MatrixButton.clicked.connect(self.slotOpenSparseMatrixImage)
@@ -175,6 +176,12 @@ class daeSimulator(QtWidgets.QDialog):
         elif self.optimization:
             self.optimization.Finalize()
     """
+
+    #@QtCore.pyqtSlot()
+    def slotAbout(self):
+        from daetools.dae_plotter.about import daeAboutDialog
+        dlg = daeAboutDialog()
+        dlg.exec_()
 
     #@QtCore.pyqtSlot()
     def slotPause(self):

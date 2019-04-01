@@ -13,7 +13,7 @@ You should have received a copy of the GNU General Public License along with the
 DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 ************************************************************************************
 """
-import os, shutil, sys, numpy, math, traceback, pprint, struct, json, gc
+import os, shutil, sys, numpy, math, traceback, pprint, struct, json, gc, warnings
 from daetools.pyDAE import *
 from .formatter import daeExpressionFormatter
 from .analyzer import daeCodeGeneratorAnalyzer
@@ -22,6 +22,9 @@ try:
     import pygraphviz as pgv
 except Exception as e:
     print(str(e))
+    
+warnings.simplefilter("always")
+warnings.warn("daeCodeGenerator_MPI is deprecated - use daeCodeGenerator_OpenCS instead", DeprecationWarning)
 
 class daeInterProcessCommGraph(object):
     def __init__(self, partitionData, statsData):
@@ -81,7 +84,7 @@ class daeCodeGenerator_MPI(daeCodeGenerator):
      - DOFs in models are not supported (for the block indexes are not set uniformly)
      - STNs are not supported
     """
-    def __init__(self):
+    def __init__(self):       
         self.wrapperInstanceName     = ''
         self.topLevelModel           = None
         self.simulation              = None

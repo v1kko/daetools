@@ -60,8 +60,8 @@ LIBRARY:
     deal.ii          deal.II finite elements library
     coolprop         CoolProp thermophysical property library
     opencs           OpenCS library
-                     Requires cblas_clapack, idas (with MPI support enabled), metis and trilinos libraries compiled
-                     using the compile_opencs.sh script from the OpenCS directory.
+                     Requires cblas_clapack, idas (with MPI support enabled), metis, hdf5 and trilinos libraries
+                     compiled using the compile_opencs.sh script from the OpenCS directory.
 
 CROSS-COMPILATION (GNU/Linux -> Windows):
 Prerequisities:
@@ -288,10 +288,17 @@ fi
 if [ ${PLATFORM} = "Darwin" ]; then
   DAE_COMPILER_FLAGS="${DAE_COMPILER_FLAGS} -arch x86_64"
   BOOST_MACOSX_FLAGS="architecture=x86"
-  export CC=/usr/local/bin/gcc
-  export CXX=/usr/local/bin/g++
-  export FC=/usr/local/bin/gfortran
-  export F77=/usr/local/bin/gfortran
+  export CC=/usr/local/bin/gcc-8
+  export CXX=/usr/local/bin/g++-8
+  export CPP=/usr/local/bin/cpp-8
+  export LD=/usr/local/bin/gcc-8
+  export F77=/usr/local/bin/gfortran-8
+
+  alias gcc=/usr/local/bin/gcc-8
+  alias g++=/usr/local/bin/g++-8
+  alias cc=/usr/local/bin/gcc-8
+  alias c++=/usr/local/bin/c++-8
+  alias ld=/usr/local/bin/gcc-8
 
   if type "wget" > /dev/null ; then
     echo "wget found"
@@ -390,7 +397,7 @@ if [ "${DO_CONFIGURE}" = "no" -a "${DO_BUILD}" = "no" -a "${DO_CLEAN}" = "no" ];
 fi
 
 if [ -z "$@" ]; then
-    # If no project is specified compile all
+    # If no project is specified print usage and exit
     usage
     exit
 else
@@ -1699,7 +1706,9 @@ configure_trilinos()
   UMFPACK_ENABLED=ON
   BLAS_LIBRARIES="${TRUNK}/lapack/lib/libblas.a -lgfortran"
   LAPACK_LIBRARIES="${TRUNK}/lapack/lib/liblapack.a -lgfortran"
+  TRILINOS_CXX_FLAGS=""
   if [ ${PLATFORM} = "Windows" ]; then
+    TRILINOS_CXX_FLAGS="/EHsc"
     UMFPACK_ENABLED=OFF
     BLAS_LIBRARIES="${TRUNK}/clapack/build/lib/blas.lib ${TRUNK}/clapack/build/lib/libf2c.lib"
     LAPACK_LIBRARIES="${TRUNK}/clapack/build/lib/lapack.lib ${TRUNK}/clapack/build/lib/libf2c.lib"
@@ -1731,7 +1740,7 @@ configure_trilinos()
     -DTPL_ENABLE_MPI:BOOL=OFF \
     -DDART_TESTING_TIMEOUT:STRING=600 \
     -DCMAKE_INSTALL_PREFIX:PATH=. \
-    -DCMAKE_CXX_FLAGS:STRING="-DNDEBUG ${DAE_COMPILER_FLAGS}" \
+    -DCMAKE_CXX_FLAGS:STRING="-DNDEBUG ${DAE_COMPILER_FLAGS} ${TRILINOS_CXX_FLAGS}" \
     -DCMAKE_C_FLAGS:STRING="-DNDEBUG ${DAE_COMPILER_FLAGS}" \
     -DCMAKE_Fortran_FLAGS:STRING="-DNDEBUG ${DAE_COMPILER_FLAGS}" \
     $EXTRA_ARGS \

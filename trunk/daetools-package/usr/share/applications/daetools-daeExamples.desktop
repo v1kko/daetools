@@ -1,10 +1,9 @@
 [Desktop Entry]
 Name=DAE Tools Examples
-GenericName=DAE Tools Examples
-Comment=DAE Tools Examples
+Comment=Start DAE Tools Examples GUI with tutorials
 Categories=GNOME;Development;
 Exec=python -m daetools.examples.run_examples
 Icon=daetools-48x48
+StartupNotify=true
 Terminal=false
 Type=Application
-StartupNotify=true

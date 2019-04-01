@@ -170,7 +170,7 @@ K2_t <b><span style='color:#0000ff;'>=</span></b> daeVariableType(<span style='c
         dVrCd_dt <b><span style='color:#0000ff;'>=</span></b> dt(<span style='color:#3605fb;'>self</span>.VR() <b><span style='color:#0000ff;'>*</span></b> <span style='color:#3605fb;'>self</span>.Cd())
         dVrT_dt  <b><span style='color:#0000ff;'>=</span></b> dt(<span style='color:#3605fb;'>self</span>.VR() <b><span style='color:#0000ff;'>*</span></b> <span style='color:#3605fb;'>self</span>.T())
         dTk_dt   <b><span style='color:#0000ff;'>=</span></b> dt(<span style='color:#3605fb;'>self</span>.Tk())
-
+        
         <span style='color:#017a31;'># Intermediates</span>
         r1 <b><span style='color:#0000ff;'>=</span></b> k1 <b><span style='color:#0000ff;'>*</span></b> VR <b><span style='color:#0000ff;'>*</span></b> Ca
         r2 <b><span style='color:#0000ff;'>=</span></b> k2 <b><span style='color:#0000ff;'>*</span></b> VR <b><span style='color:#0000ff;'>*</span></b> Cb
@@ -299,6 +299,30 @@ K2_t <b><span style='color:#0000ff;'>=</span></b> daeVariableType(<span style='c
         <span style='color:#3605fb;'>self</span>.m.Cd.SetInitialCondition(<span style='color:#cc047c;'>0.91520</span> <b><span style='color:#0000ff;'>*</span></b> mol<b><span style='color:#0000ff;'>/</span></b>l)
         <span style='color:#3605fb;'>self</span>.m.T.SetInitialCondition((<span style='color:#cc047c;'>273.15</span> <b><span style='color:#0000ff;'>+</span></b> <span style='color:#cc047c;'>79.591</span>) <b><span style='color:#0000ff;'>*</span></b> K)
         <span style='color:#3605fb;'>self</span>.m.Tk.SetInitialCondition((<span style='color:#cc047c;'>273.15</span> <b><span style='color:#0000ff;'>+</span></b> <span style='color:#cc047c;'>77.69</span>) <b><span style='color:#0000ff;'>*</span></b> K)
+ 
+        <span style='color:#017a31;'># Variable types can be:</span>
+        <span style='color:#017a31;'>#  cnAlgebraic                          = algebraic state variables</span>
+        <span style='color:#017a31;'>#  cnDifferential                       = differential state variables</span>
+        <span style='color:#017a31;'>#  cnAssigned                           = assigned variables (degrees of freedom)</span>
+        <span style='color:#017a31;'># Distributed variables can also be of a mixed type - i.e. some points can be differential, </span>
+        <span style='color:#017a31;'># while the others can be algebraic or assigned:</span>
+        <span style='color:#017a31;'>#  cnSomePointsAssigned                 = algebraic + some assigned</span>
+        <span style='color:#017a31;'>#  cnSomePointsDifferential             = algebraic + some differential</span>
+        <span style='color:#017a31;'>#  cnMixedAlgebraicAssignedDifferential = algebraic + assigned + differential</span>
+        varTypes <b><span style='color:#0000ff;'>=</span></b> {cnAlgebraic : [], cnDifferential : [], cnAssigned : []}
+        <b>for</b> var <b>in</b> <span style='color:#3605fb;'>self</span>.m.Variables:
+            varTypes[var.Type].append(var.Name)
+        
+        <b>for</b> varType, varNames <b>in</b> varTypes.items():
+            <b>if</b> varType <b><span style='color:#0000ff;'>==</span></b> cnAlgebraic:
+                <span style='color:#2a00d6;'>print</span>(<span style='color:#cc0000;'>'Algebraic: </span><span style='color:#cc0000;'>%s</span><span style='color:#cc0000;'>'</span> <b><span style='color:#0000ff;'>%</span></b> varNames)
+            <b>elif</b> varType <b><span style='color:#0000ff;'>==</span></b> cnDifferential:
+                <span style='color:#2a00d6;'>print</span>(<span style='color:#cc0000;'>'Differential: </span><span style='color:#cc0000;'>%s</span><span style='color:#cc0000;'>'</span> <b><span style='color:#0000ff;'>%</span></b> varNames)
+            <b>elif</b> varType <b><span style='color:#0000ff;'>==</span></b> cnAssigned:
+                <span style='color:#2a00d6;'>print</span>(<span style='color:#cc0000;'>'Assigned: </span><span style='color:#cc0000;'>%s</span><span style='color:#cc0000;'>'</span> <b><span style='color:#0000ff;'>%</span></b> varNames)
+            <b>else</b>:
+                <span style='color:#2a00d6;'>print</span>(<span style='color:#cc0000;'>'Mixed type: </span><span style='color:#cc0000;'>%s</span><span style='color:#cc0000;'>'</span> <b><span style='color:#0000ff;'>%</span></b> varNames)
+
 
 <b>def</b> run(<b><span style='color:#0000ff;'>**</span></b>kwargs):
     simulation <b><span style='color:#0000ff;'>=</span></b> simTutorial()

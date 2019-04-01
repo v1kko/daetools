@@ -14,8 +14,7 @@ SUBDIRS = Config \
     pyUnits \
     simulation_loader \
     fmi \
-    fmi_ws \
-    pyOpenCS
+    fmi_ws
 
 HEADERS += config.h \
            dae_develop.h \

@@ -780,6 +780,7 @@ unix::INTEL_OPENCL_INCLUDE           = $${INTEL_OPENCL_DIR}/include
 win32-msvc2015::INTEL_OPENCL_INCLUDE =
 
 unix::INTEL_OPENCL_LIBS              = -L$${INTEL_OPENCL_DIR} -lOpenCL
+macx-g++::INTEL_OPENCL_LIBS          = -framework OpenCL
 win32-msvc2015::INTEL_OPENCL_LIBS    =
 
 #####################################################################################
@@ -809,11 +810,8 @@ OPEN_CS_DIR = ../OpenCS
 OPEN_CS_INCLUDE = $${OPEN_CS_DIR}/build/include
 OPEN_CS_LIB_DIR = $${OPEN_CS_DIR}/build/lib
 
-unix::OPEN_CS_LIBS                 = -L$${OPEN_CS_LIB_DIR} -lOpenCS_Evaluators
-unix::OPEN_CS_MODELS_LIB           = -L$${OPEN_CS_LIB_DIR} -lOpenCS_Models -lOpenCS_Evaluators
-
-win32-msvc2015::OPEN_CS_LIBS       = -L$${OPEN_CS_LIB_DIR} OpenCS_Evaluators.lib
-win32-msvc2015::OPEN_CS_MODELS_LIB = -L$${OPEN_CS_LIB_DIR} OpenCS_Models.lib
+unix::OPEN_CS_LIBS           = -L$${OPEN_CS_LIB_DIR} -lOpenCS_Evaluators
+win32-msvc2015::OPEN_CS_LIBS = -L$${OPEN_CS_LIB_DIR} OpenCS_Evaluators.lib
 
 #####################################################################################
 #                                  DAE Tools

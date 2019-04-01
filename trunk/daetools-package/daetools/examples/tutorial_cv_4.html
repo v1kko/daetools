@@ -159,31 +159,31 @@ no_t <b><span style='color:#0000ff;'>=</span></b> daeVariableType(<span style='c
         Sv       <b><span style='color:#0000ff;'>=</span></b> <b>lambda</b> x,y: dvm_dt(x,y) <b><span style='color:#0000ff;'>+</span></b> (dvmum_dx(x,y) <b><span style='color:#0000ff;'>+</span></b> dvmvm_dy(x,y)) <b><span style='color:#0000ff;'>-</span></b> ni <b><span style='color:#0000ff;'>*</span></b> (d2vm_dx2(x,y) <b><span style='color:#0000ff;'>+</span></b> d2vm_dy2(x,y))
 
         <span style='color:#017a31;'># Numerical solution</span>
-        eq <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.CreateEquation(<span style='color:#cc0000;'>&quot;u&quot;</span>, <span style='color:#cc0000;'>&quot;Numerical solution&quot;</span>)
+        eq <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.CreateEquation(<span style='color:#cc0000;'>&quot;u&quot;</span>, <span style='color:#cc0000;'>&quot;u velocity component&quot;</span>)
         x <b><span style='color:#0000ff;'>=</span></b> eq.DistributeOnDomain(<span style='color:#3605fb;'>self</span>.x, eOpenOpen)
         y <b><span style='color:#0000ff;'>=</span></b> eq.DistributeOnDomain(<span style='color:#3605fb;'>self</span>.y, eOpenOpen)
         eq.Residual <b><span style='color:#0000ff;'>=</span></b> du_dt(x,y) <b><span style='color:#0000ff;'>+</span></b> (duu_dx(x,y) <b><span style='color:#0000ff;'>+</span></b> duv_dy(x,y)) <b><span style='color:#0000ff;'>-</span></b> ni <b><span style='color:#0000ff;'>*</span></b> (d2u_dx2(x,y) <b><span style='color:#0000ff;'>+</span></b> d2u_dy2(x,y)) <b><span style='color:#0000ff;'>-</span></b> Su(x,y)
         eq.CheckUnitsConsistency <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>False</span>
 
-        eq <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.CreateEquation(<span style='color:#cc0000;'>&quot;u(,0)&quot;</span>, <span style='color:#cc0000;'>&quot;Numerical solution&quot;</span>)
+        eq <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.CreateEquation(<span style='color:#cc0000;'>&quot;u(,0)&quot;</span>, <span style='color:#cc0000;'>&quot;BCs u component&quot;</span>)
         x <b><span style='color:#0000ff;'>=</span></b> eq.DistributeOnDomain(<span style='color:#3605fb;'>self</span>.x, eOpenOpen)
         y <b><span style='color:#0000ff;'>=</span></b> eq.DistributeOnDomain(<span style='color:#3605fb;'>self</span>.y, eLowerBound)
         eq.Residual <b><span style='color:#0000ff;'>=</span></b> u(x,y) <b><span style='color:#0000ff;'>-</span></b> um(x,y)
         eq.CheckUnitsConsistency <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>False</span>
 
-        eq <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.CreateEquation(<span style='color:#cc0000;'>&quot;u(,1)&quot;</span>, <span style='color:#cc0000;'>&quot;Numerical solution&quot;</span>)
+        eq <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.CreateEquation(<span style='color:#cc0000;'>&quot;u(,1)&quot;</span>, <span style='color:#cc0000;'>&quot;BCs u component&quot;</span>)
         x <b><span style='color:#0000ff;'>=</span></b> eq.DistributeOnDomain(<span style='color:#3605fb;'>self</span>.x, eOpenOpen)
         y <b><span style='color:#0000ff;'>=</span></b> eq.DistributeOnDomain(<span style='color:#3605fb;'>self</span>.y, eUpperBound)
         eq.Residual <b><span style='color:#0000ff;'>=</span></b> u(x,y) <b><span style='color:#0000ff;'>-</span></b> um(x,y)
         eq.CheckUnitsConsistency <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>False</span>
 
-        eq <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.CreateEquation(<span style='color:#cc0000;'>&quot;u(0,)&quot;</span>, <span style='color:#cc0000;'>&quot;Numerical solution&quot;</span>)
+        eq <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.CreateEquation(<span style='color:#cc0000;'>&quot;u(0,)&quot;</span>, <span style='color:#cc0000;'>&quot;BCs u component&quot;</span>)
         x <b><span style='color:#0000ff;'>=</span></b> eq.DistributeOnDomain(<span style='color:#3605fb;'>self</span>.x, eLowerBound)
         y <b><span style='color:#0000ff;'>=</span></b> eq.DistributeOnDomain(<span style='color:#3605fb;'>self</span>.y, eClosedClosed)
         eq.Residual <b><span style='color:#0000ff;'>=</span></b> u(x,y) <b><span style='color:#0000ff;'>-</span></b> um(x,y)
         eq.CheckUnitsConsistency <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>False</span>
 
-        eq <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.CreateEquation(<span style='color:#cc0000;'>&quot;u(1,)&quot;</span>, <span style='color:#cc0000;'>&quot;Numerical solution&quot;</span>)
+        eq <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.CreateEquation(<span style='color:#cc0000;'>&quot;u(1,)&quot;</span>, <span style='color:#cc0000;'>&quot;BCs u component&quot;</span>)
         x <b><span style='color:#0000ff;'>=</span></b> eq.DistributeOnDomain(<span style='color:#3605fb;'>self</span>.x, eUpperBound)
         y <b><span style='color:#0000ff;'>=</span></b> eq.DistributeOnDomain(<span style='color:#3605fb;'>self</span>.y, eClosedClosed)
         eq.Residual <b><span style='color:#0000ff;'>=</span></b> u(x,y) <b><span style='color:#0000ff;'>-</span></b> um(x,y)
@@ -191,44 +191,44 @@ no_t <b><span style='color:#0000ff;'>=</span></b> daeVariableType(<span style='c
 
 
         <span style='color:#017a31;'># v component</span>
-        eq <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.CreateEquation(<span style='color:#cc0000;'>&quot;v&quot;</span>, <span style='color:#cc0000;'>&quot;Numerical solution&quot;</span>)
+        eq <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.CreateEquation(<span style='color:#cc0000;'>&quot;v&quot;</span>, <span style='color:#cc0000;'>&quot;v velocity component&quot;</span>)
         x <b><span style='color:#0000ff;'>=</span></b> eq.DistributeOnDomain(<span style='color:#3605fb;'>self</span>.x, eOpenOpen)
         y <b><span style='color:#0000ff;'>=</span></b> eq.DistributeOnDomain(<span style='color:#3605fb;'>self</span>.y, eOpenOpen)
         eq.Residual <b><span style='color:#0000ff;'>=</span></b> dv_dt(x,y) <b><span style='color:#0000ff;'>+</span></b> (dvu_dx(x,y) <b><span style='color:#0000ff;'>+</span></b> dvv_dy(x,y)) <b><span style='color:#0000ff;'>-</span></b> ni <b><span style='color:#0000ff;'>*</span></b> (d2v_dx2(x,y) <b><span style='color:#0000ff;'>+</span></b> d2v_dy2(x,y)) <b><span style='color:#0000ff;'>-</span></b> Sv(x,y)
         eq.CheckUnitsConsistency <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>False</span>
 
-        eq <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.CreateEquation(<span style='color:#cc0000;'>&quot;v(,0)&quot;</span>, <span style='color:#cc0000;'>&quot;Numerical solution&quot;</span>)
+        eq <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.CreateEquation(<span style='color:#cc0000;'>&quot;v(,0)&quot;</span>, <span style='color:#cc0000;'>&quot;BCs v component&quot;</span>)
         x <b><span style='color:#0000ff;'>=</span></b> eq.DistributeOnDomain(<span style='color:#3605fb;'>self</span>.x, eOpenOpen)
         y <b><span style='color:#0000ff;'>=</span></b> eq.DistributeOnDomain(<span style='color:#3605fb;'>self</span>.y, eLowerBound)
         eq.Residual <b><span style='color:#0000ff;'>=</span></b> v(x,y) <b><span style='color:#0000ff;'>-</span></b> vm(x,y)
         eq.CheckUnitsConsistency <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>False</span>
 
-        eq <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.CreateEquation(<span style='color:#cc0000;'>&quot;v(,1)&quot;</span>, <span style='color:#cc0000;'>&quot;Numerical solution&quot;</span>)
+        eq <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.CreateEquation(<span style='color:#cc0000;'>&quot;v(,1)&quot;</span>, <span style='color:#cc0000;'>&quot;BCs v component&quot;</span>)
         x <b><span style='color:#0000ff;'>=</span></b> eq.DistributeOnDomain(<span style='color:#3605fb;'>self</span>.x, eOpenOpen)
         y <b><span style='color:#0000ff;'>=</span></b> eq.DistributeOnDomain(<span style='color:#3605fb;'>self</span>.y, eUpperBound)
         eq.Residual <b><span style='color:#0000ff;'>=</span></b> v(x,y) <b><span style='color:#0000ff;'>-</span></b> vm(x,y)
         eq.CheckUnitsConsistency <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>False</span>
 
-        eq <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.CreateEquation(<span style='color:#cc0000;'>&quot;v(0,)&quot;</span>, <span style='color:#cc0000;'>&quot;Numerical solution&quot;</span>)
+        eq <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.CreateEquation(<span style='color:#cc0000;'>&quot;v(0,)&quot;</span>, <span style='color:#cc0000;'>&quot;BCs v component&quot;</span>)
         x <b><span style='color:#0000ff;'>=</span></b> eq.DistributeOnDomain(<span style='color:#3605fb;'>self</span>.x, eLowerBound)
         y <b><span style='color:#0000ff;'>=</span></b> eq.DistributeOnDomain(<span style='color:#3605fb;'>self</span>.y, eClosedClosed)
         eq.Residual <b><span style='color:#0000ff;'>=</span></b> v(x,y) <b><span style='color:#0000ff;'>-</span></b> vm(x,y)
         eq.CheckUnitsConsistency <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>False</span>
 
-        eq <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.CreateEquation(<span style='color:#cc0000;'>&quot;v(1,)&quot;</span>, <span style='color:#cc0000;'>&quot;Numerical solution&quot;</span>)
+        eq <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.CreateEquation(<span style='color:#cc0000;'>&quot;v(1,)&quot;</span>, <span style='color:#cc0000;'>&quot;BCs v component&quot;</span>)
         x <b><span style='color:#0000ff;'>=</span></b> eq.DistributeOnDomain(<span style='color:#3605fb;'>self</span>.x, eUpperBound)
         y <b><span style='color:#0000ff;'>=</span></b> eq.DistributeOnDomain(<span style='color:#3605fb;'>self</span>.y, eClosedClosed)
         eq.Residual <b><span style='color:#0000ff;'>=</span></b> v(x,y) <b><span style='color:#0000ff;'>-</span></b> vm(x,y)
         eq.CheckUnitsConsistency <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>False</span>
 
         <span style='color:#017a31;'># Manufactured solution</span>
-        eq <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.CreateEquation(<span style='color:#cc0000;'>&quot;um&quot;</span>, <span style='color:#cc0000;'>&quot;Manufactured solution&quot;</span>)
+        eq <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.CreateEquation(<span style='color:#cc0000;'>&quot;um&quot;</span>, <span style='color:#cc0000;'>&quot;u component manufactured solution&quot;</span>)
         x <b><span style='color:#0000ff;'>=</span></b> eq.DistributeOnDomain(<span style='color:#3605fb;'>self</span>.x, eClosedClosed)
         y <b><span style='color:#0000ff;'>=</span></b> eq.DistributeOnDomain(<span style='color:#3605fb;'>self</span>.y, eClosedClosed)
         eq.Residual <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.um(x,y) <b><span style='color:#0000ff;'>-</span></b> um(x,y)
         eq.CheckUnitsConsistency <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>False</span>
 
-        eq <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.CreateEquation(<span style='color:#cc0000;'>&quot;vm&quot;</span>, <span style='color:#cc0000;'>&quot;Manufactured solution&quot;</span>)
+        eq <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.CreateEquation(<span style='color:#cc0000;'>&quot;vm&quot;</span>, <span style='color:#cc0000;'>&quot;v component manufactured solution&quot;</span>)
         x <b><span style='color:#0000ff;'>=</span></b> eq.DistributeOnDomain(<span style='color:#3605fb;'>self</span>.x, eClosedClosed)
         y <b><span style='color:#0000ff;'>=</span></b> eq.DistributeOnDomain(<span style='color:#3605fb;'>self</span>.y, eClosedClosed)
         eq.Residual <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.vm(x,y) <b><span style='color:#0000ff;'>-</span></b> vm(x,y)
@@ -295,6 +295,7 @@ no_t <b><span style='color:#0000ff;'>=</span></b> daeVariableType(<span style='c
 
     daeActivity.simulate(simulation, reportingInterval <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>2.0</span>, 
                                      timeHorizon       <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>90.0</span>,
+                                     log               <b><span style='color:#0000ff;'>=</span></b> log,
                                      lasolver          <b><span style='color:#0000ff;'>=</span></b> lasolver,
                                      datareporter      <b><span style='color:#0000ff;'>=</span></b> datareporter,
                                      <b><span style='color:#0000ff;'>**</span></b>kwargs)    
@@ -357,7 +358,7 @@ no_t <b><span style='color:#0000ff;'>=</span></b> daeVariableType(<span style='c
     
     <span style='color:#2a00d6;'>print</span>(<span style='color:#cc0000;'>'Eu2 ='</span>, Eu2)
     <span style='color:#2a00d6;'>print</span>(<span style='color:#cc0000;'>'Ev2 ='</span>, Ev2)
-    <span style='color:#2a00d6;'>print</span>(<span style='color:#cc0000;'>'pu '</span>, pu)
+    <span style='color:#2a00d6;'>print</span>(<span style='color:#cc0000;'>'pu ='</span>, pu)
     <span style='color:#2a00d6;'>print</span>(<span style='color:#cc0000;'>'pv ='</span>, pv)
     
     fontsize <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>14</span>

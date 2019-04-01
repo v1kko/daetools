@@ -38,14 +38,6 @@ class daeCodeGenerator_OpenCS(daeCodeGenerator):
                                  balancingConstraints  = [], 
                                  unaryOperationsFlops  = {}, 
                                  binaryOperationsFlops = {}):
-        """ Computational complexity of unary/binary mathematical operations.
-        If operation does not exist in the dictionary 1 is assumed.
-        - Unary functions:
-            eSign, eSqrt, eExp, eLog, eLn, eAbs, eCeil, eFloor, eErf
-            eSin, eCos, eTan, eArcSin, eArcCos, eArcTan, eSinh, eCosh, eTanh, eArcSinh, eArcCosh, eArcTanh.
-        - Binary functions:
-            ePlus eMinus eMulti eDivide ePower eMin eMax eArcTan2
-        """ 
         # Check input arguments.
         if not simulation:
             raise RuntimeError('Invalid simulation object')

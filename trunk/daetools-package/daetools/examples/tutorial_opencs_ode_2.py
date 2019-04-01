@@ -37,11 +37,9 @@ The boundary points are eliminated leaving an ODE system of size Nx*Ny.
 The original results are in tutorial_opencs_ode_2.csv file.
 """
 
-import os, sys, json, itertools
-from time import localtime, strftime
-from daetools.pyDAE import *
-from pyOpenCS import csModelBuilder_t, csNumber_t, csSimulate
-from tutorial_opencs_aux import compareResults
+import os, sys, json, itertools, numpy
+from daetools.solvers.opencs import csModelBuilder_t, csNumber_t, csSimulate
+from daetools.examples.tutorial_opencs_aux import compareResults
 
 class AdvectionDiffusion_2D:
     def __init__(self, Nx, Ny, u_bc):
@@ -189,8 +187,16 @@ def run(**kwargs):
     compareResults(inputFilesDirectory, ['u(0,0)', 'u(9,4)'])
 
 if __name__ == "__main__":
-    Nx   = 10
-    Ny   = 5
+    if len(sys.argv) == 1:
+        Nx = 10
+        Ny = 5
+    elif len(sys.argv) == 3:
+        Nx = int(sys.argv[1])
+        Ny = int(sys.argv[2])
+    else:
+        print('Usage: python tutorial_opencs_ode_2.py Nx Ny')
+        sys.exit()
+        
     u_bc = 0.0
     inputFilesDirectory = 'tutorial_opencs_ode_2'
     run(Nx = Nx, Ny = Ny, u_bc = u_bc, inputFilesDirectory = inputFilesDirectory)

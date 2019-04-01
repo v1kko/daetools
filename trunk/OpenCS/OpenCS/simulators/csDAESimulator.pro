@@ -116,6 +116,7 @@ HEADERS +=  ../models/cs_dae_model.h \
             ../cs_model.h \
             ../cs_evaluator.h \
             ../cs_model.h \
+            ../opencs.h \
             ../models/cs_nodes.h \
             ../models/cs_number.h \
             ../models/cs_partitioners.h \

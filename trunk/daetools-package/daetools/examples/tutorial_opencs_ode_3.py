@@ -39,11 +39,11 @@ The PDE system is discretised using the central differences on a uniform 10 x 10
 The original results are in tutorial_opencs_ode_3.csv file.
 """
 
-import os, sys, json, itertools
-from daetools.pyDAE import *
-import pyOpenCS
-from pyOpenCS import csModelBuilder_t, csNumber_t, createGraphPartitioner_2D_Npde, csSimulate
-from tutorial_opencs_aux import compareResults
+import os, sys, json, itertools, numpy
+from daetools.solvers.opencs import pyOpenCS
+from daetools.solvers.opencs import csModelBuilder_t, csNumber_t, csSimulate
+from daetools.solvers.opencs import csGraphPartitioner_t, createGraphPartitioner_2D_Npde
+from daetools.examples.tutorial_opencs_aux import compareResults
 
 V   =  1.00E-03
 Kh  =  4.00E-06
@@ -367,7 +367,15 @@ def run(**kwargs):
     compareResults(inputFilesDirectory, ['C1(0,0)'])
     
 if __name__ == "__main__":
-    Nx = 80
-    Ny = 80
+    if len(sys.argv) == 1:
+        Nx = 80
+        Ny = 80
+    elif len(sys.argv) == 3:
+        Nx = int(sys.argv[1])
+        Ny = int(sys.argv[2])
+    else:
+        print('Usage: python tutorial_opencs_ode_3.py Nx Ny')
+        sys.exit()
+        
     inputFilesDirectory = 'tutorial_opencs_ode_3'
     run(Nx = Nx, Ny = Ny, inputFilesDirectory = inputFilesDirectory)

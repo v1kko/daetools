@@ -2,7 +2,7 @@
                  DAE Tools Project: www.daetools.com
                  Copyright (C) Dragan Nikolic, 2015
 ************************************************************************************
-DAE Tools is free software; you can redistribute it and/or modify it under the 
+DAE Tools is free software; you can redistribute it and/or modify it under the
 terms of the GNU General Public License version 3 as published by the Free Software
 Foundation. DAE Tools is distributed in the hope that it will be useful, but WITHOUT
 ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
@@ -12,249 +12,249 @@ DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 ***********************************************************************************/
 
 /****************************************************************************************
-	daeSetModelAndCanonicalName
+    daeSetModelAndCanonicalName
 *****************************************************************************************/
 template<class TYPE>
 class daeSetModelAndCanonicalNameDelegate : public io::daeOnOpenObjectArrayDelegate_t<TYPE>
 {
 public:
-	daeSetModelAndCanonicalNameDelegate(daeObject* pParent, daeModel* pModel)
-	{
-		m_pParent = pParent;
-		m_pModel  = pModel;
-	}
+    daeSetModelAndCanonicalNameDelegate(daeObject* pParent, daeModel* pModel)
+    {
+        m_pParent = pParent;
+        m_pModel  = pModel;
+    }
 
-	void BeforeOpenObject(TYPE* pObject)
-	{
-		if(!pObject)
-			daeDeclareAndThrowException(exInvalidPointer);
+    void BeforeOpenObject(TYPE* pObject)
+    {
+        if(!pObject)
+            daeDeclareAndThrowException(exInvalidPointer);
 
-		pObject->SetModel(m_pModel);
-	}
+        pObject->SetModel(m_pModel);
+    }
 
-	void AfterOpenObject(TYPE* pObject)
-	{
-		if(!pObject)
-			daeDeclareAndThrowException(exInvalidPointer);
-		if(!m_pParent)
-			daeDeclareAndThrowException(exInvalidPointer);
+    void AfterOpenObject(TYPE* pObject)
+    {
+        if(!pObject)
+            daeDeclareAndThrowException(exInvalidPointer);
+        if(!m_pParent)
+            daeDeclareAndThrowException(exInvalidPointer);
 
-		//string strName = m_pParent->GetCanonicalName() + "." + pObject->GetName();
-		//pObject->SetCanonicalName(strName);
-	}
-	
-	void AfterAllObjectsOpened(void)
-	{
-	}
+        //string strName = m_pParent->GetCanonicalName() + "." + pObject->GetName();
+        //pObject->SetCanonicalName(strName);
+    }
+
+    void AfterAllObjectsOpened(void)
+    {
+    }
 
 public:
-	daeObject* m_pParent;
-	daeModel*  m_pModel;
+    daeObject* m_pParent;
+    daeModel*  m_pModel;
 };
 
 /****************************************************************************************
-	daeFindDomainByID
+    daeFindDomainByID
 *****************************************************************************************/
-class daeFindDomainByID : public io::daeOnOpenRefDelegate_t<daeDomain> 
+class daeFindDomainByID : public io::daeOnOpenRefDelegate_t<daeDomain>
 {
 public:
-	daeFindDomainByID(daeModel* pModel)
-	{
-		m_pModel = pModel;
-	}
+    daeFindDomainByID(daeModel* pModel)
+    {
+        m_pModel = pModel;
+    }
 
-	daeDomain* FindObjectByID(size_t nID)
-	{
-		if(!m_pModel)
-			daeDeclareAndThrowException(exInvalidPointer);
+    daeDomain* FindObjectByID(size_t nID)
+    {
+        if(!m_pModel)
+            daeDeclareAndThrowException(exInvalidPointer);
 
-		return m_pModel->FindDomain(nID);
-	}
+        return m_pModel->FindDomain((unsigned long)nID);
+    }
 
 public:
-	daeModel* m_pModel;
+    daeModel* m_pModel;
 };
 
 /****************************************************************************************
-	daeFindPortByID
+    daeFindPortByID
 *****************************************************************************************/
 class daeFindPortByID : public io::daeOnOpenRefDelegate_t<daePort>
 {
 public:
-	daeFindPortByID(daeModel* pModel)
-	{
-		m_pModel = pModel;
-	}
+    daeFindPortByID(daeModel* pModel)
+    {
+        m_pModel = pModel;
+    }
 
-	daePort* FindObjectByID(size_t nID)
-	{
-		if(!m_pModel)
-			daeDeclareAndThrowException(exInvalidPointer);
+    daePort* FindObjectByID(size_t nID)
+    {
+        if(!m_pModel)
+            daeDeclareAndThrowException(exInvalidPointer);
 
-		return m_pModel->FindPort(nID);
-	}
+        return m_pModel->FindPort((unsigned long)nID);
+    }
 
 public:
-	daeModel* m_pModel;
+    daeModel* m_pModel;
 };
 
 /****************************************************************************************
-	daeFindEventPortByID
+    daeFindEventPortByID
 *****************************************************************************************/
 class daeFindEventPortByID : public io::daeOnOpenRefDelegate_t<daeEventPort>
 {
 public:
-	daeFindEventPortByID(daeModel* pModel)
-	{
-		m_pModel = pModel;
-	}
+    daeFindEventPortByID(daeModel* pModel)
+    {
+        m_pModel = pModel;
+    }
 
-	daeEventPort* FindObjectByID(size_t nID)
-	{
-		if(!m_pModel)
-			daeDeclareAndThrowException(exInvalidPointer);
+    daeEventPort* FindObjectByID(size_t nID)
+    {
+        if(!m_pModel)
+            daeDeclareAndThrowException(exInvalidPointer);
 
-		return m_pModel->FindEventPort(nID);
-	}
+        return m_pModel->FindEventPort((unsigned long)nID);
+    }
 
 public:
-	daeModel* m_pModel;
+    daeModel* m_pModel;
 };
 
 /****************************************************************************************
-	daeFindVariableByID
+    daeFindVariableByID
 *****************************************************************************************/
 class daeFindVariableByID : public io::daeOnOpenRefDelegate_t<daeVariable>
 {
 public:
-	daeFindVariableByID(daeModel* pModel)
-	{
-		m_pModel = pModel;
-	}
+    daeFindVariableByID(daeModel* pModel)
+    {
+        m_pModel = pModel;
+    }
 
-	daeVariable* FindObjectByID(size_t nID)
-	{
-		if(!m_pModel)
-			daeDeclareAndThrowException(exInvalidPointer);
+    daeVariable* FindObjectByID(size_t nID)
+    {
+        if(!m_pModel)
+            daeDeclareAndThrowException(exInvalidPointer);
 
-		return m_pModel->FindVariable(nID);
-	}
+        return m_pModel->FindVariable((unsigned long)nID);
+    }
 
 public:
-	daeModel* m_pModel;
+    daeModel* m_pModel;
 };
 
 /****************************************************************************************
-	daeFindBlockByID
+    daeFindBlockByID
 *****************************************************************************************/
-class daeFindBlockByID : public io::daeOnOpenRefDelegate_t<daeBlock> 
+class daeFindBlockByID : public io::daeOnOpenRefDelegate_t<daeBlock>
 {
 public:
-	daeFindBlockByID(daeModel* pModel)
-	{
-		m_pModel = pModel;
-	}
+    daeFindBlockByID(daeModel* pModel)
+    {
+        m_pModel = pModel;
+    }
 
-	daeBlock* FindObjectByID(size_t /*nID*/)
-	{
-		if(!m_pModel)
-			daeDeclareAndThrowException(exInvalidPointer);
+    daeBlock* FindObjectByID(size_t /*nID*/)
+    {
+        if(!m_pModel)
+            daeDeclareAndThrowException(exInvalidPointer);
 
-		return NULL;
-	}
+        return NULL;
+    }
 
 public:
-	daeModel* m_pModel;
+    daeModel* m_pModel;
 };
 
 /****************************************************************************************
-	daeFindModelByID
+    daeFindModelByID
 *****************************************************************************************/
-class daeFindModelByID : public io::daeOnOpenRefDelegate_t<daeModel> 
+class daeFindModelByID : public io::daeOnOpenRefDelegate_t<daeModel>
 {
 public:
-	daeFindModelByID(daeModel* pModel)
-	{
-		m_pModel = pModel;
-	}
+    daeFindModelByID(daeModel* pModel)
+    {
+        m_pModel = pModel;
+    }
 
-	daeModel* FindObjectByID(size_t /*nID*/)
-	{
-		if(!m_pModel)
-			daeDeclareAndThrowException(exInvalidPointer);
+    daeModel* FindObjectByID(size_t /*nID*/)
+    {
+        if(!m_pModel)
+            daeDeclareAndThrowException(exInvalidPointer);
 
-		return NULL;
-	}
+        return NULL;
+    }
 
 public:
-	daeModel* m_pModel;
+    daeModel* m_pModel;
 };
 
 /****************************************************************************************
-	daeFindEquationByID
+    daeFindEquationByID
 *****************************************************************************************/
-class daeFindEquationByID : public io::daeOnOpenRefDelegate_t<daeEquation> 
+class daeFindEquationByID : public io::daeOnOpenRefDelegate_t<daeEquation>
 {
 public:
-	daeFindEquationByID(daeModel* pModel)
-	{
-		m_pModel = pModel;
-	}
+    daeFindEquationByID(daeModel* pModel)
+    {
+        m_pModel = pModel;
+    }
 
-	daeEquation* FindObjectByID(size_t /*nID*/)
-	{
-		if(!m_pModel)
-			daeDeclareAndThrowException(exInvalidPointer);
+    daeEquation* FindObjectByID(size_t /*nID*/)
+    {
+        if(!m_pModel)
+            daeDeclareAndThrowException(exInvalidPointer);
 
-		return NULL;
-	}
+        return NULL;
+    }
 
 public:
-	daeModel* m_pModel;
+    daeModel* m_pModel;
 };
 
 /****************************************************************************************
-	daeFindStateByID
+    daeFindStateByID
 *****************************************************************************************/
-class daeFindStateByID : public io::daeOnOpenRefDelegate_t<daeState> 
+class daeFindStateByID : public io::daeOnOpenRefDelegate_t<daeState>
 {
 public:
-	daeFindStateByID(daeModel* pModel)
-	{
-		m_pModel = pModel;
-	}
+    daeFindStateByID(daeModel* pModel)
+    {
+        m_pModel = pModel;
+    }
 
-	daeState* FindObjectByID(size_t /*nID*/)
-	{
-		if(!m_pModel)
-			daeDeclareAndThrowException(exInvalidPointer);
+    daeState* FindObjectByID(size_t /*nID*/)
+    {
+        if(!m_pModel)
+            daeDeclareAndThrowException(exInvalidPointer);
 
-		return NULL;
-	}
+        return NULL;
+    }
 
 public:
-	daeModel* m_pModel;
+    daeModel* m_pModel;
 };
 
 /****************************************************************************************
-	daeFindSTNByID
+    daeFindSTNByID
 *****************************************************************************************/
-class daeFindSTNByID : public io::daeOnOpenRefDelegate_t<daeSTN> 
+class daeFindSTNByID : public io::daeOnOpenRefDelegate_t<daeSTN>
 {
 public:
-	daeFindSTNByID(daeModel* pModel)
-	{
-		m_pModel = pModel;
-	}
+    daeFindSTNByID(daeModel* pModel)
+    {
+        m_pModel = pModel;
+    }
 
-	daeSTN* FindObjectByID(size_t /*nID*/)
-	{
-		if(!m_pModel)
-			daeDeclareAndThrowException(exInvalidPointer);
+    daeSTN* FindObjectByID(size_t /*nID*/)
+    {
+        if(!m_pModel)
+            daeDeclareAndThrowException(exInvalidPointer);
 
-		return NULL;
-	}
+        return NULL;
+    }
 
 public:
-	daeModel* m_pModel;
+    daeModel* m_pModel;
 };

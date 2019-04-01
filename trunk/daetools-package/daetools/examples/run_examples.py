@@ -156,6 +156,7 @@ class RunExamples(QtWidgets.QDialog):
         self.ui.toolButtonCode.clicked.connect(self.slotShowCode)
         self.ui.toolButtonModelReport.clicked.connect(self.slotShowModelReport)
         self.ui.toolButtonRuntimeModelReport.clicked.connect(self.slotShowRuntimeModelReport)
+        self.ui.toolButtonAbout.clicked.connect(self.slotAbout)
         self.ui.comboBoxExample.currentIndexChanged.connect(self.slotTutorialChanged)
 
         for m_name, data  in tutorial_modules:
@@ -225,6 +226,12 @@ class RunExamples(QtWidgets.QDialog):
         simName = str(self.ui.comboBoxExample.currentText())
         url     = join(_examples_dir, simName + "-rt.xml")
         firefox.open_new_tab(url)
+
+    #@QtCore.pyqtSlot()
+    def slotAbout(self):
+        from daetools.dae_plotter.about import daeAboutDialog
+        dlg = daeAboutDialog()
+        dlg.exec_()
 
     #@QtCore.pyqtSlot()
     def slotRunTutorial(self):

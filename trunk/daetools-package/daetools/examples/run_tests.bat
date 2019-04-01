@@ -76,9 +76,9 @@ python opt_tutorial5.py console
 python opt_tutorial6.py console
 python opt_tutorial7.py console
 
-python tutorial_che_opt_1.py console
-python tutorial_che_opt_2.py console
-python tutorial_che_opt_3.py console
+REM python tutorial_che_opt_1.py console
+REM python tutorial_che_opt_2.py console
+REM python tutorial_che_opt_3.py console
 python tutorial_che_opt_4.py console
 python tutorial_che_opt_5.py console
 python tutorial_che_opt_6.py console

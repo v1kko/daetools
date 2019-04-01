@@ -21,3 +21,4 @@ class daeAboutDialog(QtWidgets.QDialog):
         self.ui = Ui_About()
         self.ui.setupUi(self)
         self.setWindowTitle("DAE Tools Project v" + daeVersion(True))
+        self.ui.tabWidget.setCurrentIndex(0)

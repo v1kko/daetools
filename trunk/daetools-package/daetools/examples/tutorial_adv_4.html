@@ -226,6 +226,10 @@ temperature_t.AbsoluteTolerance <b><span style='color:#0000ff;'>=</span></b> <sp
     <b>return</b> lasolver
 
 <b>def</b> run(<b><span style='color:#0000ff;'>**</span></b>kwargs):
+    <span style='color:#017a31;'># Prevent nodes being deleted after they are needed no longer.</span>
+    cfg <b><span style='color:#0000ff;'>=</span></b> daeGetConfig()
+    cfg.SetInteger(<span style='color:#cc0000;'>'daetools.core.nodes.deleteNodesThreshold'</span>, <span style='color:#cc047c;'>1000000</span>)
+
     simulation <b><span style='color:#0000ff;'>=</span></b> simTutorial()
     lasolver <b><span style='color:#0000ff;'>=</span></b> setupLASolver()
     <b>return</b> daeActivity.simulate(simulation, reportingInterval        <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>10</span>, 

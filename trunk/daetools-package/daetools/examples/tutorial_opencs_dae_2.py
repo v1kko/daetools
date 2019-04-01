@@ -27,12 +27,8 @@ The original results are in tutorial_opencs_dae_2.csv file.
 """
 
 import os, sys, json, itertools
-from time import localtime, strftime
-from daetools.pyDAE import *
-import pyOpenCS
-from pyOpenCS import csModelBuilder_t, csNumber_t, csSimulate
-from pyOpenCS import csGraphPartitioner_t
-from tutorial_opencs_aux import compareResults
+from daetools.solvers.opencs import csModelBuilder_t, csNumber_t, csSimulate, csGraphPartitioner_t
+from daetools.examples.tutorial_opencs_aux import compareResults
 
 rho = 8960 # density, kg/m^3
 cp  =  385 # specific heat capacity, J/(kg.K)
@@ -207,7 +203,15 @@ def run(**kwargs):
     compareResults(inputFilesDirectory, ['T(0,0)'])
 
 if __name__ == "__main__":
-    Nx = 20
-    Ny = 20
+    if len(sys.argv) == 1:
+        Nx = 20
+        Ny = 20
+    elif len(sys.argv) == 3:
+        Nx = int(sys.argv[1])
+        Ny = int(sys.argv[2])
+    else:
+        print('Usage: python tutorial_opencs_dae_2.py Nx Ny')
+        sys.exit()
+        
     inputFilesDirectory = 'tutorial_opencs_dae_2'
     run(Nx = Nx, Ny = Ny, inputFilesDirectory = inputFilesDirectory)

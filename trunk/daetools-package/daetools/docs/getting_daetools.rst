@@ -17,13 +17,11 @@ System requirements
 
 Supported platforms:
     
-* GNU/Linux (i686 and x86_64)
+* GNU/Linux (x86 and x86_64)
 * Windows (x86 and x64)
 * MacOS (x86_64)
 
 The software works on both python 2 and 3. The binaries are provided for 2.7, 3.5, 3.6 and 3.7.
-In addition, DAE Tools require OpenCL installed (all graphics cards and CPUs support OpenCL since 2011, 
-typically as a part of display drivers).
 
 Mandatory packages:
 
@@ -44,11 +42,13 @@ Optional packages:
 * PyGraphviz: `<https://pygraphviz.github.io>`_ (Python interface to the Graphviz graph layout and visualization package)
 * SALib: `<https://github.com/SALib/SALib>`_ (Sensitivity Analysis in Python; included in ``daetools/ext_libs/SALib``)
 * PyEVTK: `<https://pypi.python.org/pypi/PyEVTK>`_ (data export to binary VTK files; included in ``daetools/ext_libs/pyevtk``)
-* OpenCL drivers/runtime libraries
+* OpenCL runtime libraries
   (Intel: `<https://software.intel.com/en-us/articles/opencl-drivers>`_;
   AMD: `<https://support.amd.com/en-us/kb-articles/Pages/OpenCL2-Driver.aspx>`_;
   NVidia: `<https://developer.nvidia.com/opencl>`_)
-* mpi4py: `<https://github.com/mpi4py/mpi4py>`_ (for parallel OpenCS simulations)
+* MPI (for parallel OpenCS simulations): 
+  OpenMPI for GNU/Linux and macOS (`<https://www.open-mpi.org>`_) and 
+  Microsoft MPI for Windows (`<https://www.microsoft.com/en-us/download/details.aspx?id=57467>`_)
 
 Optional packages (proprietary):
 
@@ -360,10 +360,9 @@ development.
     cd daetools/trunk
     sh install_dependencies_linux.sh
 
-Then, compile all the third party libraries by executing ``compile_libraries.sh`` shell script located in the
+Then, compile all third-party libraries by executing ``compile_libraries.sh`` shell script located in the
 ``trunk`` directory. The script will download all necessary source archives from the **DAE Tools** SourceForge web-site,
-unpack them, apply changes and compile them. If all dependencies are installed there should not be problems compiling
-the libraries.
+unpack them, apply changes and compile them.
 
 .. code-block:: bash
 
@@ -394,6 +393,9 @@ It is also possible to compile individual libraries using one of the following o
       trilinos         Trilinos Amesos and AztecOO solvers
       deal.ii          deal.II finite elements library
       coolprop         CoolProp thermophysical property library
+      opencs           OpenCS library
+                       Requires cblas_clapack, idas (with MPI support enabled), metis, hdf5 and trilinos libraries 
+                       compiled using the compile_opencs.sh script from the OpenCS directory.
 
 After compilation, the shared libraries will be located in ``trunk/daetools-package/daetools/solibs`` directory.
 
@@ -439,20 +441,42 @@ It is also possible to compile individual libraries using one of the following o
         deal.ii                 Build deal.II FEM library and its python extension module (pyDealII).
         cape_open_thermo        Build Cape Open thermo-physical property package library (cdaeCapeOpenThermoPackage.dll, Windows only).
         opencl_evaluator        Build Evaluator_OpenCL library and its python extension module (pyEvaluator_OpenCL).
-        daetools_mpi_simulator  Build the generic DAE Tools parallel simulator that use MPI interface.
-                                Requires boost_static and idas_mpi to be compiled.
+        pyopencs                Build pyOpenCS python extension module (pyOpenCS).
 
 All python extensions are located in the platform-dependent locations in ``trunk/daetools-package/daetools/pyDAE`` and
 ``trunk/daetools-package/daetools/solvers`` folders.
 
 **DAE Tools** can be now installed using the information from the sections above.
 
+OpenCS support can be enabled in the following way 
+(MPI and OpenCL header files and libraries are required).
+First, compile all third-party libraries required for OpenCS by executing ``compile_opencs.sh`` shell script located in the
+``OpenCS`` directory. The script will download all necessary source archives, unpack and compile them.
+
+.. code-block:: bash
+
+    cd trunk/OpenCS
+    sh compile_opencs.sh libs
+
+Next, compile OpenCS:
+
+.. code-block:: bash
+
+    sh compile_libraries.sh opencs
+
+and finally the OpenCL evaluator and OpenCS python wrappers:
+
+.. code-block:: bash
+
+    sh compile.sh opencl_evaluator pyopencs
+
+    
 .. _from_qtcreator_ide:
 
 From QtCreator IDE
 ++++++++++++++++++
 DAE Tools can also be compiled from within QtCreator IDE. First install dependencies and compile third party libraries
-(as explained in the compilation :ref:`from the command line <from_the_command_line>`) and then do the following:
+(as explained in the section :ref:`from_the_command_line`) and then do the following:
     
 * Do not do the shadow build. Uncheck it (for all projects) and build everything in the release folder
 * Choose the right specification file for your platform (usually it is done automatically by the IDE, but double-check it):
@@ -526,6 +550,12 @@ in the ``trunk`` directory.
 .. code-block:: bash
 
     sh compile.sh all
+
+The OpenCS support can be compiled in the same way as in GNU/Linux and macOS.
+First, install Microsoft MPI (https://www.microsoft.com/en-us/download/details.aspx?id=57467) and 
+OpenCL (if not installed with graphics drivers) and follow the procedure described in the section
+:ref:`from_the_command_line`.
+
 
 ..  Cross-compilation (deprecated)
     ++++++++++++++++++++++++++++++

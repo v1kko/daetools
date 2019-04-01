@@ -1,0 +1,47 @@
+GNU/Linux
+---------
+1. Compile everything for one minimal python environment (to avoid libraries confusion):
+source activate compile-py27
+sh compile_libraries.sh opencs
+sh compile.sh all opencl_evaluator intel_pardiso
+
+2. For each python environment (3.5. 3.6. 3.7):
+source activate compile-pyXY
+sh compile.sh config simulation_loader fmi fmi_ws opencl_evaluator pyopencs pydae solvers intel_pardiso
+
+macOS
+-----
+1. Compile everything for one minimal python environment (to avoid libraries confusion):
+source activate compile-py27
+sh compile_libraries.sh opencs
+export PATH=/Users/ciroki/Qt/5.5/clang_64/bin:$PATH
+compile.sh all open_evaluator
+
+2. For each python environment (3.5. 3.6. 3.7):
+source activate compile-pyXY
+export PATH=/Users/ciroki/Qt/5.5/clang_64/bin:$PATH
+sh compile.sh config simulation_loader fmi fmi_ws opencl_evaluator pyopencs pydae solvers
+
+Windows
+-------
+Requirements:
+  User PATH for x64 (64 bit):
+    C:\Users\ciroki\Miniconda2
+    C:\Users\ciroki\Miniconda2\Scripts
+    C:\mingw-w64\win64\mingw64\bin
+    C:\Qt\5.9.1\msvc2015_64\bin
+
+  User PATH for x86 (32 bit):
+    C:\Users\ciroki\Miniconda2-win32
+    C:\Users\ciroki\Miniconda2-win32\Scripts
+    C:\mingw-w64\win32\mingw32\bin
+    C:\Qt\5.9.1\msvc2015\bin
+
+1. Compile everything for one minimal python environment:
+sh compile_libraries.sh opencs
+sh compile.sh all opencl_evaluator intel_pardiso
+
+2. For each python environment (3.5. 3.6. 3.7):
+activate pyXY
+set PATH=C:\Qt\5.9.1\msvc2015_64\bin;%PATH%
+sh compile.sh config simulation_loader fmi fmi_ws opencl_evaluator pydae pyopencs solvers intel_pardiso

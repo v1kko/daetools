@@ -49,7 +49,7 @@ Type of activities that can be performed on models developed in **DAE Tools**:
   * `Modelica <http://www.modelica.org>`_
   * `gPROMS <http://www.psenterprise.com/gproms.html>`_
   * `Standard ISO C (c99) <http://www.open-std.org/jtc1/sc22/wg14/www/standards>`_
-  * C++/MPI
+  * `OpenCS <http://www.daetools.com/opencs>`_ (including message-passing systems)
 
 * Simulation in other simulators using standard co-simulation interfaces
 
@@ -150,9 +150,10 @@ How to cite
 
 If you use DAE Tools in your work then please cite the following article:
   Nikolić DD. (2016) *DAE Tools: equation-based object-oriented modelling, simulation and optimisation software*.
-  **PeerJ Computer Science** 2:e54 `<https://doi.org/10.7717/peerj-cs.54>`_.
+  **PeerJ Computer Science** 2:e54. `<https://doi.org/10.7717/peerj-cs.54>`_
+  (`bib file <http://www.daetools.com/docs/presentations/daetools-peerj-cs-54.bib>`_)
 
-BibTeX: `daetools-peerj.bib <http://www.daetools.com/docs/presentations/daetools-peerj-cs-54.bib>`_.
+More details can be found on `Publications <../publications.html>`_ page.
 
 History
 =======

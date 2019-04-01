@@ -2488,29 +2488,36 @@ The sample configuration file is given below:
     {
         "core":
         {
-            "checkForInfiniteNumbers"         : false,
-            "eventTolerance"                  : 1E-7,
-            "logIndent"                       : "    ",
-            "pythonIndent"                    : "    ",
-            "checkUnitsConsistency"           : true,
-            "resetLAMatrixAfterDiscontinuity" : true,
-            "printInfo"                       : false,
-            "deepCopyClonedNodes"             : true,
+            "checkForInfiniteNumbers"          : false,
+            "eventTolerance"                   : 1E-7,
+            "logIndent"                        : "    ",
+            "pythonIndent"                     : "    ",
+            "checkUnitsConsistency"            : true,
+            "resetLAMatrixAfterDiscontinuity"  : true,
+            "printInfo"                        : false,
+            "nodes":
+            {
+                "useNodeMemoryPools"           : false,
+                "deleteNodesThreshold"         : 1000000
+            },
             "equations":
             {
-                "simplifyExpressions" : false,
-                "evaluationMode"            : "evaluationTree_OpenMP",
-                "evaluationTree_OpenMP"     : {"numThreads" : 0},
-                "computeStack_OpenMP"       : {"numThreads" : 0}
+                "simplifyExpressions"   : false, 
+                "evaluationMode"        : "computeStack_OpenMP",
+                "evaluationTree_OpenMP" : {"numThreads" : 0},
+                "computeStack_OpenMP"   : {"numThreads" : 0}
             }
         },
         "activity":
         {
+            "printHeader"                       : false,
+            "printStats"                        : true,
             "timeHorizon"                       : 100.0,
             "reportingInterval"                 : 1.0,
-            "printHeader"                       : true,
             "reportTimeDerivatives"             : false,
             "reportSensitivities"               : false,
+            "stopAtModelDiscontinuity"          : true,
+            "reportDataAroundDiscontinuities"   : true,
             "objFunctionAbsoluteTolerance"      : 1E-8,
             "constraintsAbsoluteTolerance"      : 1E-8,
             "measuredVariableAbsoluteTolerance" : 1E-8
@@ -2534,6 +2541,8 @@ The sample configuration file is given below:
         "IDAS":
         {
             "relativeTolerance"             : 1E-5,
+            "integrationMode"               : "Normal",
+            "reportDataInOneStepMode"       : false,
             "nextTimeAfterReinitialization" : 1E-7,
             "printInfo"                     : false,
             "numberOfSTNRebuildsDuringInitialization": 1000,
@@ -2926,8 +2935,10 @@ There is a large number of available data reporters in **DAE Tools**:
   * CSV file (:py:class:`~daetools.pyDAE.data_reporters.daeCSVFileDataReporter`)
   * XML file (:py:class:`~daetools.pyDAE.data_reporters.daeXMLFileDataReporter`)
   * JSON format (:py:class:`~daetools.pyDAE.data_reporters.daeJSONFileDataReporter`)
-
-* Simple data reporters
+  * Python pickle (:py:class:`~daetools.pyDAE.data_reporters.daePickleDataReporter`) 
+    which can be opened in DAE Plotter or unpickled directly
+ 
+* Simple data reporters 
 
   * Data reporter that only stores results internally but does nothing with the data
     (:py:class:`~pyDataReporting.daeNoOpDataReporter`)
@@ -3192,6 +3203,10 @@ schedule can be specified using the following functions from the :py:class:`~pyA
   Its behaviour can be controlled using the `stopCriterion` and `reportDataAroundDiscontinuities` arguments in the same way as in the 
   :py:meth:`~pyActivity.daeSimulation.Integrate` function.
 
+- :py:meth:`~pyActivity.daeSimulation.IntegrateForOneStep` integrates the system for a single time step (DAE solver dependent)
+  Its behaviour can be controlled using the `stopCriterion` and `reportDataAroundDiscontinuities` arguments in the same way as in the 
+  :py:meth:`~pyActivity.daeSimulation.Integrate` function.
+
 - :py:meth:`~pyActivity.daeSimulation.ReportData` reports the data at the current time in simulation.
 
 - The functions :py:meth:`~pyActivity.daeSimulation.ReSetInitialCondition` and :py:meth:`~pyActivity.daeSimulation.ReAssignValue`
@@ -3239,33 +3254,52 @@ A very simple schedule can be found in the :ref:`tutorial7`:
 .. code-block:: python
 
     # The schedule:
-    #  1. Run the simulation for 100s using the function daeSimulation.IntegrateForTimeInterval()
-    #     and report the data using the function daeSimulation.ReportData().
-    #  2. Re-assign the value of Qin to 2000W. After re-assigning DOFs or re-setting initial conditions
+    #  1. Re-assign the value of Qin to 500W. After re-assigning DOFs or re-setting initial conditions
     #     the function daeSimulation.Reinitialize() has to be called to reinitialise the DAE system.
+    #     Run the simulation for 100s using the function daeSimulation.IntegrateForTimeInterval()
+    #     and report the data using the function daeSimulation.ReportData().
+    #  2. Re-assign the value of Qin to 750W and re-initialise the system.
     #     Use the function daeSimulation.IntegrateUntilTime() to run until the time reaches 200s
     #     and report the data.
-    #  3. Re-assign the variable Qin to a new value 1500W, re-initialise the temperature again to 300K
-    #     re-initialise the system, run the simulation until the TimeHorizon is reached using the function
+    #  3. Re-assign the variable Qin to 1000W and re-initialise the system. 
+    #     Use the function daeSimulation.IntegrateForOneStep() to integrate in OneStep mode for 100s
+    #     and report the data at every time step.
+    #  4. Re-assign the variable Qin to 1500W, re-set T to 300K and re-initialise the system.
+    #     Run the simulation until the TimeHorizon is reached using the function
     #     daeSimulation.Integrate() and report the data.
     def Run(self):
-        # 1. Integrate for 100s
+        # 1. Set Qin=500W and integrate for 100s
+        self.m.Qin.ReAssignValue(500 * W)
+        self.Reinitialize()
+        self.ReportData(self.CurrentTime)
         self.Log.Message("OP: Integrating for 100 seconds ... ", 0)
         time = self.IntegrateForTimeInterval(100, eDoNotStopAtDiscontinuity)
         self.ReportData(self.CurrentTime)
-        self.Log.SetProgress(int(100.0 * self.CurrentTime/self.TimeHorizon));   
+        self.Log.SetProgress(int(100.0 * self.CurrentTime/self.TimeHorizon))
 
-        # 2. Set Qin=2000W and integrate until t=200s
+        # 2. Set Qin=750W and integrate until time = 200s
         self.m.Qin.ReAssignValue(750 * W)
         self.Reinitialize()
         self.ReportData(self.CurrentTime)
         self.Log.Message("OP: Integrating until time = 200 seconds ... ", 0)
         time = self.IntegrateUntilTime(200, eDoNotStopAtDiscontinuity)
         self.ReportData(self.CurrentTime)
-        self.Log.SetProgress(int(100.0 * self.CurrentTime/self.TimeHorizon));   
+        self.Log.SetProgress(int(100.0 * self.CurrentTime/self.TimeHorizon))
 
-        # 3. Set Qin=1.5E6 and integrate until the specified TimeHorizon
+        # 3. Set Qin=1000W and integrate in OneStep mode for 100 seconds.
         self.m.Qin.ReAssignValue(1000 * W)
+        self.Reinitialize()
+        t_end = time + 100.0
+        self.Log.Message("OP: Integrating in one step mode:", 0)
+        while time < t_end:
+            msg = "    Integrated from %.10f to " % time
+            time = self.IntegrateForOneStep(eDoNotStopAtDiscontinuity)
+            self.ReportData(self.CurrentTime)
+            msg += "%.10f ... " % time
+            self.Log.Message(msg, 0)
+
+        # 4. Set Qin=1500W and integrate until the specified TimeHorizon is reached
+        self.m.Qin.ReAssignValue(1500 * W)
         self.m.T.ReSetInitialCondition(300 * K)
         self.Reinitialize()
         self.ReportData(self.CurrentTime)
@@ -3273,7 +3307,7 @@ A very simple schedule can be found in the :ref:`tutorial7`:
         self.Log.Message("OP: Integrating from " + str(time) + " to the time horizon (" + str(self.TimeHorizon) + ") ... ", 0)
         time = self.Integrate(eDoNotStopAtDiscontinuity)
         self.ReportData(self.CurrentTime)
-        self.Log.SetProgress(int(100.0 * self.CurrentTime/self.TimeHorizon));   
+        self.Log.SetProgress(int(100.0 * self.CurrentTime/self.TimeHorizon))
         self.Log.Message("OP: Finished", 0)
 
 In addition, the :ref:`tutorial_adv_1` illustrates interactive schedules where the `pyQt` graphical user interface (GUI) 
@@ -3335,7 +3369,8 @@ Screenshots of the running `Simulation Explorer`:
 
 Parallel computation
 ====================
-Parallel computation is supported using the shared-memory parallel programming model at the moment. 
+Within the DAE Tools only the shared-memory parallel programming model is supported.
+Simulation on message-passing systems is available through the OpenCS code generator (section :ref:`code_generation`).
 The following parts of the code support parallelisation.
 
 Evaluation of equations
@@ -3675,9 +3710,11 @@ in the `daetools/dae_simulator` folder:
     Plots produced by `daetools_fmi_ws` web service client using Plotly.js library
     
 
+.. _code_generation:
+
 Generating code for other modelling languages
 =============================================
-**DAE Tools** can generate code for several modelling or programming languages (Modelica, gPROMS, c99, c++ with MPI).
+**DAE Tools** can generate code for several modelling or programming languages (Modelica, gPROMS, c99, OpenCS).
 The code generation should be performed after the simulation is initialised (ideally after a call to 
 :py:meth:`~pyActivity.daeSimulation.SolveInitial` so that the consistent initial conditions are determined and available).
 
@@ -3693,9 +3730,9 @@ The code generation should be performed after the simulation is initialised (ide
     cg = daeCodeGenerator_gPROMS()
     cg.generateSimulation(simulation, tmp_folder)
 
-    # Generate c++ MPI code for 4 nodes:
-    from daetools.code_generators.cxx_mpi import daeCodeGenerator_cxx_mpi
-    cg = daeCodeGenerator_cxx_mpi()
+    # Generate OpenCS models to be simulated using MPI on 4 nodes:
+    from daetools.code_generators.opencs import daeCodeGenerator_OpenCS
+    cg = daeCodeGenerator_OpenCS()
     cg.generateSimulation(simulation, tmp_folder, 4)
 
 The :py:meth:`~daetools.code_generators.daeCodeGenerator.generateSimulation` function requires an initialised simulation object

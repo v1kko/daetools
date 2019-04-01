@@ -14,6 +14,7 @@ the OpenCS software; if not, see <http://www.gnu.org/licenses/>.
 #include "daesimulator.h"
 #include <fstream>
 #include <iomanip>
+#include <boost/format.hpp>
 #include <experimental/filesystem>
 namespace filesystem = std::experimental::filesystem;
 using namespace cs;

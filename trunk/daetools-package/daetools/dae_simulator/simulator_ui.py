@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'Simulator.ui'
 #
-# Created by: PyQt5 UI code generator 5.7
+# Created by: PyQt5 UI code generator 5.6
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -68,6 +68,9 @@ class Ui_SimulatorDialog(object):
         self.verticalLayout_2.addLayout(self.formLayout)
         self.horizontalLayout = QtWidgets.QHBoxLayout()
         self.horizontalLayout.setObjectName("horizontalLayout")
+        self.AboutButton = QtWidgets.QPushButton(SimulatorDialog)
+        self.AboutButton.setObjectName("AboutButton")
+        self.horizontalLayout.addWidget(self.AboutButton)
         spacerItem = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
         self.horizontalLayout.addItem(spacerItem)
         self.ExportButton = QtWidgets.QPushButton(SimulatorDialog)
@@ -159,6 +162,7 @@ class Ui_SimulatorDialog(object):
         self.LASolverLabel.setText(_translate("SimulatorDialog", "LA Solver"))
         self.TimeHorizonLabel.setText(_translate("SimulatorDialog", "Time Horizon, s"))
         self.ReportingIntervalLabel.setText(_translate("SimulatorDialog", "Reporting Interval, s"))
+        self.AboutButton.setText(_translate("SimulatorDialog", "About"))
         self.ExportButton.setText(_translate("SimulatorDialog", "Export Matrix..."))
         self.MatrixButton.setText(_translate("SimulatorDialog", "Matrix Preview..."))
         self.RunButton.setText(_translate("SimulatorDialog", "Start..."))

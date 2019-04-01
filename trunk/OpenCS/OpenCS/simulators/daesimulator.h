@@ -19,8 +19,6 @@ the OpenCS software; if not, see <http://www.gnu.org/licenses/>.
 #include <map>
 #include <memory>
 #include <string.h>
-#include <boost/format.hpp>
-#include <boost/property_tree/ptree.hpp>
 #include "../opencs.h"
 #include "../models/cs_dae_model.h"
 
@@ -76,8 +74,8 @@ public:
     std::string GetString (const std::string& strPropertyPath, const std::string& defValue);
 
 public:
-    std::string                 configFile;
-    boost::property_tree::ptree pt;
+    std::string  configFile;
+    void*        ptree;
 };
 
 class OPENCS_SIMULATORS_API daeModel_t : public cs::csDifferentialEquationModel

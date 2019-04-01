@@ -65,13 +65,12 @@ solvers_libs_dir  = os.path.realpath('daetools/solvers')
 solvers_libs_dir = os.path.join(solvers_libs_dir, '%s' % platform_solib_dir)
 
 def _is_in_venv():
-    return (getattr(sys, 'base_prefix', sys.prefix) != sys.prefix or
-            hasattr(sys, 'real_prefix'))
+    return (hasattr(sys, 'real_prefix') or 
+           (hasattr(sys, 'base_prefix') and sys.base_prefix != sys.prefix) or
+            sys.prefix.find('envs') != -1)
 
-if _is_in_venv():
-    inside_venv = True
-else:
-    inside_venv = False
+inside_venv = _is_in_venv()
+print('inside_venv = %s' % ('True' if inside_venv else 'False'))
 
 boost_python     = 'boost_python-daetools-py{0}{1}'.format(python_major, python_minor)
 boost_python3    = 'boost_python3-daetools-py{0}{1}'.format(python_major, python_minor)
@@ -88,7 +87,7 @@ deal_II          = 'deal_II-daetools'
 sim_loader       = 'cdaeSimulationLoader-py{0}{1}'.format(python_major, python_minor)
 fmu_so           = 'cdaeFMU_CS-py{0}{1}'.format(python_major, python_minor)
 mingw_dlls   = ['libgcc', 'libstdc++', 'libquadmath', 'libwinpthread', 'libgfortran', 'libssp']
-mac_gcc_libs = ['libgcc', 'libstdc++', 'libquadmath', 'libgfortran', 'libgomp']
+mac_gcc_libs = [] #['libgcc', 'libstdc++', 'libquadmath', 'libgfortran', 'libgomp']
 shared_libs = []
 
 print('shared_libs_dir = ', shared_libs_dir)
@@ -114,18 +113,18 @@ if os.path.isdir(shared_libs_dir):
 print('shared_libs = ', shared_libs)
 
 if platform.system() == 'Linux':
+    # Create only start menu links only for the current user
     if not inside_venv:
         data_files = [
-                        ('/usr/share/applications', [
-                                                    'usr/share/applications/daetools-daeExamples.desktop',
-                                                    'usr/share/applications/daetools-daePlotter.desktop'
-                                                    ] ),
-                        ('/usr/share/man/man1',     ['usr/share/man/man1/daetools.1.gz']),
-                        ('/usr/share/menu',         [
-                                                    'usr/share/menu/daetools-plotter',
-                                                    'usr/share/menu/daetools-examples'
-                                                    ] ),
-                        ('/usr/share/pixmaps',      ['usr/share/pixmaps/daetools-48x48.png'])
+                        (os.path.join(os.path.expanduser('~'), '.local/share/applications'), [
+                                                                                                'usr/share/applications/daetools-daeExamples.desktop',
+                                                                                                'usr/share/applications/daetools-daePlotter.desktop'
+                                                                                             ] ),
+                        #(os.path.join(os.path.expanduser('~'), '.local/share/menu'),         [
+                        #                                                                      'usr/share/menu/daetools-plotter',
+                        #                                                                      'usr/share/menu/daetools-examples'
+                        #                                                                     ] ),
+                        (os.path.join(os.path.expanduser('~'), '.icons'),      ['usr/share/pixmaps/daetools-48x48.png'])
                     ]
     else:
         data_files = []
@@ -207,7 +206,8 @@ elif platform.system() == 'Darwin':
     blibs = [f for f in shared_libs if 'libboost' in f]
     for blib in blibs:
         ext_modules.append( os.path.join(shared_libs_dir, blib) )
-
+    
+    ''' Not required now when using homebrew gcc
     # stdc++ lib links gcc_s.1 lib so update its LC_LOAD_DYLIB sections
     stdcxxlibs = [f for f in shared_libs if 'stdc++' in f]
     for stdcxxlib in stdcxxlibs:
@@ -227,7 +227,8 @@ elif platform.system() == 'Darwin':
     stdcxxlibs = [f for f in shared_libs if 'gomp' in f]
     for stdcxxlib in stdcxxlibs:
         ext_modules.append( os.path.join(shared_libs_dir, stdcxxlib) )
-
+    '''
+    
     print('ext_modules = %s' % ext_modules)
     #sys.exit()
 
@@ -267,12 +268,7 @@ elif platform.system() == 'Darwin':
             ret = os.system(cmd)
             #sys.exit()
 
-    if not inside_venv:
-        data_files = [
-                        #('/usr/share/pixmaps',      ['usr/share/pixmaps/daetools-48x48.png']),
-                     ]
-    else:
-        data_files = []
+    data_files = []
 
     solibs = ['{0}/*.so'.format(platform_solib_dir)]
     fmi_solibs = 'fmi/{0}/*.dylib'.format(platform_solib_dir)
@@ -378,8 +374,7 @@ setup(name = 'daetools',
                  'scripts/daeexamples3',
                  'scripts/daeplotter3.bat',
                  'scripts/daeexamples3.bat'],
-      #requires = ['numpy', 'scipy', 'matplotlib', 'PyQt5', 'lxml', 'pandas', 'h5py', 'openpyxl'],
-      install_requires = ['numpy', 'scipy', 'matplotlib', 'lxml', 'pandas', 'h5py', 'openpyxl'],
+      install_requires = ['numpy', 'scipy', 'matplotlib', 'lxml', 'pandas', 'openpyxl'],
       python_requires = '>=2.7,<3.8,!=3.0.*,!=3.1.*,!=3.2.*,!=3.3.*,!=3.4.*',
       platforms = ['GNU/Linux', 'macOS', 'Windows'],
       classifiers = [ 'Development Status :: 5 - Production/Stable',

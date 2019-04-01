@@ -215,6 +215,10 @@ def setupLASolver():
     return lasolver
 
 def run(**kwargs):
+    # Prevent nodes being deleted after they are needed no longer.
+    cfg = daeGetConfig()
+    cfg.SetInteger('daetools.core.nodes.deleteNodesThreshold', 1000000)
+
     simulation = simTutorial()
     lasolver = setupLASolver()
     return daeActivity.simulate(simulation, reportingInterval        = 10, 

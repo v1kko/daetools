@@ -40,12 +40,9 @@ The system is stiff.
 The original results are in tutorial_opencs_dae_1.csv file.
 """
 
-import os, sys, json
-from time import localtime, strftime
-from daetools.pyDAE import *
-import pyOpenCS
-from pyOpenCS import csModelBuilder_t, csNumber_t, csSimulate
-from tutorial_opencs_aux import compareResults
+import os, sys, json, numpy
+from daetools.solvers.opencs import csModelBuilder_t, csNumber_t, csSimulate
+from daetools.examples.tutorial_opencs_aux import compareResults
 
 # ChemicalKinetics class provides information for the OpenCS model:
 #  - Variable names

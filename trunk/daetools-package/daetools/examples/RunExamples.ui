@@ -138,7 +138,7 @@
             </sizepolicy>
            </property>
            <property name="text">
-            <string>Show code...</string>
+            <string>Show code ...</string>
            </property>
           </widget>
          </item>
@@ -151,7 +151,7 @@
             </sizepolicy>
            </property>
            <property name="text">
-            <string>Run...</string>
+            <string>Run ...</string>
            </property>
           </widget>
          </item>
@@ -164,7 +164,7 @@
             </sizepolicy>
            </property>
            <property name="text">
-            <string>Show model report ... *</string>
+            <string>Show model report ...</string>
            </property>
           </widget>
          </item>
@@ -183,7 +183,20 @@
             </size>
            </property>
            <property name="text">
-            <string>Show runtime model report ... *</string>
+            <string>Show runtime model report ...</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QToolButton" name="toolButtonAbout">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="text">
+            <string>About DAE Tools ...</string>
            </property>
           </widget>
          </item>

@@ -58,18 +58,22 @@ C99
     :members:
     :undoc-members:
 
-C++ MPI
-=======
+C++ MPI (deprecated)
+====================
 .. py:module:: daetools.code_generators.cxx_mpi
 
 .. autoclass:: daetools.code_generators.cxx_mpi.daeCodeGenerator_cxx_mpi
     :members:
     :undoc-members:
 
-.. autoclass:: daetools.code_generators.cxx_mpi.daeCodeGenerator_cxx_mpi
+OpenCS
+======
+.. py:module:: daetools.code_generators.opencs 
+
+.. autoclass:: daetools.code_generators.opencs.daeCodeGenerator_OpenCS
     :members:
     :undoc-members:
-
+ 
 Auxiliary classes
 =================
 .. py:module:: daetools.code_generators.analyzer
