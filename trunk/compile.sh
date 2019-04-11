@@ -41,7 +41,7 @@ PROJECT:
                     On GNU/Linux and macOS equivalent to: dae superlu superlu_mt trilinos ipopt bonmin nlopt deal.ii
                     On Windows equivalent to: dae superlu trilinos ipopt bonmin nlopt deal.ii
     dae             Build all daetools c++ libraries and python extension modules (no 3rd party LA/(MI)NLP/FE solvers).
-                    Equivalent to: units data_reporting idas core activity simulation_loader fmi
+                    Equivalent to: config cool_prop units data_reporting idas core activity simulation_loader fmi
     solvers         Build all solvers and their python extension modules.
                     On GNU/Linux and macOS equivalent to: superlu superlu_mt trilinos ipopt bonmin nlopt deal.ii
                     On Windows equivalent to: superlu trilinos ipopt bonmin nlopt deal.ii
@@ -66,6 +66,7 @@ PROJECT:
         ipopt                   Build IPOPT nlp solver and its python extension module (pyIPOPT).
         nlopt                   Build NLOPT nlp solver and its python extension module (pyNLOPT).
         deal.ii                 Build deal.II FEM library and its python extension module (pyDealII).
+        cool_prop               Build CoolProp thermo package (cdaeCoolPropThermoPackage).
         cape_open_thermo        Build Cape Open thermo-physical property package library (cdaeCapeOpenThermoPackage.dll, Windows only).
         opencl_evaluator        Build Evaluator_OpenCL library and its python extension module (pyEvaluator_OpenCL).
         pyopencs                Build pyOpenCS python extension module (pyOpenCS).
@@ -135,6 +136,8 @@ compile()
     ${MAKE} ${MAKEARG} -w
   fi
 
+  ${MAKE} install
+  
   echo ""
   echo "[*] Done!"
   cd "${TRUNK}"
@@ -189,6 +192,16 @@ if [[ ${PLATFORM} == *"MSYS_"* ]]; then
     echo unknown HOST_ARCH: $HOST_ARCH
     exit 1
   fi
+fi
+
+DAE_DEV_DIR="${TRUNK}/daetools-dev/${PLATFORM}_${HOST_ARCH}/lib"
+if [ ! -e ${DAE_DEV_DIR} ]; then
+    mkdir -p ${DAE_DEV_DIR}
+fi
+
+SOLIBS_DIR="${TRUNK}/daetools-package/daetools/solibs/${PLATFORM}_${HOST_ARCH}"
+if [ ! -e ${SOLIBS_DIR} ]; then
+    mkdir -p ${SOLIBS_DIR}
 fi
 
 if [ ${PLATFORM} = "Darwin" ]; then
@@ -309,6 +322,7 @@ do
     ipopt)            ;;
     nlopt)            ;; 
     deal.ii)          ;; 
+    cool_prop)        ;;
     cape_open_thermo) ;; 
     opencl_evaluator) ;;
     pyopencs)           ;;
@@ -374,7 +388,7 @@ do
                 #  compile pyIntelPardiso   "-j1"
                 #fi
                 ;;
-        
+                
         config) compile Config "-j1"
                 ;;
 
@@ -484,6 +498,9 @@ do
 
         deal.ii) compile pyDealII  "-j1"
                  ;;
+        
+        cool_prop) compile CoolPropThermoPackage "-j1"
+                ;;
             
         cape_open_thermo) compile_cape_open_thermo
                           ;;

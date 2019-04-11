@@ -280,7 +280,7 @@ if [ "${DAE_IF_CROSS_COMPILING}" = "0" ]; then
 fi
 PYTHON_VERSION=$PYTHON_MAJOR.$PYTHON_MINOR
 
-SOLIBS_DIR="${TRUNK}/daetools-package/daetools/solibs/${PLATFORM}_${HOST_ARCH}"
+SOLIBS_DIR="${TRUNK}/daetools-package/daetools/${PLATFORM}_${HOST_ARCH}/lib"
 if [ ! -e ${SOLIBS_DIR} ]; then
     mkdir -p ${SOLIBS_DIR}
 fi

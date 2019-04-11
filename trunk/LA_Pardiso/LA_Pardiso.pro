@@ -15,16 +15,16 @@ include(../dae.pri)
 QT -= core gui
 TARGET = cdaePardiso_LASolver
 TEMPLATE = lib
-CONFIG += staticlib
+CONFIG += shared plugin
 
 INCLUDEPATH += $${BOOSTDIR} \
-               $${PYTHON_INCLUDE_DIR} \
-               $${PYTHON_SITE_PACKAGES_DIR} \
-               $${SUNDIALS_INCLUDE}
+               $${PYTHON_INCLUDE_DIR}
 
 QMAKE_LIBDIR += $${PYTHON_LIB_DIR}
 
-LIBS += $${BOOST_PYTHON_LIB} \
+LIBS += $${SOLIBS_RPATH_SL}
+LIBS += $${DAE_CONFIG_LIB} \
+        $${BOOST_LIBS} \
         $${PARDISO_LIBS}
 
 SOURCES += stdafx.cpp \
@@ -36,3 +36,19 @@ HEADERS += stdafx.h \
     pardiso_sparse_la_solver.h \
     ../mmio.h
 
+#######################################################
+#                Install files
+#######################################################
+QMAKE_POST_LINK = $${COPY_FILE} \
+                  $${DAE_DEST_DIR}/$${SHARED_LIB_PREFIX}$${TARGET}$${SHARED_LIB_POSTFIX}.$${SHARED_LIB_EXT} \
+                  $${SOLIBS_DIR}/$${SHARED_LIB_PREFIX}$${TARGET}$${SHARED_LIB_POSTFIX}.$${SHARED_LIB_EXT}
+
+DAE_PROJECT_NAME = $$basename(PWD)
+
+install_headers.path  = $${DAE_INSTALL_HEADERS_DIR}/$${DAE_PROJECT_NAME}
+install_headers.files = *.h
+
+install_libs.path  = $${DAE_INSTALL_LIBS_DIR}
+install_libs.files = $${DAE_DEST_DIR}/$${SHARED_LIB_PREFIX}$${TARGET}$${SHARED_LIB_POSTFIX}.$${SHARED_LIB_EXT}
+
+INSTALLS += install_headers install_libs

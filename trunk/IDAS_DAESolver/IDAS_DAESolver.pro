@@ -3,15 +3,19 @@ QT -= core \
     gui
 TARGET = cdaeIDAS_DAESolver
 TEMPLATE = lib
-CONFIG += staticlib
+CONFIG += shared plugin
+
 INCLUDEPATH += $${BOOSTDIR} \
-               $${SUNDIALS_INCLUDE} \
-               $${MPI_INCLUDE}
+               $${SUNDIALS_INCLUDE}
 
 QMAKE_LIBDIR += $${SUNDIALS_LIBDIR}
-LIBS +=	$${DAE_CONFIG_LIB} \
+
+LIBS += $${SOLIBS_RPATH_SL}
+LIBS +=	$${DAE_UNITS_LIB} \
+        $${DAE_CONFIG_LIB} \
         $${SUNDIALS_LIBS} \
-        $${MPI_LIBS}
+        $${BOOST_LIBS} \
+        $${BLAS_LAPACK_LIBS}
 
 SOURCES += stdafx.cpp \
     ida_solver.cpp \
@@ -26,29 +30,24 @@ HEADERS += stdafx.h \
     dae_solvers.h \
     ida_la_solver_interface.h
 
-
-#win32{
-#QMAKE_POST_LINK = copy /y  $${TARGET}.lib $${STATIC_LIBS_DIR}
-#}
-
-#unix{
-#QMAKE_POST_LINK = cp -f  lib$${TARGET}.a $${STATIC_LIBS_DIR}
-#}
-
-#INSTALL_HEADERS = $$system($${COPY_FILES} base_solvers.h            $${HEADERS_DIR}/IDAS_DAESolver)
-#INSTALL_HEADERS = $$system($${COPY_FILES} solver_class_factory.h    $${HEADERS_DIR}/IDAS_DAESolver)
-#INSTALL_HEADERS = $$system($${COPY_FILES} ida_la_solver_interface.h $${HEADERS_DIR}/IDAS_DAESolver)
-
 #######################################################
 #                Install files
 #######################################################
-idas_headers.path   = $${HEADERS_DIR}/IDAS_DAESolver
-idas_headers.files  = base_solvers.h \
-                      solver_class_factory.h \
-                      ida_la_solver_interface.h
+#QMAKE_POST_LINK = $${COPY_FILE} \
+#                  $${DAE_DEST_DIR}/$${SHARED_LIB_PREFIX}$${TARGET}$${SHARED_LIB_POSTFIX}.$${SHARED_LIB_EXT} \
+#                  $${SOLIBS_DIR}/$${SHARED_LIB_PREFIX}$${TARGET}$${SHARED_LIB_POSTFIX}.$${SHARED_LIB_EXT}
 
-idas_libs.path         = $${STATIC_LIBS_DIR}
-win32::idas_libs.files = $${DAE_DEST_DIR}/$${TARGET}.lib
-unix::idas_libs.files  = $${DAE_DEST_DIR}/lib$${TARGET}.a
+# Install headers and libs into daetools-dev
+DAE_PROJECT_NAME = $$basename(PWD)
 
-INSTALLS += idas_headers idas_libs
+install_headers.path  = $${DAE_INSTALL_HEADERS_DIR}/$${DAE_PROJECT_NAME}
+install_headers.files = *.h
+
+install_libs.path  = $${DAE_INSTALL_LIBS_DIR}
+install_libs.files = $${DAE_DEST_DIR}/$${SHARED_LIB_PREFIX}$${TARGET}$${SHARED_LIB_POSTFIX}.$${SHARED_LIB_EXT}
+
+# Install into daetools-package
+install_py_solib.path  = $${SOLIBS_DIR}
+install_py_solib.files = $${DAE_DEST_DIR}/$${SHARED_LIB_PREFIX}$${TARGET}$${SHARED_LIB_POSTFIX}.$${SHARED_LIB_EXT}
+
+INSTALLS += install_headers install_libs install_py_solib

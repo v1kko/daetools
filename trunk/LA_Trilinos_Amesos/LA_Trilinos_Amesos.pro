@@ -15,21 +15,18 @@ include(../dae.pri)
 QT -= core gui
 TARGET  = cdaeTrilinos_LASolver
 TEMPLATE = lib
-CONFIG += staticlib
+CONFIG += shared plugin
 
 unix::QMAKE_CXXFLAGS += -std=c++11
 
 INCLUDEPATH +=  $${BOOSTDIR} \
-                $${PYTHON_INCLUDE_DIR} \
-                $${PYTHON_SITE_PACKAGES_DIR} \
-                $${SUNDIALS_INCLUDE} \
                 $${TRILINOS_INCLUDE}
 
-QMAKE_LIBDIR += $${PYTHON_LIB_DIR}
-
-LIBS += $${BLAS_LIBS} \
-        $${LAPACK_LIBS} \
-        $${TRILINOS_LIBS}
+LIBS += $${SOLIBS_RPATH_SL}
+LIBS += $${DAE_CONFIG_LIB} \
+        $${TRILINOS_LIBS} \
+        $${BOOST_LIBS} \
+        $${BLAS_LAPACK_LIBS}
 
 SOURCES += stdafx.cpp \
            dllmain.cpp \
@@ -44,19 +41,16 @@ HEADERS += stdafx.h \
 #######################################################
 #                Install files
 #######################################################
-#win32{
-#QMAKE_POST_LINK = copy /y  $${TARGET}.lib $${STATIC_LIBS_DIR}
-#}
+QMAKE_POST_LINK = $${COPY_FILE} \
+                  $${DAE_DEST_DIR}/$${SHARED_LIB_PREFIX}$${TARGET}$${SHARED_LIB_POSTFIX}.$${SHARED_LIB_EXT} \
+                  $${SOLIBS_DIR}/$${SHARED_LIB_PREFIX}$${TARGET}$${SHARED_LIB_POSTFIX}.$${SHARED_LIB_EXT}
 
-#unix{
-#QMAKE_POST_LINK = cp -f lib$${TARGET}.a $${STATIC_LIBS_DIR}
-#}
+DAE_PROJECT_NAME = $$basename(PWD)
 
-trilinos_headers.path  = $${HEADERS_DIR}/LA_SuperLU
-trilinos_headers.files = base_solvers.h
+install_headers.path  = $${DAE_INSTALL_HEADERS_DIR}/$${DAE_PROJECT_NAME}
+install_headers.files = *.h
 
-trilinos_libs.path         = $${STATIC_LIBS_DIR}
-win32::trilinos_libs.files = $${DAE_DEST_DIR}/$${TARGET}.lib
-unix::trilinos_libs.files  = $${DAE_DEST_DIR}/lib$${TARGET}.a
+install_libs.path  = $${DAE_INSTALL_LIBS_DIR}
+install_libs.files = $${DAE_DEST_DIR}/$${SHARED_LIB_PREFIX}$${TARGET}$${SHARED_LIB_POSTFIX}.$${SHARED_LIB_EXT}
 
-INSTALLS += trilinos_headers trilinos_libs
+INSTALLS += install_headers install_libs

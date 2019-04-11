@@ -21,7 +21,7 @@ the OpenCS software; if not, see <http://www.gnu.org/licenses/>.
 #include <sundials/sundials_math.h>
 #include "auxiliary.h"
 #include "daesimulator.h"
-//#include "idas_la_functions.h"
+#include "cvodes_la_functions.h"
 #include <boost/format.hpp>
 #include <cvodes/cvodes_impl.h>
 #include <src/cvodes/cvodes_spils_impl.h>
@@ -102,6 +102,7 @@ odeiSolver_t::odeiSolver_t()
     integrationMode          = CV_NORMAL;
     linearMultistepMethod    = CV_BDF;
     nonlinearSolverIteration = CV_NEWTON;
+    linearSolverType         = eUnknownLinearSolver;
 }
 
 odeiSolver_t::~odeiSolver_t()
@@ -259,6 +260,8 @@ void odeiSolver_t::Initialize(csDifferentialEquationModel_t* pmodel,
     std::string lasolverLibrary = cfg.GetString("LinearSolver.Library");
     if(lasolverLibrary == "Sundials")
     {
+        linearSolverType = eSundialsSpils;
+
         // Maximum dimension of the Krylov subspace to be used (if 0 use the default value MAXL = 5)
         int kspace = cfg.GetInteger("LinearSolver.Parameters.kspace", 0);
         int preconditioningType = PREC_RIGHT;
@@ -337,26 +340,27 @@ void odeiSolver_t::Initialize(csDifferentialEquationModel_t* pmodel,
     }
     else if(lasolverLibrary == "Trilinos")
     {
-        /*
-        lasolver.reset(new TrilinosAmesosLinearSolver_t);
+        linearSolverType = eThirdPartyLinearSolver;
+
+        lasolver.reset(new daeLinearSolver_Trilinos);
         bool isODESystem = true;
         retval = lasolver->Initialize(pmodel, Neq_local, isODESystem);
         if(retval < 0)
             csThrowException( (boost::format("LA Solver initialize failed: %s") % CVodeGetReturnFlagName(retval)).str() );
 
-        IDAMem ida_mem = (IDAMem)mem;
+        CVodeMem cv_mem = (CVodeMem)mem;
 
-        ida_mem->ida_linit	      = init_la;
-        ida_mem->ida_lsetup       = setup_la;
-        ida_mem->ida_lsolve       = solve_la;
-        ida_mem->ida_lperf	      = NULL;
-        ida_mem->ida_lfree        = free_la;
-        ida_mem->ida_lmem         = lasolver.get();
-        ida_mem->ida_setupNonNull = TRUE;
-        */
+        cv_mem->cv_lmem       = lasolver.get();
+        cv_mem->cv_linit	  = init_la_ode;
+        cv_mem->cv_lsetup     = setup_la_ode;
+        cv_mem->cv_lsolve     = solve_la_ode;
+        cv_mem->cv_lfree      = free_la_ode;
+        cv_mem->cv_forceSetup = TRUE;
     }
     else
     {
+        csThrowException("Invalid LinearSolver.Library specified: " + lasolverLibrary);
+
         /*
         // Maximum dimension of the Krylov subspace to be used (if 0 use the default value MAXL = 5)
         int kspace = cfg.GetInteger("LinearSolver.Parameters.kspace", 0);
@@ -585,14 +589,14 @@ void odeiSolver_t::CollectSolverStats()
     long int nst, nni, nre, nli, nreLS, nge, npe, nps, njvtimes;
     nst = nni = nre = nli = nreLS = nge = npe = nps = njvtimes = 0;
 
-    //IDAGetNumSteps(mem, &nst);
-    //IDAGetNumResEvals(mem, &nre);
-    //IDAGetNumNonlinSolvIters(mem, &nni);
-    CVSpilsGetNumLinIters(mem, &nli);
-    CVSpilsGetNumRhsEvals(mem, &nreLS);
-    CVSpilsGetNumPrecEvals(mem, &npe);
-    CVSpilsGetNumPrecSolves(mem, &nps);
-    CVSpilsGetNumJtimesEvals(mem, &njvtimes);
+    if(linearSolverType == eSundialsSpils)
+    {
+        CVSpilsGetNumLinIters(mem, &nli);
+        CVSpilsGetNumRhsEvals(mem, &nreLS);
+        CVSpilsGetNumPrecEvals(mem, &npe);
+        CVSpilsGetNumPrecSolves(mem, &nps);
+        CVSpilsGetNumJtimesEvals(mem, &njvtimes);
+    }
     stats["NumLinIters"]      = nli;
     stats["NumEquationEvals"] = nreLS;
     stats["NumPrecEvals"]     = npe;
@@ -920,5 +924,118 @@ static int check_flag(void *flagvalue, const char *funcname, int opt)
 
     return(0);
 }
+
+
+
+int init_la_ode(CVodeMem cv_mem)
+{
+    cs_dae_simulator::odeiSolver_t* pODESolver = (cs_dae_simulator::odeiSolver_t*)cv_mem->cv_user_data;
+    cs_dae_simulator::daeLinearSolver_t* pLASolver = pODESolver->lasolver.get();
+    if(!pLASolver)
+        return CV_MEM_NULL;
+    return CV_SUCCESS;
+}
+
+int setup_la_ode(CVodeMem cv_mem,
+                 int convfail,
+                 N_Vector ypred,
+                 N_Vector fpred,
+                 booleantype *jcurPtr,
+                 N_Vector vtemp1,
+                 N_Vector vtemp2,
+                 N_Vector vtemp3)
+{
+    auxiliary::daeTimesAndCounters& tcs = auxiliary::daeTimesAndCounters::GetTimesAndCounters();
+    auxiliary::TimerCounter tc(tcs.LASetup);
+
+    cs_dae_simulator::odeiSolver_t* pODESolver = (cs_dae_simulator::odeiSolver_t*)cv_mem->cv_user_data;
+    cs_dae_simulator::daeLinearSolver_t* pLASolver = pODESolver->lasolver.get();
+    if(!pLASolver)
+        return CV_MEM_NULL;
+
+    realtype *pdValues, *pdTimeDerivatives;
+
+    realtype tcur = 0;
+    CVodeGetCurrentTime(cv_mem, &tcur);
+
+    realtype hcur = 0;
+    CVodeGetCurrentStep(cv_mem, &hcur);
+    realtype inverseTimeStep = 1.0/hcur;
+
+    realtype gamma = cv_mem->cv_gamma;
+
+    pdValues			= NV_DATA_P(ypred);
+    pdTimeDerivatives	= NV_DATA_P(fpred);
+
+    // We always re-evaluate Jacobian, thus, always set jcurPtr to TRUE.
+    *jcurPtr = TRUE;
+
+    int ret = pLASolver->Setup(tcur,
+                               inverseTimeStep,
+                               gamma,
+                               pdValues,
+                               pdTimeDerivatives);
+
+    if(ret < 0)
+        return CV_LSETUP_FAIL;
+    return CV_SUCCESS;
+}
+
+int solve_la_ode(CVodeMem cv_mem,
+                 N_Vector b,
+                 N_Vector weight,
+                 N_Vector ycur,
+                 N_Vector fcur)
+{
+    auxiliary::daeTimesAndCounters& tcs = auxiliary::daeTimesAndCounters::GetTimesAndCounters();
+    auxiliary::TimerCounter tc(tcs.LASolve);
+
+    cs_dae_simulator::odeiSolver_t* pODESolver = (cs_dae_simulator::odeiSolver_t*)cv_mem->cv_user_data;
+    cs_dae_simulator::daeLinearSolver_t* pLASolver = pODESolver->lasolver.get();
+    if(!pLASolver)
+        return CV_MEM_NULL;
+
+    realtype *pdValues, *pdTimeDerivatives, *pdWeight, *pdB;
+
+    realtype tcur = 0;
+    CVodeGetCurrentTime(cv_mem, &tcur);
+
+    realtype hcur = 0;
+    CVodeGetCurrentStep(cv_mem, &hcur);
+    realtype inverseTimeStep = 1.0/hcur;
+
+    realtype cjratio = 1.0; // applicable to DAE systems (must set it to 1)
+
+    pdWeight			= NV_DATA_P(weight);
+    pdB      			= NV_DATA_P(b);
+    pdValues			= NV_DATA_P(ycur);
+    pdTimeDerivatives	= NV_DATA_P(fcur);
+
+    int ret = pLASolver->Solve(tcur,
+                               inverseTimeStep,
+                               cjratio,
+                               pdB,
+                               pdWeight,
+                               pdValues,
+                               pdTimeDerivatives);
+    if(ret < 0)
+        return CV_LSOLVE_FAIL;
+    return CV_SUCCESS;
+}
+
+void free_la_ode(CVodeMem cv_mem)
+{
+    cs_dae_simulator::odeiSolver_t* pODESolver = (cs_dae_simulator::odeiSolver_t*)cv_mem->cv_user_data;
+    cs_dae_simulator::daeLinearSolver_t* pLASolver = pODESolver->lasolver.get();
+    if(!pLASolver)
+        return;
+
+    // It is the responsibility of the user to delete LA solver pointer!!
+    cv_mem->cv_lmem = NULL;
+
+    pLASolver->Free();
+}
+
+
 
 }

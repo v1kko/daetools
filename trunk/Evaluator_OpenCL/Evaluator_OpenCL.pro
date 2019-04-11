@@ -4,7 +4,7 @@ QT -= gui
 
 TARGET = cdaeEvaluator_OpenCL
 TEMPLATE = lib
-CONFIG += staticlib
+CONFIG += shared plugin
 
 unix::QMAKE_CXXFLAGS  += -std=c++11
 unix::QMAKE_LFLAGS    += -std=c++11

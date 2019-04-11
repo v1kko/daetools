@@ -12,10 +12,8 @@ OpenCS software; if not, see <http://www.gnu.org/licenses/>.
 ***********************************************************************************/
 #include <mpi.h>
 #include "brusselator_2d.h"
-#include <OpenCS/models/cs_model_builder.h>
-#include <OpenCS/models/cs_partitioners.h>
+#include <OpenCS/opencs.h>
 #include <OpenCS/models/partitioner_metis.h>
-#include <OpenCS/simulators/cs_simulators.h>
 using namespace cs;
 
 /* Reimplementation of IDAS idasBruss_kry_bbd_p example.

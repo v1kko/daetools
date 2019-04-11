@@ -2,9 +2,16 @@ include(../dae.pri)
 QT -= core \
     gui
 TARGET = cdaeDataReporting
-CONFIG += staticlib
 TEMPLATE = lib
+CONFIG += shared plugin
+
 INCLUDEPATH += $${BOOSTDIR}
+
+LIBS += $${SOLIBS_RPATH}
+LIBS +=	$${DAE_UNITS_LIB} \
+        $${DAE_CONFIG_LIB} \
+        $${BOOST_LIBS}
+
 SOURCES += text_file_reporter.cpp \
     stdafx.cpp \
     html_file_reporter.cpp \
@@ -23,27 +30,19 @@ HEADERS += stdafx.h \
     base_data_reporters_receivers.h \
     datareporters.h
 
-
-#win32{
-#QMAKE_POST_LINK = copy /y  $${TARGET}.lib $${STATIC_LIBS_DIR}
-#}
-
-#unix{
-#QMAKE_POST_LINK = cp -f  lib$${TARGET}.a $${STATIC_LIBS_DIR}
-#}
-
-#INSTALL_HEADERS = $$system($${COPY_FILES} datareporters.h                  $${HEADERS_DIR}/DataReporting)
-#INSTALL_HEADERS = $$system($${COPY_FILES} base_data_reporters_receivers.h  $${HEADERS_DIR}/DataReporting)
-
 #######################################################
 #                Install files
 #######################################################
-datareporting_headers.path   = $${HEADERS_DIR}/DataReporting
-datareporting_headers.files  = datareporters.h \
-                               base_data_reporters_receivers.h
+QMAKE_POST_LINK = $${COPY_FILE} \
+                  $${DAE_DEST_DIR}/$${SHARED_LIB_PREFIX}$${TARGET}$${SHARED_LIB_POSTFIX}.$${SHARED_LIB_EXT} \
+                  $${SOLIBS_DIR}/$${SHARED_LIB_PREFIX}$${TARGET}$${SHARED_LIB_POSTFIX}.$${SHARED_LIB_EXT}
 
-datareporting_libs.path         = $${STATIC_LIBS_DIR}
-win32::datareporting_libs.files = $${DAE_DEST_DIR}/$${TARGET}.lib
-unix::datareporting_libs.files  = $${DAE_DEST_DIR}/lib$${TARGET}.a
+DAE_PROJECT_NAME = $$basename(PWD)
 
-INSTALLS += datareporting_headers datareporting_libs
+install_headers.path  = $${DAE_INSTALL_HEADERS_DIR}/$${DAE_PROJECT_NAME}
+install_headers.files = *.h
+
+install_libs.path  = $${DAE_INSTALL_LIBS_DIR}
+install_libs.files = $${DAE_DEST_DIR}/$${SHARED_LIB_PREFIX}$${TARGET}$${SHARED_LIB_POSTFIX}.$${SHARED_LIB_EXT}
+
+INSTALLS += install_headers install_libs

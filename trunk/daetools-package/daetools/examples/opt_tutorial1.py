@@ -94,7 +94,7 @@ def setOptions(nlpsolver):
         nlpsolver.SetOption('mu_strategy', 'adaptive')
 
         # Print options loaded at pyIPOPT startup and the user set options:
-        #nlpsolver.PrintOptions()
+        nlpsolver.PrintOptions()
         #nlpsolver.PrintUserOptions()
 
         # ClearOptions can clear all options:

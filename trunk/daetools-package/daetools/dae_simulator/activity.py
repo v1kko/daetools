@@ -149,7 +149,8 @@ class daeActivity(object):
             #from daetools.code_generators.opencs import daeCodeGenerator_OpenCS
             #cg = daeCodeGenerator_OpenCS()            
             #options = cg.defaultSimulationOptions_DAE
-            #options['LinearSolver']['Preconditioner']['Name'] = 'Amesos'
+            #options['LinearSolver']['Preconditioner']['Library'] = 'Ifpack'
+            #options['LinearSolver']['Preconditioner']['Name']    = 'Amesos'
             #options['LinearSolver']['Preconditioner']['Parameters'] = {"amesos: solver type": "Amesos_Klu"}
             #cg.generateSimulation(simulation, 
                                   #'OpenCS-' + simulation.m.Name, 

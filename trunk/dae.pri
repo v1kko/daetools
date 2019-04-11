@@ -65,6 +65,11 @@ win32-g++-*::COPY_FILE    = cp -fa
 win64-g++-*::COPY_FILE    = cp -fa
 unix::COPY_FILE           = cp -fa
 
+win32-msvc2015::MOVE_FILE = mv -f
+win32-g++-*::MOVE_FILE    = mv -f
+win64-g++-*::MOVE_FILE    = mv -f
+unix::MOVE_FILE           = mv -f
+
 # Set CONFIG += enable_mpi to use MPI libraries
 
 CONFIG(debug, debug|release) {
@@ -165,11 +170,16 @@ crossCompile{
 }
 
 # RPATH for python extension modules
+# win32-msvc2015::SOLIBS_RPATH =
+# win32-g++-*::SOLIBS_RPATH    = -Wl,-rpath,\'\$$ORIGIN/../../solibs/$${DAE_SYSTEM}_$${DAE_MACHINE}\'
+# win64-g++-*::SOLIBS_RPATH    = -Wl,-rpath,\'\$$ORIGIN/../../solibs/$${DAE_SYSTEM}_$${DAE_MACHINE}\'
+# linux-g++::SOLIBS_RPATH      = -Wl,-rpath,\'\$$ORIGIN/../../solibs/$${DAE_SYSTEM}_$${DAE_MACHINE}\',-z,origin
+# macx-g++::SOLIBS_RPATH       = -Wl,-rpath,\'@loader_path/../../solibs/$${DAE_SYSTEM}_$${DAE_MACHINE}\'
 win32-msvc2015::SOLIBS_RPATH =
-win32-g++-*::SOLIBS_RPATH    = -Wl,-rpath,\'\$$ORIGIN/../../solibs/$${DAE_SYSTEM}_$${DAE_MACHINE}\'
-win64-g++-*::SOLIBS_RPATH    = -Wl,-rpath,\'\$$ORIGIN/../../solibs/$${DAE_SYSTEM}_$${DAE_MACHINE}\'
-linux-g++::SOLIBS_RPATH      = -Wl,-rpath,\'\$$ORIGIN/../../solibs/$${DAE_SYSTEM}_$${DAE_MACHINE}\',-z,origin
-macx-g++::SOLIBS_RPATH       = -Wl,-rpath,\'@loader_path/../../solibs/$${DAE_SYSTEM}_$${DAE_MACHINE}\'
+win32-g++-*::SOLIBS_RPATH    = -Wl,-rpath,\'\$$ORIGIN/../lib\'
+win64-g++-*::SOLIBS_RPATH    = -Wl,-rpath,\'\$$ORIGIN/../lib\'
+linux-g++::SOLIBS_RPATH      = -Wl,-rpath,\'\$$ORIGIN/../lib\',-z,origin
+macx-g++::SOLIBS_RPATH       = -Wl,-rpath,\'@loader_path/../lib\'
 
 # RPATH for the simulation_loader
 win32-msvc2015::SOLIBS_RPATH_SL =
@@ -198,7 +208,7 @@ CONFIG += rtti
 unix::QMAKE_CXXFLAGS  += -std=c++11
 unix::QMAKE_LFLAGS    += -std=c++11
 win32::QMAKE_CXXFLAGS += /std:c++14
-win32::QMAKE_LFLAGS   += 
+win32::QMAKE_LFLAGS   +=
 
 # OpenMP
 unix::QMAKE_CXXFLAGS           += -fopenmp
@@ -273,7 +283,7 @@ unix::QMAKE_CXXFLAGS_RELEASE += -O3
 # On some low-RAM machines certain boost.python modules cannot compile
 # The workaround is to set the following flags:
 #unix::QMAKE_CXXFLAGS += --param ggc-min-expand=0 --param ggc-min-heapsize=8192 -fno-var-tracking-assignments
-win32-g++-*::QMAKE_CXXFLAGS += -fno-var-tracking-assignments
+#win32-g++-*::QMAKE_CXXFLAGS += -fno-var-tracking-assignments
 
 # Use SSE for x86 32 bit machines (not used by default)
 #linux-g++::QMAKE_CXXFLAGS_RELEASE += -march=pentium4 -mfpmath=sse -msse -msse2
@@ -784,25 +794,6 @@ macx-g++::INTEL_OPENCL_LIBS          = -framework OpenCL
 win32-msvc2015::INTEL_OPENCL_LIBS    =
 
 #####################################################################################
-#                                 MPI
-#####################################################################################
-enable_mpi {
-QMAKE_CXXFLAGS += -DDAE_MPI
-
-win32-msvc2015::MPI =
-unix::MPI  =
-
-win32-msvc2015::MPI_INCLUDE =
-unix::MPI_INCLUDE  = /usr/include/mpi
-
-win32-msvc2015::MPI_LIBDIR =
-unix::MPI_LIBDIR  =
-
-win32-msvc2015::MPI_LIBS =
-unix::MPI_LIBS           = -lboost_mpi-mt -lboost_serialization -lmpi_cxx -lmpi
-}
-
-#####################################################################################
 #                                   OpenCS
 #####################################################################################
 OPEN_CS_DIR = ../OpenCS
@@ -913,30 +904,48 @@ QMAKE_LIBDIR += $${DAE_DEST_DIR} $${BOOSTLIBPATH}
 #######################################################
 #            Settings for installing files
 #######################################################
-# Removed "_numpy$${NUMPY_VERSION}" to avoid compile-time dependency on numpy versions
-SOLIBS_DIR   = ../daetools-package/daetools/solibs/$${DAE_SYSTEM}_$${DAE_MACHINE}
-SOLVERS_DIR  = ../daetools-package/daetools/solvers/$${DAE_SYSTEM}_$${DAE_MACHINE}_py$${PYTHON_MAJOR}$${PYTHON_MINOR}
-PYDAE_DIR    = ../daetools-package/daetools/pyDAE/$${DAE_SYSTEM}_$${DAE_MACHINE}_py$${PYTHON_MAJOR}$${PYTHON_MINOR}
-FMI_DIR      = ../daetools-package/daetools/solibs/$${DAE_SYSTEM}_$${DAE_MACHINE}
+DAE_INSTALL_DIR             = ../daetools-dev/$${DAE_SYSTEM}_$${DAE_MACHINE}
+DAE_INSTALL_HEADERS_DIR     = $${DAE_INSTALL_DIR}/include
+DAE_INSTALL_LIBS_DIR        = $${DAE_INSTALL_DIR}/lib
+DAE_INSTALL_PY_MODULES_DIR  = $${DAE_INSTALL_DIR}/py$${PYTHON_MAJOR}$${PYTHON_MINOR}
 
-win32-msvc2015::DUMMY = $$system(mkdir daetools-package\daetools\solvers\\$${DAE_SYSTEM}_$${DAE_MACHINE}_py$${PYTHON_MAJOR}$${PYTHON_MINOR})
-win32-msvc2015::DUMMY = $$system(mkdir daetools-package\daetools\pyDAE\\$${DAE_SYSTEM}_$${DAE_MACHINE}_py$${PYTHON_MAJOR}$${PYTHON_MINOR})
-win32-msvc2015::DUMMY = $$system(mkdir daetools-package\daetools\code_generators\fmi\\$${DAE_SYSTEM}_$${DAE_MACHINE}_py$${PYTHON_MAJOR}$${PYTHON_MINOR})
+#SOLIBS_DIR   = ../daetools-package/daetools/solibs/$${DAE_SYSTEM}_$${DAE_MACHINE}
+#SOLVERS_DIR  = ../daetools-package/daetools/solvers/$${DAE_SYSTEM}_$${DAE_MACHINE}_py$${PYTHON_MAJOR}$${PYTHON_MINOR}
+#PYDAE_DIR    = ../daetools-package/daetools/pyDAE/$${DAE_SYSTEM}_$${DAE_MACHINE}_py$${PYTHON_MAJOR}$${PYTHON_MINOR}
+#FMI_DIR      = ../daetools-package/daetools/solibs/$${DAE_SYSTEM}_$${DAE_MACHINE}
+SOLIBS_DIR   = ../daetools-package/daetools/$${DAE_SYSTEM}_$${DAE_MACHINE}/lib
+SOLVERS_DIR  = ../daetools-package/daetools/$${DAE_SYSTEM}_$${DAE_MACHINE}/py$${PYTHON_MAJOR}$${PYTHON_MINOR}
+PYDAE_DIR    = ../daetools-package/daetools/$${DAE_SYSTEM}_$${DAE_MACHINE}/py$${PYTHON_MAJOR}$${PYTHON_MINOR}
+FMI_DIR      = ../daetools-package/daetools/$${DAE_SYSTEM}_$${DAE_MACHINE}/lib
+message(SOLIBS_DIR: $${SOLIBS_DIR})
 
-win32-g++-*::DUMMY = $$system(mkdir -p daetools-package/daetools/solvers/$${DAE_SYSTEM}_$${DAE_MACHINE}_py$${PYTHON_MAJOR}$${PYTHON_MINOR})
-win32-g++-*::DUMMY = $$system(mkdir -p daetools-package/daetools/pyDAE/$${DAE_SYSTEM}_$${DAE_MACHINE}_py$${PYTHON_MAJOR}$${PYTHON_MINOR})
-win32-g++-*::DUMMY = $$system(mkdir -p daetools-package/daetools/code_generators/fmi/$${DAE_SYSTEM}_$${DAE_MACHINE}_py$${PYTHON_MAJOR}$${PYTHON_MINOR})
+# win32-msvc2015::DUMMY = $$system(mkdir daetools-package\daetools\solvers\\$${DAE_SYSTEM}_$${DAE_MACHINE}_py$${PYTHON_MAJOR}$${PYTHON_MINOR})
+# win32-msvc2015::DUMMY = $$system(mkdir daetools-package\daetools\pyDAE\\$${DAE_SYSTEM}_$${DAE_MACHINE}_py$${PYTHON_MAJOR}$${PYTHON_MINOR})
+# win32-msvc2015::DUMMY = $$system(mkdir daetools-package\daetools\code_generators\fmi\\$${DAE_SYSTEM}_$${DAE_MACHINE}_py$${PYTHON_MAJOR}$${PYTHON_MINOR})
+# 
+# win32-g++-*::DUMMY = $$system(mkdir -p daetools-package/daetools/solvers/$${DAE_SYSTEM}_$${DAE_MACHINE}_py$${PYTHON_MAJOR}$${PYTHON_MINOR})
+# win32-g++-*::DUMMY = $$system(mkdir -p daetools-package/daetools/pyDAE/$${DAE_SYSTEM}_$${DAE_MACHINE}_py$${PYTHON_MAJOR}$${PYTHON_MINOR})
+# win32-g++-*::DUMMY = $$system(mkdir -p daetools-package/daetools/code_generators/fmi/$${DAE_SYSTEM}_$${DAE_MACHINE}_py$${PYTHON_MAJOR}$${PYTHON_MINOR})
+# 
+# win64-g++-*::DUMMY = $$system(mkdir -p daetools-package/daetools/solvers/$${DAE_SYSTEM}_$${DAE_MACHINE}_py$${PYTHON_MAJOR}$${PYTHON_MINOR})
+# win64-g++-*::DUMMY = $$system(mkdir -p daetools-package/daetools/pyDAE/$${DAE_SYSTEM}_$${DAE_MACHINE}_py$${PYTHON_MAJOR}$${PYTHON_MINOR})
+# win64-g++-*::DUMMY = $$system(mkdir -p daetools-package/daetools/code_generators/fmi/$${DAE_SYSTEM}_$${DAE_MACHINE}_py$${PYTHON_MAJOR}$${PYTHON_MINOR})
+# 
+# unix::DUMMY = $$system(mkdir -p $${SOLIBS_DIR})
+# unix::DUMMY = $$system(mkdir -p $${SOLVERS_DIR})
+# unix::DUMMY = $$system(mkdir -p $${PYDAE_DIR})
+# unix::DUMMY = $$system(mkdir -p $${FMI_DIR})
+# 
+dae_create_dirs1.commands = $(MKDIR) $${SOLIBS_DIR}
+dae_create_dirs2.commands = $(MKDIR) $${SOLVERS_DIR}
+dae_create_dirs3.commands = $(MKDIR) $${PYDAE_DIR}
+dae_create_dirs4.commands = $(MKDIR) $${FMI_DIR}
 
-win64-g++-*::DUMMY = $$system(mkdir -p daetools-package/daetools/solvers/$${DAE_SYSTEM}_$${DAE_MACHINE}_py$${PYTHON_MAJOR}$${PYTHON_MINOR})
-win64-g++-*::DUMMY = $$system(mkdir -p daetools-package/daetools/pyDAE/$${DAE_SYSTEM}_$${DAE_MACHINE}_py$${PYTHON_MAJOR}$${PYTHON_MINOR})
-win64-g++-*::DUMMY = $$system(mkdir -p daetools-package/daetools/code_generators/fmi/$${DAE_SYSTEM}_$${DAE_MACHINE}_py$${PYTHON_MAJOR}$${PYTHON_MINOR})
+QMAKE_EXTRA_TARGETS += dae_create_dirs1 dae_create_dirs2 dae_create_dirs3 dae_create_dirs4
+PRE_TARGETDEPS      += dae_create_dirs1 dae_create_dirs2 dae_create_dirs3 dae_create_dirs4
 
-unix::DUMMY = $$system(mkdir -p daetools-package/daetools/solvers/$${DAE_SYSTEM}_$${DAE_MACHINE}_py$${PYTHON_MAJOR}$${PYTHON_MINOR})
-unix::DUMMY = $$system(mkdir -p daetools-package/daetools/pyDAE/$${DAE_SYSTEM}_$${DAE_MACHINE}_py$${PYTHON_MAJOR}$${PYTHON_MINOR})
-unix::DUMMY = $$system(mkdir -p daetools-package/daetools/code_generators/fmi/$${DAE_SYSTEM}_$${DAE_MACHINE}_py$${PYTHON_MAJOR}$${PYTHON_MINOR})
-
-STATIC_LIBS_DIR = ../daetools-package/daetools/usr/local/lib
-HEADERS_DIR     = ../daetools-package/daetools/usr/local/include
+#STATIC_LIBS_DIR = ../daetools-package/daetools/usr/local/lib
+#HEADERS_DIR     = ../daetools-package/daetools/usr/local/include
 
 #####################################################################################
 #         Write compiler settings (needed to build installations packages)

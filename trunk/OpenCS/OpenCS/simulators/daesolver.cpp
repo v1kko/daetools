@@ -115,6 +115,7 @@ daeSolver_t::daeSolver_t()
     model       = NULL;
     simulation  = NULL;
     integrationMode = IDA_NORMAL;
+    linearSolverType = eUnknownLinearSolver;
 }
 
 daeSolver_t::~daeSolver_t()
@@ -263,6 +264,8 @@ void daeSolver_t::Initialize(csDifferentialEquationModel_t* pmodel,
     std::string lasolverLibrary = cfg.GetString("LinearSolver.Library");
     if(lasolverLibrary == "Sundials")
     {
+        linearSolverType = eSundialsSpils;
+
         // Maximum dimension of the Krylov subspace to be used (if 0 use the default value MAXL = 5)
         int kspace = cfg.GetInteger("LinearSolver.Parameters.kspace", 0);
         retval = IDASpgmr(mem, kspace);
@@ -330,8 +333,9 @@ void daeSolver_t::Initialize(csDifferentialEquationModel_t* pmodel,
     }
     else if(lasolverLibrary == "Trilinos")
     {
-        /*
-        lasolver.reset(new TrilinosAmesosLinearSolver_t);
+        linearSolverType = eThirdPartyLinearSolver;
+
+        lasolver.reset(new daeLinearSolver_Trilinos);
         bool isODESystem = false;
         retval = lasolver->Initialize(pmodel, Neq_local, isODESystem);
         if(retval < 0)
@@ -346,17 +350,19 @@ void daeSolver_t::Initialize(csDifferentialEquationModel_t* pmodel,
         ida_mem->ida_lfree        = free_la;
         ida_mem->ida_lmem         = lasolver.get();
         ida_mem->ida_setupNonNull = TRUE;
-        */
     }
     else
     {
+        csThrowException("Invalid LinearSolver.Library specified: " + lasolverLibrary);
+
+        /*
         // Maximum dimension of the Krylov subspace to be used (if 0 use the default value MAXL = 5)
         int kspace = cfg.GetInteger("LinearSolver.Parameters.kspace", 0);
         retval = IDASpgmr(mem, kspace);
         if(retval < 0)
             csThrowException( (boost::format("IDASpgmr failed: %s") % IDAGetReturnFlagName(retval)).str() );
 
-        /* Set up the BBD preconditioner. */
+        // Set up the BBD preconditioner.
         long int mudq      = 5; // Upper half-bandwidth to be used in the difference-quotient Jacobian approximation.
         long int mldq      = 5; // Lower half-bandwidth to be used in the difference-quotient Jacobian approximation.
         long int mukeep    = 2; // Upper half-bandwidth of the retained banded approximate Jacobian block
@@ -366,6 +372,7 @@ void daeSolver_t::Initialize(csDifferentialEquationModel_t* pmodel,
         retval = IDABBDPrecInit(mem, Neq_local, mudq, mldq, mukeep, mlkeep, dq_rel_yy, bbd_local_fn, NULL);
         if(retval < 0)
             csThrowException( (boost::format("IDABBDPrecInit failed: %s") % IDAGetReturnFlagName(retval)).str() );
+        */
     }
 }
 
@@ -619,14 +626,14 @@ void daeSolver_t::CollectSolverStats()
     long int nst, nni, nre, nli, nreLS, nge, npe, nps, njvtimes;
     nst = nni = nre = nli = nreLS = nge = npe = nps = njvtimes = 0;
 
-    //IDAGetNumSteps(mem, &nst);
-    //IDAGetNumResEvals(mem, &nre);
-    //IDAGetNumNonlinSolvIters(mem, &nni);
-    IDASpilsGetNumLinIters(mem, &nli);
-    IDASpilsGetNumResEvals(mem, &nreLS);
-    IDASpilsGetNumPrecEvals(mem, &npe);
-    IDASpilsGetNumPrecSolves(mem, &nps);
-    IDASpilsGetNumJtimesEvals(mem, &njvtimes);
+    if(linearSolverType == eSundialsSpils)
+    {
+        IDASpilsGetNumLinIters(mem, &nli);
+        IDASpilsGetNumResEvals(mem, &nreLS);
+        IDASpilsGetNumPrecEvals(mem, &npe);
+        IDASpilsGetNumPrecSolves(mem, &nps);
+        IDASpilsGetNumJtimesEvals(mem, &njvtimes);
+    }
     stats["NumLinIters"]      = nli;
     stats["NumEquationEvals"] = nreLS;
     stats["NumPrecEvals"]     = npe;
@@ -1010,5 +1017,104 @@ int check_flag(void *flagvalue, const char *funcname, int opt)
 
     return(0);
 }
+
+
+// User-defined linear solver interface
+int init_la(IDAMem ida_mem)
+{
+    cs_dae_simulator::daeLinearSolver_t* pLASolver = (cs_dae_simulator::daeLinearSolver_t*)ida_mem->ida_lmem;
+    if(!pLASolver)
+        return IDA_MEM_NULL;
+    return IDA_SUCCESS;
+}
+
+int setup_la(IDAMem	    ida_mem,
+             N_Vector	vectorVariables,
+             N_Vector	vectorTimeDerivatives,
+             N_Vector	vectorResiduals,
+             N_Vector	vectorTemp1,
+             N_Vector	vectorTemp2,
+             N_Vector	vectorTemp3)
+{
+    auxiliary::daeTimesAndCounters& tcs = auxiliary::daeTimesAndCounters::GetTimesAndCounters();
+    auxiliary::TimerCounter tc(tcs.LASetup);
+
+    cs_dae_simulator::daeLinearSolver_t* pLASolver = (cs_dae_simulator::daeLinearSolver_t*)ida_mem->ida_lmem;
+    if(!pLASolver)
+        return IDA_MEM_NULL;
+
+    realtype *pdValues, *pdTimeDerivatives, *pdResiduals;
+
+    realtype time            = ida_mem->ida_tn;
+    realtype inverseTimeStep = ida_mem->ida_cj;
+    realtype gamma           = 0.0; // applicable only to ODE systems
+
+    pdValues			= NV_DATA_P(vectorVariables);
+    pdTimeDerivatives	= NV_DATA_P(vectorTimeDerivatives);
+    pdResiduals			= NV_DATA_P(vectorResiduals);
+
+    int ret = pLASolver->Setup(time,
+                               inverseTimeStep,
+                               gamma,
+                               pdValues,
+                               pdTimeDerivatives);
+
+    if(ret < 0)
+        return IDA_LSETUP_FAIL;
+    return IDA_SUCCESS;
+}
+
+int solve_la(IDAMem	  ida_mem,
+             N_Vector vectorB,
+             N_Vector vectorWeight,
+             N_Vector vectorVariables,
+             N_Vector vectorTimeDerivatives,
+             N_Vector vectorResiduals)
+{
+    auxiliary::daeTimesAndCounters& tcs = auxiliary::daeTimesAndCounters::GetTimesAndCounters();
+    auxiliary::TimerCounter tc(tcs.LASolve);
+
+    cs_dae_simulator::daeLinearSolver_t* pLASolver = (cs_dae_simulator::daeLinearSolver_t*)ida_mem->ida_lmem;
+    if(!pLASolver)
+        return IDA_MEM_NULL;
+
+    realtype *pdValues, *pdTimeDerivatives, *pdResiduals, *pdWeight, *pdB;
+
+    real_t time            = ida_mem->ida_tn;
+    real_t inverseTimeStep = ida_mem->ida_cj;
+    real_t cjratio         = ida_mem->ida_cjratio;
+
+    pdWeight			= NV_DATA_P(vectorWeight);
+    pdB      			= NV_DATA_P(vectorB);
+    pdValues			= NV_DATA_P(vectorVariables);
+    pdTimeDerivatives	= NV_DATA_P(vectorTimeDerivatives);
+    pdResiduals			= NV_DATA_P(vectorResiduals);
+
+    int ret = pLASolver->Solve(time,
+                               inverseTimeStep,
+                               cjratio,
+                               pdB,
+                               pdWeight,
+                               pdValues,
+                               pdTimeDerivatives);
+    if(ret < 0)
+        return IDA_LSOLVE_FAIL;
+    return IDA_SUCCESS;
+}
+
+int free_la(IDAMem ida_mem)
+{
+    cs_dae_simulator::daeLinearSolver_t* pLASolver = (cs_dae_simulator::daeLinearSolver_t*)ida_mem->ida_lmem;
+    if(!pLASolver)
+        return IDA_MEM_NULL;
+
+    pLASolver->Free();
+
+    // It is the responsibility of the user to delete LA solver pointer!!
+    ida_mem->ida_lmem = NULL;
+
+    return IDA_SUCCESS;
+}
+
 
 }

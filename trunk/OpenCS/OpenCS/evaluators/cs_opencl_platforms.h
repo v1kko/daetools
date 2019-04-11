@@ -15,7 +15,7 @@ the OpenCS software; if not, see <http://www.gnu.org/licenses/>.
 
 #include <string>
 #include <vector>
-#include "../opencs.h"
+#include "../cs_evaluator.h"
 
 namespace cs
 {

@@ -12,13 +12,19 @@ the OpenCS software; if not, see <http://www.gnu.org/licenses/>.
 ***********************************************************************************/
 #include <mpi.h>
 #include "cs_simulators.h"
-#include "../models/cs_model_builder.h"
 
-/* Run using:
-    $ mpirun -np 4 ./csSimulator inputDataDir
-    $ mpirun -np 4 --hostfile mpi-hosts ./csSimulator inputDataDir
-    $ mpirun -np 4 ./csSimulator inputDataDir
-    $ mpirun -np 4 gdb -ex run --args ./csSimulator inputDataDir
+/* Single CPU simulations:
+    $ ./csSimulator inputDataDir
+
+   MPI simulations (OpenMPI):
+    $ mpirun -np Npe                      ./csSimulator inputDataDir
+    $ mpirun -np Npe --hostfile mpi-hosts ./csSimulator inputDataDir
+   or (MSMPI and MPICH):
+    $ mpiexec -n Npe                      ./csSimulator inputDataDir
+    $ mpiexec -n Npe --hostfile mpi-hosts ./csSimulator inputDataDir
+
+   GDB debugging:
+    $ mpirun -np Npe gdb -ex run --args ./csSimulator inputDataDir
 */
 int main(int argc, char *argv[])
 {

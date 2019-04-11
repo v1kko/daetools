@@ -1,16 +1,20 @@
 include(../dae.pri)
-QT -= core \
-    gui
+QT -= core gui
 TARGET = cdaeCore
 TEMPLATE = lib
-CONFIG += staticlib
+CONFIG += shared plugin
 
 INCLUDEPATH += $${BOOSTDIR} \
-               $${MPI_INCLUDE} \
                $${OPEN_CS_INCLUDE}
 
-LIBS +=	$${DAE_CONFIG_LIB} \
-        $${MPI_LIBS}
+LIBS += $${SOLIBS_RPATH_SL}
+
+LIBS +=	$${DAE_UNITS_LIB} \
+        $${DAE_CONFIG_LIB} \
+        $${DAE_CAPE_THERMO_PACKAGE_LIB} \
+        $${DAE_COOLPROP_THERMO_PACKAGE_LIB} \
+        $${COOLPROP_LIBS} \
+        $${BOOST_LIBS}
 
 SOURCES +=  action.cpp \
             adouble.cpp \
@@ -97,69 +101,24 @@ HEADERS +=  xmlfunctions.h \
             call_stats.h \
             compute_stack_kernels_openmp.h
 
-#win32{
-#QMAKE_POST_LINK = $${COPY_FILES} $${TARGET}.lib $${STATIC_LIBS_DIR}
-#}
-
-#unix{
-#QMAKE_POST_LINK = $${COPY_FILES} lib$${TARGET}.a $${STATIC_LIBS_DIR}
-#}
-
-#INSTALL_HEADERS = $$system($${COPY_FILES} ../dae.h         $${HEADERS_DIR})
-#INSTALL_HEADERS = $$system($${COPY_FILES} ../dae_develop.h $${HEADERS_DIR})
-#INSTALL_HEADERS = $$system($${COPY_FILES} ../config.h      $${HEADERS_DIR})
-#INSTALL_HEADERS = $$system($${COPY_FILES} ../nlp_common.h  $${HEADERS_DIR})
-#INSTALL_HEADERS = $$system($${COPY_FILES} dae.pri          $${HEADERS_DIR})
-
-#INSTALL_HEADERS = $$system($${COPY_FILES} definitions.h    $${HEADERS_DIR}/Core)
-#INSTALL_HEADERS = $$system($${COPY_FILES} core.h           $${HEADERS_DIR}/Core)
-#INSTALL_HEADERS = $$system($${COPY_FILES} log.h            $${HEADERS_DIR}/Core)
-#INSTALL_HEADERS = $$system($${COPY_FILES} activity.h       $${HEADERS_DIR}/Core)
-#INSTALL_HEADERS = $$system($${COPY_FILES} optimization.h   $${HEADERS_DIR}/Core)
-#INSTALL_HEADERS = $$system($${COPY_FILES} solver.h         $${HEADERS_DIR}/Core)
-#INSTALL_HEADERS = $$system($${COPY_FILES} datareporting.h  $${HEADERS_DIR}/Core)
-
-#INSTALL_HEADERS = $$system($${COPY_FILES} coreimpl.h       $${HEADERS_DIR}/Core)
-#INSTALL_HEADERS = $$system($${COPY_FILES} helpers.h        $${HEADERS_DIR}/Core)
-#INSTALL_HEADERS = $$system($${COPY_FILES} class_factory.h  $${HEADERS_DIR}/Core)
-#INSTALL_HEADERS = $$system($${COPY_FILES} base_logging.h   $${HEADERS_DIR}/Core)
-#INSTALL_HEADERS = $$system($${COPY_FILES} adouble.h        $${HEADERS_DIR}/Core)
-#INSTALL_HEADERS = $$system($${COPY_FILES} export.h         $${HEADERS_DIR}/Core)
-#INSTALL_HEADERS = $$system($${COPY_FILES} io.h             $${HEADERS_DIR}/Core)
-#INSTALL_HEADERS = $$system($${COPY_FILES} io_impl.h        $${HEADERS_DIR}/Core)
-#INSTALL_HEADERS = $$system($${COPY_FILES} xmlfile.h        $${HEADERS_DIR}/Core)
-
 #######################################################
 #                Install files
 #######################################################
-root_headers.path  = $${HEADERS_DIR}
-root_headers.files = ../dae.h  \
-                     ../dae_develop.h  \
-                     ../config.h  \
-                     ../nlp_common.h  \
-                     ../dae.pri
+#QMAKE_POST_LINK = $${COPY_FILE} \
+#                  $${DAE_DEST_DIR}/$${SHARED_LIB_PREFIX}$${TARGET}$${SHARED_LIB_POSTFIX}.$${SHARED_LIB_EXT} \
+#                  $${SOLIBS_DIR}/$${SHARED_LIB_PREFIX}$${TARGET}$${SHARED_LIB_POSTFIX}.$${SHARED_LIB_EXT}
 
-core_headers.path  = $${HEADERS_DIR}/Core
-core_headers.files = definitions.h  \
-                     core.h  \
-                     log.h  \
-                     activity.h  \
-                     optimization.h  \
-                     solver.h  \
-                     datareporting.h  \
-                     coreimpl.h  \
-                     helpers.h  \
-                     class_factory.h  \
-                     base_logging.h  \
-                     adouble.h  \
-                     export.h  \
-                     io.h  \
-                     io_impl.h  \
-                     xmlfile.h
+# Install headers and libs into daetools-dev
+DAE_PROJECT_NAME = $$basename(PWD)
 
-core_libs.path         = $${STATIC_LIBS_DIR}
-win32::core_libs.files = $${DAE_DEST_DIR}/$${TARGET}.lib
-unix::core_libs.files  = $${DAE_DEST_DIR}/lib$${TARGET}.a
+install_headers.path  = $${DAE_INSTALL_HEADERS_DIR}/$${DAE_PROJECT_NAME}
+install_headers.files = *.h
 
-INSTALLS += root_headers core_headers core_libs
+install_libs.path  = $${DAE_INSTALL_LIBS_DIR}
+install_libs.files = $${DAE_DEST_DIR}/$${SHARED_LIB_PREFIX}$${TARGET}$${SHARED_LIB_POSTFIX}.$${SHARED_LIB_EXT}
 
+# Install into daetools-package
+install_py_solib.path  = $${SOLIBS_DIR}
+install_py_solib.files = $${DAE_DEST_DIR}/$${SHARED_LIB_PREFIX}$${TARGET}$${SHARED_LIB_POSTFIX}.$${SHARED_LIB_EXT}
+
+INSTALLS += install_headers install_libs install_py_solib

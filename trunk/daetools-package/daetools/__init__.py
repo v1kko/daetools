@@ -43,6 +43,13 @@ else:
 daetools_dir = os.path.dirname(os.path.realpath(__file__))
 
 # pyDAE platform-dependant extension modules directory
+#lib_sodir = os.path.join(daetools_dir, '{0}_{1}'.format(daetools_system, daetools_machine), 'lib')
+#sys.path.append(lib_sodir)
+
+py_sodir = os.path.join(daetools_dir, '{0}_{1}'.format(daetools_system, daetools_machine), 
+                                      'py{0}{1}'.format(python_version_major, python_version_minor))
+sys.path.append(py_sodir)
+'''
 # Now with removed compile-time dependency on numpy
 pydae_sodir = os.path.join(daetools_dir, 'pyDAE', '{0}_{1}_py{2}{3}'.format(daetools_system,
                                                                             daetools_machine,
@@ -62,5 +69,6 @@ sys.path.append(solvers_sodir)
 solibs_sodir = os.path.join(daetools_dir, 'solibs', '{0}_{1}'.format(daetools_system,
                                                                      daetools_machine))
 sys.path.append(solibs_sodir)
+'''
 
-#print(sys.path)
+print(sys.path)

@@ -19,7 +19,7 @@ the OpenCS software; if not, see <http://www.gnu.org/licenses/>.
 #include <map>
 #include <memory>
 #include <string.h>
-#include "../opencs.h"
+//#include "../models/cs_model_builder.h"
 #include "../models/cs_dae_model.h"
 
 #if !defined(__MINGW32__) && (defined(_WIN32) || defined(WIN32) || defined(WIN64) || defined(_WIN64))
@@ -89,6 +89,57 @@ public:
     void SetAndSynchroniseData(real_t  time, real_t* values, real_t* time_derivatives);
 };
 
+class OPENCS_SIMULATORS_API daeLinearSolver_t
+{
+public:
+    virtual ~daeLinearSolver_t(){}
+
+    virtual int Initialize(cs::csDifferentialEquationModel_t* model,
+                           size_t numberOfVariables,
+                           bool   isODESystem) = 0;
+    virtual int Free() = 0;
+    virtual int Setup(real_t  time,
+                      real_t  inverseTimeStep,
+                      real_t  jacobianScaleFactor,
+                      real_t* values,
+                      real_t* timeDerivatives) = 0;
+    virtual int Solve(real_t  time,
+                      real_t  inverseTimeStep,
+                      real_t  cjratio,
+                      real_t* b,
+                      real_t* weight,
+                      real_t* values,
+                      real_t* timeDerivatives) = 0;
+};
+
+class OPENCS_SIMULATORS_API daeLinearSolver_Trilinos : public daeLinearSolver_t
+{
+public:
+    daeLinearSolver_Trilinos();
+    virtual ~daeLinearSolver_Trilinos();
+
+    virtual int Initialize(cs::csDifferentialEquationModel_t* model,
+                           size_t numberOfVariables,
+                           bool   isODESystem);
+    virtual int Setup(real_t  time,
+                      real_t  inverseTimeStep,
+                      real_t  jacobianScaleFactor,
+                      real_t* values,
+                      real_t* timeDerivatives);
+    virtual int Solve(real_t  time,
+                      real_t  inverseTimeStep,
+                      real_t  cjratio,
+                      real_t* b,
+                      real_t* weight,
+                      real_t* values,
+                      real_t* timeDerivatives);
+    virtual int Free();
+
+public:
+    void* data;
+    bool  isODESystem;
+};
+
 class OPENCS_SIMULATORS_API daePreconditioner_t
 {
 public:
@@ -106,28 +157,6 @@ public:
     virtual int Solve(real_t  time, real_t* r, real_t* z) = 0;
     virtual int JacobianVectorMultiply(real_t  time, real_t* v, real_t* Jv) = 0;
     virtual int Free() = 0;
-};
-
-class OPENCS_SIMULATORS_API daeLinearSolver_t
-{
-public:
-    virtual ~daeLinearSolver_t(){}
-
-    virtual int Initialize(cs::csDifferentialEquationModel_t* model,
-                           size_t numberOfVariables,
-                           bool   isODESystem) = 0;
-    virtual int Free() = 0;
-    virtual int Setup(real_t  time,
-                      real_t  inverseTimeStep,
-                      real_t* values,
-                      real_t* timeDerivatives) = 0;
-    virtual int Solve(real_t  time,
-                      real_t  inverseTimeStep,
-                      real_t  cjratio,
-                      real_t* b,
-                      real_t* weight,
-                      real_t* values,
-                      real_t* timeDerivatives) = 0;
 };
 
 class OPENCS_SIMULATORS_API daePreconditioner_Jacobi : public daePreconditioner_t
@@ -202,33 +231,6 @@ public:
     bool  isODESystem;
 };
 
-/*
-class OPENCS_SIMULATORS_API TrilinosAmesosLinearSolver_t : public daeLinearSolver_t
-{
-public:
-    TrilinosAmesosLinearSolver_t();
-    virtual ~TrilinosAmesosLinearSolver_t();
-
-    virtual int Initialize(cs::csDifferentialEquationModel_t* model,
-                           size_t numberOfVariables,
-                           bool   isODESystem);
-    virtual int Setup(real_t  time,
-                      real_t  inverseTimeStep,
-                      real_t* values,
-                      real_t* timeDerivatives);
-    virtual int Solve(real_t  time,
-                      real_t  inverseTimeStep,
-                      real_t  cjratio,
-                      real_t* b,
-                      real_t* weight,
-                      real_t* values,
-                      real_t* timeDerivatives);
-    virtual int Free();
-
-public:
-    void* data;
-};
-*/
 
 class OPENCS_SIMULATORS_API daeSimulation_t;
 class OPENCS_SIMULATORS_API csDifferentialEquationSolver_t
@@ -270,6 +272,13 @@ public:
     std::map<std::string, double>         stats;
 };
 
+enum daeeLinearSolverType
+{
+    eUnknownLinearSolver,
+    eSundialsSpils,
+    eThirdPartyLinearSolver
+};
+
 class OPENCS_SIMULATORS_API daeSolver_t : public csDifferentialEquationSolver_t
 {
 public:
@@ -295,21 +304,8 @@ public:
     void   CollectSolverStats();
 
 public:
-    int     integrationMode;
-//    bool    printInfo;
-//    real_t  currentTime;
-//    real_t  targetTime;
-//    real_t  rtol;
-//    real_t* yval;
-//    real_t* ypval;
-//    long    Nequations;
-
-//    cs::csDifferentialEquationModel_t*                     model;
-//    daeSimulation_t*                      simulation;
-//    std::shared_ptr<daePreconditioner_t>  preconditioner;
-//    std::shared_ptr<daeLinearSolver_t>    lasolver;
-//    std::map<std::string, double>         stats;
-
+    int                  integrationMode;
+    daeeLinearSolverType linearSolverType;
     /* Opaque pointers */
     void* mem;
     void* yy;
@@ -342,23 +338,10 @@ public:
     void   CollectSolverStats();
 
 public:
-    int     integrationMode;
-    int     linearMultistepMethod;
-    int     nonlinearSolverIteration;
-//    bool    printInfo;
-//    real_t  currentTime;
-//    real_t  targetTime;
-//    real_t  rtol;
-//    real_t* yval;
-//    real_t* ypval;
-//    long    Nequations;
-
-//    cs::csDifferentialEquationModel_t*                     model;
-//    daeSimulation_t*                      simulation;
-//    std::shared_ptr<daePreconditioner_t>  preconditioner;
-//    std::shared_ptr<daeLinearSolver_t>    lasolver;
-//    std::map<std::string, double>         stats;
-
+    int                  integrationMode;
+    int                  linearMultistepMethod;
+    int                  nonlinearSolverIteration;
+    daeeLinearSolverType linearSolverType;
     /* Opaque pointers */
     void* mem;
     void* yy;

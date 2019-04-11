@@ -3,19 +3,19 @@ include(../dae.pri)
 QT -= core gui
 TARGET = cdaeNLOPT_NLPSolver
 TEMPLATE = lib
-CONFIG += staticlib
+CONFIG += shared plugin
+
 INCLUDEPATH += $${BOOSTDIR} \
                $${NLOPT_INCLUDE} \
                $${OPEN_CS_INCLUDE}
 
 QMAKE_LIBDIR += $${NLOPT_LIBDIR}
 
-LIBS += $${DAE_ACTIVITY_LIB} \
-        $${DAE_DATAREPORTING_LIB} \
-        $${DAE_CORE_LIB} \
-        $${DAE_IDAS_SOLVER_LIB} \
+LIBS += $${SOLIBS_RPATH_SL}
+LIBS += $${DAE_CONFIG_LIB} \
         $${BOOST_LIBS} \
-        $${NLOPT_LIBS}
+        $${NLOPT_LIBS} \
+        $${BLAS_LAPACK_LIBS}
 
 HEADERS += stdafx.h \
     nlpsolver_class_factory.h \
@@ -26,25 +26,19 @@ SOURCES += stdafx.cpp \
     dllmain.cpp \
     nlpsolver.cpp
 
-
-#win32{
-#QMAKE_POST_LINK = copy /y  $${TARGET}.lib $${STATIC_LIBS_DIR}
-#}
-
-#unix{
-#QMAKE_POST_LINK = cp -f  lib$${TARGET}.a $${STATIC_LIBS_DIR}
-#}
-
-#INSTALL_HEADERS = $$system($${COPY_FILES} base_solvers.h $${HEADERS_DIR}/NLOPT_NLPSolver)
-
 #######################################################
 #                Install files
 #######################################################
-nlopt_headers.path  = $${HEADERS_DIR}/NLOPT_NLPSolver
-nlopt_headers.files = base_solvers.h
+QMAKE_POST_LINK = $${COPY_FILE} \
+                  $${DAE_DEST_DIR}/$${SHARED_LIB_PREFIX}$${TARGET}$${SHARED_LIB_POSTFIX}.$${SHARED_LIB_EXT} \
+                  $${SOLIBS_DIR}/$${SHARED_LIB_PREFIX}$${TARGET}$${SHARED_LIB_POSTFIX}.$${SHARED_LIB_EXT}
 
-nlopt_libs.path         = $${STATIC_LIBS_DIR}
-win32::nlopt_libs.files = $${DAE_DEST_DIR}/$${TARGET}.lib
-unix::nlopt_libs.files  = $${DAE_DEST_DIR}/lib$${TARGET}.a
+DAE_PROJECT_NAME = $$basename(PWD)
 
-INSTALLS += nlopt_headers nlopt_libs
+install_headers.path  = $${DAE_INSTALL_HEADERS_DIR}/$${DAE_PROJECT_NAME}
+install_headers.files = *.h
+
+install_libs.path  = $${DAE_INSTALL_LIBS_DIR}
+install_libs.files = $${DAE_DEST_DIR}/$${SHARED_LIB_PREFIX}$${TARGET}$${SHARED_LIB_POSTFIX}.$${SHARED_LIB_EXT}
+
+INSTALLS += install_headers install_libs

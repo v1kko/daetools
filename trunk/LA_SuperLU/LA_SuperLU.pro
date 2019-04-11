@@ -13,12 +13,14 @@
 include(../dae.pri)
 QT -= core gui
 TEMPLATE = lib
-CONFIG += staticlib
+CONFIG += shared plugin
 
 #################################################
 # Could be: SuperLU, SuperLU_MT, SuperLU_CUDA
 #################################################
 CONFIG += SuperLU
+
+LIBS += $${SOLIBS_RPATH_SL}
 
 #####################################################################
 # Small hack used when compiling from compile_linux.sh shell script
@@ -59,7 +61,10 @@ CONFIG(SuperLU, SuperLU|SuperLU_MT|SuperLU_CUDA):message(SuperLU) {
 QMAKE_CXXFLAGS += -DdaeSuperLU
 TARGET = cdaeSuperLU_LASolver
 INCLUDEPATH += $${SUPERLU_INCLUDE}
-LIBS += $${SUPERLU_LIBS}
+LIBS += $${DAE_CONFIG_LIB} \
+        $${SUPERLU_LIBS} \
+        $${BLAS_LAPACK_LIBS} \
+        $${BOOST_LIBS}
 }
 
 ######################################################################################
@@ -70,7 +75,10 @@ CONFIG(SuperLU_MT, SuperLU|SuperLU_MT|SuperLU_CUDA):message(SuperLU_MT) {
 QMAKE_CXXFLAGS += -DdaeSuperLU_MT
 TARGET = cdaeSuperLU_MT_LASolver
 INCLUDEPATH += $${SUPERLU_MT_INCLUDE}
-LIBS += $${SUPERLU_MT_LIBS}
+LIBS += $${DAE_CONFIG_LIB} \
+        $${SUPERLU_MT_LIBS} \
+        $${BLAS_LAPACK_LIBS} \
+        $${BOOST_LIBS}
 }
 
 ######################################################################################
@@ -88,24 +96,19 @@ LIBS += $${SUPERLU_CUDA_LIBS} $${CUDA_LIBS}
 OTHER_FILES += superlu_mt_gpu.cu gpuMakefile
 
 
-#win32{
-#QMAKE_POST_LINK = copy /y  $${TARGET}.lib $${STATIC_LIBS_DIR}
-#}
-
-#unix{
-#QMAKE_POST_LINK = cp -f  lib$${TARGET}.a $${STATIC_LIBS_DIR}
-#}
-
-#INSTALL_HEADERS = $$system($${COPY_FILES} superlu_solvers.h $${HEADERS_DIR}/LA_SuperLU)
-
 #######################################################
 #                Install files
 #######################################################
-superlu_headers.path  = $${HEADERS_DIR}/LA_SuperLU
-superlu_headers.files = superlu_solvers.h
+QMAKE_POST_LINK = $${COPY_FILE} \
+                  $${DAE_DEST_DIR}/$${SHARED_LIB_PREFIX}$${TARGET}$${SHARED_LIB_POSTFIX}.$${SHARED_LIB_EXT} \
+                  $${SOLIBS_DIR}/$${SHARED_LIB_PREFIX}$${TARGET}$${SHARED_LIB_POSTFIX}.$${SHARED_LIB_EXT}
 
-superlu_libs.path         = $${STATIC_LIBS_DIR}
-win32::superlu_libs.files = $${DAE_DEST_DIR}/$${TARGET}.lib
-unix::superlu_libs.files  = $${DAE_DEST_DIR}/lib$${TARGET}.a
+DAE_PROJECT_NAME = $$basename(PWD)
 
-INSTALLS += superlu_headers superlu_libs
+install_headers.path  = $${DAE_INSTALL_HEADERS_DIR}/$${DAE_PROJECT_NAME}
+install_headers.files = *.h
+
+install_libs.path  = $${DAE_INSTALL_LIBS_DIR}
+install_libs.files = $${DAE_DEST_DIR}/$${SHARED_LIB_PREFIX}$${TARGET}$${SHARED_LIB_POSTFIX}.$${SHARED_LIB_EXT}
+
+INSTALLS += install_headers install_libs

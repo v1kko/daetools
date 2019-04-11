@@ -135,6 +135,94 @@ def run(**kwargs):
     options['Simulation']['TimeHorizon']                 = 180.0
     options['Simulation']['ReportingInterval']           =   1.0
     options['Solver']['Parameters']['RelativeTolerance'] =  1e-8
+    # Linear solver: Trilinos AztecOO with native AztecOO ILU preconditioner
+    """
+    options['LinearSolver'] = {
+                                "Library":  "Trilinos",
+                                "Name":     "AztecOO",
+                                "PrintInfo": False,
+                                "Parameters": {
+                                    "AZ_solver":     "AZ_gmres",
+                                    "AZ_kspace":     30,
+                                    "AZ_scaling":    "AZ_none",
+                                    "AZ_reorder":    1,
+                                    "AZ_conv":       "AZ_r0",
+                                    "AZ_keep_info":  1,
+                                    "AZ_max_iter":   500,
+                                    "AZ_orthog":     "AZ_classic",
+                                    "AZ_pre_calc":   "AZ_calc",
+                                    "AZ_output":     "AZ_all"
+                                },
+                                "Preconditioner": {
+                                    "Library":   "AztecOO",
+                                    "Name":      "",
+                                    "PrintInfo": False,
+                                    "Parameters": {
+                                        "AZ_precond":          "AZ_dom_decomp",
+                                        "AZ_subdomain_solve":  "AZ_ilu",
+                                        "AZ_graph_fill":       3,
+                                        "AZ_athresh":          1e-05,
+                                        "AZ_rthresh":          1.0
+                                    }
+                                }
+                            }
+    """
+    # Linear solver: Trilinos AztecOO with native Ifpack ILU preconditioner
+    options['LinearSolver'] = {
+                                "Library":  "Trilinos",
+                                "Name":     "AztecOO",
+                                "PrintInfo": False,
+                                "Parameters": {
+                                    "AZ_solver":     "AZ_gmres",
+                                    "AZ_kspace":     30,
+                                    "AZ_scaling":    "AZ_none",
+                                    "AZ_reorder":    1,
+                                    "AZ_conv":       "AZ_r0",
+                                    "AZ_keep_info":  1,
+                                    "AZ_max_iter":   500,
+                                    "AZ_orthog":     "AZ_classic",
+                                    "AZ_pre_calc":   "AZ_calc",
+                                    "AZ_output":     "AZ_all"
+                                },
+                                "Preconditioner" : {
+                                    "Library":   "Ifpack",
+                                    "Name":      "ILU",
+                                    "PrintInfo": False,
+                                    "Parameters": {
+                                    }
+                                }
+                            }
+    options['LinearSolver1'] = {
+                                "Library":   "Trilinos",
+                                "Name":      "Amesos_Klu",
+                                "PrintInfo": False,
+                                "Parameters": {
+                                }
+                            }
+    """
+    options['LinearSolver']['Library']    = 'Trilinos'
+    options['LinearSolver']['Name']       = 'AztecOO' # AztecOO, Amesos_Klu
+    options['LinearSolver']['Parameters'] = {
+                                             'AZ_solver':       'AZ_gmres',
+                                             'AZ_kspace':       30,
+                                             'AZ_scaling':      'AZ_none',
+                                             'AZ_reorder':      1, # perform RCM reordering
+                                             'AZ_conv':         'AZ_r0',
+                                             'AZ_keep_info':    1,
+                                             'AZ_max_iter':     500,
+                                             'AZ_orthog':       'AZ_classic', # AZ_classic, AZ_modified
+                                             'AZ_pre_calc':     'AZ_calc', # AZ_calc, AZ_recalc, AZ_reuse
+                                             'AZ_output':       'AZ_warnings' # {AZ_all, AZ_none, AZ_last, AZ_summary, AZ_warnings}
+                                            }
+    options['LinearSolver']['Preconditioner']['Library']    = 'AztecOO' # AztecOO, Ifpack, ML
+    options['LinearSolver']['Preconditioner']['Name']       = 'ILU'
+    options['LinearSolver']['Preconditioner']['Parameters'] = {
+                                                                'AZ_precond':         'AZ_dom_decomp',
+                                                                'AZ_subdomain_solve': 'AZ_ilu',
+                                                                'AZ_graph_fill':      3,
+                                                                'AZ_athresh':         1e-5,
+                                                                'AZ_rthresh':         1.0
+                                                              }    """
     # Data reporter options
     #options['Simulation']['DataReporter']['Name']                       = 'CSV'
     #options['Simulation']['DataReporter']['Parameters']['precision']    = 14

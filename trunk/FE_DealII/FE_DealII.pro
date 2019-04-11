@@ -36,3 +36,6 @@ HEADERS += stdafx.h \
            dealii_omp_work_stream.h \
            dealii_fe_system.h
 
+#######################################################
+#                Install files
+#######################################################

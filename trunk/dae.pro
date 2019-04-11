@@ -2,11 +2,11 @@ TEMPLATE = subdirs
 CONFIG += ordered
 SUBDIRS = Config \
     CoolPropThermoPackage \
+    Units \
     Core \
     DataReporting \
-    Activity \
     IDAS_DAESolver \
-    Units \
+    Activity \
     pyCore \
     pyActivity \
     pyDataReporting \

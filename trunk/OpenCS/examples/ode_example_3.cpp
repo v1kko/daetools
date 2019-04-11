@@ -12,9 +12,7 @@ OpenCS software; if not, see <http://www.gnu.org/licenses/>.
 ***********************************************************************************/
 #include <mpi.h>
 #include "diurnal_kinetics_2d.h"
-#include <OpenCS/models/cs_model_builder.h>
-#include <OpenCS/models/cs_partitioners.h>
-#include <OpenCS/simulators/cs_simulators.h>
+#include <OpenCS/opencs.h>
 using namespace cs;
 
 /* Reimplementation of CVodes cvsDiurnal_kry example.

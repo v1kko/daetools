@@ -12,8 +12,7 @@ OpenCS software; if not, see <http://www.gnu.org/licenses/>.
 ***********************************************************************************/
 #include <mpi.h>
 #include "advection_diffusion_2d.h"
-#include <OpenCS/models/cs_model_builder.h>
-#include <OpenCS/simulators/cs_simulators.h>
+#include <OpenCS/opencs.h>
 using namespace cs;
 
 /* Reimplementation of CVodes cvsAdvDiff_bnd example.

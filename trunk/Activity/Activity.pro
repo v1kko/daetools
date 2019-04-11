@@ -3,14 +3,19 @@ include(../dae.pri)
 QT -= core gui
 TARGET = cdaeActivity
 TEMPLATE = lib
-CONFIG += staticlib
+CONFIG += shared plugin
+
 INCLUDEPATH += $${BOOSTDIR} \
-               $${MPI_INCLUDE} \
                $${OPEN_CS_INCLUDE}
 
-LIBS += $${DAE_CONFIG_LIB} \
-        $${DAE_CORE_LIB} \
-        $${MPI_LIBS}
+LIBS += $${SOLIBS_RPATH_SL}
+
+LIBS += $${DAE_CORE_LIB} \
+        $${DAE_DATAREPORTING_LIB} \
+        $${DAE_IDAS_SOLVER_LIB} \
+        $${DAE_UNITS_LIB} \
+        $${DAE_CONFIG_LIB} \
+        $${BOOST_LIBS}
 
 HEADERS += stdafx.h \
     simulation.h \
@@ -26,25 +31,24 @@ SOURCES += stdafx.cpp \
     optimization.cpp \
     ../mmio.c
 
-
-#win32{
-#QMAKE_POST_LINK = copy /y  $${TARGET}.lib $${STATIC_LIBS_DIR}
-#}
-
-#unix{
-#QMAKE_POST_LINK = cp -f  lib$${TARGET}.a $${STATIC_LIBS_DIR}
-#}
-
-#INSTALL_HEADERS = $$system($${COPY_FILES} simulation.h $${HEADERS_DIR}/Activity)
-
 #######################################################
 #                Install files
 #######################################################
-activity_headers.path  = $${HEADERS_DIR}/Activity
-activity_headers.files = simulation.h
+#QMAKE_POST_LINK = $${COPY_FILE} \
+#                  $${DAE_DEST_DIR}/$${SHARED_LIB_PREFIX}$${TARGET}$${SHARED_LIB_POSTFIX}.$${SHARED_LIB_EXT} \
+#                  $${SOLIBS_DIR}/$${SHARED_LIB_PREFIX}$${TARGET}$${SHARED_LIB_POSTFIX}.$${SHARED_LIB_EXT}
 
-activity_libs.path         = $${STATIC_LIBS_DIR}
-win32::activity_libs.files = $${DAE_DEST_DIR}/$${TARGET}.lib
-unix::activity_libs.files  = $${DAE_DEST_DIR}/lib$${TARGET}.a
+# Install headers and libs into daetools-dev
+DAE_PROJECT_NAME = $$basename(PWD)
 
-INSTALLS += activity_headers activity_libs
+install_headers.path  = $${DAE_INSTALL_HEADERS_DIR}/$${DAE_PROJECT_NAME}
+install_headers.files = *.h
+
+install_libs.path  = $${DAE_INSTALL_LIBS_DIR}
+install_libs.files = $${DAE_DEST_DIR}/$${SHARED_LIB_PREFIX}$${TARGET}$${SHARED_LIB_POSTFIX}.$${SHARED_LIB_EXT}
+
+# Install into daetools-package
+install_py_solib.path  = $${SOLIBS_DIR}
+install_py_solib.files = $${DAE_DEST_DIR}/$${SHARED_LIB_PREFIX}$${TARGET}$${SHARED_LIB_POSTFIX}.$${SHARED_LIB_EXT}
+
+INSTALLS += install_headers install_libs install_py_solib

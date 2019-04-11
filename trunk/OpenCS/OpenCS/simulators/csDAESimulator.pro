@@ -138,6 +138,9 @@ HEADERS +=  ../models/cs_dae_model.h \
             data_reporter_csv.h \
             data_reporter_hdf5.h \
             idas_la_functions.h \
+            cvodes_la_functions.h \
+            lasolver_trilinos.h \
+            lasolver_interfaces.h \
             logs.h
 
 SOURCES += auxiliary.cpp \
@@ -146,6 +149,7 @@ SOURCES += auxiliary.cpp \
            daesolver.cpp \
            daemodel.cpp \
            daesimulation.cpp \
+           lasolver_trilinos.cpp \
            preconditioner_jacobi.cpp \
            preconditioner_ifpack.cpp \
            preconditioner_ml.cpp \

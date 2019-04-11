@@ -13,19 +13,7 @@ file(GLOB SOURCES_EVALUATORS    OpenCS/evaluators/*.cpp)
 file(GLOB SOURCES_OPENMP        OpenCS/openmp/*.cpp)
 file(GLOB SOURCES_OPENCL        OpenCS/opencl/*.cpp)
 file(GLOB SOURCES_MODELS        OpenCS/models/*.cpp)
-set(SOURCES_SIMULATORS          OpenCS/simulators/auxiliary.cpp 
-                                OpenCS/simulators/config.cpp 
-                                OpenCS/simulators/logs.cpp 
-                                OpenCS/simulators/data_reporter_csv.cpp 
-                                OpenCS/simulators/data_reporter_hdf5.cpp 
-                                OpenCS/simulators/daesolver.cpp
-                                OpenCS/simulators/odeisolver.cpp
-                                OpenCS/simulators/daemodel.cpp 
-                                OpenCS/simulators/daesimulation.cpp
-                                OpenCS/simulators/preconditioner_jacobi.cpp 
-                                OpenCS/simulators/preconditioner_ifpack.cpp 
-                                OpenCS/simulators/preconditioner_ml.cpp
-                                OpenCS/simulators/cs_simulators.cpp)
+file(GLOB SOURCES_SIMULATORS    OpenCS/simulators/*.cpp)
 
 set(SOURCES_CS_SIMULATOR        OpenCS/simulators/cs_simulator_binary.cpp)
 

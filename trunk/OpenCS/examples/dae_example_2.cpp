@@ -12,9 +12,7 @@ OpenCS software; if not, see <http://www.gnu.org/licenses/>.
 ***********************************************************************************/
 #include <mpi.h>
 #include "heat_conduction_2d.h"
-#include <OpenCS/models/cs_model_builder.h>
-#include <OpenCS/evaluators/cs_evaluators.h>
-#include <OpenCS/simulators/cs_simulators.h>
+#include <OpenCS/opencs.h>
 #include <OpenCS/simulators/daesimulator.h>
 using namespace cs;
 

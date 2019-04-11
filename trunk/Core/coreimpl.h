@@ -3848,49 +3848,49 @@ public:
 /******************************************************************
     daeODEModel
 ******************************************************************/
-class daeODEEquation;
-class DAE_CORE_API daeODEModel : public daeModel
-{
-public:
-    daeDeclareDynamicClass(daeODEModel)
-    daeODEModel(std::string strName, daeModel* pModel, std::string strDescription);
+//class daeODEEquation;
+//class DAE_CORE_API daeODEModel : public daeModel
+//{
+//public:
+//    daeDeclareDynamicClass(daeODEModel)
+//    daeODEModel(std::string strName, daeModel* pModel, std::string strDescription);
 
-public:
-    bool CheckObject(std::vector<string>& strarrErrors) const;
+//public:
+//    bool CheckObject(std::vector<string>& strarrErrors) const;
 
-    friend class daeODEEquation;
-};
+//    friend class daeODEEquation;
+//};
 
 /******************************************************************
     daeODEEquation
 *******************************************************************/
-class DAE_CORE_API daeODEEquation : public daeEquation
-{
-public:
-    daeDeclareDynamicClass(daeODEEquation)
-    daeODEEquation();
-    virtual ~daeODEEquation(void);
+//class DAE_CORE_API daeODEEquation : public daeEquation
+//{
+//public:
+//    daeDeclareDynamicClass(daeODEEquation)
+//    daeODEEquation();
+//    virtual ~daeODEEquation(void);
 
-public:
-    void Open(io::xmlTag_t* pTag);
-    void Save(io::xmlTag_t* pTag) const;
-    void OpenRuntime(io::xmlTag_t* pTag);
-    void SaveRuntime(io::xmlTag_t* pTag) const;
+//public:
+//    void Open(io::xmlTag_t* pTag);
+//    void Save(io::xmlTag_t* pTag) const;
+//    void OpenRuntime(io::xmlTag_t* pTag);
+//    void SaveRuntime(io::xmlTag_t* pTag) const;
 
-    void CreateEquationExecutionInfos(daeModel* pModel, std::vector<daeEquationExecutionInfo*>& ptrarrEqnExecutionInfosCreated, bool bAddToTheModel);
-    bool CheckObject(std::vector<string>& strarrErrors) const;
+//    void CreateEquationExecutionInfos(daeModel* pModel, std::vector<daeEquationExecutionInfo*>& ptrarrEqnExecutionInfosCreated, bool bAddToTheModel);
+//    bool CheckObject(std::vector<string>& strarrErrors) const;
 
-    void	SetODEVariable(adouble odeVariable);
-    adouble	GetODEVariable(void) const;
+//    void	SetODEVariable(adouble odeVariable);
+//    adouble	GetODEVariable(void) const;
 
-protected:
-    // adSetupVariableNode in dVar/dt = residual
-    adNodePtr m_pODEVariableNode;
+//protected:
+//    // adSetupVariableNode in dVar/dt = residual
+//    adNodePtr m_pODEVariableNode;
 
-    friend class daeModel;
-    friend class daeODEModel;
-    friend class daeEquationExecutionInfo;
-};
+//    friend class daeModel;
+//    friend class daeODEModel;
+//    friend class daeEquationExecutionInfo;
+//};
 
 
 /******************************************************************
