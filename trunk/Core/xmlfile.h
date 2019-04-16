@@ -14,15 +14,16 @@ DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 #define XML_FILE
 
 #if !defined(__MINGW32__) && (defined(_WIN32) || defined(WIN32) || defined(WIN64) || defined(_WIN64))
-#ifdef DAEDLL
+
+#ifdef DAE_DLL_INTERFACE
 #ifdef MODEL_EXPORTS
 #define DAE_CORE_API __declspec(dllexport)
 #else // MODEL_EXPORTS
 #define DAE_CORE_API __declspec(dllimport)
 #endif // MODEL_EXPORTS
-#else // DAEDLL
+#else // DAE_DLL_INTERFACE
 #define DAE_CORE_API
-#endif // DAEDLL
+#endif // DAE_DLL_INTERFACE
 
 #else // WIN32
 #define DAE_CORE_API 

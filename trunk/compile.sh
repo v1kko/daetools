@@ -136,6 +136,12 @@ compile()
     ${MAKE} ${MAKEARG} -w
   fi
 
+  echo ""
+  echo "[*] Installing the project..."
+  echo ""
+  # qmake INSTALLS ignore rules if .files are not existing.
+  # Therefore, run qmake again after build (when all files exist) to create a makefile with all rules included.
+  ${QMAKE} -makefile $1.pro -r CONFIG+=release CONFIG+=silent CONFIG+=shellCompile ${CONFIG_CROSS_COMPILING} customPython="${PYTHON}" -spec ${QMAKE_SPEC} ${CONFIG}
   ${MAKE} install
   
   echo ""
@@ -163,7 +169,12 @@ compile_cape_open_thermo()
     
     echo "msbuild.exe CapeOpenThermoPackage.vcxproj /target:rebuild /p:Platform=${MS_BUILD_PLATFORM} /p:Configuration=Release /p:PlatformToolset=v140 /p:UseEnv=true"
     msbuild.exe CapeOpenThermoPackage.vcxproj -target:rebuild -p:Platform="${MS_BUILD_PLATFORM}" -p:Configuration="Release" -p:PlatformToolset="v140" -p:UseEnv=true
+
+    cp -fa ../release/cdaeCapeOpenThermoPackage.lib ${DAE_DEV_LIB_DIR}/cdaeCapeOpenThermoPackage.lib
+    cp -fa ../release/cdaeCapeOpenThermoPackage.dll ${DAE_DEV_LIB_DIR}/cdaeCapeOpenThermoPackage.dll
+    cp -fa ../release/cdaeCapeOpenThermoPackage.dll ${SOLIBS_DIR}/cdaeCapeOpenThermoPackage.dll
   fi
+  cd "${TRUNK}"
 }
 
 # Default python binary:
@@ -194,14 +205,13 @@ if [[ ${PLATFORM} == *"MSYS_"* ]]; then
   fi
 fi
 
-DAE_DEV_DIR="${TRUNK}/daetools-dev/${PLATFORM}_${HOST_ARCH}/lib"
-if [ ! -e ${DAE_DEV_DIR} ]; then
-    mkdir -p ${DAE_DEV_DIR}
-fi
-
-SOLIBS_DIR="${TRUNK}/daetools-package/daetools/solibs/${PLATFORM}_${HOST_ARCH}"
+SOLIBS_DIR="${TRUNK}/daetools-package/daetools/solibs/${PLATFORM}_${HOST_ARCH}/lib"
 if [ ! -e ${SOLIBS_DIR} ]; then
     mkdir -p ${SOLIBS_DIR}
+fi
+DAE_DEV_LIB_DIR="${TRUNK}/daetools-dev/${PLATFORM}_${HOST_ARCH}/lib"
+if [ ! -e ${DAE_DEV_LIB_DIR} ]; then
+    mkdir -p ${DAE_DEV_LIB_DIR}
 fi
 
 if [ ${PLATFORM} = "Darwin" ]; then

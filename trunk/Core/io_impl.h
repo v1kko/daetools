@@ -17,6 +17,22 @@ DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 #include "definitions.h"
 #include "core.h"
 
+#if !defined(__MINGW32__) && (defined(_WIN32) || defined(WIN32) || defined(WIN64) || defined(_WIN64))
+
+#ifdef DAE_DLL_INTERFACE
+#ifdef MODEL_EXPORTS
+#define DAE_CORE_API __declspec(dllexport)
+#else // MODEL_EXPORTS
+#define DAE_CORE_API __declspec(dllimport)
+#endif // MODEL_EXPORTS
+#else // DAE_DLL_INTERFACE
+#define DAE_CORE_API
+#endif // DAE_DLL_INTERFACE
+
+#else // WIN32
+#define DAE_CORE_API
+#endif // WIN32
+
 namespace dae
 {
 
@@ -28,7 +44,7 @@ namespace io
 /********************************************************************
     daeSerializable
 *********************************************************************/
-class daeSerializable : public daeSerializable_t
+class DAE_CORE_API daeSerializable : public daeSerializable_t
 {
 public:
     daeSerializable(void);
@@ -134,47 +150,47 @@ void OpenObjectArrayRuntime(xmlTag_t* pTag, const std::string& strObjectArrayNam
 /******************************************************************
     enum helper functions
 *******************************************************************/
-void OpenEnum(xmlTag_t* pTag, const std::string& strEnumName, core::daeeDomainType& eValue);
-void OpenEnum(xmlTag_t* pTag, const std::string& strEnumName, core::daeeParameterType& eValue);
-void OpenEnum(xmlTag_t* pTag, const std::string& strEnumName, core::daeeDomainBounds& eValue);
-void OpenEnum(xmlTag_t* pTag, const std::string& strEnumName, core::daeeDiscretizationMethod& eValue);
-void OpenEnum(xmlTag_t* pTag, const std::string& strEnumName, core::daeePortType& eValue);
-void OpenEnum(xmlTag_t* pTag, const std::string& strEnumName, core::daeeFunctionType& eValue);
-void OpenEnum(xmlTag_t* pTag, const std::string& strEnumName, core::daeeUnaryFunctions& eValue);
-void OpenEnum(xmlTag_t* pTag, const std::string& strEnumName, core::daeeBinaryFunctions& eValue);
-void OpenEnum(xmlTag_t* pTag, const std::string& strEnumName, core::daeeLogicalUnaryOperator& eValue);
-void OpenEnum(xmlTag_t* pTag, const std::string& strEnumName, core::daeeLogicalBinaryOperator& eValue);
-void OpenEnum(xmlTag_t* pTag, const std::string& strEnumName, core::daeeConditionType& eValue);
-void OpenEnum(xmlTag_t* pTag, const std::string& strEnumName, core::daeeSTNType& eValue);
-void OpenEnum(xmlTag_t* pTag, const std::string& strEnumName, core::daeeDomainIndexType& eValue);
-void OpenEnum(xmlTag_t* pTag, const std::string& strEnumName, core::daeeEquationType& eValue);
-void OpenEnum(xmlTag_t* pTag, const std::string& strEnumName, core::daeeSpecialUnaryFunctions& eValue);
-void OpenEnum(xmlTag_t* pTag, const std::string& strEnumName, core::daeeIntegralFunctions& eValue);
-void OpenEnum(xmlTag_t* pTag, const std::string& strEnumName, core::daeeRangeType& eValue);
-void OpenEnum(xmlTag_t* pTag, const std::string& strEnumName, core::daeIndexRangeType& eValue);
-void OpenEnum(xmlTag_t* pTag, const std::string& strEnumName, core::daeeActionType& eValue);
-void OpenEnum(xmlTag_t* pTag, const std::string& strEnumName, core::daeeVariableValueConstraint& eValue);
+DAE_CORE_API void OpenEnum(xmlTag_t* pTag, const std::string& strEnumName, core::daeeDomainType& eValue);
+DAE_CORE_API void OpenEnum(xmlTag_t* pTag, const std::string& strEnumName, core::daeeParameterType& eValue);
+DAE_CORE_API void OpenEnum(xmlTag_t* pTag, const std::string& strEnumName, core::daeeDomainBounds& eValue);
+DAE_CORE_API void OpenEnum(xmlTag_t* pTag, const std::string& strEnumName, core::daeeDiscretizationMethod& eValue);
+DAE_CORE_API void OpenEnum(xmlTag_t* pTag, const std::string& strEnumName, core::daeePortType& eValue);
+DAE_CORE_API void OpenEnum(xmlTag_t* pTag, const std::string& strEnumName, core::daeeFunctionType& eValue);
+DAE_CORE_API void OpenEnum(xmlTag_t* pTag, const std::string& strEnumName, core::daeeUnaryFunctions& eValue);
+DAE_CORE_API void OpenEnum(xmlTag_t* pTag, const std::string& strEnumName, core::daeeBinaryFunctions& eValue);
+DAE_CORE_API void OpenEnum(xmlTag_t* pTag, const std::string& strEnumName, core::daeeLogicalUnaryOperator& eValue);
+DAE_CORE_API void OpenEnum(xmlTag_t* pTag, const std::string& strEnumName, core::daeeLogicalBinaryOperator& eValue);
+DAE_CORE_API void OpenEnum(xmlTag_t* pTag, const std::string& strEnumName, core::daeeConditionType& eValue);
+DAE_CORE_API void OpenEnum(xmlTag_t* pTag, const std::string& strEnumName, core::daeeSTNType& eValue);
+DAE_CORE_API void OpenEnum(xmlTag_t* pTag, const std::string& strEnumName, core::daeeDomainIndexType& eValue);
+DAE_CORE_API void OpenEnum(xmlTag_t* pTag, const std::string& strEnumName, core::daeeEquationType& eValue);
+DAE_CORE_API void OpenEnum(xmlTag_t* pTag, const std::string& strEnumName, core::daeeSpecialUnaryFunctions& eValue);
+DAE_CORE_API void OpenEnum(xmlTag_t* pTag, const std::string& strEnumName, core::daeeIntegralFunctions& eValue);
+DAE_CORE_API void OpenEnum(xmlTag_t* pTag, const std::string& strEnumName, core::daeeRangeType& eValue);
+DAE_CORE_API void OpenEnum(xmlTag_t* pTag, const std::string& strEnumName, core::daeIndexRangeType& eValue);
+DAE_CORE_API void OpenEnum(xmlTag_t* pTag, const std::string& strEnumName, core::daeeActionType& eValue);
+DAE_CORE_API void OpenEnum(xmlTag_t* pTag, const std::string& strEnumName, core::daeeVariableValueConstraint& eValue);
 
-void SaveEnum(xmlTag_t* pTag, const std::string& strEnumName, const core::daeeDomainType eValue);
-void SaveEnum(xmlTag_t* pTag, const std::string& strEnumName, const core::daeeParameterType eValue);
-void SaveEnum(xmlTag_t* pTag, const std::string& strEnumName, const core::daeeDomainBounds eValue);
-void SaveEnum(xmlTag_t* pTag, const std::string& strEnumName, const core::daeeDiscretizationMethod eValue);
-void SaveEnum(xmlTag_t* pTag, const std::string& strEnumName, const core::daeePortType eValue);
-void SaveEnum(xmlTag_t* pTag, const std::string& strEnumName, const core::daeeFunctionType eValue);
-void SaveEnum(xmlTag_t* pTag, const std::string& strEnumName, const core::daeeUnaryFunctions eValue);
-void SaveEnum(xmlTag_t* pTag, const std::string& strEnumName, const core::daeeBinaryFunctions eValue);
-void SaveEnum(xmlTag_t* pTag, const std::string& strEnumName, const core::daeeLogicalUnaryOperator eValue);
-void SaveEnum(xmlTag_t* pTag, const std::string& strEnumName, const core::daeeLogicalBinaryOperator eValue);
-void SaveEnum(xmlTag_t* pTag, const std::string& strEnumName, const core::daeeConditionType eValue);
-void SaveEnum(xmlTag_t* pTag, const std::string& strEnumName, const core::daeeSTNType eValue);
-void SaveEnum(xmlTag_t* pTag, const std::string& strEnumName, const core::daeeDomainIndexType eValue);
-void SaveEnum(xmlTag_t* pTag, const std::string& strEnumName, const core::daeeEquationType eValue);
-void SaveEnum(xmlTag_t* pTag, const std::string& strEnumName, const core::daeeSpecialUnaryFunctions eValue);
-void SaveEnum(xmlTag_t* pTag, const std::string& strEnumName, const core::daeeIntegralFunctions eValue);
-void SaveEnum(xmlTag_t* pTag, const std::string& strEnumName, const core::daeeRangeType eValue);
-void SaveEnum(xmlTag_t* pTag, const std::string& strEnumName, const core::daeIndexRangeType eValue);
-void SaveEnum(xmlTag_t* pTag, const std::string& strEnumName, const core::daeeActionType eValue);
-void SaveEnum(xmlTag_t* pTag, const std::string& strEnumName, const core::daeeVariableValueConstraint eValue);
+DAE_CORE_API void SaveEnum(xmlTag_t* pTag, const std::string& strEnumName, const core::daeeDomainType eValue);
+DAE_CORE_API void SaveEnum(xmlTag_t* pTag, const std::string& strEnumName, const core::daeeParameterType eValue);
+DAE_CORE_API void SaveEnum(xmlTag_t* pTag, const std::string& strEnumName, const core::daeeDomainBounds eValue);
+DAE_CORE_API void SaveEnum(xmlTag_t* pTag, const std::string& strEnumName, const core::daeeDiscretizationMethod eValue);
+DAE_CORE_API void SaveEnum(xmlTag_t* pTag, const std::string& strEnumName, const core::daeePortType eValue);
+DAE_CORE_API void SaveEnum(xmlTag_t* pTag, const std::string& strEnumName, const core::daeeFunctionType eValue);
+DAE_CORE_API void SaveEnum(xmlTag_t* pTag, const std::string& strEnumName, const core::daeeUnaryFunctions eValue);
+DAE_CORE_API void SaveEnum(xmlTag_t* pTag, const std::string& strEnumName, const core::daeeBinaryFunctions eValue);
+DAE_CORE_API void SaveEnum(xmlTag_t* pTag, const std::string& strEnumName, const core::daeeLogicalUnaryOperator eValue);
+DAE_CORE_API void SaveEnum(xmlTag_t* pTag, const std::string& strEnumName, const core::daeeLogicalBinaryOperator eValue);
+DAE_CORE_API void SaveEnum(xmlTag_t* pTag, const std::string& strEnumName, const core::daeeConditionType eValue);
+DAE_CORE_API void SaveEnum(xmlTag_t* pTag, const std::string& strEnumName, const core::daeeSTNType eValue);
+DAE_CORE_API void SaveEnum(xmlTag_t* pTag, const std::string& strEnumName, const core::daeeDomainIndexType eValue);
+DAE_CORE_API void SaveEnum(xmlTag_t* pTag, const std::string& strEnumName, const core::daeeEquationType eValue);
+DAE_CORE_API void SaveEnum(xmlTag_t* pTag, const std::string& strEnumName, const core::daeeSpecialUnaryFunctions eValue);
+DAE_CORE_API void SaveEnum(xmlTag_t* pTag, const std::string& strEnumName, const core::daeeIntegralFunctions eValue);
+DAE_CORE_API void SaveEnum(xmlTag_t* pTag, const std::string& strEnumName, const core::daeeRangeType eValue);
+DAE_CORE_API void SaveEnum(xmlTag_t* pTag, const std::string& strEnumName, const core::daeIndexRangeType eValue);
+DAE_CORE_API void SaveEnum(xmlTag_t* pTag, const std::string& strEnumName, const core::daeeActionType eValue);
+DAE_CORE_API void SaveEnum(xmlTag_t* pTag, const std::string& strEnumName, const core::daeeVariableValueConstraint eValue);
 
 /*********************************************************************************************
     daeEnumStringMap

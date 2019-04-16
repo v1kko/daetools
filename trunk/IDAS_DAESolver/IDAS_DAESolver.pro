@@ -8,6 +8,8 @@ CONFIG += shared plugin
 INCLUDEPATH += $${BOOSTDIR} \
                $${SUNDIALS_INCLUDE}
 
+win32::QMAKE_CXXFLAGS += -DIDAS_EXPORTS
+
 QMAKE_LIBDIR += $${SUNDIALS_LIBDIR}
 
 LIBS += $${SOLIBS_RPATH_SL}
@@ -37,17 +39,4 @@ HEADERS += stdafx.h \
 #                  $${DAE_DEST_DIR}/$${SHARED_LIB_PREFIX}$${TARGET}$${SHARED_LIB_POSTFIX}.$${SHARED_LIB_EXT} \
 #                  $${SOLIBS_DIR}/$${SHARED_LIB_PREFIX}$${TARGET}$${SHARED_LIB_POSTFIX}.$${SHARED_LIB_EXT}
 
-# Install headers and libs into daetools-dev
-DAE_PROJECT_NAME = $$basename(PWD)
-
-install_headers.path  = $${DAE_INSTALL_HEADERS_DIR}/$${DAE_PROJECT_NAME}
-install_headers.files = *.h
-
-install_libs.path  = $${DAE_INSTALL_LIBS_DIR}
-install_libs.files = $${DAE_DEST_DIR}/$${SHARED_LIB_PREFIX}$${TARGET}$${SHARED_LIB_POSTFIX}.$${SHARED_LIB_EXT}
-
-# Install into daetools-package
-install_py_solib.path  = $${SOLIBS_DIR}
-install_py_solib.files = $${DAE_DEST_DIR}/$${SHARED_LIB_PREFIX}$${TARGET}$${SHARED_LIB_POSTFIX}.$${SHARED_LIB_EXT}
-
-INSTALLS += install_headers install_libs install_py_solib
+include(../dae_install_library.pri)

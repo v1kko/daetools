@@ -9,7 +9,7 @@ namespace dae
 {
 namespace nlpsolver
 {
-daeNLPSolver_t* daeCreateNLOPTSolver(const std::string& algorithm);
+DAE_NLOPT_API daeNLPSolver_t* daeCreateNLOPTSolver(const std::string& algorithm);
 }
 }
 

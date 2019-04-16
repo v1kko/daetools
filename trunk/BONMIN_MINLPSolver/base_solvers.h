@@ -1,5 +1,5 @@
-#ifndef DAE_NLP_BASESOLVERS_H
-#define DAE_NLP_BASESOLVERS_H
+#ifndef DAE_BONMIN_BASESOLVERS_H
+#define DAE_BONMIN_BASESOLVERS_H
 
 #include "nlpsolver_class_factory.h"
 #include "../Core/optimization.h"
@@ -10,8 +10,8 @@ namespace dae
 {
 namespace nlpsolver
 {
-daeNLPSolver_t* daeCreateIPOPTSolver(void);
-daeNLPSolver_t* daeCreateBONMINSolver(void);
+DAE_BONMIN_API daeNLPSolver_t* daeCreateIPOPTSolver(void);
+DAE_BONMIN_API daeNLPSolver_t* daeCreateBONMINSolver(void);
 }
 }
 #endif

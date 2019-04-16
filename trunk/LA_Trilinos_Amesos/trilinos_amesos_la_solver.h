@@ -35,7 +35,7 @@ namespace dae
 {
 namespace solver
 {
-class daeEpetraCSRMatrix : public daeSparseMatrix<double>
+class DAE_TRILINOS_API daeEpetraCSRMatrix : public daeSparseMatrix<double>
 {
 public:
     daeEpetraCSRMatrix(void)
@@ -214,7 +214,7 @@ protected:
     Epetra_CrsMatrix*	matrix;
 };
 
-class DAE_SOLVER_API daePreconditioner_Ifpack : public daePreconditioner_t
+class DAE_TRILINOS_API daePreconditioner_Ifpack : public daePreconditioner_t
 {
 public:
     daePreconditioner_Ifpack(const std::string& preconditionerName);
@@ -253,7 +253,7 @@ public:
     std::map<std::string, call_stats::TimeAndCount>  m_stats;
 };
 
-class DAE_SOLVER_API daePreconditioner_ML : public daePreconditioner_t
+class DAE_TRILINOS_API daePreconditioner_ML : public daePreconditioner_t
 {
 public:
     daePreconditioner_ML(const std::string& preconditionerName);
@@ -292,7 +292,7 @@ public:
     std::map<std::string, call_stats::TimeAndCount>  m_stats;
 };
 
-class DAE_SOLVER_API daeTrilinosSolver : public dae::solver::daeLASolver_t
+class DAE_TRILINOS_API daeTrilinosSolver : public dae::solver::daeLASolver_t
 {
 public:
     daeTrilinosSolver(const std::string& strSolverName, const std::string& strPreconditionerName);

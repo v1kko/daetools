@@ -17,6 +17,8 @@ TARGET = cdaeIntelPardiso_LASolver
 TEMPLATE = lib
 CONFIG += shared plugin
 
+win32::QMAKE_CXXFLAGS += -DINTEL_PARDISO_EXPORTS
+
 INCLUDEPATH += $${BOOSTDIR} \
                $${PYTHON_INCLUDE_DIR} \
                $${INTEL_MKL_INCLUDE}
@@ -40,16 +42,8 @@ HEADERS += stdafx.h \
 #######################################################
 #                Install files
 #######################################################
-QMAKE_POST_LINK = $${COPY_FILE} \
-                  $${DAE_DEST_DIR}/$${SHARED_LIB_PREFIX}$${TARGET}$${SHARED_LIB_POSTFIX}.$${SHARED_LIB_EXT} \
-                  $${SOLIBS_DIR}/$${SHARED_LIB_PREFIX}$${TARGET}$${SHARED_LIB_POSTFIX}.$${SHARED_LIB_EXT}
+#QMAKE_POST_LINK = $${COPY_FILE} \
+#                  $${DAE_DEST_DIR}/$${SHARED_LIB_PREFIX}$${TARGET}$${SHARED_LIB_POSTFIX}.$${SHARED_LIB_EXT} \
+#                  $${SOLIBS_DIR}/$${SHARED_LIB_PREFIX}$${TARGET}$${SHARED_LIB_POSTFIX}.$${SHARED_LIB_EXT}
                   
-DAE_PROJECT_NAME = $$basename(PWD)
-
-install_headers.path  = $${DAE_INSTALL_HEADERS_DIR}/$${DAE_PROJECT_NAME}
-install_headers.files = *.h
-
-install_libs.path  = $${DAE_INSTALL_LIBS_DIR}
-install_libs.files = $${DAE_DEST_DIR}/$${SHARED_LIB_PREFIX}$${TARGET}$${SHARED_LIB_POSTFIX}.$${SHARED_LIB_EXT}
-
-INSTALLS += install_headers install_libs
+include(../dae_install_library.pri)

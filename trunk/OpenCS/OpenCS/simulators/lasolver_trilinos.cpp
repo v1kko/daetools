@@ -710,9 +710,7 @@ int daeTrilinosSolver::Setup(real_t  time,
         m_pAztecOOSolver->DestroyPreconditioner();
 
         nResult = m_pAztecOOSolver->ConstructPreconditioner(condest);
-
-        //printf("    t = %.15f compute preconditioner (condest = %.2e)\n", time, condest);
-
+        printf("    t = %.15f compute preconditioner (condest = %.2e)\n", time, condest);
         if(nResult < 0)
         {
             std::cout << "AztecOO: construct preconditioner failed: " << nResult << std::endl;
@@ -725,10 +723,8 @@ int daeTrilinosSolver::Setup(real_t  time,
             csThrowException("InvalidCall");
 
         nResult = m_pPreconditionerIfpack->Compute();
-
-        //double condest = m_pPreconditionerIfpack->Condest();
-        //printf("    t = %.15f compute preconditioner (condest = %.2e)\n", time, condest);
-
+        double condest = m_pPreconditionerIfpack->Condest();
+        printf("    t = %.15f compute preconditioner (condest = %.2e)\n", time, condest);
         if(nResult != 0)
         {
             std::cout << "Ifpack: compute preconditioner failed: " << nResult << std::endl;

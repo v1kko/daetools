@@ -280,9 +280,21 @@ if [ "${DAE_IF_CROSS_COMPILING}" = "0" ]; then
 fi
 PYTHON_VERSION=$PYTHON_MAJOR.$PYTHON_MINOR
 
-SOLIBS_DIR="${TRUNK}/daetools-package/daetools/${PLATFORM}_${HOST_ARCH}/lib"
+SOLIBS_DIR="${TRUNK}/daetools-package/daetools/solibs/${PLATFORM}_${HOST_ARCH}/lib"
 if [ ! -e ${SOLIBS_DIR} ]; then
     mkdir -p ${SOLIBS_DIR}
+fi
+BIN_DIR="${TRUNK}/daetools-package/daetools/solibs/${PLATFORM}_${HOST_ARCH}/bin"
+if [ ! -e ${BIN_DIR} ]; then
+    mkdir -p ${BIN_DIR}
+fi
+DAE_DEV_LIB_DIR="${TRUNK}/daetools-dev/${PLATFORM}_${HOST_ARCH}/lib"
+if [ ! -e ${DAE_DEV_LIB_DIR} ]; then
+    mkdir -p ${DAE_DEV_LIB_DIR}
+fi
+DAE_DEV_BIN_DIR="${TRUNK}/daetools-dev/${PLATFORM}_${HOST_ARCH}/bin"
+if [ ! -e ${DAE_DEV_BIN_DIR} ]; then
+    mkdir -p ${DAE_DEV_BIN_DIR}
 fi
 
 if [ ${PLATFORM} = "Darwin" ]; then
@@ -334,8 +346,8 @@ export DAE_CROSS_COMPILER_PREFIX
 DAE_UMFPACK_INSTALL_DIR="${TRUNK}/umfpack/build"
 export DAE_UMFPACK_INSTALL_DIR
 
-vBOOST=1.65.1
-vBOOST_=1_65_1
+vBOOST=1.70.0
+vBOOST_=1_70_0
 vBONMIN=1.8.6
 vBONMIN_WIN="1.8.6-msvc++-2015"
 vLAPACK=3.4.1
@@ -358,7 +370,8 @@ vSUPERLU=5.2.1
 vSUPERLU_MT=3.1
 vCOOLPROP=6.1.0
 
-BOOST_BUILD_ID=daetools-py${PYTHON_MAJOR}${PYTHON_MINOR}
+#BOOST_BUILD_ID=daetools-py${PYTHON_MAJOR}${PYTHON_MINOR}
+BOOST_BUILD_ID=daetools
 BOOST_PYTHON_BUILD_ID=
 
 BOOST_HTTP=http://sourceforge.net/projects/boost/files/boost
@@ -470,18 +483,13 @@ configure_boost()
     unzip boost_${vBOOST_}.zip
     mv boost_${vBOOST_} boost${PYTHON_VERSION}
     cd boost${PYTHON_VERSION}
-    # There is a problem with executing bootstrap.bat with arguments from bash.
-    # Solution: create a proxy batch file which runs 'bootstrap vc14'. 
-    echo "call bootstrap vc14" > dae_bootstrap.bat
-    cmd "/C dae_bootstrap" 
   else
     if [ ! -e boost_${vBOOST_}.tar.gz ]; then
       $WGET ${BOOST_HTTP}/${vBOOST}/boost_${vBOOST_}.tar.gz
     fi
     tar -xzf boost_${vBOOST_}.tar.gz
-    mv boost_${vBOOST_} boost${PYTHON_VERSION}
-    cd boost${PYTHON_VERSION}
-    sh bootstrap.sh --with-python=${PYTHON}
+    mv boost_${vBOOST_} boost     # ${PYTHON_VERSION}
+    cd boost                      # ${PYTHON_VERSION}
   fi
 
   cd "${TRUNK}"
@@ -497,6 +505,8 @@ compile_boost()
     echo ""
     echo "[*] Building boost"
     echo ""
+
+    sh bootstrap.sh --with-python=${PYTHON}
 
     BOOST_USER_CONFIG=~/user-config.jam
 
@@ -530,9 +540,18 @@ compile_boost()
            toolset=gcc target-os=windows threadapi=win32 \
            variant=release link=shared threading=multi runtime-link=shared ${BOOST_MACOSX_FLAGS}
 
-    cp -fa stage/lib/libboost_system-${BOOST_BUILD_ID}${BOOST_PYTHON_BUILD_ID}*       ${SOLIBS_DIR}
-    cp -fa stage/lib/libboost_thread_win32-${BOOST_BUILD_ID}${BOOST_PYTHON_BUILD_ID}* ${SOLIBS_DIR}
-    cp -fa stage/lib/libboost_filesystem-${BOOST_BUILD_ID}${BOOST_PYTHON_BUILD_ID}*   ${SOLIBS_DIR}
+    # To copy only i.e. libboost_system-*.so.1.70.0 on GNU/Linux (skip the symlinks).
+    if [ ${PLATFORM} = "Linux" ]; then
+      BOOST_PYTHON_BUILD_ID=${vBOOST}
+    fi  
+	# Copy to daetools-package
+    cp -fa stage/lib/libboost_system-${BOOST_BUILD_ID}*${BOOST_PYTHON_BUILD_ID}       ${SOLIBS_DIR}
+    cp -fa stage/lib/libboost_thread_win32-${BOOST_BUILD_ID}*${BOOST_PYTHON_BUILD_ID} ${SOLIBS_DIR}
+    cp -fa stage/lib/libboost_filesystem-${BOOST_BUILD_ID}*${BOOST_PYTHON_BUILD_ID}   ${SOLIBS_DIR}
+	# Copy to daetools-dev
+    cp -fa stage/lib/libboost_system-${BOOST_BUILD_ID}*${BOOST_PYTHON_BUILD_ID}       ${DAE_DEV_LIB_DIR}
+    cp -fa stage/lib/libboost_thread_win32-${BOOST_BUILD_ID}*${BOOST_PYTHON_BUILD_ID} ${DAE_DEV_LIB_DIR}
+    cp -fa stage/lib/libboost_filesystem-${BOOST_BUILD_ID}*${BOOST_PYTHON_BUILD_ID}   ${DAE_DEV_LIB_DIR}
 
     # Achtung, Achtung!
     # The following will fail at the linking phase!
@@ -553,17 +572,23 @@ compile_boost()
     if [ "${PYTHON_MAJOR}" = "2" ]; then
       LIBBOOST_PYTHON_SUF=""
     fi
-    cp -fa stage/lib/libboost_python${LIBBOOST_PYTHON_SUF}-${BOOST_BUILD_ID}${BOOST_PYTHON_BUILD_ID}*  ${SOLIBS_DIR}
+    cp -fa stage/lib/libboost_python${LIBBOOST_PYTHON_SUF}-${BOOST_BUILD_ID}*${BOOST_PYTHON_BUILD_ID}  ${SOLIBS_DIR}
+    cp -fa stage/lib/libboost_python${LIBBOOST_PYTHON_SUF}-${BOOST_BUILD_ID}*${BOOST_PYTHON_BUILD_ID}  ${DAE_DEV_LIB_DIR}
 
   else # regular compiler (not a cross-compiler)
 
-    cd boost${PYTHON_VERSION}
+    cd boost       # ${PYTHON_VERSION}
     echo ""
     echo "[*] Building boost"
     echo ""
 
     BOOST_USER_CONFIG=~/user-config.jam
     if [ ${PLATFORM} = "Windows" ]; then
+      # There is a problem with executing bootstrap.bat with arguments from bash.
+      # Solution: create a proxy batch file which runs 'bootstrap vc14'. 
+      echo "call bootstrap vc14" > dae_bootstrap.bat
+      cmd "/C dae_bootstrap" 
+      
       # There is a problem when there are multiple vc++ version installed.
       # Therefore, specify the version in the jam file.
       echo "using msvc : 14.0 : : ;"                >  ${BOOST_USER_CONFIG}
@@ -583,18 +608,24 @@ compile_boost()
              --with-date_time --with-system --with-filesystem --with-regex --with-serialization --with-thread --with-python \
              variant=release link=shared threading=multi runtime-link=shared ${BOOST_MACOSX_FLAGS}
 
-      LIBBOOST_PYTHON_SUF="${PYTHON_MAJOR}"
-      if [ "${PYTHON_MAJOR}" = "2" ]; then
-        LIBBOOST_PYTHON_SUF=""
-      fi
+      LIBBOOST_PYTHON_SUF="${PYTHON_MAJOR}${PYTHON_MINOR}"
 
+      # Copy to daetools-package
       cp -fa stage/lib/boost_python${LIBBOOST_PYTHON_SUF}-${BOOST_BUILD_ID}${BOOST_PYTHON_BUILD_ID}*.dll  ${SOLIBS_DIR}
       cp -fa stage/lib/boost_system-${BOOST_BUILD_ID}${BOOST_PYTHON_BUILD_ID}*.dll                        ${SOLIBS_DIR}
       cp -fa stage/lib/boost_thread-${BOOST_BUILD_ID}${BOOST_PYTHON_BUILD_ID}*.dll                        ${SOLIBS_DIR}
       cp -fa stage/lib/boost_filesystem-${BOOST_BUILD_ID}${BOOST_PYTHON_BUILD_ID}*.dll                    ${SOLIBS_DIR}
       cp -fa stage/lib/boost_chrono-${BOOST_BUILD_ID}${BOOST_PYTHON_BUILD_ID}*.dll                        ${SOLIBS_DIR}
-
+      # Copy to daetools-dev
+      cp -fa stage/lib/boost_python${LIBBOOST_PYTHON_SUF}-${BOOST_BUILD_ID}${BOOST_PYTHON_BUILD_ID}*.dll  ${DAE_DEV_LIB_DIR}
+      cp -fa stage/lib/boost_system-${BOOST_BUILD_ID}${BOOST_PYTHON_BUILD_ID}*.dll                        ${DAE_DEV_LIB_DIR}
+      cp -fa stage/lib/boost_thread-${BOOST_BUILD_ID}${BOOST_PYTHON_BUILD_ID}*.dll                        ${DAE_DEV_LIB_DIR}
+      cp -fa stage/lib/boost_filesystem-${BOOST_BUILD_ID}${BOOST_PYTHON_BUILD_ID}*.dll                    ${DAE_DEV_LIB_DIR}
+      cp -fa stage/lib/boost_chrono-${BOOST_BUILD_ID}${BOOST_PYTHON_BUILD_ID}*.dll                        ${DAE_DEV_LIB_DIR}
+	  
     else
+      sh bootstrap.sh --with-python=${PYTHON}
+
       echo "using python"                           >  ${BOOST_USER_CONFIG}
       echo "    : ${PYTHON_MAJOR}.${PYTHON_MINOR}"  >> ${BOOST_USER_CONFIG}
       echo "    : ${PYTHON}"                        >> ${BOOST_USER_CONFIG}
@@ -603,19 +634,26 @@ compile_boost()
       echo "    : <toolset>gcc"                     >> ${BOOST_USER_CONFIG}
       echo "    ;"                                  >> ${BOOST_USER_CONFIG}
 
-      ./bjam --build-dir=./build --debug-building --layout=system --buildid=${BOOST_BUILD_ID} \
+      ./bjam --build-dir=./build --debug-building --buildid=${BOOST_BUILD_ID} --layout=system \
              --with-date_time --with-system --with-filesystem --with-regex --with-serialization --with-thread --with-python \
              variant=release link=shared threading=multi runtime-link=shared ${BOOST_MACOSX_FLAGS}
 
-      LIBBOOST_PYTHON_SUF="${PYTHON_MAJOR}"
-      if [ "${PYTHON_MAJOR}" = "2" ]; then
-        LIBBOOST_PYTHON_SUF=""
-      fi
+      LIBBOOST_PYTHON_SUF="${PYTHON_MAJOR}${PYTHON_MINOR}"
 
-      cp -fa stage/lib/libboost_python${LIBBOOST_PYTHON_SUF}-${BOOST_BUILD_ID}${BOOST_PYTHON_BUILD_ID}*  ${SOLIBS_DIR}
-      cp -fa stage/lib/libboost_system-${BOOST_BUILD_ID}${BOOST_PYTHON_BUILD_ID}*                        ${SOLIBS_DIR}
-      cp -fa stage/lib/libboost_thread-${BOOST_BUILD_ID}${BOOST_PYTHON_BUILD_ID}*                        ${SOLIBS_DIR}
-      cp -fa stage/lib/libboost_filesystem-${BOOST_BUILD_ID}${BOOST_PYTHON_BUILD_ID}*                    ${SOLIBS_DIR}
+      # To copy only i.e. libboost_system-*.so.1.70.0 on GNU/Linux (skip the symlinks).
+      if [ ${PLATFORM} = "Linux" ]; then
+        BOOST_PYTHON_BUILD_ID=${vBOOST}
+      fi  
+      # Copy to daetools-package
+      cp -fa stage/lib/libboost_python${LIBBOOST_PYTHON_SUF}-${BOOST_BUILD_ID}*${BOOST_PYTHON_BUILD_ID}  ${SOLIBS_DIR}
+      cp -fa stage/lib/libboost_system-${BOOST_BUILD_ID}*${BOOST_PYTHON_BUILD_ID}                        ${SOLIBS_DIR}
+      cp -fa stage/lib/libboost_thread-${BOOST_BUILD_ID}*${BOOST_PYTHON_BUILD_ID}                        ${SOLIBS_DIR}
+      cp -fa stage/lib/libboost_filesystem-${BOOST_BUILD_ID}*${BOOST_PYTHON_BUILD_ID}                    ${SOLIBS_DIR}
+      # Copy to daetools-dev
+      cp -fa stage/lib/libboost_python${LIBBOOST_PYTHON_SUF}-${BOOST_BUILD_ID}*${BOOST_PYTHON_BUILD_ID}  ${DAE_DEV_LIB_DIR}
+      cp -fa stage/lib/libboost_system-${BOOST_BUILD_ID}*${BOOST_PYTHON_BUILD_ID}                        ${DAE_DEV_LIB_DIR}
+      cp -fa stage/lib/libboost_thread-${BOOST_BUILD_ID}*${BOOST_PYTHON_BUILD_ID}                        ${DAE_DEV_LIB_DIR}
+      cp -fa stage/lib/libboost_filesystem-${BOOST_BUILD_ID}*${BOOST_PYTHON_BUILD_ID}                    ${DAE_DEV_LIB_DIR}
     fi
 
   fi
@@ -660,8 +698,8 @@ configure_boost_static()
       $WGET ${BOOST_HTTP}/${vBOOST}/boost_${vBOOST_}.zip
     fi
     unzip boost_${vBOOST_}.zip
-    mv boost_${vBOOST_} boost
-    cd boost
+    mv boost_${vBOOST_} boost-static
+    cd boost-static
     
     # There is a problem when there are multiple vc++ version installed.
     # Therefore, specify the version in the jam file.
@@ -677,8 +715,8 @@ configure_boost_static()
       $WGET ${BOOST_HTTP}/${vBOOST}/boost_${vBOOST_}.tar.gz
     fi
     tar -xzf boost_${vBOOST_}.tar.gz
-    mv boost_${vBOOST_} boost
-    cd boost
+    mv boost_${vBOOST_} boost-static
+    cd boost-static
     sh bootstrap.sh
   fi
 
@@ -690,7 +728,7 @@ configure_boost_static()
 
 compile_boost_static()
 {
-  cd boost
+  cd boost-static
   echo ""
   echo "[*] Building boost_static"
   echo ""
@@ -724,7 +762,7 @@ clean_boost_static()
   echo ""
   echo "[*] Cleaning boost_static..."
   echo ""
-  cd boost
+  cd boost-static
   ./bjam --clean
   cd "${TRUNK}"
   echo ""
@@ -776,6 +814,7 @@ compile_openblas()
   ${MAKE_Ncpu}
   ${MAKE} prefix=build install
   cp -a libopenblas_daetools* ${SOLIBS_DIR}
+  cp -a libopenblas_daetools* ${DAE_DEV_LIB_DIR}
   echo ""
   echo "[*] Done!"
   echo ""
@@ -1907,11 +1946,10 @@ compile_dealii()
   # Not anymore!
   if [ ${PLATFORM} = "Darwin" ]; then
     cp -a build/lib/libdeal_II-daetools.dylib.${vDEALII} ${SOLIBS_DIR}
+    cp -a build/lib/libdeal_II-daetools.dylib.${vDEALII} ${DAE_DEV_LIB_DIR}
   elif [ ${PLATFORM} = "Linux" ]; then
     cp -a build/lib/libdeal_II-daetools.so.${vDEALII} ${SOLIBS_DIR}/libdeal_II-daetools.so.${vDEALII}
-  elif [ ${PLATFORM} = "Linux" ]; then
-    echo "Cannot copy libdeal.II to solibs"
-    exit 1
+    cp -a build/lib/libdeal_II-daetools.so.${vDEALII} ${DAE_DEV_LIB_DIR}/libdeal_II-daetools.so.${vDEALII}
   else
     echo "..."
   fi
@@ -1975,10 +2013,19 @@ compile_opencs()
 
   if [ ${PLATFORM} = "Darwin" ]; then
     cp -fa lib/libOpenCS_*      ${SOLIBS_DIR}
+    cp -fa bin/csSimulator*     ${BIN_DIR}
+    cp -fa lib/libOpenCS_*      ${DAE_DEV_LIB_DIR}
+    cp -fa bin/csSimulator*     ${DAE_DEV_BIN_DIR}
   elif [ ${PLATFORM} = "Linux" ]; then
     cp -fa lib/libOpenCS_*      ${SOLIBS_DIR}
+    cp -fa bin/csSimulator*     ${BIN_DIR}
+    cp -fa lib/libOpenCS_*      ${DAE_DEV_LIB_DIR}
+    cp -fa bin/csSimulator*     ${DAE_DEV_BIN_DIR}
   elif [ ${PLATFORM} = "Windows" ]; then
     cp -fa lib/OpenCS_*.dll     ${SOLIBS_DIR}
+    cp -fa bin/csSimulator*     ${BIN_DIR}
+    cp -fa lib/OpenCS_*.dll     ${DAE_DEV_LIB_DIR}
+    cp -fa bin/csSimulator*     ${DAE_DEV_BIN_DIR}
   else
     echo "..."
   fi

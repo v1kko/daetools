@@ -1,5 +1,5 @@
-#ifndef DAE_NLPSOLVER_H
-#define DAE_NLPSOLVER_H
+#ifndef DAE_BONMIN_NLPSOLVER_H
+#define DAE_BONMIN_NLPSOLVER_H
 
 #include "stdafx.h"
 #include "nlpsolver_class_factory.h"
@@ -51,12 +51,12 @@ namespace nlpsolver
 	daeNLP
 *******************************************************************/
 #ifdef daeIPOPT
-class DAE_NLPSOLVER_API daeMINLP : public TNLP,
-                                   public daeNLPCommon
+class DAE_BONMIN_API daeMINLP : public TNLP,
+                                public daeNLPCommon
 #endif
 #ifdef daeBONMIN
-class DAE_NLPSOLVER_API daeMINLP : public TMINLP,
-                                   public daeNLPCommon
+class DAE_BONMIN_API daeMINLP : public TMINLP,
+                                public daeNLPCommon
 #endif
 {
 public:
@@ -68,6 +68,11 @@ public:
              const std::string& initializationFile = std::string(""));
 	
 	virtual ~daeMINLP(void);
+
+    // If DAE_DLL_INTERFACE is enabled the operator=(const TMINLP&) produces the unresolved symbol link error.
+    // The solution: add a private copy constructor and copy assignment operator.
+    daeMINLP(const daeMINLP&)            = delete;
+    daeMINLP& operator=(const daeMINLP&) = delete;
 
 public:
 // TMINLP interface
@@ -208,7 +213,7 @@ public:
 /******************************************************************
 	daeBONMINSolver
 *******************************************************************/
-class DAE_NLPSOLVER_API daeBONMINSolver : public daeNLPSolver_t
+class DAE_BONMIN_API daeBONMINSolver : public daeNLPSolver_t
 {
 public:
 	daeBONMINSolver(void);

@@ -1,3 +1,12 @@
+Boost libraries (all python versions in a single directory)
+-----------------------------------------------------------
+First compile all libraries for one python version:
+sh compile_libraries.sh boost
+
+and then for every python version only build boost_python (no configure):
+sh compile_libraries.sh --build boost
+
+
 GNU/Linux
 ---------
 1. Compile everything for one minimal python environment (to avoid libraries confusion):

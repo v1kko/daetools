@@ -5,7 +5,7 @@
 #include <iostream>
 #include "simulation_loader_common.h"
 
-class DAE_API daeSimulationLoader
+class DAE_SIMULATION_LOADER_API daeSimulationLoader
 {
 public:
     daeSimulationLoader();

@@ -34,7 +34,7 @@ namespace superlu_mt
 {
 #endif
 
-class DAE_SOLVER_API daeSuperLUSolver : public dae::solver::daeLASolver_t
+class DAE_SUPERLU_API daeSuperLUSolver : public dae::solver::daeLASolver_t
 {
     typedef daeCSRMatrix<real_t, int> daeSuperLUMatrix;
 public:

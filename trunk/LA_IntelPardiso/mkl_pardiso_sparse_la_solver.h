@@ -7,13 +7,29 @@
 #include <mkl_types.h>
 #include <mkl_pardiso.h>
 
+#if defined(_WIN32) || defined(WIN32) || defined(WIN64) || defined(_WIN64)
+
+#ifdef DAE_DLL_INTERFACE
+#ifdef INTEL_PARDISO_EXPORTS
+#define DAE_INTEL_PARDISO_API __declspec(dllexport)
+#else
+#define DAE_INTEL_PARDISO_API __declspec(dllimport)
+#endif
+#else // DAE_DLL_INTERFACE
+#define DAE_INTEL_PARDISO_API
+#endif // DAE_DLL_INTERFACE
+
+#else // WIN32
+#define DAE_INTEL_PARDISO_API
+#endif // WIN32
+
 namespace dae
 {
 namespace solver
 {
-daeLASolver_t* daeCreateIntelPardisoSolver(void);
+DAE_INTEL_PARDISO_API daeLASolver_t* daeCreateIntelPardisoSolver(void);
 
-class DAE_SOLVER_API daeIntelPardisoSolver : public dae::solver::daeLASolver_t
+class DAE_INTEL_PARDISO_API daeIntelPardisoSolver : public dae::solver::daeLASolver_t
 {
 public:
     typedef daeCSRMatrix<real_t, int> daeMKLMatrix;

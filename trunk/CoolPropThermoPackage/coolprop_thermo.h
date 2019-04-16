@@ -13,6 +13,7 @@ DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 #ifndef DAE_COOL_PROP_THERMO_H
 #define DAE_COOL_PROP_THERMO_H
 
+#include "cool_prop.h"
 #include "../Core/thermo_package.h"
 using namespace dae::tpp;
 #include "CoolProp.h"
@@ -20,7 +21,7 @@ using namespace dae::tpp;
 #include "crossplatform_shared_ptr.h"
 using namespace CoolProp;
 
-class daeCoolPropThermoPhysicalPropertyPackage : public daeThermoPhysicalPropertyPackage_t
+class DAE_COOL_PROP_API daeCoolPropThermoPhysicalPropertyPackage : public daeThermoPhysicalPropertyPackage_t
 {
 public:
     daeCoolPropThermoPhysicalPropertyPackage();

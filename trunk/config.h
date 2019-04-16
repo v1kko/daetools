@@ -4,16 +4,22 @@
 #include <string>
 
 #if !defined(__MINGW32__) && (defined(_WIN32) || defined(WIN32) || defined(WIN64) || defined(_WIN64))
-#ifdef DAE_DLL_EXPORTS
-#define DAE_API __declspec(dllexport)
-#else // CONFIG_EXPORTS
-#define DAE_API __declspec(dllimport)
-#endif // CONFIG_EXPORTS
+
+#ifdef DAE_DLL_INTERFACE
+#ifdef CONFIG_EXPORTS
+#define DAE_CONFIG_API __declspec(dllexport)
+#else
+#define DAE_CONFIG_API __declspec(dllimport)
+#endif
+#else
+#define DAE_CONFIG_API
+#endif
+
 #else // WIN32
-#define DAE_API
+#define DAE_CONFIG_API
 #endif // WIN32
 
-class DAE_API daeConfig
+class DAE_CONFIG_API daeConfig
 {
 public:
     daeConfig();
@@ -49,7 +55,7 @@ protected:
     std::string	configfile;
 };
 
-DAE_API void       daeSetConfigFile(const std::string& strConfigFile);
-DAE_API daeConfig& daeGetConfig(void);
+DAE_CONFIG_API void       daeSetConfigFile(const std::string& strConfigFile);
+DAE_CONFIG_API daeConfig& daeGetConfig(void);
 
 #endif

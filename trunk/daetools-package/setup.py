@@ -28,10 +28,10 @@ Create wheel:
   python setup.py bdist_wheel
 """
 
-import os, sys, platform, shutil
+import os, sys, platform, shutil, pprint, re
 from setuptools import setup, Distribution
 
-daetools_version = '1.9.0'
+daetools_version = '1.9.1'
 
 # Python version
 python_major = str(sys.version_info[0])
@@ -53,16 +53,9 @@ else:
 
 # (Platform/Python)-dependent shared libraries directory
 # Now with removed compile-time dependency on numpy
-platform_solib_dir = '{0}_{1}_py{2}{3}'.format(daetools_system, daetools_machine, python_major, python_minor)
-
-shared_libs_dir  = os.path.realpath('daetools/solibs')
-shared_libs_dir  = os.path.join(shared_libs_dir, '%s_%s' % (daetools_system, daetools_machine))
-
-pydae_libs_dir = os.path.realpath('daetools/pyDAE')
-pydae_libs_dir = os.path.join(pydae_libs_dir, '%s' % platform_solib_dir)
-
-solvers_libs_dir  = os.path.realpath('daetools/solvers')
-solvers_libs_dir = os.path.join(solvers_libs_dir, '%s' % platform_solib_dir)
+so_lib_dir = '%s_%s/lib'    % (daetools_system, daetools_machine)
+so_bin_dir = '%s_%s/bin'    % (daetools_system, daetools_machine)
+py_mod_dir = '%s_%s/py%s%s' % (daetools_system, daetools_machine, python_major, python_minor)
 
 def _is_in_venv():
     return (hasattr(sys, 'real_prefix') or 
@@ -72,6 +65,82 @@ def _is_in_venv():
 inside_venv = _is_in_venv()
 print('inside_venv = %s' % ('True' if inside_venv else 'False'))
 
+def install_name_tool(daetools_system, daetools_machine, python_major, python_minor):
+    shared_libs_dir  = os.path.realpath('daetools')
+    shared_libs_dir  = os.path.join(shared_libs_dir, 'solibs', '%s_%s' % (daetools_system, daetools_machine), 'lib')
+
+    pymodules_dir = os.path.realpath('daetools')
+    pymodules_dir = os.path.join(pymodules_dir, 'solibs', '%s_%s' % (daetools_system, daetools_machine), 'py%s%s' % (python_major, python_minor))
+    print('shared_libs_dir    = %s' % shared_libs_dir)
+    print('pymodules_dir      = %s' % pymodules_dir)
+
+    shared_libs = []
+    ext_modules = []
+    
+    if os.path.isdir(shared_libs_dir):
+        shared_libs_files = os.listdir(shared_libs_dir)
+        for f in shared_libs_files:
+            shared_libs.append(os.path.join(shared_libs_dir, f))
+
+    if os.path.isdir(pymodules_dir):
+        ext_modules_files = os.listdir(pymodules_dir)
+        for f in ext_modules_files:
+            ext_modules.append(os.path.join(pymodules_dir, f))
+
+    pprint.pprint(shared_libs)
+    pprint.pprint(ext_modules)
+
+    # Shared libraries' install_name must be @rpath/so_name so update their LC_ID_DYLIB section
+    for so_path in shared_libs:
+        dummy, so_name = os.path.split(so_path)
+        cmd = 'install_name_tool -id @rpath/%s %s' % (so_name, so_path)
+        print(cmd)
+        #ret = os.system(cmd)
+        #print('%s returned [%s]' %(cmd,ret))
+
+    # Python extension modules: change 'libName.dylib' to '@loader_path/../lib/libName.dylib'
+    for ext_mod_path in ext_modules:
+        dummy, ext_mod_name = os.path.split(ext_mod_path)
+        print('Start install_name_tool -change for: %s' % ext_mod_name)
+        for so_path in shared_libs:
+            dummy, so_name = os.path.split(so_path)
+            new_so_name = '@loader_path/../lib/%s' % so_name
+            cmd = 'install_name_tool -change %s %s %s' % (so_name, new_so_name, ext_mod_path)
+            print(cmd)
+            #ret = os.system(cmd)
+            #print('    %s returned [%s]' %(cmd,ret))
+        print('')
+
+    # Shared libraries: change 'libName.dylib' to '@loader_path/libName.dylib'
+    for so_lib_path in shared_libs:
+        dummy, so_lib_name = os.path.split(so_lib_path)
+        print('Start install_name_tool -change for: %s' % so_lib_name)
+        for so_path in shared_libs:
+            if so_path == so_lib_path: # skip itself
+                continue
+            
+            dummy, so_name = os.path.split(so_path)
+            new_so_name = '@loader_path/%s' % so_name
+            cmd = 'install_name_tool -change %s %s %s' % (so_name, new_so_name, so_lib_path)
+            print(cmd)
+            #ret = os.system(cmd)
+            #print('    %s returned [%s]' %(cmd,ret))
+        print('')
+    
+    
+    for so_lib_path in shared_libs:
+        dummy, so_lib_name = os.path.split(so_lib_path)
+        if deal_II in so_lib_name:
+            # Replace the full path to the libdeal_II-daetools in pyDealII.so
+            dealii_daetools_lib = os.path.realpath('../deal.II/build/lib')
+            dealii_daetools_lib = os.path.join(dealii_daetools_lib, so_lib_name)
+            print(dealii_daetools_lib)
+            new_so_name = '@loader_path/%s' % so_lib_name
+            pyDealII_path = os.path.join(pymodules_dir, 'pyDealII.so')
+            cmd = 'install_name_tool -change %s %s %s' % (dealii_daetools_lib, new_so_name, pyDealII_path)
+            print(cmd)
+            #ret = os.system(cmd)
+    
 boost_python     = 'boost_python-daetools-py{0}{1}'.format(python_major, python_minor)
 boost_python3    = 'boost_python3-daetools-py{0}{1}'.format(python_major, python_minor)
 boost_system     = 'boost_system-daetools-py{0}{1}'.format(python_major, python_minor)
@@ -79,8 +148,8 @@ boost_thread     = 'boost_thread_win32-daetools-py{0}{1}'.format(python_major, p
 boost_thread2    = 'boost_thread-daetools-py{0}{1}'.format(python_major, python_minor)
 boost_filesystem = 'boost_filesystem-daetools-py{0}{1}'.format(python_major, python_minor)
 boost_chrono     = 'boost_chrono-daetools-py{0}{1}'.format(python_major, python_minor)
-dae_config       = 'cdaeConfig-py{0}{1}'.format(python_major, python_minor)
-cape_open_thermo = 'cdaeCapeOpenThermoPackage'
+cdae_libs_py     = r"^cdae.*\-py{0}{1}.*".format(python_major, python_minor)
+cdae_libs        = 'cdae'
 vc_omp_lib       = 'vcomp'
 opencs_libs      = 'OpenCS_'
 deal_II          = 'deal_II-daetools'
@@ -88,29 +157,7 @@ sim_loader       = 'cdaeSimulationLoader-py{0}{1}'.format(python_major, python_m
 fmu_so           = 'cdaeFMU_CS-py{0}{1}'.format(python_major, python_minor)
 mingw_dlls   = ['libgcc', 'libstdc++', 'libquadmath', 'libwinpthread', 'libgfortran', 'libssp']
 mac_gcc_libs = [] #['libgcc', 'libstdc++', 'libquadmath', 'libgfortran', 'libgomp']
-shared_libs = []
-
-print('shared_libs_dir = ', shared_libs_dir)
-if os.path.isdir(shared_libs_dir):
-    shared_libs_files = os.listdir(shared_libs_dir)
-
-    for f in shared_libs_files:
-        if (boost_python in f) or (boost_python3 in f) or (boost_system in f) or (boost_thread in f) or (boost_thread2 in f) or (boost_filesystem in f) or (boost_chrono in f):
-            shared_libs.append(os.path.join(shared_libs_dir, f))
-
-        if dae_config in f:
-            shared_libs.append(os.path.join(shared_libs_dir, f))
-
-        if cape_open_thermo in f:
-            shared_libs.append(os.path.join(shared_libs_dir, f))
-
-        if vc_omp_lib in f:
-            shared_libs.append(os.path.join(shared_libs_dir, f))
-
-        if opencs_libs in f:
-            shared_libs.append(os.path.join(shared_libs_dir, f))
-
-print('shared_libs = ', shared_libs)
+shared_libs  = []
 
 if platform.system() == 'Linux':
     # Create only start menu links only for the current user
@@ -120,32 +167,16 @@ if platform.system() == 'Linux':
                                                                                                 'usr/share/applications/daetools-daeExamples.desktop',
                                                                                                 'usr/share/applications/daetools-daePlotter.desktop'
                                                                                              ] ),
-                        #(os.path.join(os.path.expanduser('~'), '.local/share/menu'),         [
-                        #                                                                      'usr/share/menu/daetools-plotter',
-                        #                                                                      'usr/share/menu/daetools-examples'
-                        #                                                                     ] ),
                         (os.path.join(os.path.expanduser('~'), '.icons'),      ['usr/share/pixmaps/daetools-48x48.png'])
                     ]
     else:
         data_files = []
 
-    solibs = ['{0}/*.so'.format(platform_solib_dir)]
-    fmi_solibs = 'fmi/{0}/*.so'.format(platform_solib_dir)
-
+    solibs   = [ '%s/*.so' % so_lib_dir ]
+    pylibs   = [ '%s/*.so' % py_mod_dir ]
+    binaries = [ '%s/*'    % so_bin_dir ]
+    
 elif platform.system() == 'Windows':
-    # Add mingw dlls
-    if os.path.isdir(shared_libs_dir):
-        shared_libs_files = os.listdir(shared_libs_dir)
-
-        for f in shared_libs_files:
-            for dll in mingw_dlls:
-                if dll in f:
-                    shared_libs.append(os.path.join(shared_libs_dir, f))
-
-    for f in shared_libs:
-        shutil.copy(f, os.path.join('daetools', 'pyDAE',   platform_solib_dir))
-        shutil.copy(f, os.path.join('daetools', 'solvers', platform_solib_dir))
-
     create_shortcuts_f = open(os.path.join('scripts', 'create_daetools_shortcuts.bat'), 'w')
     create_shortcuts_f.write('set CS_DIR=%~dp0\n')
     create_shortcuts_f.write('echo %CS_DIR%\n')
@@ -154,124 +185,19 @@ elif platform.system() == 'Windows':
     
     # Achtung!! data files dir must be '' in Windows
     data_files = []
-    solibs = [
-               '{0}/*.pyd'.format(platform_solib_dir),
-               '{0}/*.dll'.format(platform_solib_dir)
-             ]
-    fmi_solibs = 'fmi/{0}/*.dll'.format(platform_solib_dir)
-
+    solibs   = [ '%s/*.dll' % so_lib_dir ]
+    pylibs   = [ '%s/*.pyd' % py_mod_dir ]
+    binaries = [ '%s/*.exe' % so_bin_dir ]
+    
 elif platform.system() == 'Darwin':
-    if os.path.isdir(shared_libs_dir):
-        shared_libs_files = os.listdir(shared_libs_dir)
-
-        for f in shared_libs_files:
-            if (sim_loader in f) or (fmu_so in f) or (deal_II in f):
-                shared_libs.append(os.path.join(shared_libs_dir, f))
-            for so in mac_gcc_libs:
-                if so in f:
-                    shared_libs.append(os.path.join(shared_libs_dir, f))
-    print('shared_libs = %s' % shared_libs)
-    #sys.exit()
-
-    # Shared libraries' install_name must be @rpath/so_name so update their LC_ID_DYLIB section
-    for so_path in shared_libs:
-        dummy, so_name = os.path.split(so_path)
-        cmd = 'install_name_tool -id @rpath/%s %s' % (so_name, so_path)
-        ret = os.system(cmd)
-        print('%s returned [%s]' %(cmd,ret))
-
-    # Python extension modules link solibs so update their LC_LOAD_DYLIB sections
-    ext_modules = []
-    if os.path.isdir(pydae_libs_dir):
-        shared_libs_files = os.listdir(pydae_libs_dir)
-        for f in shared_libs_files:
-            ext_modules.append( os.path.join(pydae_libs_dir, f) )
-
-    if os.path.isdir(solvers_libs_dir):
-        shared_libs_files = os.listdir(solvers_libs_dir)
-        for f in shared_libs_files:
-            ext_modules.append( os.path.join(solvers_libs_dir, f) )
-
-    # cdaeConfig links boost libs so update its LC_LOAD_DYLIB sections
-    cfgs = [f for f in shared_libs if dae_config in f]
-    for cfg in cfgs:
-        ext_modules.append( os.path.join(shared_libs_dir, cfg) )
-
-    # deal_II links boost libs so update its LC_LOAD_DYLIB sections
-    dealiis = [f for f in shared_libs if deal_II in f]
-    for dealii in dealiis:
-        ext_modules.append( os.path.join(shared_libs_dir, dealii) )
-
-    # Boost libs link other boost libs so update their LC_LOAD_DYLIB sections
-    blibs = [f for f in shared_libs if 'libboost' in f]
-    for blib in blibs:
-        ext_modules.append( os.path.join(shared_libs_dir, blib) )
-    
-    ''' Not required now when using homebrew gcc
-    # stdc++ lib links gcc_s.1 lib so update its LC_LOAD_DYLIB sections
-    stdcxxlibs = [f for f in shared_libs if 'stdc++' in f]
-    for stdcxxlib in stdcxxlibs:
-        ext_modules.append( os.path.join(shared_libs_dir, stdcxxlib) )
-
-    # gfortran lib links gcc_s.1 lib so update its LC_LOAD_DYLIB sections
-    stdcxxlibs = [f for f in shared_libs if 'gfortran' in f]
-    for stdcxxlib in stdcxxlibs:
-        ext_modules.append( os.path.join(shared_libs_dir, stdcxxlib) )
-
-    # quadmath lib links gcc_s.1 lib so update its LC_LOAD_DYLIB sections
-    stdcxxlibs = [f for f in shared_libs if 'quadmath' in f]
-    for stdcxxlib in stdcxxlibs:
-        ext_modules.append( os.path.join(shared_libs_dir, stdcxxlib) )
-
-    # gomp lib links gcc_s.1 lib so update its LC_LOAD_DYLIB sections
-    stdcxxlibs = [f for f in shared_libs if 'gomp' in f]
-    for stdcxxlib in stdcxxlibs:
-        ext_modules.append( os.path.join(shared_libs_dir, stdcxxlib) )
-    '''
-    
-    print('ext_modules = %s' % ext_modules)
-    #sys.exit()
-
-    # Do the actual update on all required shared libraries and extension modules
-    for ext_mod_path in ext_modules:
-        dummy, ext_mod_name = os.path.split(ext_mod_path)
-        print('Start install_name_tool -change for: %s' % ext_mod_name)
-        for so_path in shared_libs:
-            use_full_path = any(gcc_lib in so_path for gcc_lib in mac_gcc_libs)
-            # gcc lib names (i.e. libgcc_s.1 and libstdc++.6) are hardcoded during the linking phase
-            # as /usr/local/lib/libgcc_s.1.dylib etc. so use that path with install_name_tool
-            if use_full_path: 
-                dummy, so_name = os.path.split(so_path)
-                new_so_name = '@loader_path/../../solibs/%s_%s/%s' % (daetools_system, daetools_machine, so_name)
-                so_name = '/usr/local/lib/' + so_name
-            else:
-                dummy, so_name = os.path.split(so_path)
-                new_so_name = '@loader_path/../../solibs/%s_%s/%s' % (daetools_system, daetools_machine, so_name)
-            cmd = 'install_name_tool -change %s %s %s' % (so_name, new_so_name, ext_mod_path)
-            print(cmd)
-            ret = os.system(cmd)
-            print('    %s returned [%s]' %(cmd,ret))
-    #sys.exit()
-
-    # Replace the full path to the libdeal_II-daetools in pyDealII.so
-    for ext_mod_path in ext_modules:
-        dummy, ext_mod_name = os.path.split(ext_mod_path)
-        #print(deal_II, ext_mod_name)
-        if deal_II in ext_mod_name:
-            dealii_daetools_lib = os.path.realpath('../deal.II/build/lib')
-            dealii_daetools_lib = os.path.join(dealii_daetools_lib, ext_mod_name)
-            print(dealii_daetools_lib)
-            new_so_name = '@loader_path/../../solibs/%s_%s/%s' % (daetools_system, daetools_machine, ext_mod_name)
-            pyDealII_path = os.path.join(solvers_libs_dir, 'pyDealII.so')
-            cmd = 'install_name_tool -change %s %s %s' % (dealii_daetools_lib, new_so_name, pyDealII_path)
-            print(cmd)
-            ret = os.system(cmd)
-            #sys.exit()
+    install_name_tool(daetools_system, daetools_machine, python_major, python_minor)
 
     data_files = []
 
-    solibs = ['{0}/*.so'.format(platform_solib_dir)]
-    fmi_solibs = 'fmi/{0}/*.dylib'.format(platform_solib_dir)
+    solibs   = [ '%s/*.dylib' % so_lib_dir ]
+    pylibs   = [ '%s/*.so'    % py_mod_dir ]
+    binaries = [ '%s/*'       % so_bin_dir ]
+    install_name_tool(daetools_system, daetools_machine, python_major, python_minor)
 
 try:
     root_dir = os.path.dirname(os.path.abspath(__file__))
@@ -312,6 +238,8 @@ try:
 except ImportError:
     bdist_wheel = None
 
+print(solibs + pylibs + binaries)
+
 setup(name = 'daetools',
       version = daetools_version,
       description = 'DAE Tools',
@@ -343,14 +271,15 @@ setup(name = 'daetools',
                        'daetools':                 ['*.txt',
                                                     '*.cfg',
                                                     'docs/presentations/*.pdf'
-                                                   ] + docs_html_dirs, # <----------- EXCLUDE DOCS
-                       'daetools.pyDAE':           solibs,
-                       'daetools.solvers':         solibs,
-                       'daetools.solibs':          ['%s_%s/*.*' % (daetools_system, daetools_machine)],
+                                                   ] 
+                                                   + docs_html_dirs, # <----------- DOCS
+                       'daetools.solibs':          solibs      # platform_arch/lib 
+                                                   + binaries  # platform_arch/bin
+                                                   + pylibs,   # platform_arch/pyXY
                        'daetools.dae_plotter':     ['images/*.png'],
                        'daetools.code_generators': ['c99/*.h', 'c99/*.c', 'c99/*.pro', 'c99/*.vcproj', 'c99/Makefile-*',
                                                     'mpi/*.*', 
-                                                    '*.css', '*.xsl', fmi_solibs
+                                                    '*.css', '*.xsl'
                                                    ],
                        'daetools.dae_simulator':   ['*.html',
                                                     'images/*.*', 

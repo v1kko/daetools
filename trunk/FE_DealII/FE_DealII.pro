@@ -6,7 +6,6 @@ CONFIG += staticlib
 
 INCLUDEPATH += $${BOOSTDIR} \
                $${PYTHON_INCLUDE_DIR} \
-               $${PYTHON_SITE_PACKAGES_DIR} \
                $${NUMPY_INCLUDE_DIR} \
                $${DEALII_INCLUDE}
 
@@ -39,3 +38,4 @@ HEADERS += stdafx.h \
 #######################################################
 #                Install files
 #######################################################
+include(../dae_install_library.pri)

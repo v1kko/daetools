@@ -35,23 +35,6 @@ DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 #include <boost/serialization/utility.hpp>
 #endif
 
-#if !defined(__MINGW32__) && (defined(_WIN32) || defined(WIN32) || defined(WIN64) || defined(_WIN64))
-
-#ifdef DAEDLL
-#ifdef MODEL_EXPORTS
-#define DAE_CORE_API __declspec(dllexport)
-#else // MODEL_EXPORTS
-#define DAE_CORE_API __declspec(dllimport)
-#endif // MODEL_EXPORTS
-#else // DAEDLL
-#define DAE_CORE_API
-#endif // DAEDLL
-
-#else // WIN32
-#define DAE_CORE_API
-#endif // WIN32
-
-
 namespace dae
 {
 namespace core
@@ -237,11 +220,11 @@ protected:
     friend class daePortConnection;
 };
 
-bool   daeIsValidObjectName(const string& strName);
-string daeGetRelativeName(const daeObject* parent, const daeObject* child);
-string daeGetRelativeName(const string& strParent, const string& strChild);
-string daeGetStrippedName(const string& strName);
-string daeGetStrippedRelativeName(const daeObject* parent, const daeObject* child);
+DAE_CORE_API bool   daeIsValidObjectName(const string& strName);
+DAE_CORE_API string daeGetRelativeName(const daeObject* parent, const daeObject* child);
+DAE_CORE_API string daeGetRelativeName(const string& strParent, const string& strChild);
+DAE_CORE_API string daeGetStrippedName(const string& strName);
+DAE_CORE_API string daeGetStrippedRelativeName(const daeObject* parent, const daeObject* child);
 
 /******************************************************************
     daePartialDerivativeVariable
@@ -406,16 +389,16 @@ protected:
 /******************************************************************
     daeBoolArray
 *******************************************************************/
-class DAE_CORE_API daeBoolArray : public std::vector<bool>
-{
-public:
-    daeBoolArray(void);
-    virtual ~daeBoolArray(void);
+//class DAE_CORE_API daeBoolArray : public std::vector<bool>
+//{
+//public:
+//    daeBoolArray(void);
+//    virtual ~daeBoolArray(void);
 
-public:
-    void OR(const daeBoolArray& rArray);
-    bool CheckOverlapping(const daeBoolArray& rArray);
-};
+//public:
+//    void OR(const daeBoolArray& rArray);
+//    bool CheckOverlapping(const daeBoolArray& rArray);
+//};
 
 /******************************************************************
     daeEquationExecutionInfo
@@ -2602,8 +2585,8 @@ protected:
 /******************************************************************
     daeEventPort
 *******************************************************************/
-class daeEventPort : virtual public daeObject,
-                     virtual public daeEventPort_t
+class DAE_CORE_API daeEventPort : virtual public daeObject,
+                                  virtual public daeEventPort_t
 {
 public:
     daeDeclareDynamicClass(daeEventPort)
@@ -2651,8 +2634,8 @@ protected:
 *******************************************************************/
 class daeState;
 class daeVariableWrapper;
-class daeAction : virtual public daeObject,
-                  virtual public daeAction_t
+class DAE_CORE_API daeAction : virtual public daeObject,
+                               virtual public daeAction_t
 {
 public:
     daeDeclareDynamicClass(daeAction)
@@ -2713,8 +2696,8 @@ protected:
 /******************************************************************
     daeOnEventActions
 *******************************************************************/
-class daeOnEventActions : virtual public daeObject,
-                          virtual public daeOnEventActions_t
+class DAE_CORE_API daeOnEventActions : virtual public daeObject,
+                                       virtual public daeOnEventActions_t
 {
 public:
     daeDeclareDynamicClass(daeOnEventActions)
@@ -3319,7 +3302,7 @@ protected:
 /******************************************************************
     daeVariableWrapper
 *******************************************************************/
-void daeGetVariableAndIndexesFromNode(adouble& a, daeVariable** variable, std::vector<size_t>& narrDomainIndexes);
+DAE_CORE_API void daeGetVariableAndIndexesFromNode(adouble& a, daeVariable** variable, std::vector<size_t>& narrDomainIndexes);
 
 class DAE_CORE_API daeVariableWrapper : public daeVariableWrapper_t
 {
@@ -4087,9 +4070,9 @@ public:
 /******************************************************************
     Find functions
 *******************************************************************/
-daeDomain*		FindDomain(const daeDomain* pSource, daeModel* pParentModel);
-daeEventPort*	FindEventPort(const daeEventPort* pSource, daeModel* pParentModel);
-void			FindDomains(const std::vector<daeDomain*>& ptrarrSource, std::vector<daeDomain*>& ptrarrDestination, daeModel* pParentModel);
+DAE_CORE_API daeDomain*		FindDomain(const daeDomain* pSource, daeModel* pParentModel);
+DAE_CORE_API daeEventPort*	FindEventPort(const daeEventPort* pSource, daeModel* pParentModel);
+DAE_CORE_API void			FindDomains(const std::vector<daeDomain*>& ptrarrSource, std::vector<daeDomain*>& ptrarrDestination, daeModel* pParentModel);
 
 /*********************************************************************************************
     daeExternalFunction_t

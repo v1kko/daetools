@@ -11,12 +11,12 @@ namespace datareporting
 	daeDataReportingClassFactory
 **********************************************************************************************/
 // I cannot have declared exported functions in a static library
-#ifdef DAEDLL
+#ifdef DAE_DLL_INTERFACE
 daeDeclareDataReportingLibrary("DAE.DataReporting",
 							   "DAE Tools DataReporting library",
 							   daeAuthorInfo,
 							   daeLicenceInfo,
-							   daeVersion);
+							   daeVersion());
 		
 daeRegisterDataReporter(daeTEXTFileDataReporter)
 daeRegisterDataReporter(daeHTMLFileDataReporter)

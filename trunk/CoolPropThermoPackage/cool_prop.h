@@ -15,6 +15,22 @@ DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 
 #include "../Core/thermo_package.h"
 
-dae::tpp::daeThermoPhysicalPropertyPackage_t* daeCreateCoolPropPropertyPackage();
+#if !defined(__MINGW32__) && (defined(_WIN32) || defined(WIN32) || defined(WIN64) || defined(_WIN64))
+
+#ifdef DAE_DLL_INTERFACE
+#ifdef COOL_PROP_EXPORTS
+#define DAE_COOL_PROP_API __declspec(dllexport)
+#else
+#define DAE_COOL_PROP_API __declspec(dllimport)
+#endif
+#else
+#define DAE_COOL_PROP_API
+#endif
+
+#else // WIN32
+#define DAE_COOL_PROP_API
+#endif // WIN32
+
+DAE_COOL_PROP_API dae::tpp::daeThermoPhysicalPropertyPackage_t* daeCreateCoolPropPropertyPackage();
 
 #endif

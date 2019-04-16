@@ -14,15 +14,16 @@ DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 #define ADOLC_ADOUBLE_H
 
 #if !defined(__MINGW32__) && (defined(_WIN32) || defined(WIN32) || defined(WIN64) || defined(_WIN64))
-#ifdef DAEDLL
+
+#ifdef DAE_DLL_INTERFACE
 #ifdef MODEL_EXPORTS
 #define DAE_CORE_API __declspec(dllexport)
 #else // MODEL_EXPORTS
 #define DAE_CORE_API __declspec(dllimport)
 #endif // MODEL_EXPORTS
-#else // DAEDLL
+#else // DAE_DLL_INTERFACE
 #define DAE_CORE_API
-#endif // DAEDLL
+#endif // DAE_DLL_INTERFACE
 
 #else // WIN32
 #define DAE_CORE_API
@@ -245,27 +246,27 @@ public:
 
     daeCondition operator !=(const adouble&) const;
     daeCondition operator !=(const real_t) const;
-    friend daeCondition operator !=(const real_t, const adouble&);
+    friend DAE_CORE_API daeCondition operator !=(const real_t, const adouble&);
 
     daeCondition operator ==(const adouble&) const;
     daeCondition operator ==(const real_t) const;
-    friend daeCondition operator ==(const real_t, const adouble&);
+    friend DAE_CORE_API daeCondition operator ==(const real_t, const adouble&);
 
     daeCondition operator <=(const adouble&) const;
     daeCondition operator <=(const real_t) const;
-    friend daeCondition operator <=(const real_t, const adouble&);
+    friend DAE_CORE_API daeCondition operator <=(const real_t, const adouble&);
 
     daeCondition operator >=(const adouble&) const;
     daeCondition operator >=(const real_t) const;
-    friend daeCondition operator >= (const real_t, const adouble&);
+    friend DAE_CORE_API daeCondition operator >= (const real_t, const adouble&);
 
     daeCondition operator >(const adouble&) const;
     daeCondition operator >(const real_t) const;
-    friend daeCondition operator >(const real_t, const adouble&);
+    friend DAE_CORE_API daeCondition operator >(const real_t, const adouble&);
 
     daeCondition operator <(const adouble&) const;
     daeCondition operator <(const real_t) const;
-    friend daeCondition operator <(const real_t, const adouble&);
+    friend DAE_CORE_API daeCondition operator <(const real_t, const adouble&);
 
     std::string NodeAsPlainText(void) const;
     std::string NodeAsLatex(void) const;
@@ -330,7 +331,7 @@ inline const adouble __min__(const adouble &a, const adouble &b)
     return min(a, b);
 }
 
-std::ostream& operator<<(std::ostream& out, const adouble& a);
+DAE_CORE_API std::ostream& operator<<(std::ostream& out, const adouble& a);
 
 /******************************************************************
     adouble_array

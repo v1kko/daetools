@@ -3,20 +3,18 @@
 
 #if defined(_WIN32) || defined(WIN32) || defined(WIN64) || defined(_WIN64)
 
-#ifdef DAEDLL
-#ifdef NLPSOLVER_EXPORTS
-#define DAE_NLPSOLVER_API __declspec(dllexport)
-#else // NLPSOLVER_EXPORTS
-#define DAE_NLPSOLVER_API __declspec(dllimport)
-#endif // NLPSOLVER_EXPORTS
-#else // DAEDLL
-#define DAE_NLPSOLVER_API
-#endif // DAEDLL
+#ifdef DAE_DLL_INTERFACE
+#ifdef NLOPT_EXPORTS
+#define DAE_NLOPT_API __declspec(dllexport)
+#else
+#define DAE_NLOPT_API __declspec(dllimport)
+#endif
+#else // DAE_DLL_INTERFACE
+#define DAE_NLOPT_API
+#endif // DAE_DLL_INTERFACE
 
 #else // WIN32
-#define DAE_NLPSOLVER_API 
+#define DAE_NLOPT_API
 #endif // WIN32
-
-
 
 #endif

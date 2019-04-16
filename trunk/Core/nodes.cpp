@@ -746,7 +746,7 @@ adNodePtr adNode::SimplifyNode(adNodePtr node)
 double adNodeImpl::HASH_FLOAT_CONSTANT_PRECISION = std::pow(10, daeGetConfig().GetInteger("daetools.core.nodes.significantDecimalsForConstantsHash", 12));
 
 thread_local daeeMemoryPool adNodeImpl::g_memoryPool = eSetupNodesPool;
-
+/*
 adNodeImpl::adNodeImpl()
 {
     // Important:
@@ -807,7 +807,7 @@ size_t adNodeImpl::GetHash() const
 
     return 0;
 }
-
+*/
 void adNodeImpl::SetMemoryPool(daeeMemoryPool memPool)
 {
     g_memoryPool = memPool;

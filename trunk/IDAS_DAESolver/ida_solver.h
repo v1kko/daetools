@@ -14,6 +14,22 @@
 #include <boost/serialization/utility.hpp>
 #endif
 
+#if !defined(__MINGW32__) && (defined(_WIN32) || defined(WIN32) || defined(WIN64) || defined(_WIN64))
+
+#ifdef DAE_DLL_INTERFACE
+#ifdef IDAS_EXPORTS
+#define DAE_IDAS_API __declspec(dllexport)
+#else
+#define DAE_IDAS_API __declspec(dllimport)
+#endif
+#else
+#define DAE_IDAS_API
+#endif
+
+#else // WIN32
+#define DAE_IDAS_API
+#endif // WIN32
+
 namespace dae
 {
 namespace solver
@@ -22,7 +38,7 @@ namespace solver
     daeIDASolver
 **********************************************************************************************/
 class daeIDASolverData;
-class DAE_SOLVER_API daeIDASolver : public daeDAESolver_t
+class DAE_IDAS_API daeIDASolver : public daeDAESolver_t
 {
 public:
     daeIDASolver(void);

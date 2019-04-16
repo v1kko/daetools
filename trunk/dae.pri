@@ -12,7 +12,7 @@
 #************************************************************************************
 DAE_TOOLS_MAJOR = 1
 DAE_TOOLS_MINOR = 9
-DAE_TOOLS_BUILD = 0
+DAE_TOOLS_BUILD = 1
 
 # DAE Tools version (major, minor, build)
 VERSION = $${DAE_TOOLS_MAJOR}.$${DAE_TOOLS_MINOR}.$${DAE_TOOLS_BUILD}
@@ -24,10 +24,19 @@ QMAKE_CXXFLAGS += -DDAE_BUILD=$${DAE_TOOLS_BUILD}
 # daetools always use the current system python version and custom compiled boost libs
 # located in ../boost with the libraries in ../boost/stage/lib
 
+# Don't append major version number to the end of the library name
+win32::CONFIG += skip_target_version_ext
+
 # Build only for x86_64 for MAC OS-X
 macx-g++::CONFIG    += x86_64
 macx-g++::QMAKE_CC   = /usr/local/bin/gcc
 macx-g++::QMAKE_CXX  = /usr/local/bin/g++
+
+win32-msvc2015::STATIC_LIB_EXT  = lib
+win32-g++-*::STATIC_LIB_EXT     = a
+win64-g++-*::STATIC_LIB_EXT     = a
+linux-g++::STATIC_LIB_EXT       = a
+macx-g++::STATIC_LIB_EXT        =
 
 win32-msvc2015::SHARED_LIB_EXT  = dll
 win32-g++-*::SHARED_LIB_EXT     = dll
@@ -41,9 +50,9 @@ win64-g++-*::SHARED_LIB_PREFIX      =
 linux-g++::SHARED_LIB_PREFIX        = lib
 macx-g++::SHARED_LIB_PREFIX         = lib
 
-win32-msvc2015::SHARED_LIB_POSTFIX  = $${DAE_TOOLS_MAJOR}
-win32-g++-*::SHARED_LIB_POSTFIX     = $${DAE_TOOLS_MAJOR}
-win64-g++-*::SHARED_LIB_POSTFIX     = $${DAE_TOOLS_MAJOR}
+win32-msvc2015::SHARED_LIB_POSTFIX  = 
+win32-g++-*::SHARED_LIB_POSTFIX     = 
+win64-g++-*::SHARED_LIB_POSTFIX     = 
 linux-g++::SHARED_LIB_POSTFIX       =
 macx-g++::SHARED_LIB_POSTFIX        =
 
@@ -81,6 +90,7 @@ CONFIG(release, debug|release) {
     DAE_DEST_DIR = ../release
     OBJECTS_DIR = release
 }
+CONFIG -= debug_and_release debug_and_release_target
 
 DESTDIR = $${DAE_DEST_DIR}
 
@@ -223,6 +233,8 @@ win32-msvc2015::QMAKE_CXXFLAGS += /bigobj
 win32-g++-*::QMAKE_LFLAGS += -mwindows
 win64-g++-*::QMAKE_LFLAGS += -mwindows
 
+win32::QMAKE_CXXFLAGS += -DDAE_DLL_INTERFACE
+
 QMAKE_CXXFLAGS_DEBUG += -fno-default-inline
 
 QMAKE_CXXFLAGS_DEBUG += -DDAE_DEBUG
@@ -337,29 +349,24 @@ win64-g++-*::PTHREADS_LIB    = -lwinpthread
 # Starting with the version 1.2.1 daetools use manually compiled boost libraries.
 # The compilation is done in the shell script compile_libraries_linux.sh
 #####################################################################################
-BOOST_PYTHON_SUFFIX =
-equals(PYTHON_MAJOR, "3") {
-    message("If python major is 3; otherwise the suffix is empty.")
-    BOOST_PYTHON_SUFFIX = $${PYTHON_MAJOR}
-}
+BOOST_PYTHON_SUFFIX = $${PYTHON_MAJOR}$${PYTHON_MINOR}
+BOOSTDIR = ../boost
 
-win32-msvc2015::BOOSTDIR                  = ../boost$${PYTHON_MAJOR}.$${PYTHON_MINOR}
 win32-msvc2015::BOOSTLIBPATH              = $${BOOSTDIR}/stage/lib
-win32-msvc2015::BOOST_PYTHON_LIB_NAME     = boost_python$${BOOST_PYTHON_SUFFIX}-daetools-py$${PYTHON_MAJOR}$${PYTHON_MINOR}
-win32-msvc2015::BOOST_SYSTEM_LIB_NAME     = boost_system-daetools-py$${PYTHON_MAJOR}$${PYTHON_MINOR}
-win32-msvc2015::BOOST_THREAD_LIB_NAME     = boost_thread-daetools-py$${PYTHON_MAJOR}$${PYTHON_MINOR}
-win32-msvc2015::BOOST_FILESYSTEM_LIB_NAME = boost_filesystem-daetools-py$${PYTHON_MAJOR}$${PYTHON_MINOR}
+win32-msvc2015::BOOST_PYTHON_LIB_NAME     = boost_python$${BOOST_PYTHON_SUFFIX}-daetools
+win32-msvc2015::BOOST_SYSTEM_LIB_NAME     = boost_system-daetools
+win32-msvc2015::BOOST_THREAD_LIB_NAME     = boost_thread-daetools
+win32-msvc2015::BOOST_FILESYSTEM_LIB_NAME = boost_filesystem-daetools
 win32-msvc2015::BOOST_PYTHON_LIB          = $${BOOST_PYTHON_LIB_NAME}.lib $${PYTHON_LIB}
 win32-msvc2015::BOOST_LIBS                = $${BOOST_SYSTEM_LIB_NAME}.lib \
                                             $${BOOST_THREAD_LIB_NAME}.lib \
                                             $${BOOST_FILESYSTEM_LIB_NAME}.lib
 
-win32-g++-*::BOOSTDIR                   = ../boost$${PYTHON_MAJOR}.$${PYTHON_MINOR}
 win32-g++-*::BOOSTLIBPATH               = $${BOOSTDIR}/stage/lib
-win32-g++-*::BOOST_PYTHON_LIB_NAME      = boost_python$${BOOST_PYTHON_SUFFIX}-daetools-py$${PYTHON_MAJOR}$${PYTHON_MINOR}
-win32-g++-*::BOOST_SYSTEM_LIB_NAME      = boost_system-daetools-py$${PYTHON_MAJOR}$${PYTHON_MINOR}
-win32-g++-*::BOOST_THREAD_LIB_NAME      = boost_thread_win32-daetools-py$${PYTHON_MAJOR}$${PYTHON_MINOR}
-win32-g++-*::BOOST_FILESYSTEM_LIB_NAME  = boost_filesystem-daetools-py$${PYTHON_MAJOR}$${PYTHON_MINOR}
+win32-g++-*::BOOST_PYTHON_LIB_NAME      = boost_python$${BOOST_PYTHON_SUFFIX}-daetools
+win32-g++-*::BOOST_SYSTEM_LIB_NAME      = boost_system-daetools
+win32-g++-*::BOOST_THREAD_LIB_NAME      = boost_thread_win32-daetools
+win32-g++-*::BOOST_FILESYSTEM_LIB_NAME  = boost_filesystem-daetools
 win32-g++-*::BOOST_PYTHON_LIB           = -L$${BOOSTLIBPATH} -l$${BOOST_PYTHON_LIB_NAME} \
                                           -L$${PYTHON_LIB_DIR} $${PYTHON_LIB}
 win32-g++-*::BOOST_LIBS                 = -L$${BOOSTLIBPATH} -l$${BOOST_SYSTEM_LIB_NAME} \
@@ -369,12 +376,11 @@ win32-g++-*::BOOST_LIBS                 = -L$${BOOSTLIBPATH} -l$${BOOST_SYSTEM_L
                                                              $${PTHREADS_LIB} \
                                                              $${RT}
 
-win64-g++-*::BOOSTDIR                   = ../boost$${PYTHON_MAJOR}.$${PYTHON_MINOR}
 win64-g++-*::BOOSTLIBPATH               = $${BOOSTDIR}/stage/lib
-win64-g++-*::BOOST_PYTHON_LIB_NAME      = boost_python$${BOOST_PYTHON_SUFFIX}-daetools-py$${PYTHON_MAJOR}$${PYTHON_MINOR}
-win64-g++-*::BOOST_SYSTEM_LIB_NAME      = boost_system-daetools-py$${PYTHON_MAJOR}$${PYTHON_MINOR}
-win64-g++-*::BOOST_THREAD_LIB_NAME      = boost_thread_win32-daetools-py$${PYTHON_MAJOR}$${PYTHON_MINOR}
-win64-g++-*::BOOST_FILESYSTEM_LIB_NAME  = boost_filesystem-daetools-py$${PYTHON_MAJOR}$${PYTHON_MINOR}
+win64-g++-*::BOOST_PYTHON_LIB_NAME      = boost_python$${BOOST_PYTHON_SUFFIX}-daetools
+win64-g++-*::BOOST_SYSTEM_LIB_NAME      = boost_system-daetools
+win64-g++-*::BOOST_THREAD_LIB_NAME      = boost_thread_win32-daetools
+win64-g++-*::BOOST_FILESYSTEM_LIB_NAME  = boost_filesystem-daetools
 win64-g++-*::BOOST_PYTHON_LIB           = -L$${BOOSTLIBPATH} -l$${BOOST_PYTHON_LIB_NAME} \
                                           -L$${PYTHON_LIB_DIR} $${PYTHON_LIB}
 win64-g++-*::BOOST_LIBS                 = -L$${BOOSTLIBPATH} -l$${BOOST_SYSTEM_LIB_NAME} \
@@ -384,12 +390,11 @@ win64-g++-*::BOOST_LIBS                 = -L$${BOOSTLIBPATH} -l$${BOOST_SYSTEM_L
                                                              $${PTHREADS_LIB} \
                                                              $${RT}
 
-unix::BOOSTDIR                   = ../boost$${PYTHON_MAJOR}.$${PYTHON_MINOR}
 unix::BOOSTLIBPATH               = $${BOOSTDIR}/stage/lib
-unix::BOOST_PYTHON_LIB_NAME      = boost_python$${BOOST_PYTHON_SUFFIX}-daetools-py$${PYTHON_MAJOR}$${PYTHON_MINOR}
-unix::BOOST_SYSTEM_LIB_NAME      = boost_system-daetools-py$${PYTHON_MAJOR}$${PYTHON_MINOR}
-unix::BOOST_THREAD_LIB_NAME      = boost_thread-daetools-py$${PYTHON_MAJOR}$${PYTHON_MINOR}
-unix::BOOST_FILESYSTEM_LIB_NAME  = boost_filesystem-daetools-py$${PYTHON_MAJOR}$${PYTHON_MINOR}
+unix::BOOST_PYTHON_LIB_NAME      = boost_python$${BOOST_PYTHON_SUFFIX}-daetools
+unix::BOOST_SYSTEM_LIB_NAME      = boost_system-daetools
+unix::BOOST_THREAD_LIB_NAME      = boost_thread-daetools
+unix::BOOST_FILESYSTEM_LIB_NAME  = boost_filesystem-daetools
 unix::BOOST_PYTHON_LIB           = -L$${BOOSTLIBPATH} -l$${BOOST_PYTHON_LIB_NAME} \
                                    -L$${PYTHON_LIB_DIR} $${PYTHON_LIB}
 unix::BOOST_LIBS                 = -L$${BOOSTLIBPATH} -l$${BOOST_SYSTEM_LIB_NAME} \
@@ -808,27 +813,27 @@ win32-msvc2015::OPEN_CS_LIBS = -L$${OPEN_CS_LIB_DIR} OpenCS_Evaluators.lib
 #                                  DAE Tools
 #####################################################################################
 win32-msvc2015::DAE_CONFIG_LIB                  = cdaeConfig-py$${PYTHON_MAJOR}$${PYTHON_MINOR}$${SHARED_LIB_POSTFIX}.lib
-win32-msvc2015::DAE_CORE_LIB                    = cdaeCore.lib $${OPENMP_LIB}
-win32-msvc2015::DAE_DATAREPORTING_LIB           = cdaeDataReporting.lib
-win32-msvc2015::DAE_ACTIVITY_LIB                = cdaeActivity.lib
-win32-msvc2015::DAE_IDAS_SOLVER_LIB             = cdaeIDAS_DAESolver.lib
-win32-msvc2015::DAE_UNITS_LIB                   = cdaeUnits.lib
-win32-msvc2015::DAE_SUPERLU_SOLVER_LIB          = cdaeSuperLU_LASolver.lib
-win32-msvc2015::DAE_SUPERLU_MT_SOLVER_LIB       = cdaeSuperLU_MT_LASolver.lib
-win32-msvc2015::DAE_SUPERLU_CUDA_SOLVER_LIB     = cdaeSuperLU_CUDA_LASolver.lib
-win32-msvc2015::DAE_BONMIN_SOLVER_LIB           = cdaeBONMIN_MINLPSolver.lib
-win32-msvc2015::DAE_IPOPT_SOLVER_LIB            = cdaeIPOPT_NLPSolver.lib
-win32-msvc2015::DAE_NLOPT_SOLVER_LIB            = cdaeNLOPT_NLPSolver.lib
-win32-msvc2015::DAE_TRILINOS_SOLVER_LIB         = cdaeTrilinos_LASolver.lib
-win32-msvc2015::DAE_INTEL_PARDISO_SOLVER_LIB    = cdaeIntelPardiso_LASolver.lib
-win32-msvc2015::DAE_PARDISO_SOLVER_LIB          = cdaePardiso_LASolver.lib
-win32-msvc2015::DAE_DEALII_SOLVER_LIB           = cdaeDealII_FESolver.lib
+win32-msvc2015::DAE_CORE_LIB                    = cdaeCore$${SHARED_LIB_POSTFIX}.lib $${OPENMP_LIB}
+win32-msvc2015::DAE_DATAREPORTING_LIB           = cdaeDataReporting$${SHARED_LIB_POSTFIX}.lib
+win32-msvc2015::DAE_ACTIVITY_LIB                = cdaeActivity$${SHARED_LIB_POSTFIX}.lib
+win32-msvc2015::DAE_IDAS_SOLVER_LIB             = cdaeIDAS_DAESolver$${SHARED_LIB_POSTFIX}.lib
+win32-msvc2015::DAE_UNITS_LIB                   = cdaeUnits$${SHARED_LIB_POSTFIX}.lib
+win32-msvc2015::DAE_SUPERLU_SOLVER_LIB          = cdaeSuperLU_LASolver$${SHARED_LIB_POSTFIX}.lib
+win32-msvc2015::DAE_SUPERLU_MT_SOLVER_LIB       = cdaeSuperLU_MT_LASolver$${SHARED_LIB_POSTFIX}.lib
+win32-msvc2015::DAE_SUPERLU_CUDA_SOLVER_LIB     = cdaeSuperLU_CUDA_LASolver$${SHARED_LIB_POSTFIX}.lib
+win32-msvc2015::DAE_BONMIN_SOLVER_LIB           = cdaeBONMIN_MINLPSolver$${SHARED_LIB_POSTFIX}.lib
+win32-msvc2015::DAE_IPOPT_SOLVER_LIB            = cdaeIPOPT_NLPSolver$${SHARED_LIB_POSTFIX}.lib
+win32-msvc2015::DAE_NLOPT_SOLVER_LIB            = cdaeNLOPT_NLPSolver$${SHARED_LIB_POSTFIX}.lib
+win32-msvc2015::DAE_TRILINOS_SOLVER_LIB         = cdaeTrilinos_LASolver$${SHARED_LIB_POSTFIX}.lib
+win32-msvc2015::DAE_INTEL_PARDISO_SOLVER_LIB    = cdaeIntelPardiso_LASolver$${SHARED_LIB_POSTFIX}.lib
+win32-msvc2015::DAE_PARDISO_SOLVER_LIB          = cdaePardiso_LASolver$${SHARED_LIB_POSTFIX}.lib
+win32-msvc2015::DAE_DEALII_SOLVER_LIB           = cdaeDealII_FESolver$${SHARED_LIB_POSTFIX}.lib
 win32-msvc2015::DAE_SIMULATION_LOADER_LIB       = cdaeSimulationLoader-py$${PYTHON_MAJOR}$${PYTHON_MINOR}$${SHARED_LIB_POSTFIX}.lib
 win32-msvc2015::DAE_DAETOOLS_FMI_CS_LIB         = cdaeFMU_CS-py$${PYTHON_MAJOR}$${PYTHON_MINOR}$${SHARED_LIB_POSTFIX}.lib
 win32-msvc2015::DAE_DAETOOLS_FMI_CS_WS_LIB      = cdaeFMU_CS_WS$${SHARED_LIB_POSTFIX}.lib
 win32-msvc2015::DAE_CAPE_THERMO_PACKAGE_LIB     = cdaeCapeOpenThermoPackage.lib
-win32-msvc2015::DAE_COOLPROP_THERMO_PACKAGE_LIB = cdaeCoolPropThermoPackage.lib
-win32-msvc2015::DAE_EVALUATOR_OPENCL_LIB        = cdaeEvaluator_OpenCL.lib
+win32-msvc2015::DAE_COOLPROP_THERMO_PACKAGE_LIB = cdaeCoolPropThermoPackage$${SHARED_LIB_POSTFIX}.lib
+win32-msvc2015::DAE_EVALUATOR_OPENCL_LIB        = cdaeEvaluator_OpenCL$${SHARED_LIB_POSTFIX}.lib
 
 win32-g++-*::DAE_CONFIG_LIB                  = -lcdaeConfig-py$${PYTHON_MAJOR}$${PYTHON_MINOR}
 win32-g++-*::DAE_CORE_LIB                    = -lcdaeCore $${OPENMP_LIB}
@@ -909,40 +914,33 @@ DAE_INSTALL_HEADERS_DIR     = $${DAE_INSTALL_DIR}/include
 DAE_INSTALL_LIBS_DIR        = $${DAE_INSTALL_DIR}/lib
 DAE_INSTALL_PY_MODULES_DIR  = $${DAE_INSTALL_DIR}/py$${PYTHON_MAJOR}$${PYTHON_MINOR}
 
-#SOLIBS_DIR   = ../daetools-package/daetools/solibs/$${DAE_SYSTEM}_$${DAE_MACHINE}
-#SOLVERS_DIR  = ../daetools-package/daetools/solvers/$${DAE_SYSTEM}_$${DAE_MACHINE}_py$${PYTHON_MAJOR}$${PYTHON_MINOR}
-#PYDAE_DIR    = ../daetools-package/daetools/pyDAE/$${DAE_SYSTEM}_$${DAE_MACHINE}_py$${PYTHON_MAJOR}$${PYTHON_MINOR}
-#FMI_DIR      = ../daetools-package/daetools/solibs/$${DAE_SYSTEM}_$${DAE_MACHINE}
-SOLIBS_DIR   = ../daetools-package/daetools/$${DAE_SYSTEM}_$${DAE_MACHINE}/lib
-SOLVERS_DIR  = ../daetools-package/daetools/$${DAE_SYSTEM}_$${DAE_MACHINE}/py$${PYTHON_MAJOR}$${PYTHON_MINOR}
-PYDAE_DIR    = ../daetools-package/daetools/$${DAE_SYSTEM}_$${DAE_MACHINE}/py$${PYTHON_MAJOR}$${PYTHON_MINOR}
-FMI_DIR      = ../daetools-package/daetools/$${DAE_SYSTEM}_$${DAE_MACHINE}/lib
-message(SOLIBS_DIR: $${SOLIBS_DIR})
+# All libraries are in the daetools/solibs/Platform_arch/lib directory:
+#  - lib:  shared libraries
+#  - pyXy: python extension modules
+SOLIBS_DIR   = ../daetools-package/daetools/solibs/$${DAE_SYSTEM}_$${DAE_MACHINE}/lib
+SOLVERS_DIR  = ../daetools-package/daetools/solibs/$${DAE_SYSTEM}_$${DAE_MACHINE}/py$${PYTHON_MAJOR}$${PYTHON_MINOR}
+PYDAE_DIR    = ../daetools-package/daetools/solibs/$${DAE_SYSTEM}_$${DAE_MACHINE}/py$${PYTHON_MAJOR}$${PYTHON_MINOR}
+FMI_DIR      = ../daetools-package/daetools/solibs/$${DAE_SYSTEM}_$${DAE_MACHINE}/lib
 
-# win32-msvc2015::DUMMY = $$system(mkdir daetools-package\daetools\solvers\\$${DAE_SYSTEM}_$${DAE_MACHINE}_py$${PYTHON_MAJOR}$${PYTHON_MINOR})
-# win32-msvc2015::DUMMY = $$system(mkdir daetools-package\daetools\pyDAE\\$${DAE_SYSTEM}_$${DAE_MACHINE}_py$${PYTHON_MAJOR}$${PYTHON_MINOR})
-# win32-msvc2015::DUMMY = $$system(mkdir daetools-package\daetools\code_generators\fmi\\$${DAE_SYSTEM}_$${DAE_MACHINE}_py$${PYTHON_MAJOR}$${PYTHON_MINOR})
-# 
-# win32-g++-*::DUMMY = $$system(mkdir -p daetools-package/daetools/solvers/$${DAE_SYSTEM}_$${DAE_MACHINE}_py$${PYTHON_MAJOR}$${PYTHON_MINOR})
-# win32-g++-*::DUMMY = $$system(mkdir -p daetools-package/daetools/pyDAE/$${DAE_SYSTEM}_$${DAE_MACHINE}_py$${PYTHON_MAJOR}$${PYTHON_MINOR})
-# win32-g++-*::DUMMY = $$system(mkdir -p daetools-package/daetools/code_generators/fmi/$${DAE_SYSTEM}_$${DAE_MACHINE}_py$${PYTHON_MAJOR}$${PYTHON_MINOR})
-# 
-# win64-g++-*::DUMMY = $$system(mkdir -p daetools-package/daetools/solvers/$${DAE_SYSTEM}_$${DAE_MACHINE}_py$${PYTHON_MAJOR}$${PYTHON_MINOR})
-# win64-g++-*::DUMMY = $$system(mkdir -p daetools-package/daetools/pyDAE/$${DAE_SYSTEM}_$${DAE_MACHINE}_py$${PYTHON_MAJOR}$${PYTHON_MINOR})
-# win64-g++-*::DUMMY = $$system(mkdir -p daetools-package/daetools/code_generators/fmi/$${DAE_SYSTEM}_$${DAE_MACHINE}_py$${PYTHON_MAJOR}$${PYTHON_MINOR})
-# 
-# unix::DUMMY = $$system(mkdir -p $${SOLIBS_DIR})
-# unix::DUMMY = $$system(mkdir -p $${SOLVERS_DIR})
-# unix::DUMMY = $$system(mkdir -p $${PYDAE_DIR})
-# unix::DUMMY = $$system(mkdir -p $${FMI_DIR})
-# 
-dae_create_dirs1.commands = $(MKDIR) $${SOLIBS_DIR}
-dae_create_dirs2.commands = $(MKDIR) $${SOLVERS_DIR}
-dae_create_dirs3.commands = $(MKDIR) $${PYDAE_DIR}
-dae_create_dirs4.commands = $(MKDIR) $${FMI_DIR}
+# daetools-package dirs
+dae_create_dirs1.commands = $(MKDIR) -p $${SOLIBS_DIR}
+dae_create_dirs2.commands = $(MKDIR) -p $${SOLVERS_DIR}
 
-QMAKE_EXTRA_TARGETS += dae_create_dirs1 dae_create_dirs2 dae_create_dirs3 dae_create_dirs4
-PRE_TARGETDEPS      += dae_create_dirs1 dae_create_dirs2 dae_create_dirs3 dae_create_dirs4
+# daetools-ev dirs
+dae_create_dirs3.commands = $(MKDIR) -p $${DAE_INSTALL_HEADERS_DIR}
+dae_create_dirs4.commands = $(MKDIR) -p $${DAE_INSTALL_LIBS_DIR}
+dae_create_dirs5.commands = $(MKDIR) -p $${DAE_INSTALL_PY_MODULES_DIR}
+
+QMAKE_EXTRA_TARGETS += dae_create_dirs1 \
+                       dae_create_dirs2 \
+                       dae_create_dirs3 \
+                       dae_create_dirs4 \
+                       dae_create_dirs5
+PRE_TARGETDEPS += dae_create_dirs1 \
+                  dae_create_dirs2 \
+                  dae_create_dirs3 \
+                  dae_create_dirs4 \
+                  dae_create_dirs5
 
 #STATIC_LIBS_DIR = ../daetools-package/daetools/usr/local/lib
 #HEADERS_DIR     = ../daetools-package/daetools/usr/local/include

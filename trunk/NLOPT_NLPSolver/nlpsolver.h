@@ -33,8 +33,8 @@ struct nloptData
 	daeOptimizationConstraint_t* constraint;
 };
 
-class DAE_NLPSOLVER_API daeNLOPTSolver: public daeNLPSolver_t,
-                                        public daeNLPCommon
+class DAE_NLOPT_API daeNLOPTSolver: public daeNLPSolver_t,
+                                    public daeNLPCommon
 {
 public:
 	daeNLOPTSolver(nlopt_algorithm algorithm);

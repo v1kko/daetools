@@ -14,10 +14,26 @@
 
 namespace units
 {
+#if !defined(__MINGW32__) && (defined(_WIN32) || defined(WIN32) || defined(WIN64) || defined(_WIN64))
+
+#ifdef DAE_DLL_INTERFACE
+#ifdef UNITS_EXPORTS
+#define DAE_UNITS_API __declspec(dllexport)
+#else
+#define DAE_UNITS_API __declspec(dllimport)
+#endif
+#else
+#define DAE_UNITS_API
+#endif
+
+#else // WIN32
+#define DAE_UNITS_API
+#endif // WIN32
+
 /**************************************************************
   units_error
 **************************************************************/
-class units_error : public std::runtime_error
+class DAE_UNITS_API units_error : public std::runtime_error
 {
 public:
     units_error(const std::string& error) : std::runtime_error(error)
@@ -31,7 +47,7 @@ public:
 const std::string __string_unit_delimiter__  = " * ";
 const std::string __string_unit_power__      = "**";
 
-class base_unit
+class DAE_UNITS_API base_unit
 {
 public:
     base_unit(void);
@@ -55,7 +71,6 @@ public:
     const base_unit operator-(void) const;
 
     std::string toString(bool bUnitsOnly = false) const;
-    friend std::ostream& operator<<(std::ostream& out, const base_unit& u);
 
     bool areDimensionsEqual(const base_unit& other) const;
 
@@ -69,18 +84,20 @@ public:
     double N;
     double multiplier;
 };
-const base_unit operator*(double value, const base_unit& self);
-const base_unit operator/(double value, const base_unit& self);
-const base_unit operator+(double value, const base_unit& self);
-const base_unit operator-(double value, const base_unit& self);
-const base_unit pow      (const base_unit& self, double exponent);
-const base_unit pow      (const base_unit& self, const base_unit& exponent);
+DAE_UNITS_API std::ostream& operator<<(std::ostream& out, const base_unit& u);
+
+DAE_UNITS_API const base_unit operator*(double value, const base_unit& self);
+DAE_UNITS_API const base_unit operator/(double value, const base_unit& self);
+DAE_UNITS_API const base_unit operator+(double value, const base_unit& self);
+DAE_UNITS_API const base_unit operator-(double value, const base_unit& self);
+DAE_UNITS_API const base_unit pow      (const base_unit& self, double exponent);
+DAE_UNITS_API const base_unit pow      (const base_unit& self, const base_unit& exponent);
 
 /**************************************************************
         unit
 **************************************************************/
 class quantity;
-class unit
+class DAE_UNITS_API unit
 {
 public:
     unit(std::string u1 = "", double exp1 = 0,
@@ -122,7 +139,6 @@ public:
     std::string toString() const;
     std::string toLatex() const;
     std::string toJSON() const;
-    friend std::ostream& operator<<(std::ostream& out, const unit& u);
 
 public:
     std::map<std::string, double> units;
@@ -140,17 +156,19 @@ inline std::string toString(const std::vector<unit>& uarray, const std::string& 
     return result;
 }
 
-const quantity operator*(double value, const unit& self);
-const quantity operator/(double value, const unit& self);
-const unit     operator+(double value, const unit& self);
-const unit     operator-(double value, const unit& self);
-const unit     pow      (const unit& self, double exponent);
-const unit     pow      (const unit& self, const unit& exponent);
+DAE_UNITS_API std::ostream& operator<<(std::ostream& out, const unit& u);
+
+DAE_UNITS_API const quantity operator*(double value, const unit& self);
+DAE_UNITS_API const quantity operator/(double value, const unit& self);
+DAE_UNITS_API const unit     operator+(double value, const unit& self);
+DAE_UNITS_API const unit     operator-(double value, const unit& self);
+DAE_UNITS_API const unit     pow      (const unit& self, double exponent);
+DAE_UNITS_API const unit     pow      (const unit& self, const unit& exponent);
 
 /**************************************************************
         quantity
 **************************************************************/
-class quantity
+class DAE_UNITS_API quantity
 {
 public:
     quantity(void);
@@ -170,7 +188,6 @@ public:
     std::string toString() const;
     std::string toLatex() const;
     std::string toJSON() const;
-    friend std::ostream& operator<<(std::ostream& out, const quantity& q);
 
     bool operator==(const quantity& other) const;
     bool operator==(double value) const;
@@ -209,8 +226,9 @@ protected:
     double                  _value;
 };
 
-std::size_t hash_value(unit const& u);
-std::size_t hash_value(quantity const& q);
+DAE_UNITS_API std::ostream& operator<<(std::ostream& out, const quantity& q);
+DAE_UNITS_API std::size_t hash_value(unit const& u);
+DAE_UNITS_API std::size_t hash_value(quantity const& q);
 
 inline std::string toString(const std::vector<quantity>& qarray, const std::string& strDelimiter = std::string(", "))
 {
@@ -224,54 +242,54 @@ inline std::string toString(const std::vector<quantity>& qarray, const std::stri
     return result;
 }
 
-const quantity operator*(double value, const quantity& self);
-const quantity operator/(double value, const quantity& self);
-const quantity operator+(double value, const quantity& self);
-const quantity operator-(double value, const quantity& self);
-const quantity operator^(double value, const quantity& self);
-const quantity pow      (double value, const quantity& exponent);
-const quantity pow      (const quantity& self, double exponent);
-const quantity pow      (const quantity& self, const quantity& exponent);
+DAE_UNITS_API const quantity operator*(double value, const quantity& self);
+DAE_UNITS_API const quantity operator/(double value, const quantity& self);
+DAE_UNITS_API const quantity operator+(double value, const quantity& self);
+DAE_UNITS_API const quantity operator-(double value, const quantity& self);
+DAE_UNITS_API const quantity operator^(double value, const quantity& self);
+DAE_UNITS_API const quantity pow      (double value, const quantity& exponent);
+DAE_UNITS_API const quantity pow      (const quantity& self, double exponent);
+DAE_UNITS_API const quantity pow      (const quantity& self, const quantity& exponent);
 
-bool operator ==(double value, const quantity& self);
-bool operator !=(double value, const quantity& self);
-bool operator <=(double value, const quantity& self);
-bool operator >=(double value, const quantity& self);
-bool operator > (double value, const quantity& self);
-bool operator < (double value, const quantity& self);
+DAE_UNITS_API bool operator ==(double value, const quantity& self);
+DAE_UNITS_API bool operator !=(double value, const quantity& self);
+DAE_UNITS_API bool operator <=(double value, const quantity& self);
+DAE_UNITS_API bool operator >=(double value, const quantity& self);
+DAE_UNITS_API bool operator > (double value, const quantity& self);
+DAE_UNITS_API bool operator < (double value, const quantity& self);
 
-const quantity exp(const quantity &q);
-const quantity log(const quantity &q);
-const quantity log10(const quantity &q);
-const quantity sqrt(const quantity &q);
-const quantity sin(const quantity &q);
-const quantity cos(const quantity &q);
-const quantity tan(const quantity &q);
-const quantity asin(const quantity &q);
-const quantity acos(const quantity &q);
-const quantity atan(const quantity &q);
+DAE_UNITS_API const quantity exp(const quantity &q);
+DAE_UNITS_API const quantity log(const quantity &q);
+DAE_UNITS_API const quantity log10(const quantity &q);
+DAE_UNITS_API const quantity sqrt(const quantity &q);
+DAE_UNITS_API const quantity sin(const quantity &q);
+DAE_UNITS_API const quantity cos(const quantity &q);
+DAE_UNITS_API const quantity tan(const quantity &q);
+DAE_UNITS_API const quantity asin(const quantity &q);
+DAE_UNITS_API const quantity acos(const quantity &q);
+DAE_UNITS_API const quantity atan(const quantity &q);
 
-const quantity sinh(const quantity &q);
-const quantity cosh(const quantity &q);
-const quantity tanh(const quantity &q);
-const quantity asinh(const quantity &q);
-const quantity acosh(const quantity &q);
-const quantity atanh(const quantity &q);
-const quantity atan2(const quantity &a, const quantity &b);
-const quantity erf(const quantity &q);
+DAE_UNITS_API const quantity sinh(const quantity &q);
+DAE_UNITS_API const quantity cosh(const quantity &q);
+DAE_UNITS_API const quantity tanh(const quantity &q);
+DAE_UNITS_API const quantity asinh(const quantity &q);
+DAE_UNITS_API const quantity acosh(const quantity &q);
+DAE_UNITS_API const quantity atanh(const quantity &q);
+DAE_UNITS_API const quantity atan2(const quantity &a, const quantity &b);
+DAE_UNITS_API const quantity erf(const quantity &q);
 
-const quantity ceil(const quantity &q);
-const quantity floor(const quantity &q);
+DAE_UNITS_API const quantity ceil(const quantity &q);
+DAE_UNITS_API const quantity floor(const quantity &q);
 
-const quantity abs(const quantity &q);
-const quantity max(const quantity &a, const quantity &b);
-const quantity max(double v, const quantity &q);
-const quantity max(const quantity &q, double v);
-const quantity min(const quantity &a, const quantity &b);
-const quantity min(double v, const quantity &q);
-const quantity min(const quantity &q, double v);
+DAE_UNITS_API const quantity abs(const quantity &q);
+DAE_UNITS_API const quantity max(const quantity &a, const quantity &b);
+DAE_UNITS_API const quantity max(double v, const quantity &q);
+DAE_UNITS_API const quantity max(const quantity &q, double v);
+DAE_UNITS_API const quantity min(const quantity &a, const quantity &b);
+DAE_UNITS_API const quantity min(double v, const quantity &q);
+DAE_UNITS_API const quantity min(const quantity &q, double v);
 
-class create_base_units
+class DAE_UNITS_API create_base_units
 {
 public:
     create_base_units();

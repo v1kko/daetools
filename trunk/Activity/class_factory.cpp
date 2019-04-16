@@ -10,15 +10,15 @@ namespace activity
 	daeActivityClassFactory
 **********************************************************************************************/
 // I cannot have declared exported functions in a static library
-#ifdef DAEDLL
-daeDeclareActivityLibrary("DAE.Activity",
-						  "DAE Tools Activity library",
-						  daeAuthorInfo,
-						  daeLicenceInfo,
-					      daeVersion)
+// #ifdef DAE_DLL_INTERFACE
+// daeDeclareActivityLibrary("DAE.Activity",
+						  // "DAE Tools Activity library",
+						  // daeAuthorInfo,
+						  // daeLicenceInfo,
+					      // daeVersion())
 
-daeRegisterSimulation(daeSimulation)
-#endif
+// daeRegisterSimulation(daeSimulation)
+// #endif
 
 daeActivityClassFactory::daeActivityClassFactory(string strName, string strDescription, string strAuthorInfo, string strLicenceInfo, string strVersion)
 {

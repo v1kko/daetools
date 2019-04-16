@@ -328,7 +328,7 @@ class daeCodeGenerator_FMI(fmiModelDescription):
         else:
             raise RuntimeError('Unsupported platform: %s' % platform_system)
 
-        solibs_dir = os.path.join(daetools.daetools_dir, 'solibs', '%s_%s' % (platform_system, platform_machine))
+        solibs_dir = os.path.join(daetools.daetools_dir, 'solibs', '%s_%s' % (platform_system, platform_machine), 'lib')
         daetools_fmu_solib = '%s.%s' % (modelIdentifier, so_ext)
         if self.useWebService:
             daetools_fmi_cs = '%scdaeFMU_CS_WS%s.%s' % (shared_lib_prefix,

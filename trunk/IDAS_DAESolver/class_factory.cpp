@@ -12,12 +12,12 @@ namespace solver
 	daeDataReportingClassFactory
 **********************************************************************************************/
 // I cannot have declared exported functions in a static library
-#ifdef DAEDLL
+#ifdef DAE_DLL_INTERFACE
 daeDeclareSolverLibrary("DAE.Solver",
 					    "DAE Tools Solver library",
 						daeAuthorInfo,
 						daeLicenceInfo,
-					    daeVersion)
+					    daeVersion())
 
 daeRegisterDAESolver(daeIDASolver)
 #endif

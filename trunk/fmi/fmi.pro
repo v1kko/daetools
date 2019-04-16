@@ -9,6 +9,8 @@ CONFIG += shared plugin
 
 TARGET = cdaeFMU_CS-py$${PYTHON_MAJOR}$${PYTHON_MINOR}
 
+win32::QMAKE_CXXFLAGS += -DFMI_CS_EXPORTS
+
 unix::QMAKE_CXXFLAGS += -fvisibility=hidden
 
 SOURCES += dllmain.cpp \
@@ -35,17 +37,4 @@ QMAKE_LIBDIR += $${SOLIBS_DIR}
 #                  $${DAE_DEST_DIR}/$${SHARED_LIB_PREFIX}$${TARGET}$${SHARED_LIB_POSTFIX}.$${SHARED_LIB_EXT} \
 #                  $${FMI_DIR}/$${SHARED_LIB_PREFIX}$${TARGET}$${SHARED_LIB_POSTFIX}.$${SHARED_LIB_EXT}
 
-# Install headers and libs into daetools-dev
-DAE_PROJECT_NAME = $$basename(PWD)
-
-install_headers.path  = $${DAE_INSTALL_HEADERS_DIR}/$${DAE_PROJECT_NAME}
-install_headers.files = *.h
-
-install_libs.path  = $${DAE_INSTALL_LIBS_DIR}
-install_libs.files = $${DAE_DEST_DIR}/$${SHARED_LIB_PREFIX}$${TARGET}$${SHARED_LIB_POSTFIX}.$${SHARED_LIB_EXT}
-
-# Install into daetools-package
-install_py_solib.path  = $${FMI_DIR}
-install_py_solib.files = $${DAE_DEST_DIR}/$${SHARED_LIB_PREFIX}$${TARGET}$${SHARED_LIB_POSTFIX}.$${SHARED_LIB_EXT}
-
-INSTALLS += install_headers install_libs install_py_solib
+include(../dae_install_library.pri)

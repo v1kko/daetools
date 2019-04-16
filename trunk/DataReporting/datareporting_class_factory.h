@@ -5,18 +5,18 @@
 
 #if !defined(__MINGW32__) && (defined(_WIN32) || defined(WIN32) || defined(WIN64) || defined(_WIN64))
 
-#ifdef DAEDLL
-#ifdef DATAREPORTERS_EXPORTS
+#ifdef DAE_DLL_INTERFACE
+#ifdef DATA_REPORTING_EXPORTS
 #define DAE_DATAREPORTERS_API __declspec(dllexport)
-#else // DATAREPORTERS_EXPORTS
+#else
 #define DAE_DATAREPORTERS_API __declspec(dllimport)
-#endif // DATAREPORTERS_EXPORTS
-#else // DAEDLL
+#endif
+#else
 #define DAE_DATAREPORTERS_API
-#endif // DAEDLL
+#endif
 
 #else // WIN32
-#define DAE_DATAREPORTERS_API 
+#define DAE_DATAREPORTERS_API
 #endif // WIN32
 
 namespace dae

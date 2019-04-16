@@ -9,12 +9,12 @@ namespace core
 	daeCoreClassFactory
 **********************************************************************************************/
 // I cannot have declared exported functions in a static library
-#ifdef DAEDLL
+#ifdef DAE_DLL_INTERFACE
 static daeCoreClassFactory g_BaseModelClassFactory("DAE.Core",
 												   "DAE Tools Core library",
-												   daeAuthorInfo,
-												   daeLicenceInfo,
-												   daeVersion);
+                                                   daeAuthorInfo,
+                                                   daeLicenceInfo,
+                                                   daeVersion());
 extern "C" DAE_CORE_API daeCoreClassFactory_t* GetCoreClassFactory(void);
 
 daeCoreClassFactory_t* GetCoreClassFactory(void)

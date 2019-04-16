@@ -7,10 +7,10 @@
 #include <fstream>
 #include "../Core/helpers.h"
 #include "solver_class_factory.h"
-extern "C"
-{
-#include "../mmio.h"
-}
+//extern "C"
+//{
+//#include "../mmio.h"
+//}
 
 namespace dae
 {
@@ -90,7 +90,7 @@ protected:
 /*********************************************************************************************
     daeDenseMatrix
 **********************************************************************************************/
-class DAE_SOLVER_API daeDenseMatrix : public daeMatrix<real_t>
+class daeDenseMatrix : public daeMatrix<real_t>
 {
 public:
     daeDenseMatrix(void)
@@ -287,6 +287,7 @@ public:
 
     void SaveAsMatrixMarketFile(const std::string& strFileName, const std::string& strMatrixName, const std::string& strMatrixDescription)
     {
+        /*
         int n;
         size_t row, col;
         FILE* mmx = fopen(strFileName.c_str(), "w");
@@ -311,7 +312,7 @@ public:
         fprintf(mmx, "%% \n");
         mm_write_mtx_crd_size(mmx, Nrow, Ncol, Nrow * Ncol);
 
-        /* NOTE: matrix market files use 1-based indices */
+        // NOTE: matrix market files use 1-based indices
         for(row = 0; row < Nrow; row++)
         {
             for(col = 0; col < Ncol; col++)
@@ -325,6 +326,7 @@ public:
         }
 
         fclose(mmx);
+        */
     }
 
 public:
@@ -357,7 +359,7 @@ inline bool CompareMatrices(daeMatrix<real_t>& left, daeMatrix<real_t>& right)
 /*********************************************************************************************
     daeLapackMatrix
 **********************************************************************************************/
-class DAE_SOLVER_API daeLapackMatrix : public daeMatrix<real_t>
+class daeLapackMatrix : public daeMatrix<real_t>
 {
 public:
     daeLapackMatrix(void)
@@ -490,6 +492,7 @@ public:
 
     void SaveAsMatrixMarketFile(const std::string& strFileName, const std::string& strMatrixName, const std::string& strMatrixDescription)
     {
+        /*
         int n;
         size_t i, k;
         FILE* mmx = fopen(strFileName.c_str(), "w");
@@ -514,7 +517,7 @@ public:
         fprintf(mmx, "%% \n");
         mm_write_mtx_crd_size(mmx, Nrow, Ncol, Nrow*Ncol);
 
-        /* NOTE: matrix market files use 1-based indices */
+        // NOTE: matrix market files use 1-based indices 
         for(i = 0; i < Nrow; i++)
         {
             for(k = 0; k < Ncol; k++)
@@ -524,6 +527,7 @@ public:
             fflush(mmx);
         }
         fclose(mmx);
+        */
     }
 
 public:
@@ -963,6 +967,7 @@ public:
 
     void SaveAsMatrixMarketFile(const std::string& strFileName, const std::string& strMatrixName, const std::string& strMatrixDescription)
     {
+        /*
         int n;
         size_t i, j;
         FILE* mmx = fopen(strFileName.c_str(), "w");
@@ -987,7 +992,7 @@ public:
         fprintf(mmx, "%% \n");
         mm_write_mtx_crd_size(mmx, N, N, NNZ);
 
-        /* NOTE: matrix market files use 1-based indices */
+        // NOTE: matrix market files use 1-based indices 
         for(i = 0; i < N; i++)
         {
             for(j = 0; j < N; j++)
@@ -1001,6 +1006,7 @@ public:
         }
 
         fclose(mmx);
+        */
     }
 
 public:

@@ -95,19 +95,57 @@ enum daeeMemoryPool
     eRuntimeNodesPool
 };
 
-class DAE_CORE_API adNodeImpl : public adNode
+// thread_local storage cannot have dll interface (__declspec(dllexport)).
+// Therefore, adNodeImpl cannot be declared using: DAE_CORE_API adNodeImpl
+// and all functions must be made visible to files that include it.
+class adNodeImpl : public adNode
 {
 public:
-    adNodeImpl();
-    virtual ~adNodeImpl();
+    adNodeImpl(){}
+    virtual ~adNodeImpl(){}
 
-    void Export(std::string& strContent, daeeModelLanguage eLanguage, daeModelExportContext& c) const;
-    void ExportAsLatex(string strFileName);
-    bool IsLinear(void) const;
-    bool IsFunctionOfVariables(void) const;
-    bool IsDifferential(void) const;
-    size_t SizeOf(void) const;
-    size_t GetHash() const;
+    void Export(std::string& strContent, daeeModelLanguage eLanguage, daeModelExportContext& c) const
+    {
+    }
+
+    void ExportAsLatex(string strFileName)
+    {
+        std::string strLatex;
+        std::ofstream file(strFileName.c_str());
+        file << SaveAsLatex(NULL);
+        file.close();
+    }
+
+    bool IsLinear(void) const
+    {
+    // All nodes are non-linear if I dont explicitly state that they are linear!
+        return false;
+    }
+
+    bool IsFunctionOfVariables(void) const
+    {
+    // All nodes are functions of variables if I dont explicitly state that they aint!
+        return true;
+    }
+
+    bool IsDifferential(void) const
+    {
+        return false;
+    }
+
+    size_t SizeOf(void) const
+    {
+        return sizeof(*this);
+    }
+
+    size_t GetHash() const
+    {
+        daeDeclareException(exNotImplemented);
+        e << "GetHash function is not implemented in " << typeid(*this).name() << " class";
+        throw e;
+
+        return 0;
+    }
 
     // These two functions are used to keep track of the existing nodes (type and count)
     // and used ONLY for debugging purposes.

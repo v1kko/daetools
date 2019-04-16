@@ -28,6 +28,22 @@ DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 #include <boost/bind.hpp>
 using boost::asio::ip::tcp;
 
+#if !defined(__MINGW32__) && (defined(_WIN32) || defined(WIN32) || defined(WIN64) || defined(_WIN64))
+
+#ifdef DAE_DLL_INTERFACE
+#ifdef MODEL_EXPORTS
+#define DAE_CORE_API __declspec(dllexport)
+#else // MODEL_EXPORTS
+#define DAE_CORE_API __declspec(dllimport)
+#endif // MODEL_EXPORTS
+#else // DAE_DLL_INTERFACE
+#define DAE_CORE_API
+#endif // DAE_DLL_INTERFACE
+
+#else // WIN32
+#define DAE_CORE_API
+#endif // WIN32
+
 namespace dae
 {
 namespace logging
@@ -35,7 +51,7 @@ namespace logging
 /********************************************************************
 	daeTCPIPLog
 *********************************************************************/
-class daeTCPIPLog : public daeBaseLog
+class DAE_CORE_API daeTCPIPLog : public daeBaseLog
 {
 public:
 	daeTCPIPLog(void);
@@ -59,7 +75,7 @@ protected:
 /********************************************************************
 	daeTCPIPLogServer
 *********************************************************************/
-class daeTCPIPLogServer
+class DAE_CORE_API daeTCPIPLogServer
 {
 public:
 	daeTCPIPLogServer(int nPort);

@@ -5,20 +5,19 @@
 
 #if !defined(__MINGW32__) && (defined(_WIN32) || defined(WIN32) || defined(WIN64) || defined(_WIN64))
 
-#ifdef DAEDLL
-#ifdef SIMULATION_EXPORTS
+#ifdef DAE_DLL_INTERFACE
+#ifdef ACTIVITY_EXPORTS
 #define DAE_ACTIVITY_API __declspec(dllexport)
-#else // SIMULATION_EXPORTS
+#else
 #define DAE_ACTIVITY_API __declspec(dllimport)
-#endif // SIMULATION_EXPORTS
-#else // DAEDLL
+#endif
+#else
 #define DAE_ACTIVITY_API
-#endif // DAEDLL
+#endif
 
 #else // WIN32
-#define DAE_ACTIVITY_API 
+#define DAE_ACTIVITY_API
 #endif // WIN32
-
 
 namespace dae
 {

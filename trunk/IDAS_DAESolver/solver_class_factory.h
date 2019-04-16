@@ -3,18 +3,18 @@
 
 #if !defined(__MINGW32__) && (defined(_WIN32) || defined(WIN32) || defined(WIN64) || defined(_WIN64))
 
-#ifdef DAEDLL
-#ifdef DAESOLVER_EXPORTS
-#define DAE_SOLVER_API __declspec(dllexport)
-#else // DAESOLVER_EXPORTS
-#define DAE_SOLVER_API __declspec(dllimport)
-#endif // DAESOLVER_EXPORTS
-#else // DAEDLL
-#define DAE_SOLVER_API
-#endif // DAEDLL
+#ifdef DAE_DLL_INTERFACE
+#ifdef IDAS_EXPORTS
+#define DAE_IDAS_API __declspec(dllexport)
+#else
+#define DAE_IDAS_API __declspec(dllimport)
+#endif
+#else
+#define DAE_IDAS_API
+#endif
 
 #else // WIN32
-#define DAE_SOLVER_API 
+#define DAE_IDAS_API
 #endif // WIN32
 
 #include "../Core/solver.h"
@@ -30,7 +30,7 @@ typedef daeCreateObjectDelegate<daeLASolver_t>*		pfnCreateLASolver;
 typedef daeCreateObjectDelegate<daeNLASolver_t>*	pfnCreateNLASolver;
 typedef daeCreateObjectDelegate<daeDAESolver_t>*	pfnCreateDAESolver;
 
-class DAE_SOLVER_API daeSolverClassFactory : public daeSolverClassFactory_t
+class DAE_IDAS_API daeSolverClassFactory : public daeSolverClassFactory_t
 {
 public:
 	daeSolverClassFactory(string strName, string strDescription, string strAuthorInfo, string strLicenceInfo, string strVersion);
