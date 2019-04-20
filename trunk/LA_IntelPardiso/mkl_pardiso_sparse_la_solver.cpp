@@ -6,11 +6,11 @@
 #include <omp.h>
 #include "../config.h"
 
-namespace dae
+namespace daetools
 {
 namespace solver
 {
-daeLASolver_t* daeCreateIntelPardisoSolver(void)
+daeLASolver_t* daeCreateIntelPardisoSolver()
 {
     return new daeIntelPardisoSolver;
 }

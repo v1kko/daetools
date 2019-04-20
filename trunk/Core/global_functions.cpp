@@ -1,8 +1,9 @@
 #include "stdafx.h"
+#include "definitions.h"
 #include "coreimpl.h"
 #include "xmlfile.h"
 
-namespace dae
+namespace daetools
 {
 namespace core
 {

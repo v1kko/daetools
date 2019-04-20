@@ -120,7 +120,7 @@ public:
         }
     }
 
-    void FillSparseMatrix(dae::daeSparseMatrix<real_t>* pmatrix)
+    void FillSparseMatrix(daetools::daeSparseMatrix<real_t>* pmatrix)
     {
         if(numberOfVariables != N)
             csThrowException("");
@@ -163,7 +163,7 @@ public:
     std::shared_ptr<Epetra_CrsMatrix>                       m_matEPETRA;
     Epetra_SerialComm                                       m_Comm;
     std::shared_ptr<ML_Epetra::MultiLevelPreconditioner>	m_pPreconditionerML;
-    dae::solver::daeEpetraCSRMatrix                         m_matJacobian;
+    daetools::solver::daeEpetraCSRMatrix                         m_matJacobian;
 };
 
 daePreconditioner_ML::daePreconditioner_ML()

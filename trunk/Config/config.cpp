@@ -11,17 +11,23 @@ You should have received a copy of the GNU General Public License along with the
 DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 ***********************************************************************************/
 #include <fstream>
+#include <strstream>
 #include <sys/stat.h>
+
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/info_parser.hpp>
 #include <boost/property_tree/json_parser.hpp>
 #include <boost/property_tree/detail/file_parser_error.hpp>
-#include <boost/filesystem.hpp>
-#include <boost/filesystem/operations.hpp>
-#include <boost/filesystem/path.hpp>
+
+//#include <boost/filesystem.hpp>
+//#include <boost/filesystem/operations.hpp>
+//#include <boost/filesystem/path.hpp>
+#include <experimental/filesystem>
+namespace filesystem = std::experimental::filesystem;
+
 #include "../Core/definitions.h"
 #include "../config.h"
-using namespace dae;
+using namespace daetools;
 
 #if defined(_WIN32) || defined(WIN32) || defined(WIN64) || defined(_WIN64)
 #include <Windows.h>
@@ -33,6 +39,9 @@ using namespace dae;
 
 static std::string g_configfile = "";
 static boost::property_tree::ptree g_pt;
+filesystem::path cfg_home_folder,
+                 cfg_app_folder,
+                 cfg_python_daetools_folder;
 
 void daeSetConfigFile(const std::string& strConfigFile)
 {
@@ -49,7 +58,7 @@ daeConfig::daeConfig()
     // std::cout << "\n\nLoaded config " << rand() << std::endl << std::endl;
     if(g_configfile.empty())
     {
-        boost::filesystem::path cfg_file = daeConfig::GetConfigFolder();
+        filesystem::path cfg_file = daeConfig::GetConfigFolder();
         cfg_file /= "daetools.cfg";
         configfile = cfg_file.string();
     }
@@ -69,26 +78,18 @@ void daeConfig::Reload(void)
 {
     try
     {
-        // First try to read the config file in "json" format
+        // Try to read the config file in "json" format
         g_pt.clear();
         boost::property_tree::json_parser::read_json(configfile, g_pt);
     }
     catch(boost::property_tree::file_parser_error& jsone)
     {
-        // If json fails, try to read the same file in "info" format (this is just a transitional feature)
-        try
-        {
-            boost::property_tree::info_parser::read_info(configfile, g_pt);
-        }
-        catch(boost::property_tree::file_parser_error& infoe)
-        {
-            std::cout << "Cannot load daetools.cfg config file [" << configfile << "] in neither 'json' nor 'info' format. Error: " << jsone.message() << std::endl;
-            std::cout << "Config files are located in: (1)current_exe_directory, (b).../daetools or (c)$HOME/.daetools directory" << std::endl;
-            return;
-        }
-
-        std::cout << "Config file is in deprecated 'info' format - switch to the new 'json' format." << std::endl;
-        std::cout << "Config files are located in /etc/daetools, c:/daetools or $HOME/.daetools directory" << std::endl;
+        std::cout << "Cannot load daetools.cfg config file [" << configfile << "] in 'json' format. Error: " << jsone.message() << std::endl;
+        std::cout << "Config files are located in: (a) $HOME/.daetools directory, (b) current executable directory or (c) python installation daetools directory" << std::endl;
+        std::cout << "The following paths are searched: " <<
+                     cfg_home_folder.string() << ", " <<
+                     cfg_app_folder.string() << " and " <<
+                     cfg_python_daetools_folder.string() << std::endl;
     }
 }
 
@@ -202,7 +203,7 @@ daeConfig& daeConfig::GetConfig(void)
 
 std::string daeConfig::GetBONMINOptionsFile()
 {
-    boost::filesystem::path cfg_file = daeConfig::GetConfigFolder();
+    filesystem::path cfg_file = daeConfig::GetConfigFolder();
     cfg_file /= "bonmin.cfg";
     return cfg_file.string();
 }
@@ -213,10 +214,6 @@ extern HMODULE config_hModule;
 
 std::string daeConfig::GetConfigFolder()
 {
-    boost::filesystem::path cfg_home_folder,
-                            cfg_app_folder,
-                            cfg_python_daetools_folder;
-
 #if defined(_WIN32) || defined(WIN32) || defined(WIN64) || defined(_WIN64)
     char* szUserProfile = getenv("USERPROFILE");
     if(szUserProfile != NULL)
@@ -241,10 +238,11 @@ std::string daeConfig::GetConfigFolder()
     if(returned > 0)
     {
         std::wstring w_szModuleFileName(szModuleFileName);
-        boost::filesystem::path canonical_config_path = std::string(w_szModuleFileName.begin(), w_szModuleFileName.end());
-        canonical_config_path = boost::filesystem::weakly_canonical(canonical_config_path);
+        filesystem::path canonical_config_path = std::string(w_szModuleFileName.begin(), w_szModuleFileName.end());
+        canonical_config_path = filesystem::canonical(canonical_config_path);
 
-        cfg_python_daetools_folder = canonical_config_path;                    // i.e. daetools/solibs/Windows_win32/libcdaeConfig-py27.so
+        cfg_python_daetools_folder = canonical_config_path;                    // i.e. daetools/solibs/Windows_win32/lib/libcdaeConfig-py27.so
+        cfg_python_daetools_folder = cfg_python_daetools_folder.parent_path(); // i.e. daetools/solibs/Windows_win32/lib
         cfg_python_daetools_folder = cfg_python_daetools_folder.parent_path(); // i.e. daetools/solibs/Windows_win32
         cfg_python_daetools_folder = cfg_python_daetools_folder.parent_path(); // i.e. daetools/solibs
         cfg_python_daetools_folder = cfg_python_daetools_folder.parent_path(); // i.e. daetools
@@ -262,14 +260,15 @@ std::string daeConfig::GetConfigFolder()
     //printf("module %s loaded\n", dl_info.dli_fname);
     if(dl_info.dli_fname != NULL)
     {
-        boost::filesystem::path canonical_config_path = std::string(dl_info.dli_fname); // i.e. app_folder/some_file
-        canonical_config_path = boost::filesystem::weakly_canonical(canonical_config_path);
+        filesystem::path canonical_config_path = std::string(dl_info.dli_fname); // i.e. app_folder/some_file
+        canonical_config_path = filesystem::canonical(canonical_config_path);
 
         cfg_app_folder = canonical_config_path;
         cfg_app_folder = cfg_app_folder.parent_path();   // i.e. app_folder
 
-        cfg_python_daetools_folder = canonical_config_path;                    // i.e. daetools/solibs/Linux_x86_64/libcdaeConfig-py27.so
-        cfg_python_daetools_folder = cfg_python_daetools_folder.parent_path(); // i.e. daetools/solibs/Linux_x86_64_py27
+        cfg_python_daetools_folder = canonical_config_path;                    // i.e. daetools/solibs/Linux_x86_64/lib/libcdaeConfig-py27.so
+        cfg_python_daetools_folder = cfg_python_daetools_folder.parent_path(); // i.e. daetools/solibs/Linux_x86_64/lib
+        cfg_python_daetools_folder = cfg_python_daetools_folder.parent_path(); // i.e. daetools/solibs/Linux_x86_64
         cfg_python_daetools_folder = cfg_python_daetools_folder.parent_path(); // i.e. daetools/solibs
         cfg_python_daetools_folder = cfg_python_daetools_folder.parent_path(); // i.e. daetools
     }
@@ -278,13 +277,13 @@ std::string daeConfig::GetConfigFolder()
     //printf("APP folder %s\n", cfg_app_folder.string().c_str());
     //printf("daetools folder %s\n", cfg_python_daetools_folder.string().c_str());
 
-    if(boost::filesystem::exists(cfg_home_folder / std::string("daetools.cfg")))
+    if(filesystem::exists(cfg_home_folder / std::string("daetools.cfg")))
         return cfg_home_folder.string();
 
-    else if(boost::filesystem::exists(cfg_app_folder / std::string("daetools.cfg")))
+    else if(filesystem::exists(cfg_app_folder / std::string("daetools.cfg")))
         return cfg_app_folder.string();
 
-    else if(boost::filesystem::exists(cfg_python_daetools_folder / std::string("daetools.cfg")))
+    else if(filesystem::exists(cfg_python_daetools_folder / std::string("daetools.cfg")))
         return cfg_python_daetools_folder.string();
 
     else

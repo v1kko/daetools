@@ -84,31 +84,31 @@ public:
             it->InitializeModel(jsonInit);
     }
 
-    virtual void CollectAllDomains(std::map<dae::string, daeDomain_t*>& mapDomains) const
+    virtual void CollectAllDomains(std::map<std::string, daeDomain_t*>& mapDomains) const
     {
         for(iterator it = this->m_ptrarrObjects.begin(); it != this->m_ptrarrObjects.end(); it++)
             it->CollectAllDomains(mapDomains);
     }
 
-    virtual void CollectAllParameters(std::map<dae::string, daeParameter_t*>& mapParameters) const
+    virtual void CollectAllParameters(std::map<std::string, daeParameter_t*>& mapParameters) const
     {
         for(iterator it = this->m_ptrarrObjects.begin(); it != this->m_ptrarrObjects.end(); it++)
             it->CollectAllParameters(mapParameters);
     }
 
-    virtual void CollectAllVariables(std::map<dae::string, daeVariable_t*>& mapVariables) const
+    virtual void CollectAllVariables(std::map<std::string, daeVariable_t*>& mapVariables) const
     {
         for(iterator it = this->m_ptrarrObjects.begin(); it != this->m_ptrarrObjects.end(); it++)
             it->CollectAllVariables(mapVariables);
     }
 
-    virtual void CollectAllSTNs(std::map<dae::string, daeSTN_t*>& mapSTNs) const
+    virtual void CollectAllSTNs(std::map<std::string, daeSTN_t*>& mapSTNs) const
     {
         for(iterator it = this->m_ptrarrObjects.begin(); it != this->m_ptrarrObjects.end(); it++)
             it->CollectAllSTNs(mapSTNs);
     }
 
-    virtual void CollectAllPorts(std::map<dae::string, daePort_t*>& mapPorts) const
+    virtual void CollectAllPorts(std::map<std::string, daePort_t*>& mapPorts) const
     {
         for(iterator it = this->m_ptrarrObjects.begin(); it != this->m_ptrarrObjects.end(); it++)
             it->CollectAllPorts(mapPorts);
@@ -196,7 +196,7 @@ protected:
             it->InitializeEquations();
     }
 
-    virtual void PropagateDataProxy(boost::shared_ptr<daeDataProxy_t> pDataProxy)
+    virtual void PropagateDataProxy(std::shared_ptr<daeDataProxy_t> pDataProxy)
     {
         for(iterator it = this->m_ptrarrObjects.begin(); it != this->m_ptrarrObjects.end(); it++)
             it->PropagateDataProxy(pDataProxy);

@@ -3,7 +3,7 @@
 #include "nodes_array.h"
 #include "units_io.h"
 
-namespace dae
+namespace daetools
 {
 namespace core
 {
@@ -35,7 +35,7 @@ daeParameter::daeParameter(string strName, const unit& units, daeModel* pModel, 
 
     pModel->AddParameter(*this, strName, units, strDescription);
 
-    m_ptrDomains = dae::makeVector<daeDomain*>(d1, d2, d3, d4, d5, d6, d7, d8);
+    m_ptrDomains = daetools::makeVector<daeDomain*>(d1, d2, d3, d4, d5, d6, d7, d8);
 }
 
 daeParameter::daeParameter(string strName, const unit& units, daePort* pPort, string strDescription,
@@ -56,7 +56,7 @@ daeParameter::daeParameter(string strName, const unit& units, daePort* pPort, st
 
     pPort->AddParameter(*this, strName, units, strDescription);
 
-    m_ptrDomains = dae::makeVector<daeDomain*>(d1, d2, d3, d4, d5, d6, d7, d8);
+    m_ptrDomains = daetools::makeVector<daeDomain*>(d1, d2, d3, d4, d5, d6, d7, d8);
 }
 
 daeParameter::~daeParameter(void)

@@ -3,7 +3,7 @@
 #include <algorithm>
 #include <typeinfo>
 
-namespace dae 
+namespace daetools 
 {
 namespace core 
 {
@@ -43,7 +43,7 @@ daeFunctionWithGradients::daeFunctionWithGradients(daeModel* pModel,
 	m_nEquationIndexInBlock = ULONG_MAX;
 	m_nVariableIndexInBlock = ULONG_MAX;
 	
-	m_pVariable	= boost::shared_ptr<daeVariable>(new daeVariable(strVariableName, varType, m_pModel, strDescription));
+	m_pVariable	= std::shared_ptr<daeVariable>(new daeVariable(strVariableName, varType, m_pModel, strDescription));
 	m_pVariable->SetReportingOn(true);
 	
 	m_pEquation = m_pModel->CreateEquation(strEquationName, strDescription);
@@ -213,10 +213,10 @@ void daeFunctionWithGradients::GetOptimizationVariableIndexes(std::vector<size_t
 	narrOptimizationVariablesIndexes = m_narrOptimizationVariablesIndexes;
 }
 
-void daeFunctionWithGradients::Initialize(const std::vector< boost::shared_ptr<daeOptimizationVariable> >& arrOptimizationVariables, daeBlock_t* pBlock)
+void daeFunctionWithGradients::Initialize(const std::vector< std::shared_ptr<daeOptimizationVariable> >& arrOptimizationVariables, daeBlock_t* pBlock)
 {
 	size_t i;
-	boost::shared_ptr<daeOptimizationVariable> pOptVariable;
+	std::shared_ptr<daeOptimizationVariable> pOptVariable;
 	vector<daeEquationExecutionInfo*> ptrarrEquationExecutionInfos;
 
 	if(!m_pEquation)

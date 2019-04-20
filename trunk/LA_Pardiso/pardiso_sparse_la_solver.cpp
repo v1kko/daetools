@@ -4,11 +4,11 @@
 #include "pardiso_sparse_la_solver.h"
 #include <omp.h>
 
-namespace dae
+namespace daetools
 {
 namespace solver
 {
-daeLASolver_t* daeCreatePardisoSolver(void)
+daeLASolver_t* daeCreatePardisoSolver()
 {
     return new daePardisoSolver;
 }

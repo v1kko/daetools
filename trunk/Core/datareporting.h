@@ -15,12 +15,13 @@ DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 
 #include "definitions.h"
 #include "core.h"
-using namespace dae::core;
 
-namespace dae
+namespace daetools
 {
 namespace datareporting
 {
+using namespace daetools::core;
+
 /*********************************************************************
     daeDataReporterDomain
 *********************************************************************/

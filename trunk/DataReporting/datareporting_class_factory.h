@@ -19,7 +19,7 @@
 #define DAE_DATAREPORTERS_API
 #endif // WIN32
 
-namespace dae
+namespace daetools
 {
 namespace datareporting
 {

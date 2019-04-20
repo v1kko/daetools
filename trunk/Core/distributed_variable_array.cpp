@@ -3,7 +3,7 @@
 #include "nodes_array.h"
 using namespace boost;
 
-namespace dae
+namespace daetools
 {
 namespace core
 {
@@ -92,7 +92,7 @@ int daeVariable::GetType() const
     if(!m_pModel)
         daeDeclareAndThrowException(exInvalidPointer);
 
-    boost::shared_ptr<daeDataProxy_t> pDataProxy = m_pModel->GetDataProxy();
+    std::shared_ptr<daeDataProxy_t> pDataProxy = m_pModel->GetDataProxy();
     if(!pDataProxy)
         daeDeclareAndThrowException(exInvalidPointer);
 
@@ -876,7 +876,7 @@ adouble daeVariable::CreateSetupVariable(const daeDomainIndex* indexes, const si
     tmp.setGatherInfo(true);
 
     // If all indexes are constant indexes and overall index found add it to the map
-    if(int_indexes.size() == N && nOverallIndex != -1)
+    if(int_indexes.size() == N && nOverallIndex != ULONG_MAX)
     {
         //std::cout << "Added variable " << GetName() << "(" << int_indexes[0] << ") to the map" << std::endl;
         daeVariable* self = const_cast<daeVariable*>(this);
@@ -1092,7 +1092,7 @@ adouble daeVariable::CreateSetupTimeDerivative(const daeDomainIndex* indexes, co
             break;
     }
 
-    size_t nOverallIndex = -1;
+    size_t nOverallIndex = ULONG_MAX;
     if(int_indexes.size() == N) // all indexes are constant indexes
     {
         nOverallIndex = m_nOverallIndex + CalculateIndex(int_indexes);
@@ -1117,7 +1117,7 @@ adouble daeVariable::CreateSetupTimeDerivative(const daeDomainIndex* indexes, co
     tmp.setGatherInfo(true);
 
     // If all indexes are constant indexes and overall index found add it to the map
-    if(int_indexes.size() == N && nOverallIndex != -1)
+    if(int_indexes.size() == N && nOverallIndex != ULONG_MAX)
     {
         daeVariable* self = const_cast<daeVariable*>(this);
         m_pModel->m_pDataProxy->m_mapSetupTimeDerivativeNodes[nOverallIndex] = tmp;

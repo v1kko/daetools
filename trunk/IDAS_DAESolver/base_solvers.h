@@ -18,7 +18,7 @@
 #define DAE_IDAS_API
 #endif // WIN32
 
-namespace dae 
+namespace daetools 
 {
 namespace solver 
 {

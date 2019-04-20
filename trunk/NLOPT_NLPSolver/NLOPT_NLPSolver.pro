@@ -18,6 +18,7 @@ LIBS += $${DAE_CONFIG_LIB} \
         $${BOOST_LIBS} \
         $${NLOPT_LIBS} \
         $${BLAS_LAPACK_LIBS}
+LIBS += $${STD_FILESYSTEM}
 
 HEADERS += stdafx.h \
     nlpsolver_class_factory.h \

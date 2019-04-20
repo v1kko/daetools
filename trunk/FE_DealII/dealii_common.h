@@ -78,7 +78,7 @@ template <> struct EnableIfScalar<adouble>
 };
 }
 
-namespace dae
+namespace daetools
 {
 namespace fe_solver
 {
@@ -477,8 +477,8 @@ protected:
     PyGILState_STATE gstate;
 };
 
-#define INIT_THREAD_STATE_AND_RELEASE_GIL boost::shared_ptr<daeAllowThreads_t> _allowThreads_(new pyAllowThreads(false))
-#define ACQUIRE_GIL_STATE                 boost::shared_ptr<daeGILState_t>     _GIL_         (new pyGILState(false))
+#define INIT_THREAD_STATE_AND_RELEASE_GIL std::shared_ptr<daeAllowThreads_t> _allowThreads_(new pyAllowThreads(false))
+#define ACQUIRE_GIL_STATE                 std::shared_ptr<daeGILState_t>     _GIL_         (new pyGILState(false))
 
 /*********************************************************
  * feExpression
@@ -519,7 +519,7 @@ template<int dim>
 class feExpression
 {
 public:
-    typedef typename boost::shared_ptr< feNode<dim> > feNodePtr;
+    typedef typename std::shared_ptr< feNode<dim> > feNodePtr;
 
     feExpression()
     {
@@ -2615,7 +2615,7 @@ template<int dim>
 class feNode_function : public feNode<dim>
 {
 public:
-    typedef typename boost::shared_ptr< feNode<dim> > feNodePtr;
+    typedef typename std::shared_ptr< feNode<dim> > feNodePtr;
 
     feNode_function(const std::string& name, efeFunctionCall call, feNodePtr xyz_node, unsigned int component = 0)
     {
@@ -2680,7 +2680,7 @@ template<int dim>
 class feNode_adouble_function : public feNode<dim>
 {
 public:
-    typedef typename boost::shared_ptr< feNode<dim> > feNodePtr;
+    typedef typename std::shared_ptr< feNode<dim> > feNodePtr;
 
     feNode_adouble_function(const std::string& name, efeFunctionCall call, feNodePtr xyz_node, unsigned int component = 0)
     {
@@ -2749,7 +2749,7 @@ template<int dim, typename Number>
 class feNode_function : public feNode<dim>
 {
 public:
-    typedef typename boost::shared_ptr< feNode<dim> > feNodePtr;
+    typedef typename std::shared_ptr< feNode<dim> > feNodePtr;
 
     feNode_function(const std::string& name, const Function<dim,Number>& fun, efeFunctionCall call, feNodePtr xyz_node, unsigned int component = 0)
         : m_function(fun)
@@ -2818,7 +2818,7 @@ template<int rank, int dim, typename Number>
 class feNode_tensor_function : public feNode<dim>
 {
 public:
-    typedef typename boost::shared_ptr< feNode<dim> > feNodePtr;
+    typedef typename std::shared_ptr< feNode<dim> > feNodePtr;
 
     feNode_tensor_function(const std::string& name, const TensorFunction<rank,dim,Number>& tfun, efeFunctionCall call, feNodePtr xyz_node)
         : m_tensor_function(tfun)
@@ -3174,7 +3174,7 @@ template<int dim>
 class feNode_unary : public feNode<dim>
 {
 public:
-    typedef typename boost::shared_ptr< feNode<dim> > feNodePtr;
+    typedef typename std::shared_ptr< feNode<dim> > feNodePtr;
 
     feNode_unary(efeUnaryFunction function, feNodePtr node)
     {
@@ -3281,7 +3281,7 @@ template<int dim>
 class feNode_binary : public feNode<dim>
 {
 public:
-    typedef typename boost::shared_ptr< feNode<dim> > feNodePtr;
+    typedef typename std::shared_ptr< feNode<dim> > feNodePtr;
 
     feNode_binary(efeBinaryFunction function, feNodePtr left, feNodePtr right)
     {

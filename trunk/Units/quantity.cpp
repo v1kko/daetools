@@ -210,7 +210,7 @@ create_base_units::create_base_units()
 **************************************************************/
 // Dimensionless quanities should not create a large unit object but
 // use the dimension less global object.
-boost::shared_ptr<unit> g_dimensionless_unit(new unit());
+std::shared_ptr<unit> g_dimensionless_unit(new unit());
 
 quantity::quantity(void)
 {

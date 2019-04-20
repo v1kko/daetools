@@ -32,9 +32,9 @@ DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 #include <string>
 #include <vector>
 #include "io.h"
-using namespace dae::io;
+using namespace daetools::io;
 
-namespace dae 
+namespace daetools 
 {
 class daeClassFactoryManager_t;
 

@@ -3,9 +3,9 @@
 #include "../IDAS_DAESolver/dae_array_matrix.h"
 #include <omp.h>
 #include "compute_stack_kernels_openmp.h"
-using namespace dae::solver;
+using namespace daetools::solver;
 
-namespace dae
+namespace daetools
 {
 namespace core
 {
@@ -165,7 +165,7 @@ void daeBlock::CalculateResiduals(real_t			dTime,
     pTopLevelModel->UpdateEquations();
 
     // Calls PyEval_InitThreads and PyEval_SaveThread in the constructor, and PyEval_RestoreThread in the destructor
-    boost::shared_ptr<daeAllowThreads_t> _allowThreads_ = pTopLevelModel->CreateAllowThreads();
+    std::shared_ptr<daeAllowThreads_t> _allowThreads_ = pTopLevelModel->CreateAllowThreads();
 
     if(m_pDataProxy->GetEvaluationMode() == eComputeStack_OpenMP ||
        m_pDataProxy->GetEvaluationMode() == eComputeStack_External)
@@ -297,7 +297,7 @@ void daeBlock::CalculateJacobian(real_t				dTime,
     pTopLevelModel->UpdateEquations();
 
     // Calls PyEval_InitThreads and PyEval_SaveThread in the constructor, and PyEval_RestoreThread in the destructor
-    boost::shared_ptr<daeAllowThreads_t> _allowThreads_ = pTopLevelModel->CreateAllowThreads();
+    std::shared_ptr<daeAllowThreads_t> _allowThreads_ = pTopLevelModel->CreateAllowThreads();
 
     if(m_pDataProxy->GetEvaluationMode() == eComputeStack_OpenMP ||
        m_pDataProxy->GetEvaluationMode() == eComputeStack_External)
@@ -444,7 +444,7 @@ void daeBlock::CalculateSensitivityResiduals(real_t						dTime,
     pTopLevelModel->UpdateEquations();
 
     // Calls PyEval_InitThreads and PyEval_SaveThread in the constructor, and PyEval_RestoreThread in the destructor
-    boost::shared_ptr<daeAllowThreads_t> _allowThreads_ = pTopLevelModel->CreateAllowThreads();
+    std::shared_ptr<daeAllowThreads_t> _allowThreads_ = pTopLevelModel->CreateAllowThreads();
 
     if(m_pDataProxy->GetEvaluationMode() == eComputeStack_OpenMP ||
        m_pDataProxy->GetEvaluationMode() == eComputeStack_External)

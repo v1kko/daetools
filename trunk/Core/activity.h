@@ -18,15 +18,16 @@ DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 #include "solver.h"
 #include "datareporting.h"
 #include "log.h"
-using namespace dae::logging;
-using namespace dae::core;
-using namespace dae::solver;
-using namespace dae::datareporting;
 
-namespace dae
+namespace daetools
 {
 namespace activity
 {
+using namespace daetools::logging;
+using namespace daetools::core;
+using namespace daetools::solver;
+using namespace daetools::datareporting;
+
 enum daeeActivityAction
 {
     eAAUnknown = 0,

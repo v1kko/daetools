@@ -2,7 +2,7 @@
 #include "base_data_reporters_receivers.h"
 #include "datareporters.h"
 
-namespace dae
+namespace daetools
 {
 namespace datareporting
 {

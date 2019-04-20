@@ -46,7 +46,7 @@ POINTER_CONVERSION(daePortConnection)
 POINTER_CONVERSION(daeEventPortConnection)
 POINTER_CONVERSION(daePortArray)
 POINTER_CONVERSION(daeModelArray)
-POINTER_CONVERSION(dae::tpp::daeThermoPhysicalPropertyPackage_t)
+POINTER_CONVERSION(daetools::tpp::daeThermoPhysicalPropertyPackage_t)
 }
 #endif
 #endif
@@ -62,225 +62,225 @@ BOOST_PYTHON_MODULE(pyCore)
     Enums
 ***************************************************************/
     enum_<daeeDomainType>("daeeDomainType")
-        .value("eDTUnknown",        dae::core::eDTUnknown)
-        .value("eArray",            dae::core::eArray)
-        .value("eStructuredGrid",   dae::core::eStructuredGrid)
-        .value("eUnstructuredGrid",	dae::core::eUnstructuredGrid)
+        .value("eDTUnknown",        daetools::core::eDTUnknown)
+        .value("eArray",            daetools::core::eArray)
+        .value("eStructuredGrid",   daetools::core::eStructuredGrid)
+        .value("eUnstructuredGrid",	daetools::core::eUnstructuredGrid)
         .export_values()
     ;
 
     enum_<daeeParameterType>("daeeParameterType")
-        .value("ePTUnknown",	dae::core::ePTUnknown)
-        .value("eReal",			dae::core::eReal)
-        .value("eInteger",		dae::core::eInteger)
-        .value("eBool",			dae::core::eBool)
+        .value("ePTUnknown",	daetools::core::ePTUnknown)
+        .value("eReal",			daetools::core::eReal)
+        .value("eInteger",		daetools::core::eInteger)
+        .value("eBool",			daetools::core::eBool)
         .export_values()
     ;
 
     enum_<daeePortType>("daeePortType")
-        .value("eUnknownPort",	dae::core::eUnknownPort)
-        .value("eInletPort",	dae::core::eInletPort)
-        .value("eOutletPort",	dae::core::eOutletPort)
+        .value("eUnknownPort",	daetools::core::eUnknownPort)
+        .value("eInletPort",	daetools::core::eInletPort)
+        .value("eOutletPort",	daetools::core::eOutletPort)
         .export_values()
     ;
 
     enum_<daeeDiscretizationMethod>("daeeDiscretizationMethod")
-        .value("eDMUnknown",	dae::core::eDMUnknown)
-        .value("eCFDM",			dae::core::eCFDM)
-        .value("eFFDM",			dae::core::eFFDM)
-        .value("eBFDM",			dae::core::eBFDM)
-        .value("eUpwindCCFV",	dae::core::eUpwindCCFV)
+        .value("eDMUnknown",	daetools::core::eDMUnknown)
+        .value("eCFDM",			daetools::core::eCFDM)
+        .value("eFFDM",			daetools::core::eFFDM)
+        .value("eBFDM",			daetools::core::eBFDM)
+        .value("eUpwindCCFV",	daetools::core::eUpwindCCFV)
         .export_values()
     ;
 
     enum_<daeeDomainBounds>("daeeDomainBounds")
-        .value("eDBUnknown",		dae::core::eDBUnknown)
-        .value("eOpenOpen",			dae::core::eOpenOpen)
-        .value("eOpenClosed",		dae::core::eOpenClosed)
-        .value("eClosedOpen",		dae::core::eClosedOpen)
-        .value("eClosedClosed",		dae::core::eClosedClosed)
-        .value("eLowerBound",		dae::core::eLowerBound)
-        .value("eUpperBound",		dae::core::eUpperBound)
+        .value("eDBUnknown",		daetools::core::eDBUnknown)
+        .value("eOpenOpen",			daetools::core::eOpenOpen)
+        .value("eOpenClosed",		daetools::core::eOpenClosed)
+        .value("eClosedOpen",		daetools::core::eClosedOpen)
+        .value("eClosedClosed",		daetools::core::eClosedClosed)
+        .value("eLowerBound",		daetools::core::eLowerBound)
+        .value("eUpperBound",		daetools::core::eUpperBound)
         .export_values()
     ;
 
     enum_<daeeInitialConditionMode>("daeeInitialConditionMode")
-        .value("eICTUnknown",					dae::core::eICTUnknown)
-        .value("eAlgebraicValuesProvided",		dae::core::eAlgebraicValuesProvided)
-        .value("eQuasiSteadyState",				dae::core::eQuasiSteadyState)
+        .value("eICTUnknown",					daetools::core::eICTUnknown)
+        .value("eAlgebraicValuesProvided",		daetools::core::eAlgebraicValuesProvided)
+        .value("eQuasiSteadyState",				daetools::core::eQuasiSteadyState)
         .export_values()
     ;
 
     enum_<daeeSTNType>("daeeSTNType")
-        .value("eSTNTUnknown",	dae::core::eSTNTUnknown)
-        .value("eSTN",          dae::core::eSTN)
-        .value("eIF",			dae::core::eIF)
+        .value("eSTNTUnknown",	daetools::core::eSTNTUnknown)
+        .value("eSTN",          daetools::core::eSTN)
+        .value("eIF",			daetools::core::eIF)
         .export_values()
     ;
 
     enum_<daeeDomainIndexType>("daeeDomainIndexType")
-        .value("eDITUnknown",					dae::core::eDITUnknown)
-        .value("eConstantIndex",				dae::core::eConstantIndex)
-        .value("eLastPointInDomain",            dae::core::eLastPointInDomain)
-        .value("eDomainIterator",				dae::core::eDomainIterator)
-        .value("eIncrementedDomainIterator",	dae::core::eIncrementedDomainIterator)
+        .value("eDITUnknown",					daetools::core::eDITUnknown)
+        .value("eConstantIndex",				daetools::core::eConstantIndex)
+        .value("eLastPointInDomain",            daetools::core::eLastPointInDomain)
+        .value("eDomainIterator",				daetools::core::eDomainIterator)
+        .value("eIncrementedDomainIterator",	daetools::core::eIncrementedDomainIterator)
         .export_values()
     ;
 
     enum_<daeeRangeType>("daeeRangeType")
-        .value("eRaTUnknown",			dae::core::eRaTUnknown)
-        .value("eRangeDomainIndex",		dae::core::eRangeDomainIndex)
-        .value("eRange",				dae::core::eRange)
+        .value("eRaTUnknown",			daetools::core::eRaTUnknown)
+        .value("eRangeDomainIndex",		daetools::core::eRangeDomainIndex)
+        .value("eRange",				daetools::core::eRange)
         .export_values()
     ;
 
     enum_<daeIndexRangeType>("daeIndexRangeType")
-        .value("eIRTUnknown",			dae::core::eIRTUnknown)
-        .value("eAllPointsInDomain",	dae::core::eAllPointsInDomain)
-        .value("eRangeOfIndexes",		dae::core::eRangeOfIndexes)
-        .value("eCustomRange",			dae::core::eCustomRange)
+        .value("eIRTUnknown",			daetools::core::eIRTUnknown)
+        .value("eAllPointsInDomain",	daetools::core::eAllPointsInDomain)
+        .value("eRangeOfIndexes",		daetools::core::eRangeOfIndexes)
+        .value("eCustomRange",			daetools::core::eCustomRange)
         .export_values()
     ;
 
     enum_<daeeOptimizationVariableType>("daeeOptimizationVariableType")
-        .value("eIntegerVariable",		dae::core::eIntegerVariable)
-        .value("eBinaryVariable",		dae::core::eBinaryVariable)
-        .value("eContinuousVariable",	dae::core::eContinuousVariable)
+        .value("eIntegerVariable",		daetools::core::eIntegerVariable)
+        .value("eBinaryVariable",		daetools::core::eBinaryVariable)
+        .value("eContinuousVariable",	daetools::core::eContinuousVariable)
         .export_values()
     ;
 
     enum_<daeeModelLanguage>("daeeModelLanguage")
-        .value("eMLNone",	dae::core::eMLNone)
-        .value("eCDAE",		dae::core::eCDAE)
-        .value("ePYDAE",	dae::core::ePYDAE)
+        .value("eMLNone",	daetools::core::eMLNone)
+        .value("eCDAE",		daetools::core::eCDAE)
+        .value("ePYDAE",	daetools::core::ePYDAE)
         .export_values()
     ;
 
     enum_<daeeConstraintType>("daeeConstraintType")
-        .value("eInequalityConstraint",	dae::core::eInequalityConstraint)
-        .value("eEqualityConstraint",	dae::core::eEqualityConstraint)
+        .value("eInequalityConstraint",	daetools::core::eInequalityConstraint)
+        .value("eEqualityConstraint",	daetools::core::eEqualityConstraint)
         .export_values()
     ;
 
     enum_<daeeUnaryFunctions>("daeeUnaryFunctions")
-        .value("eUFUnknown",dae::core::eUFUnknown)
-        .value("eSign",     dae::core::eSign)
-        .value("eSqrt",     dae::core::eSqrt)
-        .value("eExp",      dae::core::eExp)
-        .value("eLog",      dae::core::eLog)
-        .value("eLn",       dae::core::eLn)
-        .value("eAbs",      dae::core::eAbs)
-        .value("eSin",      dae::core::eSin)
-        .value("eCos",      dae::core::eCos)
-        .value("eTan",      dae::core::eTan)
-        .value("eArcSin",	dae::core::eArcSin)
-        .value("eArcCos",	dae::core::eArcCos)
-        .value("eArcTan",	dae::core::eArcTan)
-        .value("eCeil",     dae::core::eCeil)
-        .value("eFloor",	dae::core::eFloor)
-        .value("eSinh",     dae::core::eSinh)
-        .value("eCosh",     dae::core::eCosh)
-        .value("eTanh",     dae::core::eTanh)
-        .value("eArcSinh",	dae::core::eArcSinh)
-        .value("eArcCosh",	dae::core::eArcCosh)
-        .value("eArcTanh",	dae::core::eArcTanh)
-        .value("eScaling",	dae::core::eScaling)
+        .value("eUFUnknown",daetools::core::eUFUnknown)
+        .value("eSign",     daetools::core::eSign)
+        .value("eSqrt",     daetools::core::eSqrt)
+        .value("eExp",      daetools::core::eExp)
+        .value("eLog",      daetools::core::eLog)
+        .value("eLn",       daetools::core::eLn)
+        .value("eAbs",      daetools::core::eAbs)
+        .value("eSin",      daetools::core::eSin)
+        .value("eCos",      daetools::core::eCos)
+        .value("eTan",      daetools::core::eTan)
+        .value("eArcSin",	daetools::core::eArcSin)
+        .value("eArcCos",	daetools::core::eArcCos)
+        .value("eArcTan",	daetools::core::eArcTan)
+        .value("eCeil",     daetools::core::eCeil)
+        .value("eFloor",	daetools::core::eFloor)
+        .value("eSinh",     daetools::core::eSinh)
+        .value("eCosh",     daetools::core::eCosh)
+        .value("eTanh",     daetools::core::eTanh)
+        .value("eArcSinh",	daetools::core::eArcSinh)
+        .value("eArcCosh",	daetools::core::eArcCosh)
+        .value("eArcTanh",	daetools::core::eArcTanh)
+        .value("eScaling",	daetools::core::eScaling)
         .export_values()
     ;
 
     enum_<daeeBinaryFunctions>("daeeBinaryFunctions")
-        .value("eBFUnknown",	dae::core::eBFUnknown)
-        .value("ePlus",         dae::core::ePlus)
-        .value("eMinus",        dae::core::eMinus)
-        .value("eMulti",        dae::core::eMulti)
-        .value("eDivide",       dae::core::eDivide)
-        .value("ePower",        dae::core::ePower)
-        .value("eMin",          dae::core::eMin)
-        .value("eMax",          dae::core::eMax)
-        .value("eArcTan2",      dae::core::eArcTan2)
+        .value("eBFUnknown",	daetools::core::eBFUnknown)
+        .value("ePlus",         daetools::core::ePlus)
+        .value("eMinus",        daetools::core::eMinus)
+        .value("eMulti",        daetools::core::eMulti)
+        .value("eDivide",       daetools::core::eDivide)
+        .value("ePower",        daetools::core::ePower)
+        .value("eMin",          daetools::core::eMin)
+        .value("eMax",          daetools::core::eMax)
+        .value("eArcTan2",      daetools::core::eArcTan2)
         .export_values()
     ;
 
     enum_<daeeSpecialUnaryFunctions>("daeeSpecialUnaryFunctions")
-        .value("eSUFUnknown",	dae::core::eSUFUnknown)
-        .value("eSum",          dae::core::eSum)
-        .value("eProduct",      dae::core::eProduct)
-        .value("eMinInArray",   dae::core::eMinInArray)
-        .value("eMaxInArray",   dae::core::eMaxInArray)
-        .value("eAverage",      dae::core::eAverage)
+        .value("eSUFUnknown",	daetools::core::eSUFUnknown)
+        .value("eSum",          daetools::core::eSum)
+        .value("eProduct",      daetools::core::eProduct)
+        .value("eMinInArray",   daetools::core::eMinInArray)
+        .value("eMaxInArray",   daetools::core::eMaxInArray)
+        .value("eAverage",      daetools::core::eAverage)
         .export_values()
     ;
 
     enum_<daeeLogicalUnaryOperator>("daeeLogicalUnaryOperator")
-        .value("eUOUnknown",	dae::core::eUOUnknown)
-        .value("eNot",          dae::core::eNot)
+        .value("eUOUnknown",	daetools::core::eUOUnknown)
+        .value("eNot",          daetools::core::eNot)
         .export_values()
     ;
 
     enum_<daeeLogicalBinaryOperator>("daeeLogicalBinaryOperator")
-        .value("eBOUnknown",	dae::core::eBOUnknown)
-        .value("eAnd",          dae::core::eAnd)
-        .value("eOr",           dae::core::eOr)
+        .value("eBOUnknown",	daetools::core::eBOUnknown)
+        .value("eAnd",          daetools::core::eAnd)
+        .value("eOr",           daetools::core::eOr)
         .export_values()
     ;
 
     enum_<daeeConditionType>("daeeConditionType")
-        .value("eCTUnknown",	dae::core::eCTUnknown)
-        .value("eNotEQ",        dae::core::eNotEQ)
-        .value("eEQ",           dae::core::eEQ)
-        .value("eGT",           dae::core::eGT)
-        .value("eGTEQ",         dae::core::eGTEQ)
-        .value("eLT",           dae::core::eLT)
-        .value("eLTEQ",         dae::core::eLTEQ)
+        .value("eCTUnknown",	daetools::core::eCTUnknown)
+        .value("eNotEQ",        daetools::core::eNotEQ)
+        .value("eEQ",           daetools::core::eEQ)
+        .value("eGT",           daetools::core::eGT)
+        .value("eGTEQ",         daetools::core::eGTEQ)
+        .value("eLT",           daetools::core::eLT)
+        .value("eLTEQ",         daetools::core::eLTEQ)
         .export_values()
     ;
 
     enum_<daeeVariableValueConstraint>("daeeVariableValueConstraint")
-        .value("eNoConstraint",	dae::core::eNoConstraint)
-        .value("eValueGTEQ",    dae::core::eValueGTEQ)
-        .value("eValueLTEQ",    dae::core::eValueLTEQ)
-        .value("eValueGT",      dae::core::eValueGT)
-        .value("eValueLT",      dae::core::eValueLT)
+        .value("eNoConstraint",	daetools::core::eNoConstraint)
+        .value("eValueGTEQ",    daetools::core::eValueGTEQ)
+        .value("eValueLTEQ",    daetools::core::eValueLTEQ)
+        .value("eValueGT",      daetools::core::eValueGT)
+        .value("eValueLT",      daetools::core::eValueLT)
         .export_values()
     ;
 
     enum_<daeeActionType>("daeeActionType")
-        .value("eUnknownAction",                    dae::core::eUnknownAction)
-        .value("eChangeState",                      dae::core::eChangeState)
-        .value("eSendEvent",                        dae::core::eSendEvent)
-        .value("eReAssignOrReInitializeVariable",   dae::core::eReAssignOrReInitializeVariable)
-        .value("eUserDefinedAction",                dae::core::eUserDefinedAction)
+        .value("eUnknownAction",                    daetools::core::eUnknownAction)
+        .value("eChangeState",                      daetools::core::eChangeState)
+        .value("eSendEvent",                        daetools::core::eSendEvent)
+        .value("eReAssignOrReInitializeVariable",   daetools::core::eReAssignOrReInitializeVariable)
+        .value("eUserDefinedAction",                daetools::core::eUserDefinedAction)
         .export_values()
     ;
 
     enum_<daeeEquationType>("daeeEquationType")
-        .value("eETUnknown",	dae::core::eETUnknown)
-        .value("eExplicitODE",	dae::core::eExplicitODE)
-        .value("eImplicitODE",  dae::core::eImplicitODE)
-        .value("eAlgebraic",    dae::core::eAlgebraic)
+        .value("eETUnknown",	daetools::core::eETUnknown)
+        .value("eExplicitODE",	daetools::core::eExplicitODE)
+        .value("eImplicitODE",  daetools::core::eImplicitODE)
+        .value("eAlgebraic",    daetools::core::eAlgebraic)
         .export_values()
     ;
 
     enum_<daeeModelType>("daeeModelType")
-        .value("eMTUnknown",	dae::core::eMTUnknown)
-        .value("eSteadyState",	dae::core::eSteadyState)
-        .value("eODE",          dae::core::eODE)
-        .value("eDAE",          dae::core::eDAE)
+        .value("eMTUnknown",	daetools::core::eMTUnknown)
+        .value("eSteadyState",	daetools::core::eSteadyState)
+        .value("eODE",          daetools::core::eODE)
+        .value("eDAE",          daetools::core::eDAE)
         .export_values()
     ;
 
     enum_<daeeThermoPackageBasis>("daeeThermoPackageBasis")
-        .value("eMole",	          dae::tpp::eMole)
-        .value("eMass",	          dae::tpp::eMass)
-        .value("eUndefinedBasis", dae::tpp::eUndefinedBasis)
+        .value("eMole",	          daetools::tpp::eMole)
+        .value("eMass",	          daetools::tpp::eMass)
+        .value("eUndefinedBasis", daetools::tpp::eUndefinedBasis)
         .export_values()
     ;
 
     enum_<daeeThermoPackagePhase>("daeeThermoPackagePhase")
-        .value("etppPhaseUnknown",	dae::tpp::etppPhaseUnknown)
-        .value("eVapor",            dae::tpp::eVapor)
-        .value("eLiquid",           dae::tpp::eLiquid)
-        .value("eSolid",            dae::tpp::eSolid)
+        .value("etppPhaseUnknown",	daetools::tpp::etppPhaseUnknown)
+        .value("eVapor",            daetools::tpp::eVapor)
+        .value("eLiquid",           daetools::tpp::eLiquid)
+        .value("eSolid",            daetools::tpp::eSolid)
         .export_values()
     ;
 
@@ -314,9 +314,9 @@ BOOST_PYTHON_MODULE(pyCore)
     ;
 
     enum_<daeeEvaluationMode>("daeeEvaluationMode")
-        .value("eEvaluationTree_OpenMP",	dae::core::eEvaluationTree_OpenMP)
-        .value("eComputeStack_OpenMP",      dae::core::eComputeStack_OpenMP)
-        .value("eComputeStack_External",    dae::core::eComputeStack_External)
+        .value("eEvaluationTree_OpenMP",	daetools::core::eEvaluationTree_OpenMP)
+        .value("eComputeStack_OpenMP",      daetools::core::eComputeStack_OpenMP)
+        .value("eComputeStack_External",    daetools::core::eComputeStack_External)
         .export_values()
     ;
 
@@ -374,10 +374,10 @@ BOOST_PYTHON_MODULE(pyCore)
 ***************************************************************/
     def("daeSetConfigFile",	&daeSetConfigFile);
     def("daeGetConfig",		&daepython::pydaeGetConfig);
-    def("daeVersion",		&dae::daeVersion, ( arg("includeBuild") = false ), DOCSTR_global_daeVersion);
-    def("daeVersionMajor",  &dae::daeVersionMajor, DOCSTR_global_daeVersionMajor);
-    def("daeVersionMinor",  &dae::daeVersionMinor, DOCSTR_global_daeVersionMinor);
-    def("daeVersionBuild",  &dae::daeVersionBuild, DOCSTR_global_daeVersionBuild);
+    def("daeVersion",		&daetools::daeVersion, ( arg("includeBuild") = false ), DOCSTR_global_daeVersion);
+    def("daeVersionMajor",  &daetools::daeVersionMajor, DOCSTR_global_daeVersionMajor);
+    def("daeVersionMinor",  &daetools::daeVersionMinor, DOCSTR_global_daeVersionMinor);
+    def("daeVersionBuild",  &daetools::daeVersionBuild, DOCSTR_global_daeVersionBuild);
 
     def("daeMemoryUsage",   &daepython::daeMemoryUsage);
 
@@ -2029,7 +2029,7 @@ BOOST_PYTHON_MODULE(pyCore)
         .def("__repr__",			&daepython::daeIF__repr__)
     ;
 
-    class_<dae::tpp::daeThermoPhysicalPropertyPackage_t, boost::noncopyable>("daeThermoPhysicalPropertyPackage_t", no_init)
+    class_<daetools::tpp::daeThermoPhysicalPropertyPackage_t, boost::noncopyable>("daeThermoPhysicalPropertyPackage_t", no_init)
     ;
 
     class_<daeThermoPhysicalPropertyPackage, boost::noncopyable>("daeThermoPhysicalPropertyPackage", DOCSTR_daeThermoPhysicalPropertyPackage, no_init)
@@ -2045,7 +2045,7 @@ BOOST_PYTHON_MODULE(pyCore)
                                                                        arg("compoundIDs"),
                                                                        arg("compoundCASNumbers"),
                                                                        arg("availablePhases"),
-                                                                       arg("defaultBasis") = dae::tpp::eMole,
+                                                                       arg("defaultBasis") = daetools::tpp::eMole,
                                                                        arg("options") = boost::python::dict()
                                                                      ))
 
@@ -2053,7 +2053,7 @@ BOOST_PYTHON_MODULE(pyCore)
                                                                        arg("compoundIDs"),
                                                                        arg("compoundCASNumbers"),
                                                                        arg("availablePhases"),
-                                                                       arg("defaultBasis") = dae::tpp::eMole,
+                                                                       arg("defaultBasis") = daetools::tpp::eMole,
                                                                        arg("options") = boost::python::dict()
                                                                      ))
 
@@ -2082,7 +2082,7 @@ BOOST_PYTHON_MODULE(pyCore)
                                                                                              arg("temperature"),
                                                                                              arg("composition"),
                                                                                              arg("phase"),
-                                                                                             arg("basis") = dae::tpp::eMole
+                                                                                             arg("basis") = daetools::tpp::eMole
                                                                                            ))
 
         .def("CalcSinglePhaseVectorProperty",	&daepython::CalcSinglePhaseVectorProperty, ( arg("self"),
@@ -2091,7 +2091,7 @@ BOOST_PYTHON_MODULE(pyCore)
                                                                                              arg("temperature"),
                                                                                              arg("composition"),
                                                                                              arg("phase"),
-                                                                                             arg("basis") = dae::tpp::eMole
+                                                                                             arg("basis") = daetools::tpp::eMole
                                                                                            ))
 
         .def("CalcTwoPhaseScalarProperty",	&daepython::CalcTwoPhaseScalarProperty, ( arg("self"),
@@ -2104,7 +2104,7 @@ BOOST_PYTHON_MODULE(pyCore)
                                                                                       arg("temperature2"),
                                                                                       arg("composition2"),
                                                                                       arg("phase2"),
-                                                                                      arg("basis") = dae::tpp::eMole
+                                                                                      arg("basis") = daetools::tpp::eMole
                                                                                     ))
 
         .def("CalcTwoPhaseVectorProperty",	&daepython::CalcTwoPhaseVectorProperty, ( arg("self"),
@@ -2117,7 +2117,7 @@ BOOST_PYTHON_MODULE(pyCore)
                                                                                       arg("temperature2"),
                                                                                       arg("composition2"),
                                                                                       arg("phase2"),
-                                                                                      arg("basis") = dae::tpp::eMole
+                                                                                      arg("basis") = daetools::tpp::eMole
                                                                                     ))
 
 
@@ -2145,7 +2145,7 @@ BOOST_PYTHON_MODULE(pyCore)
                                                                                                arg("temperature"),
                                                                                                arg("composition"),
                                                                                                arg("phase"),
-                                                                                               arg("basis") = dae::tpp::eMole
+                                                                                               arg("basis") = daetools::tpp::eMole
                                                                                              ))
 
         .def("_CalcSinglePhaseVectorProperty",	&daepython::_CalcSinglePhaseVectorProperty, (  arg("self"),
@@ -2154,7 +2154,7 @@ BOOST_PYTHON_MODULE(pyCore)
                                                                                                arg("temperature"),
                                                                                                arg("composition"),
                                                                                                arg("phase"),
-                                                                                               arg("basis") = dae::tpp::eMole
+                                                                                               arg("basis") = daetools::tpp::eMole
                                                                                              ))
 
         .def("_CalcTwoPhaseScalarProperty",	&daepython::_CalcTwoPhaseScalarProperty, (  arg("self"),
@@ -2167,7 +2167,7 @@ BOOST_PYTHON_MODULE(pyCore)
                                                                                         arg("temperature2"),
                                                                                         arg("composition2"),
                                                                                         arg("phase2"),
-                                                                                        arg("basis") = dae::tpp::eMole
+                                                                                        arg("basis") = daetools::tpp::eMole
                                                                                       ))
 
         .def("_CalcTwoPhaseVectorProperty",	&daepython::_CalcTwoPhaseVectorProperty, (  arg("self"),
@@ -2180,7 +2180,7 @@ BOOST_PYTHON_MODULE(pyCore)
                                                                                         arg("temperature2"),
                                                                                         arg("composition2"),
                                                                                         arg("phase2"),
-                                                                                        arg("basis") = dae::tpp::eMole
+                                                                                        arg("basis") = daetools::tpp::eMole
                                                                                       ))
 
         .def("__str__",		&daepython::daeThermoPhysicalPropertyPackage__str__)

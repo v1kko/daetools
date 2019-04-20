@@ -44,6 +44,7 @@ LIBS += $${DAE_CONFIG_LIB} \
         $${BONMIN_LIBS} \
         $${MUMPS_LIBS} \
         $${BLAS_LAPACK_LIBS}
+LIBS += $${STD_FILESYSTEM}
 }
 
 ######################################################################################
@@ -67,6 +68,7 @@ LIBS += $${DAE_CONFIG_LIB} \
         $${IPOPT_LIBS} \
         $${MUMPS_LIBS} \
         $${BLAS_LAPACK_LIBS}
+LIBS += $${STD_FILESYSTEM}
 }
 
 

@@ -4,7 +4,7 @@
 #include "limits.h"
 #include <limits>
 
-namespace dae
+namespace daetools
 {
 namespace core
 {
@@ -34,7 +34,7 @@ daeVariable::daeVariable(string strName,
         daeDeclareAndThrowException(exInvalidPointer);
     pModel->AddVariable(*this, strName, varType, strDescription);
 
-    m_ptrDomains = dae::makeVector<daeDomain*>(d1, d2, d3, d4, d5, d6, d7, d8);
+    m_ptrDomains = daetools::makeVector<daeDomain*>(d1, d2, d3, d4, d5, d6, d7, d8);
 }
 
 daeVariable::daeVariable(string strName,
@@ -52,7 +52,7 @@ daeVariable::daeVariable(string strName,
         daeDeclareAndThrowException(exInvalidPointer);
     pPort->AddVariable(*this, strName, varType, strDescription);
 
-    m_ptrDomains = dae::makeVector<daeDomain*>(d1, d2, d3, d4, d5, d6, d7, d8);
+    m_ptrDomains = daetools::makeVector<daeDomain*>(d1, d2, d3, d4, d5, d6, d7, d8);
 }
 
 daeVariable::~daeVariable()
@@ -2645,7 +2645,7 @@ size_t daeVariableWrapper::GetOverallIndex(void) const
 int daeVariableWrapper::GetVariableType(void) const
 {
     size_t nOverallIndex = GetOverallIndex();
-    boost::shared_ptr<daeDataProxy_t> pDataProxy = m_pVariable->m_pModel->GetDataProxy();
+    std::shared_ptr<daeDataProxy_t> pDataProxy = m_pVariable->m_pModel->GetDataProxy();
     return pDataProxy->GetVariableType(nOverallIndex);
 }
 

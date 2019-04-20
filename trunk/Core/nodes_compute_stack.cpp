@@ -15,7 +15,7 @@ DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 #include "../IDAS_DAESolver/dae_array_matrix.h"
 #include <stack>
 
-namespace dae
+namespace daetools
 {
 namespace core
 {

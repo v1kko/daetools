@@ -11,7 +11,7 @@
 #include <boost/algorithm/string.hpp>
 
 #include "simulation_loader.h"
-#include "../dae.h"
+#include "../daetools-core.h"
 
 /* Common functions */
 static std::string getPythonTraceback()

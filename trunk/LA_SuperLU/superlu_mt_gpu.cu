@@ -5,7 +5,7 @@
 
 #define CUDACheck(ce) if(ce != cudaSuccess) {return ce;}
 
-namespace dae
+namespace daetools
 {
 namespace solver
 {

@@ -2,7 +2,7 @@
                  DAE Tools Project: www.daetools.com
                  Copyright (C) Dragan Nikolic, 2015
 ************************************************************************************
-DAE Tools is free software; you can redistribute it and/or modify it under the 
+DAE Tools is free software; you can redistribute it and/or modify it under the
 terms of the GNU General Public License version 3 as published by the Free Software
 Foundation. DAE Tools is distributed in the hope that it will be useful, but WITHOUT
 ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
@@ -23,64 +23,49 @@ DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 #include <iomanip>
 #include <vector>
 #include "base_logging.h"
+#include "logs.h"
 #include <boost/thread.hpp>
 #include <boost/asio.hpp>
 #include <boost/bind.hpp>
 using boost::asio::ip::tcp;
 
-#if !defined(__MINGW32__) && (defined(_WIN32) || defined(WIN32) || defined(WIN64) || defined(_WIN64))
-
-#ifdef DAE_DLL_INTERFACE
-#ifdef MODEL_EXPORTS
-#define DAE_CORE_API __declspec(dllexport)
-#else // MODEL_EXPORTS
-#define DAE_CORE_API __declspec(dllimport)
-#endif // MODEL_EXPORTS
-#else // DAE_DLL_INTERFACE
-#define DAE_CORE_API
-#endif // DAE_DLL_INTERFACE
-
-#else // WIN32
-#define DAE_CORE_API
-#endif // WIN32
-
-namespace dae
+namespace daetools
 {
 namespace logging
 {
 /********************************************************************
-	daeTCPIPLog
+    daeTCPIPLog
 *********************************************************************/
 class DAE_CORE_API daeTCPIPLog : public daeBaseLog
 {
 public:
-	daeTCPIPLog(void);
-	virtual ~daeTCPIPLog(void);
+    daeTCPIPLog(void);
+    virtual ~daeTCPIPLog(void);
 
 public:
-	virtual void Message(const string& strMessage, size_t nSeverity);
-    
+    virtual void Message(const string& strMessage, size_t nSeverity);
+
 public:
     bool Connect(const string& strIPAddress, int nPort);
-	bool Disconnect(void);
-	bool IsConnected(void);
+    bool Disconnect(void);
+    bool IsConnected(void);
 
 protected:
-	int						       m_nPort;
-	string					       m_strIPAddress;
-	boost::shared_ptr<tcp::socket> m_ptcpipSocket;
-	boost::asio::io_service        m_ioService;
+    int						       m_nPort;
+    string					       m_strIPAddress;
+    std::shared_ptr<tcp::socket> m_ptcpipSocket;
+    boost::asio::io_service        m_ioService;
 };
 
 /********************************************************************
-	daeTCPIPLogServer
+    daeTCPIPLogServer
 *********************************************************************/
 class DAE_CORE_API daeTCPIPLogServer
 {
 public:
-	daeTCPIPLogServer(int nPort);
-	virtual ~daeTCPIPLogServer(void);
-	
+    daeTCPIPLogServer(int nPort);
+    virtual ~daeTCPIPLogServer(void);
+
 public:
     virtual void MessageReceived(const char* strMessage);
 
@@ -93,11 +78,11 @@ protected:
     void thread(void);
 
 public:
-	int						         m_nPort;
-	boost::asio::io_service          m_ioService;
-	tcp::acceptor			         m_acceptor;
-	tcp::socket                      m_tcpipSocket;
-	boost::shared_ptr<boost::thread> m_pThread;
+    int						         m_nPort;
+    boost::asio::io_service          m_ioService;
+    tcp::acceptor			         m_acceptor;
+    tcp::socket                      m_tcpipSocket;
+    std::shared_ptr<boost::thread> m_pThread;
 };
 
 

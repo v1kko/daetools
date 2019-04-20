@@ -43,21 +43,21 @@ BOOST_PYTHON_MODULE(pyActivity)
     Enums
 ***************************************************************/
     enum_<daeeStopCriterion>("daeeStopCriterion")
-        .value("eStopAtModelDiscontinuity",     dae::core::eStopAtModelDiscontinuity)
-        .value("eDoNotStopAtDiscontinuity",     dae::core::eDoNotStopAtDiscontinuity)
+        .value("eStopAtModelDiscontinuity",     daetools::core::eStopAtModelDiscontinuity)
+        .value("eDoNotStopAtDiscontinuity",     daetools::core::eDoNotStopAtDiscontinuity)
         .export_values()
     ;
 
     enum_<daeeActivityAction>("daeeActivityAction")
-        .value("eAAUnknown",        dae::activity::eAAUnknown)
-        .value("eRunActivity",      dae::activity::eRunActivity)
-        .value("ePauseActivity",    dae::activity::ePauseActivity)
+        .value("eAAUnknown",        daetools::activity::eAAUnknown)
+        .value("eRunActivity",      daetools::activity::eRunActivity)
+        .value("ePauseActivity",    daetools::activity::ePauseActivity)
         .export_values()
     ;
     enum_<daeeSimulationMode>("daeeSimulationMode")
-        .value("eSimulation",			dae::activity::eSimulation)
-        .value("eOptimization",			dae::activity::eOptimization)
-        .value("eParameterEstimation",	dae::activity::eParameterEstimation)
+        .value("eSimulation",			daetools::activity::eSimulation)
+        .value("eOptimization",			daetools::activity::eOptimization)
+        .value("eParameterEstimation",	daetools::activity::eParameterEstimation)
         .export_values()
     ;
 

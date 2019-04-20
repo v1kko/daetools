@@ -5,7 +5,7 @@
 #include <iostream>
 #include <boost/cstdint.hpp>
 
-namespace dae
+namespace daetools
 {
 namespace datareporting
 {
@@ -42,7 +42,7 @@ void daeTCPIPDataReceiverServer::Start(void)
         throw e;
     }
 
-    m_pThread = boost::shared_ptr<boost::thread>(new boost::thread(boost::bind(&daeTCPIPDataReceiverServer::StartThread, this)));
+    m_pThread = std::shared_ptr<boost::thread>(new boost::thread(boost::bind(&daeTCPIPDataReceiverServer::StartThread, this)));
 }
 
 void daeTCPIPDataReceiverServer::StartThread(void)
@@ -61,7 +61,7 @@ bool daeTCPIPDataReceiverServer::IsConnected(void)
 
 void daeTCPIPDataReceiverServer::StartAccept(void)
 {
-    m_tcpipSocket = boost::shared_ptr<tcp::socket>(new tcp::socket(m_ioService));
+    m_tcpipSocket = std::shared_ptr<tcp::socket>(new tcp::socket(m_ioService));
     m_acceptor.async_accept(*m_tcpipSocket, bind(&daeTCPIPDataReceiverServer::HandleAccept, this, boost::asio::placeholders::error));
 }
 
@@ -88,7 +88,7 @@ daeTCPIPDataReceiver::daeTCPIPDataReceiver(void)
 {
 }
 
-daeTCPIPDataReceiver::daeTCPIPDataReceiver(boost::shared_ptr<tcp::socket> ptcpipSocket)
+daeTCPIPDataReceiver::daeTCPIPDataReceiver(std::shared_ptr<tcp::socket> ptcpipSocket)
 {
     m_tcpipSocket = ptcpipSocket;
 }
@@ -122,9 +122,9 @@ bool daeTCPIPDataReceiver::Stop(void)
     return true;
 }
 
-void daeTCPIPDataReceiver::ParseMessage(unsigned char* data, boost::int32_t msgSize)
+void daeTCPIPDataReceiver::ParseMessage(unsigned char* data, std::int32_t msgSize)
 {
-    boost::int32_t i, curPos, nameSize, unitsSize;
+    std::int32_t i, curPos, nameSize, unitsSize;
     char cFlag = data[0];
     curPos = 1;
 
@@ -153,7 +153,7 @@ void daeTCPIPDataReceiver::ParseMessage(unsigned char* data, boost::int32_t msgS
         }
         else if(cFlag == cRegisterDomain)
         {
-            boost::int32_t noPoints, type;
+            std::int32_t noPoints, type;
 
             daeDataReceiverDomain* pDomain = new daeDataReceiverDomain;
             m_drProcess.m_ptrarrRegisteredDomains.push_back(pDomain);
@@ -233,8 +233,8 @@ void daeTCPIPDataReceiver::ParseMessage(unsigned char* data, boost::int32_t msgS
             char* szName;
             size_t j, k;
             string strDomainName;
-            boost::int32_t noPoints;
-            boost::int32_t domainsSize;
+            std::int32_t noPoints;
+            std::int32_t domainsSize;
             daeDataReceiverDomain* pDomain;
             daeDataReceiverVariable* pVariable = new daeDataReceiverVariable;
 
@@ -312,7 +312,7 @@ void daeTCPIPDataReceiver::ParseMessage(unsigned char* data, boost::int32_t msgS
             for(k = 0; k < pVariable->m_ptrarrDomains.size(); k++)
                 noPoints *= pVariable->m_ptrarrDomains[k]->m_nNumberOfPoints;
 
-            if(noPoints != (boost::int32_t)pVariable->m_nNumberOfPoints)
+            if(noPoints != (std::int32_t)pVariable->m_nNumberOfPoints)
             {
                 delete pVariable;
                 daeDeclareException(exRuntimeCheck);
@@ -334,7 +334,7 @@ void daeTCPIPDataReceiver::ParseMessage(unsigned char* data, boost::int32_t msgS
         {
             char* szName;
             string strVariableName;
-            boost::int32_t noPoints;
+            std::int32_t noPoints;
 
         // Read size of the name and move the pointer
             memcpy(&nameSize, &data[curPos], sizeof(nameSize));
@@ -371,7 +371,7 @@ void daeTCPIPDataReceiver::ParseMessage(unsigned char* data, boost::int32_t msgS
             memcpy(&noPoints, &data[curPos], sizeof(noPoints));
             curPos += sizeof(noPoints);
 
-            if(noPoints != (boost::int32_t)pVariable->m_nNumberOfPoints)
+            if(noPoints != (std::int32_t)pVariable->m_nNumberOfPoints)
             {
                 delete pValue;
                 daeDeclareException(exRuntimeCheck);
@@ -413,7 +413,7 @@ void daeTCPIPDataReceiver::thread(void)
     try
     {
         boost::system::error_code ec;
-        boost::int32_t msgSize = 0,
+        std::int32_t msgSize = 0,
                        nRead   = 0;
 
         for(;;)

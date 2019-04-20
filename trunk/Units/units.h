@@ -222,7 +222,7 @@ public:
     size_t GetHash() const;
 
 protected:
-    boost::shared_ptr<unit> _units;
+    std::shared_ptr<unit> _units;
     double                  _value;
 };
 

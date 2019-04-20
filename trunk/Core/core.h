@@ -17,13 +17,14 @@ DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 #include "log.h"
 #include "call_stats.h"
 #include "../Units/units.h"
-using namespace dae::logging;
-using namespace units;
 
-namespace dae
+namespace daetools
 {
 namespace core
 {
+using namespace daetools::logging;
+using namespace units;
+
 // cnAlgebraic must be 0 while cnDifferential 1!!
 const int cnAlgebraic	 = 0;
 const int cnDifferential = 1;
@@ -788,9 +789,9 @@ public:
 
     virtual void CleanUpSetupData(void) = 0;
 
-    virtual void    CollectAllDomains(std::map<dae::string, daeDomain_t*>& mapDomains) const          = 0;
-    virtual void    CollectAllParameters(std::map<dae::string, daeParameter_t*>& mapParameters) const = 0;
-    virtual void    CollectAllVariables(std::map<dae::string, daeVariable_t*>& mapVariables) const    = 0;
+    virtual void    CollectAllDomains(std::map<std::string, daeDomain_t*>& mapDomains) const          = 0;
+    virtual void    CollectAllParameters(std::map<std::string, daeParameter_t*>& mapParameters) const = 0;
+    virtual void    CollectAllVariables(std::map<std::string, daeVariable_t*>& mapVariables) const    = 0;
 };
 
 /******************************************************************
@@ -813,11 +814,11 @@ public:
     virtual void CleanUpSetupData(void)                        = 0;
     virtual void InitializeModels(const std::string& jsonInit) = 0;
 
-    virtual void    CollectAllDomains(std::map<dae::string, daeDomain_t*>& mapDomains)          = 0;
-    virtual void    CollectAllParameters(std::map<dae::string, daeParameter_t*>& mapParameters) = 0;
-    virtual void    CollectAllVariables(std::map<dae::string, daeVariable_t*>& mapVariables)    = 0;
-    virtual void    CollectAllSTNs(std::map<dae::string, daeSTN_t*>& mapSTNs)                   = 0;
-    virtual void    CollectAllPorts(std::map<dae::string, daePort_t*>& mapPorts)                = 0;
+    virtual void    CollectAllDomains(std::map<std::string, daeDomain_t*>& mapDomains)          = 0;
+    virtual void    CollectAllParameters(std::map<std::string, daeParameter_t*>& mapParameters) = 0;
+    virtual void    CollectAllVariables(std::map<std::string, daeVariable_t*>& mapVariables)    = 0;
+    virtual void    CollectAllSTNs(std::map<std::string, daeSTN_t*>& mapSTNs)                   = 0;
+    virtual void    CollectAllPorts(std::map<std::string, daePort_t*>& mapPorts)                = 0;
 };
 
 /*********************************************************************************************
@@ -1099,11 +1100,11 @@ public:
     virtual void	GetPortArrays(std::vector<daePortArray_t*>& ptrarrPortArrays)								= 0;
     virtual void	GetModelArrays(std::vector<daeModelArray_t*>& ptrarrModelArrays)							= 0;
 
-    virtual void    CollectAllDomains(std::map<dae::string, daeDomain_t*>& mapDomains) const          = 0;
-    virtual void    CollectAllParameters(std::map<dae::string, daeParameter_t*>& mapParameters) const = 0;
-    virtual void    CollectAllVariables(std::map<dae::string, daeVariable_t*>& mapVariables) const    = 0;
-    virtual void    CollectAllSTNs(std::map<dae::string, daeSTN_t*>& mapSTNs) const                   = 0;
-    virtual void    CollectAllPorts(std::map<dae::string, daePort_t*>& mapPorts) const                = 0;
+    virtual void    CollectAllDomains(std::map<std::string, daeDomain_t*>& mapDomains) const          = 0;
+    virtual void    CollectAllParameters(std::map<std::string, daeParameter_t*>& mapParameters) const = 0;
+    virtual void    CollectAllVariables(std::map<std::string, daeVariable_t*>& mapVariables) const    = 0;
+    virtual void    CollectAllSTNs(std::map<std::string, daeSTN_t*>& mapSTNs) const                   = 0;
+    virtual void    CollectAllPorts(std::map<std::string, daePort_t*>& mapPorts) const                = 0;
 
     virtual void    GetCoSimulationInterface(std::vector<daeParameter_t*>& ptrarrParameters,
                                              std::vector<daeVariable_t*>&  ptrarrInputs,

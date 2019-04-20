@@ -11,7 +11,7 @@
 # DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 #************************************************************************************
 # Install headers and libs into daetools-dev
-DAE_PROJECT_NAME = $$basename(PWD)
+DAE_PROJECT_NAME = $$basename(OUT_PWD)
 
 dae_headers.path  = $${DAE_INSTALL_HEADERS_DIR}/$${DAE_PROJECT_NAME}
 dae_headers.files = *.h

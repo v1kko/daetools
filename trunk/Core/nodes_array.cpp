@@ -1,14 +1,14 @@
 #include "stdafx.h"
 #include "coreimpl.h"
 #include "nodes_array.h"
-using namespace dae;
+using namespace daetools;
 #include "xmlfunctions.h"
 #include "units_io.h"
 #include <typeinfo>
-using namespace dae::xml;
+using namespace daetools::xml;
 using namespace boost;
 
-namespace dae
+namespace daetools
 {
 namespace core
 {
@@ -2979,7 +2979,7 @@ adouble adSetupSpecialFunctionNode::Evaluate(const daeExecutionContext* pExecuti
     case eMinInArray:
         tmp = adarr[0];
         for(size_t i = 1; i < adarr.GetSize(); i++)
-            tmp = dae::core::__min__(tmp, adarr[i]);
+            tmp = daetools::core::__min__(tmp, adarr[i]);
         return tmp;
 //  13.10.2012
 //        return m_pModel->__min__(node->Evaluate(pExecutionContext));
@@ -2987,7 +2987,7 @@ adouble adSetupSpecialFunctionNode::Evaluate(const daeExecutionContext* pExecuti
     case eMaxInArray:
         tmp = adarr[0];
         for(size_t i = 1; i < adarr.GetSize(); i++)
-            tmp = dae::core::__max__(tmp, adarr[i]);
+            tmp = daetools::core::__max__(tmp, adarr[i]);
         return tmp;
 //  13.10.2012
 //        return m_pModel->__max__(node->Evaluate(pExecutionContext));

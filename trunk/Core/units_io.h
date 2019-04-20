@@ -8,8 +8,8 @@
 
 namespace units
 {
-using namespace dae::io;
-using namespace dae::core;
+using namespace daetools::io;
+using namespace daetools::core;
 
 inline void Open(xmlTag_t* pTag, const std::string& strName, unit& u)
 {
@@ -59,7 +59,7 @@ inline std::string Export(daeeModelLanguage eLanguage, daeModelExportContext& c,
 	}
 	else
 	{
-		daeDeclareAndThrowException(dae::exNotImplemented);
+		daeDeclareAndThrowException(daetools::exNotImplemented);
 	}
 	
 	return strResult;
@@ -145,7 +145,7 @@ inline std::string Export(daeeModelLanguage eLanguage, daeModelExportContext& c,
 	}
 	else
 	{
-		daeDeclareAndThrowException(dae::exNotImplemented);
+		daeDeclareAndThrowException(daetools::exNotImplemented);
 		return std::string("");
 	}
 }

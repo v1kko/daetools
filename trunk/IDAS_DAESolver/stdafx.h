@@ -51,7 +51,7 @@
 #include <memory>
 
 //#include "../Core/xmlfile.h"
-//using namespace dae::xml;
+//using namespace daetools::xml;
 
 #include <math.h>
 

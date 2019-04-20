@@ -3,7 +3,7 @@
 #include "base_data_reporters_receivers.h"
 #include "../Core/macros.h"
 
-namespace dae 
+namespace daetools 
 {
 namespace datareporting 
 {

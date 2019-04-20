@@ -8,7 +8,7 @@ using namespace std;
 #error Trilinos Amesos LA Solver does not support single precision floating point values
 #endif
 
-namespace dae
+namespace daetools
 {
 namespace solver
 {

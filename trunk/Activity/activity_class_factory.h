@@ -19,7 +19,7 @@
 #define DAE_ACTIVITY_API
 #endif // WIN32
 
-namespace dae
+namespace daetools
 {
 namespace activity
 {

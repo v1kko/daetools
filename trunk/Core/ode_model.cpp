@@ -1,8 +1,7 @@
 #include "coreimpl.h"
 #include "nodes.h"
-#include "../variable_types.h"
 
-namespace dae
+namespace daetools
 {
 namespace core
 {

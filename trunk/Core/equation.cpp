@@ -7,6 +7,8 @@
 
 namespace cs
 {
+using namespace daetools::core;
+
 // It has to be in the cs namespace (otherwise the compiler can't find it).
 size_t hash_value(csComputeStackItem_t const& item)
 {
@@ -52,7 +54,7 @@ size_t hash_value(csComputeStackItem_t const& item)
 }
 }
 
-namespace dae
+namespace daetools
 {
 namespace core
 {
@@ -288,7 +290,7 @@ void daeEquationExecutionInfo::GatherInfo(daeExecutionContext& EC, daeModel* pMo
 // We need to propagate this as a global execution context for it will be used to add variable indexes
     EC.m_pEquationExecutionInfo = this;
 
-    boost::shared_ptr<daeDataProxy_t> pDataProxy = pModel->GetDataProxy();
+    std::shared_ptr<daeDataProxy_t> pDataProxy = pModel->GetDataProxy();
     daeModel* pTopLevelModel = dynamic_cast<daeModel*>(pDataProxy->GetTopLevelModel());
     pTopLevelModel->PropagateGlobalExecutionContext(&EC);
 
@@ -1359,8 +1361,8 @@ void daeEquation::SaveNodeAsLatex(io::xmlTag_t* pTag, const string& strObjectNam
                 strValue += ", ";
 
             std::vector<string> empty;
-            strDEDI   = dae::xml::latexCreator::Variable(pDedi->GetName(), empty);
-            strDomain = dae::xml::latexCreator::Variable(pDedi->GetDomain()->GetName(), empty);
+            strDEDI   = daetools::xml::latexCreator::Variable(pDedi->GetName(), empty);
+            strDomain = daetools::xml::latexCreator::Variable(pDedi->GetDomain()->GetName(), empty);
 
             if(pDedi->m_eDomainBounds == eLowerBound ||
                pDedi->m_eDomainBounds == eUpperBound)

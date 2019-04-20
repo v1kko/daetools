@@ -4,7 +4,7 @@
 #include <boost/format.hpp>
 #include "../Core/nodes.h"
 
-namespace dae
+namespace daetools
 {
 namespace core
 {
@@ -27,47 +27,47 @@ adNodePtr simplify(adNodePtr node)
 
             switch(un->eFunction)
             {
-                case dae::core::eSign:
+                case daetools::core::eSign:
                     return adNodePtr(new adConstantNode(-q));
-                case dae::core::eSin:
+                case daetools::core::eSin:
                     return adNodePtr(new adConstantNode(sin(q)));
-                case dae::core::eCos:
+                case daetools::core::eCos:
                     return adNodePtr(new adConstantNode(cos(q)));
-                case dae::core::eTan:
+                case daetools::core::eTan:
                     return adNodePtr(new adConstantNode(tan(q)));
-                case dae::core::eArcSin:
+                case daetools::core::eArcSin:
                     return adNodePtr(new adConstantNode(asin(q)));
-                case dae::core::eArcCos:
+                case daetools::core::eArcCos:
                     return adNodePtr(new adConstantNode(acos(q)));
-                case dae::core::eArcTan:
+                case daetools::core::eArcTan:
                     return adNodePtr(new adConstantNode(atan(q)));
-                case dae::core::eSqrt:
+                case daetools::core::eSqrt:
                     return adNodePtr(new adConstantNode(sqrt(q)));
-                case dae::core::eExp:
+                case daetools::core::eExp:
                     return adNodePtr(new adConstantNode(exp(q)));
-                case dae::core::eLn:
+                case daetools::core::eLn:
                     return adNodePtr(new adConstantNode(log(q)));
-                case dae::core::eLog:
+                case daetools::core::eLog:
                     return adNodePtr(new adConstantNode(log10(q)));
-                case dae::core::eAbs:
+                case daetools::core::eAbs:
                     return adNodePtr(new adConstantNode(abs(q)));
-                case dae::core::eCeil:
+                case daetools::core::eCeil:
                     return adNodePtr(new adConstantNode(ceil(q)));
-                case dae::core::eFloor:
+                case daetools::core::eFloor:
                     return adNodePtr(new adConstantNode(floor(q)));
-                case dae::core::eSinh:
+                case daetools::core::eSinh:
                     return adNodePtr(new adConstantNode(sinh(q)));
-                case dae::core::eCosh:
+                case daetools::core::eCosh:
                     return adNodePtr(new adConstantNode(cosh(q)));
-                case dae::core::eTanh:
+                case daetools::core::eTanh:
                     return adNodePtr(new adConstantNode(tanh(q)));
-                case dae::core::eArcSinh:
+                case daetools::core::eArcSinh:
                     return adNodePtr(new adConstantNode(asinh(q)));
-                case dae::core::eArcCosh:
+                case daetools::core::eArcCosh:
                     return adNodePtr(new adConstantNode(acosh(q)));
-                case dae::core::eArcTanh:
+                case daetools::core::eArcTanh:
                     return adNodePtr(new adConstantNode(atanh(q)));
-                case dae::core::eErf:
+                case daetools::core::eErf:
                     return adNodePtr(new adConstantNode(erf(q)));
                 default:
                     ; // do nothing (previously: "return node;" thus returning unsimplified node that was simplified but discarded)
@@ -89,22 +89,22 @@ adNodePtr simplify(adNodePtr node)
             adConstantNode* cleft  = dynamic_cast<adConstantNode*>(left);
             adConstantNode* cright = dynamic_cast<adConstantNode*>(right);
 
-            if(bn->eFunction == dae::core::ePlus)
+            if(bn->eFunction == daetools::core::ePlus)
                 return adNodePtr(new adConstantNode(cleft->m_quantity + cright->m_quantity));
-            else if(bn->eFunction == dae::core::eMinus)
+            else if(bn->eFunction == daetools::core::eMinus)
                 return adNodePtr(new adConstantNode(cleft->m_quantity - cright->m_quantity));
-            else if(bn->eFunction == dae::core::eMulti)
+            else if(bn->eFunction == daetools::core::eMulti)
                 return adNodePtr(new adConstantNode(cleft->m_quantity * cright->m_quantity));
-            else if(bn->eFunction == dae::core::eDivide)
+            else if(bn->eFunction == daetools::core::eDivide)
                 return adNodePtr(new adConstantNode(cleft->m_quantity / cright->m_quantity));
 
-            else if(bn->eFunction == dae::core::ePower)
+            else if(bn->eFunction == daetools::core::ePower)
                 return adNodePtr(new adConstantNode(units::pow(cleft->m_quantity, cright->m_quantity)));
-            else if(bn->eFunction == dae::core::eArcTan2)
+            else if(bn->eFunction == daetools::core::eArcTan2)
                 return adNodePtr(new adConstantNode(units::atan2(cleft->m_quantity, cright->m_quantity)));
-            else if(bn->eFunction == dae::core::eMin)
+            else if(bn->eFunction == daetools::core::eMin)
                 return adNodePtr(new adConstantNode(units::min(cleft->m_quantity, cright->m_quantity)));
-            else if(bn->eFunction == dae::core::eMax)
+            else if(bn->eFunction == daetools::core::eMax)
                 return adNodePtr(new adConstantNode(units::max(cleft->m_quantity, cright->m_quantity)));
         }
         else if(dynamic_cast<adConstantNode*>(left) && dynamic_cast<adFloatCoefficientVariableSumNode*>(right)) // c1 OP base+sum(c*Var) => combine them
@@ -112,7 +112,7 @@ adNodePtr simplify(adNodePtr node)
             adConstantNode*                    cleft  = dynamic_cast<adConstantNode*>(left);
             adFloatCoefficientVariableSumNode* cright = dynamic_cast<adFloatCoefficientVariableSumNode*>(right);
 
-            if(bn->eFunction == dae::core::eMulti) // c1 * (base+sum(c*Var)) => c1*base + sum(c1*c*Var)
+            if(bn->eFunction == daetools::core::eMulti) // c1 * (base+sum(c*Var)) => c1*base + sum(c1*c*Var)
             {
                 if(cleft->m_quantity.getValue() == 0.0)
                     return adNodePtr(new adConstantNode(0.0));
@@ -130,7 +130,7 @@ adNodePtr simplify(adNodePtr node)
                 }
                 return adNodePtr(fcvs);
             }
-            else if(bn->eFunction == dae::core::ePlus) // c1 + (base+sum(c*Var)) => c1+base + sum(c*Var)
+            else if(bn->eFunction == daetools::core::ePlus) // c1 + (base+sum(c*Var)) => c1+base + sum(c*Var)
             {
                 adFloatCoefficientVariableSumNode* fcvs = new adFloatCoefficientVariableSumNode();
                 fcvs->m_sum  = cright->m_sum;
@@ -144,7 +144,7 @@ adNodePtr simplify(adNodePtr node)
             adFloatCoefficientVariableSumNode* cleft  = dynamic_cast<adFloatCoefficientVariableSumNode*>(left);
             adConstantNode*                    cright = dynamic_cast<adConstantNode*>(right);
 
-            if(bn->eFunction == dae::core::eMulti) // (base+sum(c*Var)) * c1 => c1*base + sum(c1*c*Var)
+            if(bn->eFunction == daetools::core::eMulti) // (base+sum(c*Var)) * c1 => c1*base + sum(c1*c*Var)
             {
                 if(cright->m_quantity.getValue() == 0.0)
                     return adNodePtr(new adConstantNode(0.0));
@@ -162,7 +162,7 @@ adNodePtr simplify(adNodePtr node)
                 }
                 return adNodePtr(fcvs);
             }
-            else if(bn->eFunction == dae::core::eDivide) // (base+sum(c*Var)) / c1 => base/c1 + sum(c1/c*Var)
+            else if(bn->eFunction == daetools::core::eDivide) // (base+sum(c*Var)) / c1 => base/c1 + sum(c1/c*Var)
             {
                 // Division by zero!!!
                 if(cright->m_quantity.getValue() == 0.0)
@@ -181,7 +181,7 @@ adNodePtr simplify(adNodePtr node)
                 }
                 return adNodePtr(fcvs);
             }
-            else if(bn->eFunction == dae::core::ePlus) // (base+sum(c*Var)) + c1 => c1+base + sum(c*Var)
+            else if(bn->eFunction == daetools::core::ePlus) // (base+sum(c*Var)) + c1 => c1+base + sum(c*Var)
             {
                 adFloatCoefficientVariableSumNode* fcvs = new adFloatCoefficientVariableSumNode();
                 fcvs->m_sum  = cleft->m_sum;
@@ -195,7 +195,7 @@ adNodePtr simplify(adNodePtr node)
             adFloatCoefficientVariableSumNode* cleft  = dynamic_cast<adFloatCoefficientVariableSumNode*>(left);
             adFloatCoefficientVariableSumNode* cright = dynamic_cast<adFloatCoefficientVariableSumNode*>(right);
 
-            if(bn->eFunction == dae::core::ePlus) // (base1+sum(c1*Var)) + (base2+sum(c2*Var)) => base1+base2 + sum((c1+c2)*Var)
+            if(bn->eFunction == daetools::core::ePlus) // (base1+sum(c1*Var)) + (base2+sum(c2*Var)) => base1+base2 + sum((c1+c2)*Var)
             {
                 std::map<size_t, daeFloatCoefficientVariableProduct>::iterator it, it_find;
 
@@ -221,7 +221,7 @@ adNodePtr simplify(adNodePtr node)
                 }
                 return adNodePtr(fcvs);
             }
-            else if(bn->eFunction == dae::core::eMinus) // (base1+sum(c1*Var)) - (base2+sum(c2*Var)) => base1-base2 + sum((c1-c2)*Var)
+            else if(bn->eFunction == daetools::core::eMinus) // (base1+sum(c1*Var)) - (base2+sum(c2*Var)) => base1-base2 + sum((c1-c2)*Var)
             {
                 std::map<size_t, daeFloatCoefficientVariableProduct>::iterator it, it_find;
 
@@ -255,11 +255,11 @@ adNodePtr simplify(adNodePtr node)
             adConstantNode* cn = dynamic_cast<adConstantNode*>(left);
             if(cn->m_quantity.getValue() == 0)
             {
-                if(bn->eFunction == dae::core::ePlus) // 0 + right => right
+                if(bn->eFunction == daetools::core::ePlus) // 0 + right => right
                     return right_s;
-                else if(bn->eFunction == dae::core::eMulti) // 0 * right => 0 (that is left)
+                else if(bn->eFunction == daetools::core::eMulti) // 0 * right => 0 (that is left)
                     return left_s;
-                else if(bn->eFunction == dae::core::eDivide) // 0 / right => 0 (that is left)
+                else if(bn->eFunction == daetools::core::eDivide) // 0 / right => 0 (that is left)
                     return left_s;
             }
         }
@@ -268,11 +268,11 @@ adNodePtr simplify(adNodePtr node)
             adConstantNode* cn = dynamic_cast<adConstantNode*>(right);
             if(cn->m_quantity.getValue() == 0)
             {
-                if(bn->eFunction == dae::core::ePlus) // left + 0 => left
+                if(bn->eFunction == daetools::core::ePlus) // left + 0 => left
                     return left_s;
-                else if(bn->eFunction == dae::core::eMinus) // left - 0 => left
+                else if(bn->eFunction == daetools::core::eMinus) // left - 0 => left
                     return left_s;
-                else if(bn->eFunction == dae::core::eMulti) // left * 0 => 0 (that is right)
+                else if(bn->eFunction == daetools::core::eMulti) // left * 0 => 0 (that is right)
                     return right_s;
             }
         }

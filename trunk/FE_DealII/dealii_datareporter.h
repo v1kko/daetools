@@ -9,12 +9,12 @@
 #include <boost/function.hpp>
 #include <boost/algorithm/string.hpp>
 
-namespace dae
+namespace daetools
 {
 namespace fe_solver
 {
 using namespace dealii;
-using namespace dae::datareporting;
+using namespace daetools::datareporting;
 
 typedef boost::function<void (unsigned int, double*, unsigned int)>  fnUpdateBlock;
 typedef boost::function<void (const std::string&)>                   fnWriteSolution;

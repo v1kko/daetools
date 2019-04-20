@@ -1238,115 +1238,115 @@ BOOST_PYTHON_MODULE(pyDealII)
     ;
 
     // Scalar finite elements
-    class_<FE_Q<1>, bases< FiniteElement<1> >, boost::shared_ptr< FE_Q<1> >, boost::noncopyable>("FE_Q_1D", no_init)
+    class_<FE_Q<1>, bases< FiniteElement<1> >, std::shared_ptr< FE_Q<1> >, boost::noncopyable>("FE_Q_1D", no_init)
         .def(init<const unsigned int>((arg("polynomialOrder"))))
     ;
-    class_<FE_Q<2>, bases< FiniteElement<2> >, boost::shared_ptr< FE_Q<2> >, boost::noncopyable>("FE_Q_2D", no_init)
+    class_<FE_Q<2>, bases< FiniteElement<2> >, std::shared_ptr< FE_Q<2> >, boost::noncopyable>("FE_Q_2D", no_init)
         .def(init<const unsigned int>((arg("polynomialOrder"))))
     ;
-    class_<FE_Q<3>, bases< FiniteElement<3> >, boost::shared_ptr< FE_Q<3> >, boost::noncopyable>("FE_Q_3D", no_init)
+    class_<FE_Q<3>, bases< FiniteElement<3> >, std::shared_ptr< FE_Q<3> >, boost::noncopyable>("FE_Q_3D", no_init)
         .def(init<const unsigned int>((arg("polynomialOrder"))))
     ;
 
-    class_<FE_Bernstein<1>, bases< FiniteElement<1> >, boost::shared_ptr< FE_Bernstein<1> >, boost::noncopyable>("FE_Bernstein_1D", no_init)
+    class_<FE_Bernstein<1>, bases< FiniteElement<1> >, std::shared_ptr< FE_Bernstein<1> >, boost::noncopyable>("FE_Bernstein_1D", no_init)
         .def(init<const unsigned int>((arg("polynomialOrder"))))
     ;
-    class_<FE_Bernstein<2>, bases< FiniteElement<2> >, boost::shared_ptr< FE_Bernstein<2> >, boost::noncopyable>("FE_Bernstein_2D", no_init)
+    class_<FE_Bernstein<2>, bases< FiniteElement<2> >, std::shared_ptr< FE_Bernstein<2> >, boost::noncopyable>("FE_Bernstein_2D", no_init)
         .def(init<const unsigned int>((arg("polynomialOrder"))))
     ;
-    class_<FE_Bernstein<3>, bases< FiniteElement<3> >, boost::shared_ptr< FE_Bernstein<3> >, boost::noncopyable>("FE_Bernstein_3D", no_init)
+    class_<FE_Bernstein<3>, bases< FiniteElement<3> >, std::shared_ptr< FE_Bernstein<3> >, boost::noncopyable>("FE_Bernstein_3D", no_init)
         .def(init<const unsigned int>((arg("polynomialOrder"))))
     ;
 
     // Vector finite elements
-    class_<FE_RaviartThomas<1>, bases< FiniteElement<1> >, boost::shared_ptr< FE_RaviartThomas<1> >, boost::noncopyable>("FE_RaviartThomas_1D", no_init)
+    class_<FE_RaviartThomas<1>, bases< FiniteElement<1> >, std::shared_ptr< FE_RaviartThomas<1> >, boost::noncopyable>("FE_RaviartThomas_1D", no_init)
         .def(init<const unsigned int>((arg("polynomialOrder"))))
     ;
-    class_<FE_RaviartThomas<2>, bases< FiniteElement<2> >, boost::shared_ptr< FE_RaviartThomas<2> >, boost::noncopyable>("FE_RaviartThomas_2D", no_init)
+    class_<FE_RaviartThomas<2>, bases< FiniteElement<2> >, std::shared_ptr< FE_RaviartThomas<2> >, boost::noncopyable>("FE_RaviartThomas_2D", no_init)
         .def(init<const unsigned int>((arg("polynomialOrder"))))
     ;
-    class_<FE_RaviartThomas<3>, bases< FiniteElement<3> >, boost::shared_ptr< FE_RaviartThomas<3> >, boost::noncopyable>("FE_RaviartThomas_3D", no_init)
-        .def(init<const unsigned int>((arg("polynomialOrder"))))
-    ;
-
-    class_<FE_DGRaviartThomas<1>, bases< FiniteElement<1> >, boost::shared_ptr< FE_DGRaviartThomas<1> >, boost::noncopyable>("FE_DGRaviartThomas_1D", no_init)
-        .def(init<const unsigned int>((arg("polynomialOrder"))))
-    ;
-    class_<FE_DGRaviartThomas<2>, bases< FiniteElement<2> >, boost::shared_ptr< FE_DGRaviartThomas<2> >, boost::noncopyable>("FE_DGRaviartThomas_2D", no_init)
-        .def(init<const unsigned int>((arg("polynomialOrder"))))
-    ;
-    class_<FE_DGRaviartThomas<3>, bases< FiniteElement<3> >, boost::shared_ptr< FE_DGRaviartThomas<3> >, boost::noncopyable>("FE_DGRaviartThomas_3D", no_init)
+    class_<FE_RaviartThomas<3>, bases< FiniteElement<3> >, std::shared_ptr< FE_RaviartThomas<3> >, boost::noncopyable>("FE_RaviartThomas_3D", no_init)
         .def(init<const unsigned int>((arg("polynomialOrder"))))
     ;
 
-    class_<FE_Nedelec<1>, bases< FiniteElement<1> >, boost::shared_ptr< FE_Nedelec<1> >, boost::noncopyable>("FE_Nedelec_1D", no_init)
+    class_<FE_DGRaviartThomas<1>, bases< FiniteElement<1> >, std::shared_ptr< FE_DGRaviartThomas<1> >, boost::noncopyable>("FE_DGRaviartThomas_1D", no_init)
         .def(init<const unsigned int>((arg("polynomialOrder"))))
     ;
-    class_<FE_Nedelec<2>, bases< FiniteElement<2> >, boost::shared_ptr< FE_Nedelec<2> >, boost::noncopyable>("FE_Nedelec_2D", no_init)
+    class_<FE_DGRaviartThomas<2>, bases< FiniteElement<2> >, std::shared_ptr< FE_DGRaviartThomas<2> >, boost::noncopyable>("FE_DGRaviartThomas_2D", no_init)
         .def(init<const unsigned int>((arg("polynomialOrder"))))
     ;
-    class_<FE_Nedelec<3>, bases< FiniteElement<3> >, boost::shared_ptr< FE_Nedelec<3> >, boost::noncopyable>("FE_Nedelec_3D", no_init)
-        .def(init<const unsigned int>((arg("polynomialOrder"))))
-    ;
-
-    class_<FE_DGNedelec<1>, bases< FiniteElement<1> >, boost::shared_ptr< FE_DGNedelec<1> >, boost::noncopyable>("FE_DGNedelec_1D", no_init)
-        .def(init<const unsigned int>((arg("polynomialOrder"))))
-    ;
-    class_<FE_DGNedelec<2>, bases< FiniteElement<2> >, boost::shared_ptr< FE_DGNedelec<2> >, boost::noncopyable>("FE_DGNedelec_2D", no_init)
-        .def(init<const unsigned int>((arg("polynomialOrder"))))
-    ;
-    class_<FE_DGNedelec<3>, bases< FiniteElement<3> >, boost::shared_ptr< FE_DGNedelec<3> >, boost::noncopyable>("FE_DGNedelec_3D", no_init)
+    class_<FE_DGRaviartThomas<3>, bases< FiniteElement<3> >, std::shared_ptr< FE_DGRaviartThomas<3> >, boost::noncopyable>("FE_DGRaviartThomas_3D", no_init)
         .def(init<const unsigned int>((arg("polynomialOrder"))))
     ;
 
-    class_<FE_BDM<1>, bases< FiniteElement<1> >, boost::shared_ptr< FE_BDM<1> >, boost::noncopyable>("FE_BDM_1D", no_init)
+    class_<FE_Nedelec<1>, bases< FiniteElement<1> >, std::shared_ptr< FE_Nedelec<1> >, boost::noncopyable>("FE_Nedelec_1D", no_init)
         .def(init<const unsigned int>((arg("polynomialOrder"))))
     ;
-    class_<FE_BDM<2>, bases< FiniteElement<2> >, boost::shared_ptr< FE_BDM<2> >, boost::noncopyable>("FE_BDM_2D", no_init)
+    class_<FE_Nedelec<2>, bases< FiniteElement<2> >, std::shared_ptr< FE_Nedelec<2> >, boost::noncopyable>("FE_Nedelec_2D", no_init)
         .def(init<const unsigned int>((arg("polynomialOrder"))))
     ;
-    class_<FE_BDM<3>, bases< FiniteElement<3> >, boost::shared_ptr< FE_BDM<3> >, boost::noncopyable>("FE_BDM_3D", no_init)
-        .def(init<const unsigned int>((arg("polynomialOrder"))))
-    ;
-
-    class_<FE_DGBDM<1>, bases< FiniteElement<1> >, boost::shared_ptr< FE_DGBDM<1> >, boost::noncopyable>("FE_DGBDM_1D", no_init)
-        .def(init<const unsigned int>((arg("polynomialOrder"))))
-    ;
-    class_<FE_DGBDM<2>, bases< FiniteElement<2> >, boost::shared_ptr< FE_DGBDM<2> >, boost::noncopyable>("FE_DGBDM_2D", no_init)
-        .def(init<const unsigned int>((arg("polynomialOrder"))))
-    ;
-    class_<FE_DGBDM<3>, bases< FiniteElement<3> >, boost::shared_ptr< FE_DGBDM<3> >, boost::noncopyable>("FE_DGBDM_3D", no_init)
+    class_<FE_Nedelec<3>, bases< FiniteElement<3> >, std::shared_ptr< FE_Nedelec<3> >, boost::noncopyable>("FE_Nedelec_3D", no_init)
         .def(init<const unsigned int>((arg("polynomialOrder"))))
     ;
 
-    class_<FE_ABF<1>, bases< FiniteElement<1> >, boost::shared_ptr< FE_ABF<1> >, boost::noncopyable>("FE_ABF_1D", no_init)
+    class_<FE_DGNedelec<1>, bases< FiniteElement<1> >, std::shared_ptr< FE_DGNedelec<1> >, boost::noncopyable>("FE_DGNedelec_1D", no_init)
         .def(init<const unsigned int>((arg("polynomialOrder"))))
     ;
-    class_<FE_ABF<2>, bases< FiniteElement<2> >, boost::shared_ptr< FE_ABF<2> >, boost::noncopyable>("FE_ABF_2D", no_init)
+    class_<FE_DGNedelec<2>, bases< FiniteElement<2> >, std::shared_ptr< FE_DGNedelec<2> >, boost::noncopyable>("FE_DGNedelec_2D", no_init)
         .def(init<const unsigned int>((arg("polynomialOrder"))))
     ;
-    class_<FE_ABF<3>, bases< FiniteElement<3> >, boost::shared_ptr< FE_ABF<3> >, boost::noncopyable>("FE_ABF_3D", no_init)
+    class_<FE_DGNedelec<3>, bases< FiniteElement<3> >, std::shared_ptr< FE_DGNedelec<3> >, boost::noncopyable>("FE_DGNedelec_3D", no_init)
+        .def(init<const unsigned int>((arg("polynomialOrder"))))
+    ;
+
+    class_<FE_BDM<1>, bases< FiniteElement<1> >, std::shared_ptr< FE_BDM<1> >, boost::noncopyable>("FE_BDM_1D", no_init)
+        .def(init<const unsigned int>((arg("polynomialOrder"))))
+    ;
+    class_<FE_BDM<2>, bases< FiniteElement<2> >, std::shared_ptr< FE_BDM<2> >, boost::noncopyable>("FE_BDM_2D", no_init)
+        .def(init<const unsigned int>((arg("polynomialOrder"))))
+    ;
+    class_<FE_BDM<3>, bases< FiniteElement<3> >, std::shared_ptr< FE_BDM<3> >, boost::noncopyable>("FE_BDM_3D", no_init)
+        .def(init<const unsigned int>((arg("polynomialOrder"))))
+    ;
+
+    class_<FE_DGBDM<1>, bases< FiniteElement<1> >, std::shared_ptr< FE_DGBDM<1> >, boost::noncopyable>("FE_DGBDM_1D", no_init)
+        .def(init<const unsigned int>((arg("polynomialOrder"))))
+    ;
+    class_<FE_DGBDM<2>, bases< FiniteElement<2> >, std::shared_ptr< FE_DGBDM<2> >, boost::noncopyable>("FE_DGBDM_2D", no_init)
+        .def(init<const unsigned int>((arg("polynomialOrder"))))
+    ;
+    class_<FE_DGBDM<3>, bases< FiniteElement<3> >, std::shared_ptr< FE_DGBDM<3> >, boost::noncopyable>("FE_DGBDM_3D", no_init)
+        .def(init<const unsigned int>((arg("polynomialOrder"))))
+    ;
+
+    class_<FE_ABF<1>, bases< FiniteElement<1> >, std::shared_ptr< FE_ABF<1> >, boost::noncopyable>("FE_ABF_1D", no_init)
+        .def(init<const unsigned int>((arg("polynomialOrder"))))
+    ;
+    class_<FE_ABF<2>, bases< FiniteElement<2> >, std::shared_ptr< FE_ABF<2> >, boost::noncopyable>("FE_ABF_2D", no_init)
+        .def(init<const unsigned int>((arg("polynomialOrder"))))
+    ;
+    class_<FE_ABF<3>, bases< FiniteElement<3> >, std::shared_ptr< FE_ABF<3> >, boost::noncopyable>("FE_ABF_3D", no_init)
         .def(init<const unsigned int>((arg("polynomialOrder"))))
     ;
 
 
-    class_<FE_DGQ<1>, bases< FiniteElement<1> >, boost::shared_ptr< FE_DGQ<1> >, boost::noncopyable>("FE_DGQ_1D", no_init)
+    class_<FE_DGQ<1>, bases< FiniteElement<1> >, std::shared_ptr< FE_DGQ<1> >, boost::noncopyable>("FE_DGQ_1D", no_init)
         .def(init<const unsigned int>((arg("polynomialOrder"))))
     ;
-    class_<FE_DGQ<2>, bases< FiniteElement<2> >, boost::shared_ptr< FE_DGQ<2> >, boost::noncopyable>("FE_DGQ_2D", no_init)
+    class_<FE_DGQ<2>, bases< FiniteElement<2> >, std::shared_ptr< FE_DGQ<2> >, boost::noncopyable>("FE_DGQ_2D", no_init)
         .def(init<const unsigned int>((arg("polynomialOrder"))))
     ;
-    class_<FE_DGQ<3>, bases< FiniteElement<3> >, boost::shared_ptr< FE_DGQ<3> >, boost::noncopyable>("FE_DGQ_3D", no_init)
+    class_<FE_DGQ<3>, bases< FiniteElement<3> >, std::shared_ptr< FE_DGQ<3> >, boost::noncopyable>("FE_DGQ_3D", no_init)
         .def(init<const unsigned int>((arg("polynomialOrder"))))
     ;
 
-    class_<FE_DGP<1>, bases< FiniteElement<1> >, boost::shared_ptr< FE_DGP<1> >, boost::noncopyable>("FE_DGP_1D", no_init)
+    class_<FE_DGP<1>, bases< FiniteElement<1> >, std::shared_ptr< FE_DGP<1> >, boost::noncopyable>("FE_DGP_1D", no_init)
         .def(init<const unsigned int>((arg("polynomialOrder"))))
     ;
-    class_<FE_DGP<2>, bases< FiniteElement<2> >, boost::shared_ptr< FE_DGP<2> >, boost::noncopyable>("FE_DGP_2D", no_init)
+    class_<FE_DGP<2>, bases< FiniteElement<2> >, std::shared_ptr< FE_DGP<2> >, boost::noncopyable>("FE_DGP_2D", no_init)
         .def(init<const unsigned int>((arg("polynomialOrder"))))
     ;
-    class_<FE_DGP<3>, bases< FiniteElement<3> >, boost::shared_ptr< FE_DGP<3> >, boost::noncopyable>("FE_DGP_3D", no_init)
+    class_<FE_DGP<3>, bases< FiniteElement<3> >, std::shared_ptr< FE_DGP<3> >, boost::noncopyable>("FE_DGP_3D", no_init)
         .def(init<const unsigned int>((arg("polynomialOrder"))))
     ;
 
@@ -1354,7 +1354,7 @@ BOOST_PYTHON_MODULE(pyDealII)
     class_<dealiiFiniteElementDOF<1>, boost::noncopyable>("dealiiFiniteElementDOF_1D", no_init)
         .def(init<const std::string&,
                   const std::string&,
-                  boost::shared_ptr< FiniteElement<1> >,
+                  std::shared_ptr< FiniteElement<1> >,
                   unsigned int,
                   daeVariableType>((arg("name"),
                                      arg("description"),
@@ -1369,7 +1369,7 @@ BOOST_PYTHON_MODULE(pyDealII)
     class_<dealiiFiniteElementDOF<2>, boost::noncopyable>("dealiiFiniteElementDOF_2D", no_init)
         .def(init<const std::string&,
                   const std::string&,
-                  boost::shared_ptr< FiniteElement<2> >,
+                  std::shared_ptr< FiniteElement<2> >,
                   unsigned int,
                   daeVariableType>((arg("name"),
                                      arg("description"),
@@ -1384,7 +1384,7 @@ BOOST_PYTHON_MODULE(pyDealII)
     class_<dealiiFiniteElementDOF<3>, boost::noncopyable>("dealiiFiniteElementDOF_3D", no_init)
         .def(init<const std::string&,
                   const std::string&,
-                  boost::shared_ptr< FiniteElement<3> >,
+                  std::shared_ptr< FiniteElement<3> >,
                   unsigned int,
                   daeVariableType>((arg("name"),
                                     arg("description"),

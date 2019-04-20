@@ -9,7 +9,7 @@
 #include <boost/graph/properties.hpp>
 #include <boost/graph/bandwidth.hpp>
 
-namespace dae
+namespace daetools
 {
 namespace core
 {
@@ -2243,7 +2243,7 @@ void daeModel::PropagateParameter(daeParameter& propagatedParameter)
     }
 }
 
-boost::shared_ptr<daeDataProxy_t> daeModel::GetDataProxy(void) const
+std::shared_ptr<daeDataProxy_t> daeModel::GetDataProxy(void) const
 {
     return m_pDataProxy;
 }
@@ -2455,7 +2455,7 @@ void daeModel::CreatePortConnectionEquations(void)
     }
 }
 
-void daeModel::PropagateDataProxy(boost::shared_ptr<daeDataProxy_t> pDataProxy)
+void daeModel::PropagateDataProxy(std::shared_ptr<daeDataProxy_t> pDataProxy)
 {
     size_t i;
     daeModel* pModel;
@@ -3041,7 +3041,7 @@ void daeModel::CollectAllSTNsAsVector(vector<daeSTN*>& ptrarrSTNs) const
     }
 }
 
-void daeModel::CollectAllDomains(std::map<dae::string, daeDomain_t*>& mapDomains) const
+void daeModel::CollectAllDomains(std::map<std::string, daeDomain_t*>& mapDomains) const
 {
     // Insert objects from the model
     for(std::vector<daeDomain*>::const_iterator iter = Domains().begin(); iter != Domains().end(); iter++)
@@ -3061,7 +3061,7 @@ void daeModel::CollectAllDomains(std::map<dae::string, daeDomain_t*>& mapDomains
         (*paiter)->CollectAllDomains(mapDomains);
 }
 
-void daeModel::CollectAllParameters(std::map<dae::string, daeParameter_t*>& mapParameters) const
+void daeModel::CollectAllParameters(std::map<std::string, daeParameter_t*>& mapParameters) const
 {
     // Insert objects from the model
     for(std::vector<daeParameter*>::const_iterator iter = Parameters().begin(); iter != Parameters().end(); iter++)
@@ -3081,7 +3081,7 @@ void daeModel::CollectAllParameters(std::map<dae::string, daeParameter_t*>& mapP
         (*paiter)->CollectAllParameters(mapParameters);
 }
 
-void daeModel::CollectAllVariables(std::map<dae::string, daeVariable_t*>& mapVariables) const
+void daeModel::CollectAllVariables(std::map<std::string, daeVariable_t*>& mapVariables) const
 {
     // Insert objects from the model
     for(std::vector<daeVariable*>::const_iterator iter = Variables().begin(); iter != Variables().end(); iter++)
@@ -3105,7 +3105,7 @@ void daeModel::CollectAllVariables(std::map<dae::string, daeVariable_t*>& mapVar
         (*paiter)->CollectAllVariables(mapVariables);
 }
 
-void daeModel::CollectAllSTNs(std::map<dae::string, daeSTN_t*>& mapSTNs) const
+void daeModel::CollectAllSTNs(std::map<std::string, daeSTN_t*>& mapSTNs) const
 {
     // Insert objects from the model
     for(std::vector<daeSTN*>::const_iterator iter = STNs().begin(); iter != STNs().end(); iter++)
@@ -3125,7 +3125,7 @@ void daeModel::CollectAllSTNs(std::map<dae::string, daeSTN_t*>& mapSTNs) const
         (*maiter)->CollectAllSTNs(mapSTNs);
 }
 
-void daeModel::CollectAllPorts(std::map<dae::string, daePort_t*>& mapPorts) const
+void daeModel::CollectAllPorts(std::map<std::string, daePort_t*>& mapPorts) const
 {
     // Insert objects from the model
     for(std::vector<daePort*>::const_iterator iter = Ports().begin(); iter != Ports().end(); iter++)
@@ -4574,15 +4574,15 @@ bool daeModel::CheckObject(vector<string>& strarrErrors) const
     return bCheck;
 }
 
-boost::shared_ptr<daeAllowThreads_t> daeModel::CreateAllowThreads()
+std::shared_ptr<daeAllowThreads_t> daeModel::CreateAllowThreads()
 {
-    boost::shared_ptr<daeAllowThreads_t> allowThreads(new daeAllowThreads_t);
+    std::shared_ptr<daeAllowThreads_t> allowThreads(new daeAllowThreads_t);
     return allowThreads;
 }
 
-boost::shared_ptr<daeGILState_t> daeModel::CreateGILState()
+std::shared_ptr<daeGILState_t> daeModel::CreateGILState()
 {
-    boost::shared_ptr<daeGILState_t> GIL(new daeGILState_t);
+    std::shared_ptr<daeGILState_t> GIL(new daeGILState_t);
     return GIL;
 }
 

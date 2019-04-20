@@ -31,7 +31,7 @@
 #include <ml_MultiLevelPreconditioner.h>
 #include "base_solvers.h"
 
-namespace dae
+namespace daetools
 {
 namespace solver
 {
@@ -292,7 +292,7 @@ public:
     std::map<std::string, call_stats::TimeAndCount>  m_stats;
 };
 
-class DAE_TRILINOS_API daeTrilinosSolver : public dae::solver::daeLASolver_t
+class DAE_TRILINOS_API daeTrilinosSolver : public daetools::solver::daeLASolver_t
 {
 public:
     daeTrilinosSolver(const std::string& strSolverName, const std::string& strPreconditionerName);
@@ -360,11 +360,11 @@ public:
     std::string m_strSolverName;
 
 // General Trilinos Solver Data
-    boost::shared_ptr<Epetra_LinearProblem>	m_Problem;
-    boost::shared_ptr<Epetra_Vector>		m_vecB;
-    boost::shared_ptr<Epetra_Vector>		m_vecX;
-    boost::shared_ptr<Epetra_Map>			m_map;
-    boost::shared_ptr<Epetra_CrsMatrix>		m_matEPETRA;
+    std::shared_ptr<Epetra_LinearProblem>	m_Problem;
+    std::shared_ptr<Epetra_Vector>		m_vecB;
+    std::shared_ptr<Epetra_Vector>		m_vecX;
+    std::shared_ptr<Epetra_Map>			m_map;
+    std::shared_ptr<Epetra_CrsMatrix>		m_matEPETRA;
 
     std::map<std::string, call_stats::TimeAndCount>  m_stats;
 
@@ -392,14 +392,14 @@ public:
 
     Teuchos::ParameterList	m_parameterList;
 /* AMESOS */
-    boost::shared_ptr<Amesos_BaseSolver>	m_pAmesosSolver;
+    std::shared_ptr<Amesos_BaseSolver>	m_pAmesosSolver;
     //Teuchos::ParameterList				m_parameterListAmesos;
 
 /* AZTECOO */
     std::string												m_strPreconditionerName;
-    boost::shared_ptr<AztecOO>								m_pAztecOOSolver;
-    boost::shared_ptr<Ifpack_Preconditioner>				m_pPreconditionerIfpack;
-    boost::shared_ptr<ML_Epetra::MultiLevelPreconditioner>	m_pPreconditionerML;
+    std::shared_ptr<AztecOO>								m_pAztecOOSolver;
+    std::shared_ptr<Ifpack_Preconditioner>				m_pPreconditionerIfpack;
+    std::shared_ptr<ML_Epetra::MultiLevelPreconditioner>	m_pPreconditionerML;
     //Teuchos::ParameterList									m_parameterListAztec;
     //Teuchos::ParameterList									m_parameterListIfpack;
     //Teuchos::ParameterList									m_parameterListML;

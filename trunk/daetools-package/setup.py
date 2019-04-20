@@ -65,14 +65,13 @@ def _is_in_venv():
 inside_venv = _is_in_venv()
 print('inside_venv = %s' % ('True' if inside_venv else 'False'))
 
+# install_name_tool needs to be run only once after compilation.
 def install_name_tool(daetools_system, daetools_machine, python_major, python_minor):
     shared_libs_dir  = os.path.realpath('daetools')
     shared_libs_dir  = os.path.join(shared_libs_dir, 'solibs', '%s_%s' % (daetools_system, daetools_machine), 'lib')
 
     pymodules_dir = os.path.realpath('daetools')
     pymodules_dir = os.path.join(pymodules_dir, 'solibs', '%s_%s' % (daetools_system, daetools_machine), 'py%s%s' % (python_major, python_minor))
-    print('shared_libs_dir    = %s' % shared_libs_dir)
-    print('pymodules_dir      = %s' % pymodules_dir)
 
     shared_libs = []
     ext_modules = []
@@ -86,7 +85,9 @@ def install_name_tool(daetools_system, daetools_machine, python_major, python_mi
         ext_modules_files = os.listdir(pymodules_dir)
         for f in ext_modules_files:
             ext_modules.append(os.path.join(pymodules_dir, f))
-
+    
+    print('shared_libs_dir    = %s' % shared_libs_dir)
+    print('pymodules_dir      = %s' % pymodules_dir)
     pprint.pprint(shared_libs)
     pprint.pprint(ext_modules)
 
@@ -94,11 +95,14 @@ def install_name_tool(daetools_system, daetools_machine, python_major, python_mi
     for so_path in shared_libs:
         dummy, so_name = os.path.split(so_path)
         cmd = 'install_name_tool -id @rpath/%s %s' % (so_name, so_path)
-        print(cmd)
-        #ret = os.system(cmd)
-        #print('%s returned [%s]' %(cmd,ret))
+        #print(cmd)
+        ret = os.system(cmd)
+        print('%s returned [%s]' %(cmd,ret))
 
-    # Python extension modules: change 'libName.dylib' to '@loader_path/../lib/libName.dylib'
+    # Python extension modules: 
+    #  change the name of linked libraries from 'libName.dylib' to '@loader_path/../lib/libName.dylib'
+    #  since they are in the ../lib directory.
+    # Leave the libSystem and gcc libraries as they are.
     for ext_mod_path in ext_modules:
         dummy, ext_mod_name = os.path.split(ext_mod_path)
         print('Start install_name_tool -change for: %s' % ext_mod_name)
@@ -106,40 +110,45 @@ def install_name_tool(daetools_system, daetools_machine, python_major, python_mi
             dummy, so_name = os.path.split(so_path)
             new_so_name = '@loader_path/../lib/%s' % so_name
             cmd = 'install_name_tool -change %s %s %s' % (so_name, new_so_name, ext_mod_path)
-            print(cmd)
-            #ret = os.system(cmd)
-            #print('    %s returned [%s]' %(cmd,ret))
-        print('')
+            #print(cmd)
+            ret = os.system(cmd)
+            print('    %s returned [%s]' %(cmd,ret))
 
-    # Shared libraries: change 'libName.dylib' to '@loader_path/libName.dylib'
+    # Shared libraries: 
+    #  change the name of linked libraries 'libName.dylib' to '@loader_path/libName.dylib' 
+    #  since they are in the same directory.
+    # Leave the libSystem and gcc libraries as they are.
     for so_lib_path in shared_libs:
         dummy, so_lib_name = os.path.split(so_lib_path)
         print('Start install_name_tool -change for: %s' % so_lib_name)
         for so_path in shared_libs:
             if so_path == so_lib_path: # skip itself
-                continue
-            
+                continue            
             dummy, so_name = os.path.split(so_path)
             new_so_name = '@loader_path/%s' % so_name
             cmd = 'install_name_tool -change %s %s %s' % (so_name, new_so_name, so_lib_path)
-            print(cmd)
-            #ret = os.system(cmd)
-            #print('    %s returned [%s]' %(cmd,ret))
+            #print(cmd)
+            ret = os.system(cmd)
+            print('    %s returned [%s]' %(cmd,ret))
         print('')
     
     
+    # pyDealII only:
+    #  change the full path to the linked libdeal_II-daetools-8.5.0.dylib library to @loader_path/../lib/libdeal_II-daetools-8.5.0.dylib
+    #  since fr some reasons it was linked using its full path .../trunk/deal.ii/build/lib.
     for so_lib_path in shared_libs:
         dummy, so_lib_name = os.path.split(so_lib_path)
         if deal_II in so_lib_name:
+            print('Start install_name_tool -change for: %s' % so_lib_name)
             # Replace the full path to the libdeal_II-daetools in pyDealII.so
             dealii_daetools_lib = os.path.realpath('../deal.II/build/lib')
             dealii_daetools_lib = os.path.join(dealii_daetools_lib, so_lib_name)
-            print(dealii_daetools_lib)
-            new_so_name = '@loader_path/%s' % so_lib_name
+            new_so_name = '@loader_path/../lib/%s' % so_lib_name
             pyDealII_path = os.path.join(pymodules_dir, 'pyDealII.so')
             cmd = 'install_name_tool -change %s %s %s' % (dealii_daetools_lib, new_so_name, pyDealII_path)
-            print(cmd)
-            #ret = os.system(cmd)
+            #print(cmd)
+            ret = os.system(cmd)
+            print('    %s returned [%s]' %(cmd,ret))
     
 boost_python     = 'boost_python-daetools-py{0}{1}'.format(python_major, python_minor)
 boost_python3    = 'boost_python3-daetools-py{0}{1}'.format(python_major, python_minor)

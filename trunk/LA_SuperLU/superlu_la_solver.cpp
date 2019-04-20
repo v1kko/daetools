@@ -4,7 +4,7 @@
 #include "config_data.h"
 #include <omp.h>
 
-namespace dae
+namespace daetools
 {
 namespace solver
 {

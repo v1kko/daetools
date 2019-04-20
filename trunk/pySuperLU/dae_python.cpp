@@ -7,7 +7,7 @@
 #include "docstrings.h"
 #include "../LA_SuperLU/superlu_la_solver.h"
 using namespace boost::python;
-using namespace dae::solver;
+using namespace daetools::solver;
 
 // Temporary workaround for Visual Studio 2015 update 3
 //  Error   LNK2019 unresolved external symbol "class ClassName const volatile * __cdecl boost::get_pointer<class ClassName const volatile *>(...)
@@ -39,7 +39,7 @@ boost::python::dict getDictFromMapByValue(std::map<KEY,VALUE>& mapItems)
 }
 
 #ifdef daeSuperLU
-using namespace dae::solver::superlu;
+using namespace daetools::solver::superlu;
 static boost::python::dict GetCallStats(superlu::daeSuperLUSolver& self)
 {
     std::map<std::string, call_stats::TimeAndCount> stats = self.GetCallStats();
@@ -50,7 +50,7 @@ BOOST_PYTHON_MODULE(pySuperLU)
 #endif
 
 #ifdef daeSuperLU_MT
-using namespace dae::solver::superlu_mt;
+using namespace daetools::solver::superlu_mt;
 static boost::python::dict GetCallStats(superlu_mt::daeSuperLUSolver& self)
 {
     std::map<std::string, call_stats::TimeAndCount> stats = self.GetCallStats();

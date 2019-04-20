@@ -3,7 +3,7 @@
 #include "nodes.h"
 using namespace boost;
 
-namespace dae
+namespace daetools
 {
 namespace core
 {
@@ -102,7 +102,7 @@ daeAction::daeAction(const string& strName, daeModel* pModel, const daeVariableW
     m_pSendEventPort = NULL;
 
 // For eReAssignOrReInitializeVariable:
-    m_pVariableWrapper = boost::shared_ptr<daeVariableWrapper>(new daeVariableWrapper(variable));
+    m_pVariableWrapper = std::shared_ptr<daeVariableWrapper>(new daeVariableWrapper(variable));
     if(value.node)
         m_pSetupNode = value.node;
     else

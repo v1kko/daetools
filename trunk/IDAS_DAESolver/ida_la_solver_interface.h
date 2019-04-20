@@ -4,7 +4,7 @@
 #include "solver_class_factory.h"
 #include <string>
 
-namespace dae
+namespace daetools
 {
 namespace solver
 {

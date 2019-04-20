@@ -2,7 +2,7 @@
 #include "datareporters.h"
 #include "../Core/helpers.h"
 
-namespace dae
+namespace daetools
 {
 namespace datareporting
 {

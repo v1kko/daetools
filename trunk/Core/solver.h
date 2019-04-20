@@ -16,23 +16,23 @@ DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 #include "definitions.h"
 #include "core.h"
 #include "log.h"
-using namespace dae::core;
-using namespace dae::logging;
 
-namespace dae
+namespace daetools
 {
 namespace activity
 {
     class daeSimulation_t;
 }
 }
-using namespace dae::activity;
 
-
-namespace dae
+namespace daetools
 {
 namespace solver
 {
+using namespace daetools::core;
+using namespace daetools::logging;
+using namespace daetools::activity;
+
 enum daeeIntegrationMode
 {
     eNormalIntegration  = 0,

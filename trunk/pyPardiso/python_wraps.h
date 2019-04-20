@@ -18,7 +18,7 @@
 #include <boost/smart_ptr.hpp>
 #include <boost/python/call_method.hpp>
 #include <boost/python/reference_existing_object.hpp>
-using namespace dae::solver;
+using namespace daetools::solver;
 
 namespace daepython
 {

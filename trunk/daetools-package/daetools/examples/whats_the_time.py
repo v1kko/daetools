@@ -22,8 +22,7 @@ a single variable (called 'time') and a single differential equation::
 
   d(time)/dt = 1
 
-This way, the value of the variable 'time' is equal to the elapsed time in the
-simulation at any moment.
+This way, the value of the variable 'time' is equal to the elapsed time in the simulation.
 
 This tutorial presents the basic structure of daeModel and daeSimulation classes.
 A typical DAETools simulation requires the following 8 tasks:

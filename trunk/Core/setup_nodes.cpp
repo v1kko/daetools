@@ -1,13 +1,13 @@
 #include "stdafx.h"
 #include "coreimpl.h"
 #include "nodes.h"
-using namespace dae;
+using namespace daetools;
 #include <typeinfo>
 #include "xmlfunctions.h"
 #include <boost/functional/hash.hpp>
-using namespace dae::xml;
+using namespace daetools::xml;
 
-namespace dae
+namespace daetools
 {
 namespace core
 {
@@ -83,7 +83,7 @@ void adSetupParameterNode::Export(std::string& strContent, daeeModelLanguage eLa
     vector<string> strarrIndexes;
 
     FillDomains(m_arrDomains, strarrIndexes);
-    dae::RemoveAllNonAlphaNumericCharacters(strarrIndexes);
+    daetools::RemoveAllNonAlphaNumericCharacters(strarrIndexes);
 
     if(eLanguage == eCDAE)
         strContent += daeGetStrippedRelativeName(c.m_pModel, m_pParameter) + "(" + toString(strarrIndexes) + ")";
@@ -490,7 +490,7 @@ void adSetupVariableNode::Export(std::string& strContent, daeeModelLanguage eLan
     vector<string> strarrIndexes;
 
     FillDomains(m_arrDomains, strarrIndexes);
-    dae::RemoveAllNonAlphaNumericCharacters(strarrIndexes);
+    daetools::RemoveAllNonAlphaNumericCharacters(strarrIndexes);
 
     if(eLanguage == eCDAE)
         strContent += daeGetStrippedRelativeName(c.m_pModel, m_pVariable) + "(" + toString(strarrIndexes) + ")";
@@ -635,7 +635,7 @@ void adSetupTimeDerivativeNode::Export(std::string& strContent, daeeModelLanguag
     vector<string> strarrIndexes;
 
     FillDomains(m_arrDomains, strarrIndexes);
-    dae::RemoveAllNonAlphaNumericCharacters(strarrIndexes);
+    daetools::RemoveAllNonAlphaNumericCharacters(strarrIndexes);
 
     string strName = daeGetStrippedRelativeName(c.m_pModel, m_pVariable);
 
@@ -802,7 +802,7 @@ void adSetupPartialDerivativeNode::Export(std::string& strContent, daeeModelLang
     vector<string> strarrIndexes;
 
     FillDomains(m_arrDomains, strarrIndexes);
-    dae::RemoveAllNonAlphaNumericCharacters(strarrIndexes);
+    daetools::RemoveAllNonAlphaNumericCharacters(strarrIndexes);
 
     string strName       = daeGetStrippedRelativeName(c.m_pModel, m_pVariable);
     string strDomainName = daeGetStrippedRelativeName(c.m_pModel, m_pDomain);

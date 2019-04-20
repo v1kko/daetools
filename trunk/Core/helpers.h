@@ -59,7 +59,7 @@ DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 #endif
 #endif
 
-namespace dae
+namespace daetools
 {
 #define g_cstrTrue   "true"
 #define g_cstrFalse  "false"
@@ -88,6 +88,8 @@ std::string	SplitAndBracket(std::vector<std::string>& Array,  const char* lpszDe
 void		Enclose(std::string& strToEnclose, char cLeft, char cRight);
 void		Enclose(std::string& strToEnclose, const char* lpszLeft = "[", const char* lpszRight = "]");
 bool		ParseSingleToken(std::string& strFullName, std::string& strShortName, std::vector<size_t>& narrDomains);
+
+inline std::string getFormattedDateTime();
 
 inline double GetTimeInSeconds();
 inline void GetProcessMemory(int* currRealMem, int* peakRealMem,
@@ -166,6 +168,17 @@ std::string toStringFormatted(T value,
     }
 
     return ss.str();
+}
+
+std::string getFormattedDateTime()
+{
+    time_t rawtime;
+    struct tm* timeinfo;
+    char buffer[256];
+    time(&rawtime);
+    timeinfo = localtime(&rawtime);
+    strftime (buffer, 80, "[%d.%m.%Y %H:%M:%S]", timeinfo);
+    return buffer;
 }
 
 template<class T>

@@ -5,7 +5,7 @@
 
 #include "simulation_loader_c.h"
 #include "simulation_loader.h"
-#include "../dae.h"
+#include "../daetools-core.h"
 
 /* Common functions */
 static std::string g_strLastError;

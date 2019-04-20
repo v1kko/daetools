@@ -1,17 +1,17 @@
 #include "stdafx.h"
 #include "coreimpl.h"
 
-namespace dae 
+namespace daetools
 {
-namespace core 
+namespace core
 {
 /*********************************************************************************************
-	daeCoreClassFactory
+    daeCoreClassFactory
 **********************************************************************************************/
 // I cannot have declared exported functions in a static library
 #ifdef DAE_DLL_INTERFACE
 static daeCoreClassFactory g_BaseModelClassFactory("DAE.Core",
-												   "DAE Tools Core library",
+                                                   "DAE Tools Core library",
                                                    daeAuthorInfo,
                                                    daeLicenceInfo,
                                                    daeVersion());
@@ -19,7 +19,7 @@ extern "C" DAE_CORE_API daeCoreClassFactory_t* GetCoreClassFactory(void);
 
 daeCoreClassFactory_t* GetCoreClassFactory(void)
 {
-	return &g_BaseModelClassFactory;
+    return &g_BaseModelClassFactory;
 }
 
 bool _r1  = g_BaseModelClassFactory.RegisterPort( string("daePort"),  new daeCreateObjectDelegateDerived<daePort>() );
@@ -52,48 +52,48 @@ daeCoreClassFactory::~daeCoreClassFactory()
 
 string daeCoreClassFactory::GetName(void) const
 {
-	return m_strName;
+    return m_strName;
 }
 
 string daeCoreClassFactory::GetDescription(void) const
 {
-	return m_strDescription;
+    return m_strDescription;
 }
 
 string daeCoreClassFactory::GetAuthorInfo(void) const
 {
-	return m_strAuthorInfo;
+    return m_strAuthorInfo;
 }
 
 string daeCoreClassFactory:: GetLicenceInfo(void) const
 {
-	return m_strLicenceInfo;
+    return m_strLicenceInfo;
 }
 
 string daeCoreClassFactory::GetVersion(void) const
 {
-	return m_strVersion;
+    return m_strVersion;
 }
 
 void daeCoreClassFactory::SupportedVariableTypes(vector<string>& strarrClasses)
 {
-	map<string, pfnVariableType>::iterator it;
-	for(it = m_mapCreateVariableType.begin(); it != m_mapCreateVariableType.end(); it++)
-		strarrClasses.push_back((*it).first);
+    map<string, pfnVariableType>::iterator it;
+    for(it = m_mapCreateVariableType.begin(); it != m_mapCreateVariableType.end(); it++)
+        strarrClasses.push_back((*it).first);
 }
 
 void daeCoreClassFactory::SupportedPorts(vector<string>& strarrClasses)
 {
-	map<string, pfnCreatePort>::iterator it;
-	for(it = m_mapCreatePort.begin(); it != m_mapCreatePort.end(); it++)
-		strarrClasses.push_back((*it).first);
+    map<string, pfnCreatePort>::iterator it;
+    for(it = m_mapCreatePort.begin(); it != m_mapCreatePort.end(); it++)
+        strarrClasses.push_back((*it).first);
 }
 
 void daeCoreClassFactory::SupportedModels(vector<string>& strarrClasses)
 {
-	map<string, pfnCreateModel>::iterator it;
-	for(it = m_mapCreateModel.begin(); it != m_mapCreateModel.end(); it++)
-		strarrClasses.push_back((*it).first);
+    map<string, pfnCreateModel>::iterator it;
+    for(it = m_mapCreateModel.begin(); it != m_mapCreateModel.end(); it++)
+        strarrClasses.push_back((*it).first);
 }
 
 //void daeCoreClassFactory::SupportedParameters(vector<string>& strarrClasses)
@@ -154,26 +154,26 @@ void daeCoreClassFactory::SupportedModels(vector<string>& strarrClasses)
 
 daeVariableType_t* daeCoreClassFactory::CreateVariableType(const string& strClass)
 {
-	map<string, pfnVariableType>::iterator it = m_mapCreateVariableType.find(strClass);
-	if(it == m_mapCreateVariableType.end())
-		return NULL;
-	return (*it).second->Create();
+    map<string, pfnVariableType>::iterator it = m_mapCreateVariableType.find(strClass);
+    if(it == m_mapCreateVariableType.end())
+        return NULL;
+    return (*it).second->Create();
 }
 
 daeModel_t* daeCoreClassFactory::CreateModel(const string& strClass)
 {
-	map<string, pfnCreateModel>::iterator it = m_mapCreateModel.find(strClass);
-	if(it == m_mapCreateModel.end())
-		return NULL;
-	return (*it).second->Create();
+    map<string, pfnCreateModel>::iterator it = m_mapCreateModel.find(strClass);
+    if(it == m_mapCreateModel.end())
+        return NULL;
+    return (*it).second->Create();
 }
 
 daePort_t* daeCoreClassFactory::CreatePort(const string& strClass)
 {
-	map<string, pfnCreatePort>::iterator it = m_mapCreatePort.find(strClass);
-	if(it == m_mapCreatePort.end())
-		return NULL;
-	return (*it).second->Create();
+    map<string, pfnCreatePort>::iterator it = m_mapCreatePort.find(strClass);
+    if(it == m_mapCreatePort.end())
+        return NULL;
+    return (*it).second->Create();
 }
 
 //daeParameter_t* daeCoreClassFactory::CreateParameter(const string& strClass)
@@ -239,29 +239,29 @@ daePort_t* daeCoreClassFactory::CreatePort(const string& strClass)
 //		return NULL;
 //	return (*it).second->Create();
 //}
-	
+
 bool daeCoreClassFactory::RegisterVariableType(string strClass, pfnVariableType pfn)
 {
-	pair<string, pfnVariableType> p(strClass, pfn);
-	pair<map<string, pfnVariableType>::iterator, bool> ret;
-	ret = m_mapCreateVariableType.insert(p);
-	return ret.second;
+    pair<string, pfnVariableType> p(strClass, pfn);
+    pair<map<string, pfnVariableType>::iterator, bool> ret;
+    ret = m_mapCreateVariableType.insert(p);
+    return ret.second;
 }
 
 bool daeCoreClassFactory::RegisterPort(string strClass, pfnCreatePort pfn)
 {
-	pair<string, pfnCreatePort> p(strClass, pfn);
-	pair<map<string, pfnCreatePort>::iterator, bool> ret;
-	ret = m_mapCreatePort.insert(p);
-	return ret.second;
+    pair<string, pfnCreatePort> p(strClass, pfn);
+    pair<map<string, pfnCreatePort>::iterator, bool> ret;
+    ret = m_mapCreatePort.insert(p);
+    return ret.second;
 }
 
 bool daeCoreClassFactory::RegisterModel(string strClass, pfnCreateModel pfn)
 {
-	pair<string, pfnCreateModel> p(strClass, pfn);
-	pair<map<string, pfnCreateModel>::iterator, bool> ret;
-	ret = m_mapCreateModel.insert(p);
-	return ret.second;
+    pair<string, pfnCreateModel> p(strClass, pfn);
+    pair<map<string, pfnCreateModel>::iterator, bool> ret;
+    ret = m_mapCreateModel.insert(p);
+    return ret.second;
 }
 
 //bool daeCoreClassFactory::RegisterParameter(string strClass, pfnCreateParameter pfn)

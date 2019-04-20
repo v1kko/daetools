@@ -12,7 +12,7 @@
 //#include "../IDAS_DAESolver/dae_array_matrix.h"
 #include <boost/format.hpp>
 
-namespace dae
+namespace daetools
 {
 namespace activity
 {
@@ -419,10 +419,10 @@ void daeSimulation::SetupSolver(void)
 {
     size_t i;
     vector<size_t> narrParametersIndexes;
-    boost::shared_ptr<daeOptimizationVariable> pOptVariable;
-    boost::shared_ptr<daeOptimizationConstraint> pConstraint;
-    boost::shared_ptr<daeObjectiveFunction> pObjectiveFunction;
-    boost::shared_ptr<daeMeasuredVariable> pMeasuredVariable;
+    std::shared_ptr<daeOptimizationVariable> pOptVariable;
+    std::shared_ptr<daeOptimizationConstraint> pConstraint;
+    std::shared_ptr<daeObjectiveFunction> pObjectiveFunction;
+    std::shared_ptr<daeMeasuredVariable> pMeasuredVariable;
     vector<string> strarrErrors;
 
     if(!m_ptrBlock)
@@ -712,7 +712,7 @@ void daeSimulation::Run(void)
         //m_dCurrentTime = t;
 
         ReportData(m_dCurrentTime);
-        real_t newProgress = ceil(100.0 * m_dCurrentTime/m_dTimeHorizon);
+        real_t newProgress = std::ceil(100.0 * m_dCurrentTime/m_dTimeHorizon);
         if(newProgress > m_pLog->GetProgress())
             m_pLog->SetProgress(newProgress);
     }
@@ -891,7 +891,7 @@ daeOptimizationConstraint* daeSimulation::CreateInequalityConstraint(string strD
     daeConfig& cfg = daeConfig::GetConfig();
     real_t dAbsTolerance = cfg.GetFloat("daetools.activity.constraintsAbsoluteTolerance", 1E-8);
 
-    boost::shared_ptr<daeOptimizationConstraint> pConstraint(new daeOptimizationConstraint(m_pModel, m_pDAESolver, true, dAbsTolerance, m_arrConstraints.size(), strDescription));
+    std::shared_ptr<daeOptimizationConstraint> pConstraint(new daeOptimizationConstraint(m_pModel, m_pDAESolver, true, dAbsTolerance, m_arrConstraints.size(), strDescription));
     m_arrConstraints.push_back(pConstraint);
     return pConstraint.get();
 }
@@ -901,7 +901,7 @@ daeOptimizationConstraint* daeSimulation::CreateEqualityConstraint(string strDes
     daeConfig& cfg = daeConfig::GetConfig();
     real_t dAbsTolerance = cfg.GetFloat("daetools.activity.constraintsAbsoluteTolerance", 1E-8);
 
-    boost::shared_ptr<daeOptimizationConstraint> pConstraint(new daeOptimizationConstraint(m_pModel, m_pDAESolver, false, dAbsTolerance, m_arrConstraints.size(), strDescription));
+    std::shared_ptr<daeOptimizationConstraint> pConstraint(new daeOptimizationConstraint(m_pModel, m_pDAESolver, false, dAbsTolerance, m_arrConstraints.size(), strDescription));
     m_arrConstraints.push_back(pConstraint);
     return pConstraint.get();
 }
@@ -919,7 +919,7 @@ daeMeasuredVariable* daeSimulation::SetMeasuredVariable(daeVariable& variable)
     real_t dAbsTolerance = cfg.GetFloat("daetools.activity.measuredVariableAbsoluteTolerance", 1E-8);
     size_t nIndex  = m_arrMeasuredVariables.size();
 
-    boost::shared_ptr<daeMeasuredVariable> measvar(new daeMeasuredVariable(m_pModel, m_pDAESolver, dAbsTolerance, nIndex, "Measured variable"));
+    std::shared_ptr<daeMeasuredVariable> measvar(new daeMeasuredVariable(m_pModel, m_pDAESolver, dAbsTolerance, nIndex, "Measured variable"));
     measvar->SetResidual(variable());
     m_arrMeasuredVariables.push_back(measvar);
 
@@ -928,7 +928,7 @@ daeMeasuredVariable* daeSimulation::SetMeasuredVariable(daeVariable& variable)
 
 daeVariableWrapper* daeSimulation::SetInputVariable(daeVariable& variable)
 {
-    boost::shared_ptr<daeVariableWrapper> var(new daeVariableWrapper(variable, ""));
+    std::shared_ptr<daeVariableWrapper> var(new daeVariableWrapper(variable, ""));
     m_arrInputVariables.push_back(var);
 
     return var.get();
@@ -950,7 +950,7 @@ daeMeasuredVariable* daeSimulation::SetMeasuredVariable(adouble a)
     real_t dAbsTolerance = cfg.GetFloat("daetools.activity.measuredVariableAbsoluteTolerance", 1E-8);
     size_t nIndex  = m_arrMeasuredVariables.size();
 
-    boost::shared_ptr<daeMeasuredVariable> measvar(new daeMeasuredVariable(m_pModel, m_pDAESolver, dAbsTolerance, nIndex, "Measured variable"));
+    std::shared_ptr<daeMeasuredVariable> measvar(new daeMeasuredVariable(m_pModel, m_pDAESolver, dAbsTolerance, nIndex, "Measured variable"));
     measvar->SetResidual(a);
     m_arrMeasuredVariables.push_back(measvar);
 
@@ -959,7 +959,7 @@ daeMeasuredVariable* daeSimulation::SetMeasuredVariable(adouble a)
 
 daeVariableWrapper* daeSimulation::SetInputVariable(adouble a)
 {
-    boost::shared_ptr<daeVariableWrapper> var(new daeVariableWrapper(a, ""));
+    std::shared_ptr<daeVariableWrapper> var(new daeVariableWrapper(a, ""));
     m_arrInputVariables.push_back(var);
     return var.get();
 }
@@ -973,7 +973,7 @@ daeOptimizationVariable* daeSimulation::SetContinuousOptimizationVariable(daeVar
 {
     std::vector<size_t> narrDomainIndexes;
     size_t nOptVarIndex = m_arrOptimizationVariables.size();
-    boost::shared_ptr<daeOptimizationVariable> pVar(new daeOptimizationVariable(&variable, nOptVarIndex, narrDomainIndexes, LB, UB, defaultValue));
+    std::shared_ptr<daeOptimizationVariable> pVar(new daeOptimizationVariable(&variable, nOptVarIndex, narrDomainIndexes, LB, UB, defaultValue));
     m_arrOptimizationVariables.push_back(pVar);
     return pVar.get();
 }
@@ -987,7 +987,7 @@ daeOptimizationVariable* daeSimulation::SetContinuousOptimizationVariable(daeVar
 
     std::vector<size_t> narrDomainIndexes;
     size_t nOptVarIndex = m_arrOptimizationVariables.size();
-    boost::shared_ptr<daeOptimizationVariable> pVar(new daeOptimizationVariable(&variable, nOptVarIndex, narrDomainIndexes, LB, UB, defaultValue));
+    std::shared_ptr<daeOptimizationVariable> pVar(new daeOptimizationVariable(&variable, nOptVarIndex, narrDomainIndexes, LB, UB, defaultValue));
     m_arrOptimizationVariables.push_back(pVar);
     return pVar.get();
 }
@@ -996,7 +996,7 @@ daeOptimizationVariable* daeSimulation::SetBinaryOptimizationVariable(daeVariabl
 {
     std::vector<size_t> narrDomainIndexes;
     size_t nOptVarIndex = m_arrOptimizationVariables.size();
-    boost::shared_ptr<daeOptimizationVariable> pVar(new daeOptimizationVariable(&variable, nOptVarIndex, narrDomainIndexes, defaultValue));
+    std::shared_ptr<daeOptimizationVariable> pVar(new daeOptimizationVariable(&variable, nOptVarIndex, narrDomainIndexes, defaultValue));
     m_arrOptimizationVariables.push_back(pVar);
     return pVar.get();
 }
@@ -1005,7 +1005,7 @@ daeOptimizationVariable* daeSimulation::SetIntegerOptimizationVariable(daeVariab
 {
     std::vector<size_t> narrDomainIndexes;
     size_t nOptVarIndex = m_arrOptimizationVariables.size();
-    boost::shared_ptr<daeOptimizationVariable> pVar(new daeOptimizationVariable(&variable, nOptVarIndex, narrDomainIndexes, LB, UB, defaultValue));
+    std::shared_ptr<daeOptimizationVariable> pVar(new daeOptimizationVariable(&variable, nOptVarIndex, narrDomainIndexes, LB, UB, defaultValue));
     m_arrOptimizationVariables.push_back(pVar);
     return pVar.get();
 }
@@ -1017,7 +1017,7 @@ daeOptimizationVariable* daeSimulation::SetContinuousOptimizationVariable(adoubl
 
     daeGetVariableAndIndexesFromNode(a, &variable, narrDomainIndexes);
     size_t nOptVarIndex = m_arrOptimizationVariables.size();
-    boost::shared_ptr<daeOptimizationVariable> pVar(new daeOptimizationVariable(variable, nOptVarIndex, narrDomainIndexes, LB, UB, defaultValue));
+    std::shared_ptr<daeOptimizationVariable> pVar(new daeOptimizationVariable(variable, nOptVarIndex, narrDomainIndexes, LB, UB, defaultValue));
     m_arrOptimizationVariables.push_back(pVar);
     return pVar.get();
 }
@@ -1035,7 +1035,7 @@ daeOptimizationVariable* daeSimulation::SetContinuousOptimizationVariable(adoubl
     real_t UB = qUB.scaleTo(u).getValue();
     real_t defaultValue = qdefaultValue.scaleTo(u).getValue();
 
-    boost::shared_ptr<daeOptimizationVariable> pVar(new daeOptimizationVariable(variable, nOptVarIndex, narrDomainIndexes, LB, UB, defaultValue));
+    std::shared_ptr<daeOptimizationVariable> pVar(new daeOptimizationVariable(variable, nOptVarIndex, narrDomainIndexes, LB, UB, defaultValue));
     m_arrOptimizationVariables.push_back(pVar);
     return pVar.get();
 }
@@ -1047,7 +1047,7 @@ daeOptimizationVariable* daeSimulation::SetBinaryOptimizationVariable(adouble a,
 
     daeGetVariableAndIndexesFromNode(a, &variable, narrDomainIndexes);
     size_t nOptVarIndex = m_arrOptimizationVariables.size();
-    boost::shared_ptr<daeOptimizationVariable> pVar(new daeOptimizationVariable(variable, nOptVarIndex, narrDomainIndexes, defaultValue));
+    std::shared_ptr<daeOptimizationVariable> pVar(new daeOptimizationVariable(variable, nOptVarIndex, narrDomainIndexes, defaultValue));
     m_arrOptimizationVariables.push_back(pVar);
     return pVar.get();
 }
@@ -1059,7 +1059,7 @@ daeOptimizationVariable* daeSimulation::SetIntegerOptimizationVariable(adouble a
 
     daeGetVariableAndIndexesFromNode(a, &variable, narrDomainIndexes);
     size_t nOptVarIndex = m_arrOptimizationVariables.size();
-    boost::shared_ptr<daeOptimizationVariable> pVar(new daeOptimizationVariable(variable, nOptVarIndex, narrDomainIndexes, LB, UB, defaultValue));
+    std::shared_ptr<daeOptimizationVariable> pVar(new daeOptimizationVariable(variable, nOptVarIndex, narrDomainIndexes, LB, UB, defaultValue));
     m_arrOptimizationVariables.push_back(pVar);
     return pVar.get();
 }
@@ -1154,13 +1154,13 @@ daeObjectiveFunction* daeSimulation::GetObjectiveFunction(void) const
     return m_arrObjectiveFunctions[0].get();
 }
 
-boost::shared_ptr<daeObjectiveFunction> daeSimulation::AddObjectiveFunction(void)
+std::shared_ptr<daeObjectiveFunction> daeSimulation::AddObjectiveFunction(void)
 {
     daeConfig& cfg = daeConfig::GetConfig();
     real_t dAbsTolerance = cfg.GetFloat("daetools.activity.objFunctionAbsoluteTolerance", 1E-8);
     size_t nObjFunIndex  = m_arrObjectiveFunctions.size();
 
-    boost::shared_ptr<daeObjectiveFunction> objfun(new daeObjectiveFunction(m_pModel, m_pDAESolver, dAbsTolerance, nObjFunIndex, "Objective function"));
+    std::shared_ptr<daeObjectiveFunction> objfun(new daeObjectiveFunction(m_pModel, m_pDAESolver, dAbsTolerance, nObjFunIndex, "Objective function"));
     m_arrObjectiveFunctions.push_back(objfun);
 
     return objfun;
@@ -1179,7 +1179,7 @@ void daeSimulation::SetNumberOfObjectiveFunctions(size_t n)
 // Remove all equations from the model and delete all obj. functions
     for(i = 0; i < m_arrObjectiveFunctions.size(); i++)
     {
-        boost::shared_ptr<daeObjectiveFunction> objfun = m_arrObjectiveFunctions[i];
+        std::shared_ptr<daeObjectiveFunction> objfun = m_arrObjectiveFunctions[i];
         objfun->RemoveEquationFromModel();
     }
     m_arrObjectiveFunctions.clear();
@@ -1834,7 +1834,7 @@ void daeSimulation::InitialiseModelBuilder(uint32_t&                            
     if(!m_ptrBlock)
         daeDeclareAndThrowException(exInvalidPointer);
 
-    boost::shared_ptr<daeDataProxy_t> pDataProxy = m_pModel->GetDataProxy();
+    std::shared_ptr<daeDataProxy_t> pDataProxy = m_pModel->GetDataProxy();
     daeBlock*                         pBlock     = dynamic_cast<daeBlock*>(m_ptrBlock);
 
     Ndofs      = 0;
@@ -2938,7 +2938,7 @@ void daeSimulation::Register(daeVariable* pVariable)
     daeDomain_t* pDomain;
     vector<daeDomain_t*> arrDomains;
 
-    boost::shared_ptr<daeDataProxy_t> pDataProxy = m_pModel->GetDataProxy();
+    std::shared_ptr<daeDataProxy_t> pDataProxy = m_pModel->GetDataProxy();
 
     daeDataReporterVariable var;
     var.m_strName  = m_strIteration + pVariable->GetCanonicalName();
@@ -2991,7 +2991,7 @@ void daeSimulation::Register(daeVariable* pVariable)
         {
             for(size_t pi = 0; pi < m_arrOptimizationVariables.size(); pi++)
             {
-                boost::shared_ptr<daeOptimizationVariable> optVar = m_arrOptimizationVariables[pi];
+                std::shared_ptr<daeOptimizationVariable> optVar = m_arrOptimizationVariables[pi];
 
                 var.m_strName = m_strIteration + pVariable->GetCanonicalNameAndPrepend("sensitivities.d(");
                 var.m_strName += ")_d(" + optVar->GetName() + ")";
@@ -3173,7 +3173,7 @@ void daeSimulation::Report(daeVariable* pVariable, real_t time)
     nEnd    = pVariable->GetOverallIndex() + nPoints;
     var.m_nNumberOfPoints = nPoints;
     var.m_pValues = new real_t[nPoints];
-    boost::shared_ptr<daeDataProxy_t> pDataProxy = m_pModel->GetDataProxy();
+    std::shared_ptr<daeDataProxy_t> pDataProxy = m_pModel->GetDataProxy();
     for(k = 0, i = nStart; i < nEnd; i++, k++)
         var.m_pValues[k] = pDataProxy->GetValue(i);
 
@@ -3219,7 +3219,7 @@ void daeSimulation::Report(daeVariable* pVariable, real_t time)
         {
             for(size_t pi = 0; pi < m_arrOptimizationVariables.size(); pi++)
             {
-                boost::shared_ptr<daeOptimizationVariable> optVar = m_arrOptimizationVariables[pi];
+                std::shared_ptr<daeOptimizationVariable> optVar = m_arrOptimizationVariables[pi];
 
                 var.m_strName = m_strIteration + pVariable->GetCanonicalNameAndPrepend("sensitivities.d(");
                 var.m_strName += ")_d(" + optVar->GetName() + ")";

@@ -9,7 +9,7 @@
 #include <vector>
 #include <boost/python.hpp>
 #include "../Units/units.h"
-#include "../dae_develop.h"
+#include "../daetools-pymod.h"
 using namespace units;
 
 namespace daepython

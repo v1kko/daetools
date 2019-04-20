@@ -5,17 +5,11 @@
 #include "../Core/coreimpl.h"
 #include "../config.h"
 #include "../Core/optimization.h"
+#include "../IDAS_DAESolver/dae_array_matrix.h"
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/json_parser.hpp>
-#include "../IDAS_DAESolver/dae_array_matrix.h"
 
-#if defined(DAE_MPI)
-#include <boost/mpi.hpp>
-#include <boost/serialization/string.hpp>
-#include <boost/serialization/utility.hpp>
-#endif
-
-namespace dae
+namespace daetools
 {
 namespace activity
 {
@@ -199,7 +193,7 @@ protected:
     void	CheckSystem(void) const;
     void	SetupSolver(void);
 
-    boost::shared_ptr<daeObjectiveFunction> AddObjectiveFunction(void);
+    std::shared_ptr<daeObjectiveFunction> AddObjectiveFunction(void);
 
     void	EnterConditionalIntegrationMode(void);
     real_t	IntegrateUntilConditionSatisfied(daeCondition rCondition, daeeStopCriterion eStopCriterion);
@@ -247,13 +241,13 @@ protected:
     int                                                         m_iNoSensitivityFiles;
 
     size_t														m_nNumberOfObjectiveFunctions;
-    std::vector< boost::shared_ptr<daeObjectiveFunction> >		m_arrObjectiveFunctions;
-    std::vector< boost::shared_ptr<daeOptimizationConstraint> >	m_arrConstraints;
-    std::vector< boost::shared_ptr<daeOptimizationVariable> >	m_arrOptimizationVariables;
+    std::vector< std::shared_ptr<daeObjectiveFunction> >		m_arrObjectiveFunctions;
+    std::vector< std::shared_ptr<daeOptimizationConstraint> >	m_arrConstraints;
+    std::vector< std::shared_ptr<daeOptimizationVariable> >	    m_arrOptimizationVariables;
 
 // Parameter estimation related data
-    std::vector< boost::shared_ptr<daeVariableWrapper> >		m_arrInputVariables;
-    std::vector< boost::shared_ptr<daeMeasuredVariable> >		m_arrMeasuredVariables;
+    std::vector< std::shared_ptr<daeVariableWrapper> >		m_arrInputVariables;
+    std::vector< std::shared_ptr<daeMeasuredVariable> >		m_arrMeasuredVariables;
 };
 
 /*********************************************************************************************

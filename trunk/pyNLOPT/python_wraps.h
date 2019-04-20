@@ -17,34 +17,34 @@
 #include <boost/shared_ptr.hpp>
 #include <boost/python/suite/indexing/vector_indexing_suite.hpp>
 #include <boost/python/suite/indexing/map_indexing_suite.hpp>
-#include "../dae_develop.h"
+#include "../daetools-pymod.h"
 #include "../DataReporting/datareporters.h"
 #include "../NLOPT_NLPSolver/nlpsolver.h"
 #include "../NLOPT_NLPSolver/base_solvers.h"
 #include "../Core/base_logging.h"
 #include "../Core/tcpiplog.h"
 
-using namespace dae::nlpsolver;
+using namespace daetools::nlpsolver;
 
 namespace daepython
 {
 class daeNLPSolverWrapper : public daeNLPSolver_t,
-					        public boost::python::wrapper<daeNLPSolver_t>
+                            public boost::python::wrapper<daeNLPSolver_t>
 {
 public:
-	void Initialize(daeSimulation_t*   pSimulation,
-			        daeNLPSolver_t*    pNLPSolver, 
-					daeDAESolver_t*    pDAESolver, 
-					daeDataReporter_t* pDataReporter, 
-					daeLog_t*          pLog)
-	{
-		this->get_override("Initialize")(pSimulation, pNLPSolver, pDAESolver, pDataReporter, pLog);
-	}
-	
-	void Solve(void)
-	{
-		this->get_override("Solve")();
-	}
+    void Initialize(daeSimulation_t*   pSimulation,
+                    daeNLPSolver_t*    pNLPSolver,
+                    daeDAESolver_t*    pDAESolver,
+                    daeDataReporter_t* pDataReporter,
+                    daeLog_t*          pLog)
+    {
+        this->get_override("Initialize")(pSimulation, pNLPSolver, pDAESolver, pDataReporter, pLog);
+    }
+
+    void Solve(void)
+    {
+        this->get_override("Solve")();
+    }
 };
 
 
@@ -55,21 +55,21 @@ public:
     daeNLOPTWrapper(string algorithm) : daeNLOPTSolver(algorithm)
     {
     }
-	
+
 //	void SetOptionS(const string& strOptionName, const string& strValue)
 //	{
 //		daeNLOPTSolver::SetOption(strOptionName, strValue);
 //	}
-//	    
+//
 //	void SetOptionN(const string& strOptionName, real_t dValue)
 //	{
 //		daeNLOPTSolver::SetOption(strOptionName, dValue);
 //	}
-//    
+//
 //	void SetOptionI(const string& strOptionName, int iValue)
 //	{
 //		daeNLOPTSolver::SetOption(strOptionName, iValue);
-//	}   
+//	}
 };
 
 

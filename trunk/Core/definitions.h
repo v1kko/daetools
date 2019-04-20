@@ -58,10 +58,18 @@ DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 #endif
 #endif
 
-namespace dae
+namespace daetools
 {
 using std::string;
 using std::map;
+
+const size_t FREE = ULONG_MAX;
+
+#ifndef DAE_MAJOR
+#define DAE_MAJOR 1
+#define DAE_MINOR 9
+#define DAE_BUILD 1
+#endif
 
 const string daeAuthorInfo  =	"Dragan Nikolic, DAE Tools project, dnikolic at daetools.com";
 const string daeLicenceInfo	=	"DAE Tools is free software: you can redistribute it and/or modify "
@@ -73,7 +81,6 @@ const string daeLicenceInfo	=	"DAE Tools is free software: you can redistribute 
                                 "GNU General Public License for more details. \n\n"
                                 "You should have received a copy of the GNU General Public License "
                                 "along with this program. If not, see <http://www.gnu.org/licenses/>.";
-const size_t FREE = ULONG_MAX;
 inline std::string daeVersion(bool bIncludeBuild = false)
 {
     char dae__version[20];
@@ -256,46 +263,6 @@ void dae_set_vector(const std::vector<itemSource>& arrSource, std::vector<itemDe
     std::cout << std::string(__FILE__) << ":" << std::string(__FUNCTION__) << ":" <<  string(#Vector) << ": " << Vector.capacity() - Vector.size() << std::endl;
 
 /*********************************************************************************************
-    daeReferenceCountable
-**********************************************************************************************/
-class daeReferenceCountable
-{
-public:
-    daeReferenceCountable(void) : ref_count(0)
-    {
-    }
-
-    void IncreaseRefCount(void)
-    {
-        ++ref_count;
-    }
-
-    int DecreaseRefCount(void)
-    {
-        return (--ref_count);
-    }
-
-protected:
-    int ref_count;
-};
-
-template<typename T>
-inline void intrusive_ptr_add_ref(T* pobj)
-{
-    pobj->IncreaseRefCount();
-}
-
-template<typename T>
-inline void intrusive_ptr_release(T* pobj)
-{
-    if(pobj->DecreaseRefCount() == 0)
-    {
-        delete pobj;
-        pobj = NULL;
-    }
-}
-
-/*********************************************************************************************
     daeCreateObjectDelegate
 **********************************************************************************************/
 template <typename OBJECT>
@@ -384,8 +351,8 @@ static const string  exRuntimeCheck			= "Runtime Check";
 static const string  exNotImplemented		= "Not implemented";
 static const string  exDeprecated   		= "Deprecated";
 
-#define daeDeclareException(TYPE)	          dae::daeException e(std::string(TYPE), std::string(__FUNCTION__), std::string(__FILE__), __LINE__);
-#define daeDeclareAndThrowException(TYPE)	{ dae::daeException e(std::string(TYPE), std::string(__FUNCTION__), std::string(__FILE__), __LINE__); throw e; }
+#define daeDeclareException(TYPE)	          daetools::daeException e(std::string(TYPE), std::string(__FUNCTION__), std::string(__FILE__), __LINE__);
+#define daeDeclareAndThrowException(TYPE)	{ daetools::daeException e(std::string(TYPE), std::string(__FUNCTION__), std::string(__FILE__), __LINE__); throw e; }
 
 class daeException : public std::exception
 {

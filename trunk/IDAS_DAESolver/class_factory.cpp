@@ -4,7 +4,7 @@ using namespace std;
 #include "base_solvers.h"
 #include "../Core/macros.h"
 
-namespace dae 
+namespace daetools 
 {
 namespace solver 
 {

@@ -1,7 +1,6 @@
-#ifndef DAE_SUPERLU_SOLVERS_H
-#define DAE_SUPERLU_SOLVERS_H
+#ifndef DAE_SUPERLU_MT_SOLVER_H
+#define DAE_SUPERLU_MT_SOLVER_H
 #include "../Core/solver.h"
-//#include "../IDAS_DAESolver/ida_la_solver_interface.h"
 
 #if defined(_WIN32) || defined(WIN32) || defined(WIN64) || defined(_WIN64)
 
@@ -20,14 +19,10 @@
 #endif // WIN32
 
 
-namespace dae
+namespace daetools
 {
 namespace solver
 {
-#ifdef daeSuperLU
-DAE_SUPERLU_API daeLASolver_t* daeCreateSuperLUSolver(void);
-#endif
-
 #ifdef daeSuperLU_MT
 DAE_SUPERLU_API daeLASolver_t* daeCreateSuperLU_MTSolver(void);
 #endif

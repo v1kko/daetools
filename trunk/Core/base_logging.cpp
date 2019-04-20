@@ -1,26 +1,21 @@
 #include "stdafx.h"
 #include "base_logging.h"
+#include "logs.h"
 #include "tcpiplog.h"
 
-namespace dae
+namespace daetools
 {
 namespace logging
 {
 daeLog_t* daeCreateFileLog(const string& strFileName)
 {
-	return new daeFileLog(strFileName);
+    return new daeFileLog(strFileName);
 }
 
-daeLog_t* daeCreateStdOutLog(void)
+daeLog_t* daeCreateStdOutLog()
 {
-	return new daeStdOutLog;
+    return new daeStdOutLog;
 }
-
-daeLog_t* daeCreateTCPIPLog()
-{
-	return new daeTCPIPLog();
-}
-
 }
 }
 

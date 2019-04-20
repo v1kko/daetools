@@ -1,7 +1,7 @@
 #include "stdafx.h"
 #include "coreimpl.h"
 
-namespace dae
+namespace daetools
 {
 namespace core
 {

@@ -8,7 +8,7 @@
 #include <idas/idas_dense.h>
 #include "dae_array_matrix.h"
 
-namespace dae
+namespace daetools
 {
 namespace solver
 {

@@ -2,7 +2,7 @@
 #include "coreimpl.h"
 #include <boost/format.hpp>
 
-namespace dae 
+namespace daetools 
 {
 namespace core 
 {

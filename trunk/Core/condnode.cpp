@@ -4,7 +4,7 @@
 #include <typeinfo>
 using namespace boost;
 
-namespace dae
+namespace daetools
 {
 namespace core
 {

@@ -12,7 +12,7 @@
 //#include "../mmio.h"
 //}
 
-namespace dae
+namespace daetools
 {
 namespace solver
 {
@@ -220,7 +220,7 @@ public:
                 if(bStructureOnly)
                     std::cout << (GetItem(row, col) == 0 ? "-" : "X");
                 else
-                    std::cout << dae::toStringFormatted(GetItem(row, col), -1, DBL_DIG, false);
+                    std::cout << daetools::toStringFormatted(GetItem(row, col), -1, DBL_DIG, false);
             }
             std::cout << std::endl;
         }
@@ -447,7 +447,7 @@ public:
                 if(bStructureOnly)
                     std::cout << (GetItem(i, k) == 0 ? "-" : "X");
                 else
-                    std::cout << dae::toStringFormatted(GetItem(i, k), -1, DBL_DIG, false);
+                    std::cout << daetools::toStringFormatted(GetItem(i, k), -1, DBL_DIG, false);
             }
             std::cout << std::endl;
         }
@@ -779,7 +779,7 @@ public:
                 if(bStructureOnly)
                     std::cout << (n < 0 ? "-" : "X");
                 else
-                    std::cout << dae::toStringFormatted(value, -1, DBL_DIG, false);
+                    std::cout << daetools::toStringFormatted(value, -1, DBL_DIG, false);
             }
             std::cout << std::endl;
         }

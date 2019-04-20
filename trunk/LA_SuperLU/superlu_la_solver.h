@@ -4,7 +4,8 @@
 #include "../IDAS_DAESolver/ida_la_solver_interface.h"
 #include "../IDAS_DAESolver/solver_class_factory.h"
 #include "../IDAS_DAESolver/dae_array_matrix.h"
-#include "superlu_solvers.h"
+#include "superlu_solver.h"
+#include "superlu_mt_solver.h"
 
 #ifdef daeSuperLU_MT
 extern "C"
@@ -21,7 +22,7 @@ extern "C"
 #endif
 
 
-namespace dae
+namespace daetools
 {
 namespace solver
 {
@@ -34,7 +35,7 @@ namespace superlu_mt
 {
 #endif
 
-class DAE_SUPERLU_API daeSuperLUSolver : public dae::solver::daeLASolver_t
+class DAE_SUPERLU_API daeSuperLUSolver : public daetools::solver::daeLASolver_t
 {
     typedef daeCSRMatrix<real_t, int> daeSuperLUMatrix;
 public:

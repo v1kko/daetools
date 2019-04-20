@@ -4,7 +4,7 @@
 #include "docstrings.h"
 #include "../LA_Trilinos_Amesos/trilinos_amesos_la_solver.h"
 using namespace boost::python;
-using namespace dae::solver;
+using namespace daetools::solver;
 
 // Temporary workaround for Visual Studio 2015 update 3
 //  Error   LNK2019 unresolved external symbol "class ClassName const volatile * __cdecl boost::get_pointer<class ClassName const volatile *>(...)

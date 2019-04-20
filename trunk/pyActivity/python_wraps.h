@@ -17,7 +17,7 @@
 #include <boost/smart_ptr.hpp>
 #include <boost/python/suite/indexing/vector_indexing_suite.hpp>
 #include <boost/python/suite/indexing/map_indexing_suite.hpp>
-#include "../dae_develop.h"
+#include "../daetools-pymod.h"
 #include "../DataReporting/datareporters.h"
 #include "../Activity/simulation.h"
 #include "../IDAS_DAESolver/ida_solver.h"
@@ -276,7 +276,7 @@ public:
     boost::python::list GetDOFs(void) const
     {
         boost::python::list l;
-        boost::shared_ptr<daeDataProxy_t> pDataProxy = m_pModel->GetDataProxy();
+        std::shared_ptr<daeDataProxy_t> pDataProxy = m_pModel->GetDataProxy();
         const std::vector<real_t>& dofs = pDataProxy->GetAssignedVarsValues();
         for(size_t i = 0; i < dofs.size(); i++)
             l.append(dofs[i]);
@@ -287,7 +287,7 @@ public:
     boost::python::list GetValues(void) const
     {
         boost::python::list l;
-        boost::shared_ptr<daeDataProxy_t> pDataProxy = m_pModel->GetDataProxy();
+        std::shared_ptr<daeDataProxy_t> pDataProxy = m_pModel->GetDataProxy();
         const std::vector<real_t*>& valRefs = pDataProxy->GetValuesReferences();
         for(size_t i = 0; i < valRefs.size(); i++)
             l.append(*valRefs[i]);
@@ -298,7 +298,7 @@ public:
     boost::python::list GetTimeDerivatives(void) const
     {
         boost::python::list l;
-        boost::shared_ptr<daeDataProxy_t> pDataProxy = m_pModel->GetDataProxy();
+        std::shared_ptr<daeDataProxy_t> pDataProxy = m_pModel->GetDataProxy();
         const std::vector<real_t*>& dtRefs = pDataProxy->GetTimeDerivativesReferences();
         for(size_t i = 0; i < dtRefs.size(); i++)
         {
@@ -313,7 +313,7 @@ public:
 
     boost::python::list GetVariableTypes(void) const
     {
-        boost::shared_ptr<daeDataProxy_t> pDataProxy = m_pModel->GetDataProxy();
+        std::shared_ptr<daeDataProxy_t> pDataProxy = m_pModel->GetDataProxy();
         size_t  nVars     = pDataProxy->GetTotalNumberOfVariables();
         real_t* pVarTypes = pDataProxy->GetVariableTypesPointer();
 
@@ -339,7 +339,7 @@ public:
 
     boost::python::list GetAbsoluteTolerances(void) const
     {
-        boost::shared_ptr<daeDataProxy_t> pDataProxy = m_pModel->GetDataProxy();
+        std::shared_ptr<daeDataProxy_t> pDataProxy = m_pModel->GetDataProxy();
         size_t  nVars    = pDataProxy->GetTotalNumberOfVariables();
         real_t* pAbsTols = m_pModel->GetDataProxy()->GetAbsoluteTolerancesPointer();
         return getListFromVectorByValue(pAbsTols, nVars);

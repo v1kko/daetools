@@ -13,7 +13,7 @@
 #include "../config.h"
 using boost::asio::ip::tcp;
 
-namespace dae
+namespace daetools
 {
 namespace datareporting
 {
@@ -222,7 +222,7 @@ public:
 // Message formatting routines
     string SendProcessName(const string& strProcessName)
     {
-        boost::int32_t nameSize;
+        std::int32_t nameSize;
         std::stringstream s(std::ios_base::out|std::ios_base::in|std::ios_base::binary);
 
     // Send cStartRegistration flag
@@ -275,7 +275,7 @@ public:
 
     string RegisterDomain(const daeDataReporterDomain* pDomain)
     {
-        boost::int32_t nameSize, unitsSize, noPoints, type;
+        std::int32_t nameSize, unitsSize, noPoints, type;
         std::stringstream s(std::ios_base::out|std::ios_base::in|std::ios_base::binary);
 
     // Send RegisterDomain flag
@@ -327,7 +327,7 @@ public:
 
     string RegisterVariable(const daeDataReporterVariable* pVariable)
     {
-        boost::int32_t nameSize, unitsSize, domainsSize, noPoints;
+        std::int32_t nameSize, unitsSize, domainsSize, noPoints;
         std::stringstream s(std::ios_base::out|std::ios_base::in|std::ios_base::binary);
 
     // Send RegisterVariable flag
@@ -398,7 +398,7 @@ public:
 
     string SendVariable(const daeDataReporterVariableValue* pVariableValue)
     {
-        boost::int32_t nameSize, noPoints;
+        std::int32_t nameSize, noPoints;
         std::stringstream s(std::ios_base::out|std::ios_base::in|std::ios_base::binary);
 
     // Send cSendVariable flag
@@ -431,7 +431,7 @@ public:
 
     void StartRegistration(const string& strMessage, daeDataReceiverProcess& drProcess)
     {
-        boost::int32_t curPos, nameSize;
+        std::int32_t curPos, nameSize;
         const char* data = strMessage.c_str();
 
         char cFlag = data[0];
@@ -456,7 +456,7 @@ public:
 
     void EndRegistration(const string& strMessage, daeDataReceiverProcess& drProcess)
     {
-        boost::int32_t msgSize, curPos;
+        std::int32_t msgSize, curPos;
         const char* data = strMessage.c_str();
         msgSize = strMessage.size();
 
@@ -467,13 +467,13 @@ public:
 
     void RegisterDomain(const string& strMessage, daeDataReceiverProcess& drProcess)
     {
-        boost::int32_t curPos, nameSize, unitsSize;
+        std::int32_t curPos, nameSize, unitsSize;
         const char* data = strMessage.c_str();
 
         char cFlag = data[0];
         curPos = 1;
 
-        boost::int32_t noPoints, type;
+        std::int32_t noPoints, type;
 
         daeDataReceiverDomain* pDomain = new daeDataReceiverDomain;
         drProcess.m_ptrarrRegisteredDomains.push_back(pDomain);
@@ -544,7 +544,7 @@ public:
 
     void RegisterVariable(const string& strMessage, daeDataReceiverProcess& drProcess)
     {
-        boost::int32_t i, msgSize, curPos, nameSize, unitsSize;
+        std::int32_t i, msgSize, curPos, nameSize, unitsSize;
         const char* data = strMessage.c_str();
         msgSize = strMessage.size();
 
@@ -554,8 +554,8 @@ public:
         char* szName;
         size_t j, k;
         string strDomainName;
-        boost::int32_t noPoints;
-        boost::int32_t domainsSize;
+        std::int32_t noPoints;
+        std::int32_t domainsSize;
         daeDataReceiverDomain* pDomain;
         daeDataReceiverVariable* pVariable = new daeDataReceiverVariable;
 
@@ -633,7 +633,7 @@ public:
         for(k = 0; k < pVariable->m_ptrarrDomains.size(); k++)
             noPoints *= pVariable->m_ptrarrDomains[k]->m_nNumberOfPoints;
 
-        if(noPoints != (boost::int32_t)pVariable->m_nNumberOfPoints)
+        if(noPoints != (std::int32_t)pVariable->m_nNumberOfPoints)
         {
             delete pVariable;
             daeDeclareException(exRuntimeCheck);
@@ -658,7 +658,7 @@ public:
 
     void SendVariable(const string& strMessage, daeDataReceiverProcess& drProcess, real_t dCurrentTime)
     {
-        boost::int32_t msgSize, curPos, nameSize;
+        std::int32_t msgSize, curPos, nameSize;
         const char* data = strMessage.c_str();
         msgSize = strMessage.size();
 
@@ -667,7 +667,7 @@ public:
 
         char* szName;
         string strVariableName;
-        boost::int32_t noPoints;
+        std::int32_t noPoints;
 
     // Read size of the name and move the pointer
         memcpy(&nameSize, &data[curPos], sizeof(nameSize));
@@ -704,7 +704,7 @@ public:
         memcpy(&noPoints, &data[curPos], sizeof(noPoints));
         curPos += sizeof(noPoints);
 
-        if(noPoints != (boost::int32_t)pVariable->m_nNumberOfPoints)
+        if(noPoints != (std::int32_t)pVariable->m_nNumberOfPoints)
         {
             delete pValue;
             daeDeclareException(exRuntimeCheck);
@@ -724,7 +724,7 @@ public:
 
     void EndOfData(const string& strMessage, daeDataReceiverProcess& drProcess)
     {
-        boost::int32_t i, msgSize, curPos, nameSize;
+        std::int32_t i, msgSize, curPos, nameSize;
         const char* data = strMessage.c_str();
         msgSize = strMessage.size();
 
@@ -803,7 +803,7 @@ protected:
 //	string					 m_strConnectionString;
 //	string					 m_strProcessName;
 //	real_t                   m_dCurrentTime;
-    boost::shared_ptr<tcp::socket> m_ptcpipSocket;
+    std::shared_ptr<tcp::socket> m_ptcpipSocket;
     boost::asio::io_service        m_ioService;
 };
 
@@ -814,7 +814,7 @@ class DAE_DATAREPORTERS_API daeTCPIPDataReceiver : public daeDataReceiver_t
 {
 public:
     daeTCPIPDataReceiver(void);
-    daeTCPIPDataReceiver(boost::shared_ptr<tcp::socket> ptcpipSocket);
+    daeTCPIPDataReceiver(std::shared_ptr<tcp::socket> ptcpipSocket);
     virtual ~daeTCPIPDataReceiver(void);
 
 public:
@@ -826,13 +826,13 @@ public:
     virtual daeDataReceiverProcess*	GetProcess(void);
 
     void thread(void);
-    void ParseMessage(unsigned char* data, boost::int32_t msgSize);
+    void ParseMessage(unsigned char* data, std::int32_t msgSize);
 
 protected:
-    boost::shared_ptr<tcp::socket>	 m_tcpipSocket;
+    std::shared_ptr<tcp::socket>	 m_tcpipSocket;
     real_t							 m_dCurrentTime;
     daeDataReceiverProcess			 m_drProcess;
-    boost::shared_ptr<boost::thread> m_pThread;
+    std::shared_ptr<boost::thread> m_pThread;
 };
 
 /*********************************************************************
@@ -856,8 +856,8 @@ public:
     int									m_nPort;
     boost::asio::io_service				m_ioService;
     tcp::acceptor						m_acceptor;
-    boost::shared_ptr<tcp::socket>		m_tcpipSocket;
-    boost::shared_ptr<boost::thread>	m_pThread;
+    std::shared_ptr<tcp::socket>		m_tcpipSocket;
+    std::shared_ptr<boost::thread>	m_pThread;
     daePtrVector<daeTCPIPDataReceiver*> m_ptrarrDataReceivers;
 };
 

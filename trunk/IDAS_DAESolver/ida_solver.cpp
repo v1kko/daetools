@@ -11,7 +11,7 @@ using namespace std;
 
 #define JACOBIAN(A) (A->cols)
 
-namespace dae
+namespace daetools
 {
 namespace solver
 {

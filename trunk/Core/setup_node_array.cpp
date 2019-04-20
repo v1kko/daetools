@@ -2,12 +2,12 @@
 #include "coreimpl.h"
 #include "nodes_array.h"
 #include "xmlfunctions.h"
-using namespace dae;
+using namespace daetools;
 #include <typeinfo>
-using namespace dae::xml;
+using namespace daetools::xml;
 using namespace boost;
 
-namespace dae
+namespace daetools
 {
 namespace core
 {

@@ -4,14 +4,12 @@
 #include "nlpsolver_class_factory.h"
 #include "../Core/optimization.h"
 
-using namespace dae::solver;
-
-namespace dae
+namespace daetools
 {
 namespace nlpsolver
 {
-DAE_BONMIN_API daeNLPSolver_t* daeCreateIPOPTSolver(void);
-DAE_BONMIN_API daeNLPSolver_t* daeCreateBONMINSolver(void);
+DAE_BONMIN_API daetools::solver::daeNLPSolver_t* daeCreateIPOPTSolver(void);
+DAE_BONMIN_API daetools::solver::daeNLPSolver_t* daeCreateBONMINSolver(void);
 }
 }
 #endif

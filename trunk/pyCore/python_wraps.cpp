@@ -2771,7 +2771,7 @@ boost::python::object daeVariable_TimeDerivatives(daeVariable& self)
     var.GetDomains(ptrarrDomains);
     nDomains = ptrarrDomains.size();
     daeModel* pModel = dynamic_cast<daeModel*>(var.GetModel());
-    boost::shared_ptr<daeDataProxy_t> pDataProxy = pModel->GetDataProxy();
+    std::shared_ptr<daeDataProxy_t> pDataProxy = pModel->GetDataProxy();
     const std::vector<real_t*>& dtRefs = pDataProxy->GetTimeDerivativesReferences();
 
     if(nDomains == 0)
@@ -2808,7 +2808,7 @@ boost::python::object daeVariable_TimeDerivatives(daeVariable& self)
 */
     const std::vector<daeDomain*>& domains = self.Domains();
     daeModel* pModel = dynamic_cast<daeModel*>(self.GetModel());
-    boost::shared_ptr<daeDataProxy_t> pDataProxy = pModel->GetDataProxy();
+    std::shared_ptr<daeDataProxy_t> pDataProxy = pModel->GetDataProxy();
     size_t nStart = self.GetOverallIndex();
     size_t nEnd   = self.GetOverallIndex() + self.GetNumberOfPoints();
     const std::vector<real_t*>& dtRefs = pDataProxy->GetTimeDerivativesReferences();
@@ -2909,7 +2909,7 @@ boost::python::object daeVariable_Values(daeVariable& self)
     var.GetDomains(ptrarrDomains);
     nDomains = ptrarrDomains.size();
     daeModel* pModel = dynamic_cast<daeModel*>(var.GetModel());
-    boost::shared_ptr<daeDataProxy_t> pDataProxy = pModel->GetDataProxy();
+    std::shared_ptr<daeDataProxy_t> pDataProxy = pModel->GetDataProxy();
 
     if(nDomains == 0)
     {
@@ -2935,7 +2935,7 @@ boost::python::object daeVariable_Values(daeVariable& self)
 */
     const std::vector<daeDomain*>& domains = self.Domains();
     daeModel* pModel = dynamic_cast<daeModel*>(self.GetModel());
-    boost::shared_ptr<daeDataProxy_t> pDataProxy = pModel->GetDataProxy();
+    std::shared_ptr<daeDataProxy_t> pDataProxy = pModel->GetDataProxy();
     size_t nStart = self.GetOverallIndex();
     size_t nEnd   = self.GetOverallIndex() + self.GetNumberOfPoints();
 
@@ -2987,7 +2987,7 @@ boost::python::object daeVariable_IDs(daeVariable& self)
     var.GetDomains(ptrarrDomains);
     nDomains = ptrarrDomains.size();
     daeModel* pModel = dynamic_cast<daeModel*>(var.GetModel());
-    boost::shared_ptr<daeDataProxy_t> pDataProxy = pModel->GetDataProxy();
+    std::shared_ptr<daeDataProxy_t> pDataProxy = pModel->GetDataProxy();
 
     if(nDomains == 0)
     {
@@ -3013,7 +3013,7 @@ boost::python::object daeVariable_IDs(daeVariable& self)
 */
     const std::vector<daeDomain*>& domains = self.Domains();
     daeModel* pModel = dynamic_cast<daeModel*>(self.GetModel());
-    boost::shared_ptr<daeDataProxy_t> pDataProxy = pModel->GetDataProxy();
+    std::shared_ptr<daeDataProxy_t> pDataProxy = pModel->GetDataProxy();
     size_t nStart = self.GetOverallIndex();
     size_t nEnd   = self.GetOverallIndex() + self.GetNumberOfPoints();
 
@@ -3062,7 +3062,7 @@ boost::python::object daeVariable_GatheredIDs(daeVariable& self)
     var.GetDomains(ptrarrDomains);
     nDomains = ptrarrDomains.size();
     daeModel* pModel = dynamic_cast<daeModel*>(var.GetModel());
-    boost::shared_ptr<daeDataProxy_t> pDataProxy = pModel->GetDataProxy();
+    std::shared_ptr<daeDataProxy_t> pDataProxy = pModel->GetDataProxy();
 
     if(nDomains == 0)
     {
@@ -3088,7 +3088,7 @@ boost::python::object daeVariable_GatheredIDs(daeVariable& self)
 */
     const std::vector<daeDomain*>& domains = self.Domains();
     daeModel* pModel = dynamic_cast<daeModel*>(self.GetModel());
-    boost::shared_ptr<daeDataProxy_t> pDataProxy = pModel->GetDataProxy();
+    std::shared_ptr<daeDataProxy_t> pDataProxy = pModel->GetDataProxy();
     size_t nStart = self.GetOverallIndex();
     size_t nEnd   = self.GetOverallIndex() + self.GetNumberOfPoints();
 
@@ -4916,7 +4916,7 @@ boost::python::list daeEquationExecutionInfo_GetDiffVariableIndexes(daeEquationE
     self.GetVariableIndexes(narr);
 
     daeModel* pModel = dynamic_cast<daeModel*>(self.GetEquation()->GetModel());
-    boost::shared_ptr<daeDataProxy_t> dataProxy = pModel->GetDataProxy();
+    std::shared_ptr<daeDataProxy_t> dataProxy = pModel->GetDataProxy();
     for(std::vector<size_t>::iterator it = narr.begin(); it != narr.end(); it++)
     {
         if(dataProxy->GetVariableTypeGathered( *it ) == cnDifferential)

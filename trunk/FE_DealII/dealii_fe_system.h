@@ -15,7 +15,7 @@
 #include <chrono>
 #include <atomic>
 
-namespace dae
+namespace daetools
 {
 namespace fe_solver
 {
@@ -69,7 +69,7 @@ class dealiiFiniteElementDOF
 public:
     dealiiFiniteElementDOF(const std::string&                      strName,
                            const std::string&                      strDescription,
-                           boost::shared_ptr< FiniteElement<dim> > fe,
+                           std::shared_ptr< FiniteElement<dim> > fe,
                            unsigned int                            nMultiplicity,
                            daeVariableType                         variableType = variable_types::no_t)
     {
@@ -101,7 +101,7 @@ public:
     daeVariableType m_VariableType;
 
 // Internal data
-    boost::shared_ptr< FiniteElement<dim> > m_fe;
+    std::shared_ptr< FiniteElement<dim> > m_fe;
 };
 
 enum dealiiContributionType
@@ -231,9 +231,9 @@ public:
     virtual bool NeedsReAssembling();
     virtual void ReAssembleSystem();
 
-    virtual dae::daeMatrix<adouble>*                                                    Asystem() const; // Stiffness matrix
-    virtual dae::daeMatrix<adouble>*                                                    Msystem() const; // Mass matrix (dt)
-    virtual dae::daeArray<adouble>*                                                     Fload() const;   // Load vector
+    virtual daetools::daeMatrix<adouble>*                                                    Asystem() const; // Stiffness matrix
+    virtual daetools::daeMatrix<adouble>*                                                    Msystem() const; // Mass matrix (dt)
+    virtual daetools::daeArray<adouble>*                                                     Fload() const;   // Load vector
     virtual const std::map< unsigned int, std::vector< std::pair<adouble,adouble> > >*  SurfaceIntegrals() const;
     virtual const std::vector< std::pair<adouble,adouble> >*                            VolumeIntegrals() const;
 
@@ -422,9 +422,9 @@ public:
 
     BlockSparsityPattern            sparsity_pattern;
 
-    boost::shared_ptr< BlockSparseMatrix<adouble> > system_matrix;
-    boost::shared_ptr< BlockSparseMatrix<adouble> > system_matrix_dt;
-    boost::shared_ptr< BlockVector<adouble> >       system_rhs;
+    std::shared_ptr< BlockSparseMatrix<adouble> > system_matrix;
+    std::shared_ptr< BlockSparseMatrix<adouble> > system_matrix_dt;
+    std::shared_ptr< BlockVector<adouble> >       system_rhs;
 
     //BlockVector<adouble>        solution;
     BlockVector<double>         datareporter_solution;
@@ -1569,8 +1569,8 @@ void dealiiFiniteElementSystem<dim>::assemble_system()
         for(; cell_i != endc; ++cell_i)
             all_iterators.push_back(cell_i);
 
-        std::queue< boost::shared_ptr<PerTaskData> > copy_data_queue;
-        std::queue< boost::shared_ptr<PerTaskData> > copy_data_queue_swap;
+        std::queue< std::shared_ptr<PerTaskData> > copy_data_queue;
+        std::queue< std::shared_ptr<PerTaskData> > copy_data_queue_swap;
 
         int n_cells = all_iterators.size();
         #pragma omp parallel
@@ -1591,7 +1591,7 @@ void dealiiFiniteElementSystem<dim>::assemble_system()
                 //printf("Thread %d assembling cell %s\n", tid, cell->id().to_string().c_str());
 
                 // Create the scratch and the copy_data objects
-                boost::shared_ptr<PerTaskData> copy_data(new PerTaskData(copy_data_s));
+                std::shared_ptr<PerTaskData> copy_data(new PerTaskData(copy_data_s));
                 ScratchData scratch(scratch_s);
 
                 // Assemble cell
@@ -1621,7 +1621,7 @@ void dealiiFiniteElementSystem<dim>::assemble_system()
                         //printf("copy_data_queue_swap.size = %d\n", copy_data_queue_swap.size());
                         while(!copy_data_queue_swap.empty())
                         {
-                            boost::shared_ptr<PerTaskData> cd = copy_data_queue_swap.front();
+                            std::shared_ptr<PerTaskData> cd = copy_data_queue_swap.front();
                             copy_data_queue_swap.pop();
 
                             copy_local_to_global(*cd);
@@ -1634,7 +1634,7 @@ void dealiiFiniteElementSystem<dim>::assemble_system()
         // If something is left in the queue process it
         while(!copy_data_queue.empty())
         {
-            boost::shared_ptr<PerTaskData> cd = copy_data_queue.front();
+            std::shared_ptr<PerTaskData> cd = copy_data_queue.front();
             copy_data_queue.pop();
             copy_local_to_global(*cd);
             //printf("copy_data_queue.size = %d\n", copy_data_queue.size());
@@ -1852,21 +1852,21 @@ void dealiiFiniteElementSystem<dim>::ClearAssembledSystem()
 
 
 template <int dim>
-dae::daeMatrix<adouble>* dealiiFiniteElementSystem<dim>::Asystem() const
+daetools::daeMatrix<adouble>* dealiiFiniteElementSystem<dim>::Asystem() const
 {
     BlockSparseMatrix<adouble>* Aij = const_cast<BlockSparseMatrix<adouble>*>(system_matrix.get());
     return new daeFEBlockMatrix<adouble>(*Aij);
 }
 
 template <int dim>
-dae::daeMatrix<adouble>* dealiiFiniteElementSystem<dim>::Msystem() const
+daetools::daeMatrix<adouble>* dealiiFiniteElementSystem<dim>::Msystem() const
 {
     BlockSparseMatrix<adouble>* Mij = const_cast<BlockSparseMatrix<adouble>*>(system_matrix_dt.get());
     return new daeFEBlockMatrix<adouble>(*Mij);
 }
 
 template <int dim>
-dae::daeArray<adouble>* dealiiFiniteElementSystem<dim>::Fload() const
+daetools::daeArray<adouble>* dealiiFiniteElementSystem<dim>::Fload() const
 {
     BlockVector<adouble>* Fi = const_cast<BlockVector<adouble>*>(system_rhs.get());
     return new daeFEBlockArray<adouble>(*Fi);

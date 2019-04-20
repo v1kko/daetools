@@ -5,10 +5,11 @@
 #include <stdexcept>
 #include <string>
 #include "helpers.h"
-
+#include <float.h>
+#include <cmath>
 using namespace std;
 
-namespace dae
+namespace daetools
 {
 namespace xml
 {

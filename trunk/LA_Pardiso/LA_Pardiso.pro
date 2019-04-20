@@ -2,7 +2,7 @@
 #                 DAE Tools Project: www.daetools.com
 #                 Copyright (C) Dragan Nikolic, 2013
 #************************************************************************************
-# DAE Tools is free software; you can redistribute it and/or modify it under the 
+# DAE Tools is free software; you can redistribute it and/or modify it under the
 # terms of the GNU General Public License version 3 as published by the Free Software
 # Foundation. DAE Tools is distributed in the hope that it will be useful, but WITHOUT
 # ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
@@ -36,6 +36,7 @@ SOURCES += stdafx.cpp \
 
 HEADERS += stdafx.h \
     pardiso_sparse_la_solver.h \
+    base_solvers.h \
     ../mmio.h
 
 #######################################################

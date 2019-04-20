@@ -288,6 +288,10 @@ BIN_DIR="${TRUNK}/daetools-package/daetools/solibs/${PLATFORM}_${HOST_ARCH}/bin"
 if [ ! -e ${BIN_DIR} ]; then
     mkdir -p ${BIN_DIR}
 fi
+DAE_DEV_INCLUDE_DIR="${TRUNK}/daetools-dev/include"
+if [ ! -e ${DAE_DEV_INCLUDE_DIR} ]; then
+    mkdir -p ${DAE_DEV_INCLUDE_DIR}
+fi
 DAE_DEV_LIB_DIR="${TRUNK}/daetools-dev/${PLATFORM}_${HOST_ARCH}/lib"
 if [ ! -e ${DAE_DEV_LIB_DIR} ]; then
     mkdir -p ${DAE_DEV_LIB_DIR}
@@ -481,15 +485,15 @@ configure_boost()
       $WGET ${BOOST_HTTP}/${vBOOST}/boost_${vBOOST_}.zip
     fi
     unzip boost_${vBOOST_}.zip
-    mv boost_${vBOOST_} boost${PYTHON_VERSION}
-    cd boost${PYTHON_VERSION}
+    mv boost_${vBOOST_} boost
+    cd boost
   else
     if [ ! -e boost_${vBOOST_}.tar.gz ]; then
       $WGET ${BOOST_HTTP}/${vBOOST}/boost_${vBOOST_}.tar.gz
     fi
     tar -xzf boost_${vBOOST_}.tar.gz
-    mv boost_${vBOOST_} boost     # ${PYTHON_VERSION}
-    cd boost                      # ${PYTHON_VERSION}
+    mv boost_${vBOOST_} boost
+    cd boost
   fi
 
   cd "${TRUNK}"
@@ -599,14 +603,14 @@ compile_boost()
       echo "    : "                                 >> ${BOOST_USER_CONFIG}
       echo "    : <toolset>msvc"                    >> ${BOOST_USER_CONFIG}
       echo "    ;"                                  >> ${BOOST_USER_CONFIG}
-	  if [[ $HOST_ARCH == "win64" ]]; then
-	    ADDRESS_MODEL="address-model=64"
+	  if [ $HOST_ARCH = "win64" ]; then
+	    ADDRESS_MODEL="address-model=64 architecture=x86"
       else
-	    ADDRESS_MODEL=""
+	    ADDRESS_MODEL="address-model=32 architecture=x86"
 	  fi
-      ./bjam --build-dir=./build --debug-building --layout=system --buildid=${BOOST_BUILD_ID} ${ADDRESS_MODEL} \
+      ./bjam --build-dir=./build --debug-building --layout=system --buildid=${BOOST_BUILD_ID} \
              --with-date_time --with-system --with-filesystem --with-regex --with-serialization --with-thread --with-python \
-             variant=release link=shared threading=multi runtime-link=shared ${BOOST_MACOSX_FLAGS}
+             variant=release link=shared threading=multi runtime-link=shared ${ADDRESS_MODEL}
 
       LIBBOOST_PYTHON_SUF="${PYTHON_MAJOR}${PYTHON_MINOR}"
 
@@ -616,12 +620,12 @@ compile_boost()
       cp -fa stage/lib/boost_thread-${BOOST_BUILD_ID}${BOOST_PYTHON_BUILD_ID}*.dll                        ${SOLIBS_DIR}
       cp -fa stage/lib/boost_filesystem-${BOOST_BUILD_ID}${BOOST_PYTHON_BUILD_ID}*.dll                    ${SOLIBS_DIR}
       cp -fa stage/lib/boost_chrono-${BOOST_BUILD_ID}${BOOST_PYTHON_BUILD_ID}*.dll                        ${SOLIBS_DIR}
-      # Copy to daetools-dev
-      cp -fa stage/lib/boost_python${LIBBOOST_PYTHON_SUF}-${BOOST_BUILD_ID}${BOOST_PYTHON_BUILD_ID}*.dll  ${DAE_DEV_LIB_DIR}
-      cp -fa stage/lib/boost_system-${BOOST_BUILD_ID}${BOOST_PYTHON_BUILD_ID}*.dll                        ${DAE_DEV_LIB_DIR}
-      cp -fa stage/lib/boost_thread-${BOOST_BUILD_ID}${BOOST_PYTHON_BUILD_ID}*.dll                        ${DAE_DEV_LIB_DIR}
-      cp -fa stage/lib/boost_filesystem-${BOOST_BUILD_ID}${BOOST_PYTHON_BUILD_ID}*.dll                    ${DAE_DEV_LIB_DIR}
-      cp -fa stage/lib/boost_chrono-${BOOST_BUILD_ID}${BOOST_PYTHON_BUILD_ID}*.dll                        ${DAE_DEV_LIB_DIR}
+      # Copy to daetools-dev (.dll and .lib files)
+      cp -fa stage/lib/boost_python${LIBBOOST_PYTHON_SUF}-${BOOST_BUILD_ID}${BOOST_PYTHON_BUILD_ID}*.*  ${DAE_DEV_LIB_DIR}
+      cp -fa stage/lib/boost_system-${BOOST_BUILD_ID}${BOOST_PYTHON_BUILD_ID}*.*                        ${DAE_DEV_LIB_DIR}
+      cp -fa stage/lib/boost_thread-${BOOST_BUILD_ID}${BOOST_PYTHON_BUILD_ID}*.*                        ${DAE_DEV_LIB_DIR}
+      cp -fa stage/lib/boost_filesystem-${BOOST_BUILD_ID}${BOOST_PYTHON_BUILD_ID}*.*                    ${DAE_DEV_LIB_DIR}
+      cp -fa stage/lib/boost_chrono-${BOOST_BUILD_ID}${BOOST_PYTHON_BUILD_ID}*.*                        ${DAE_DEV_LIB_DIR}
 	  
     else
       sh bootstrap.sh --with-python=${PYTHON}
@@ -735,15 +739,15 @@ compile_boost_static()
 
   BOOST_USER_CONFIG=~/user-config.jam
   if [ ${PLATFORM} = "Windows" ]; then
-    if [[ $HOST_ARCH == "win64" ]]; then
-	    ADDRESS_MODEL="address-model=64"
+    if [ $HOST_ARCH = "win64" ]; then
+	    ADDRESS_MODEL="address-model=64 architecture=x86"
     else
-	    ADDRESS_MODEL=""
+	    ADDRESS_MODEL="address-model=32 architecture=x86"
 	fi
 	
-    ./bjam --build-dir=./build --debug-building --layout=system ${ADDRESS_MODEL} \
+    ./bjam --build-dir=./build --debug-building --layout=system \
            --with-system --with-filesystem --with-thread --with-regex --with-mpi --with-serialization \
-           variant=release link=static threading=multi runtime-link=shared cxxflags="\MD"
+           variant=release link=static threading=multi runtime-link=shared cxxflags="\MD" ${ADDRESS_MODEL}
 
   else
     ./bjam --build-dir=./build --debug-building --layout=system \
@@ -2012,16 +2016,19 @@ compile_opencs()
   ${MAKE_Ncpu} install
 
   if [ ${PLATFORM} = "Darwin" ]; then
+    cp -fa include/.            ${DAE_DEV_INCLUDE_DIR}
     cp -fa lib/libOpenCS_*      ${SOLIBS_DIR}
     cp -fa bin/csSimulator*     ${BIN_DIR}
     cp -fa lib/libOpenCS_*      ${DAE_DEV_LIB_DIR}
     cp -fa bin/csSimulator*     ${DAE_DEV_BIN_DIR}
   elif [ ${PLATFORM} = "Linux" ]; then
+    cp -fa include/.            ${DAE_DEV_INCLUDE_DIR}
     cp -fa lib/libOpenCS_*      ${SOLIBS_DIR}
     cp -fa bin/csSimulator*     ${BIN_DIR}
     cp -fa lib/libOpenCS_*      ${DAE_DEV_LIB_DIR}
     cp -fa bin/csSimulator*     ${DAE_DEV_BIN_DIR}
   elif [ ${PLATFORM} = "Windows" ]; then
+    cp -fa include/.            ${DAE_DEV_INCLUDE_DIR}
     cp -fa lib/OpenCS_*.dll     ${SOLIBS_DIR}
     cp -fa bin/csSimulator*     ${BIN_DIR}
     cp -fa lib/OpenCS_*.dll     ${DAE_DEV_LIB_DIR}

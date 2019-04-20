@@ -2,7 +2,7 @@
 #                 DAE Tools Project: www.daetools.com
 #                 Copyright (C) Dragan Nikolic, 2010
 #************************************************************************************
-# DAE Tools is free software; you can redistribute it and/or modify it under the 
+# DAE Tools is free software; you can redistribute it and/or modify it under the
 # terms of the GNU General Public License version 3 as published by the Free Software
 # Foundation. DAE Tools is distributed in the hope that it will be useful, but WITHOUT
 # ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
@@ -49,7 +49,8 @@ SOURCES +=  stdafx.cpp \
             ../mmio.c
 
 HEADERS +=  stdafx.h \
-            superlu_solvers.h \
+            superlu_solver.h \
+            superlu_mt_solver.h \
             superlu_la_solver.h \
             superlu_mt_gpu.h \
             config_data.h \
@@ -58,7 +59,7 @@ HEADERS +=  stdafx.h \
 ######################################################################################
 #                                   SuperLU
 ######################################################################################
-CONFIG(SuperLU, SuperLU|SuperLU_MT|SuperLU_CUDA):message(SuperLU) { 
+CONFIG(SuperLU, SuperLU|SuperLU_MT|SuperLU_CUDA):message(SuperLU) {
 
 QMAKE_CXXFLAGS += -DdaeSuperLU
 TARGET = cdaeSuperLU_LASolver
@@ -72,7 +73,7 @@ LIBS += $${DAE_CONFIG_LIB} \
 ######################################################################################
 #                                SuperLU_MT
 ######################################################################################
-CONFIG(SuperLU_MT, SuperLU|SuperLU_MT|SuperLU_CUDA):message(SuperLU_MT) { 
+CONFIG(SuperLU_MT, SuperLU|SuperLU_MT|SuperLU_CUDA):message(SuperLU_MT) {
 
 QMAKE_CXXFLAGS += -DdaeSuperLU_MT
 TARGET = cdaeSuperLU_MT_LASolver
@@ -87,7 +88,7 @@ LIBS += $${DAE_CONFIG_LIB} \
 #                                SuperLU_CUDA
 # compile it with: make --file=gpuMakefile
 ######################################################################################
-CONFIG(SuperLU_CUDA, SuperLU|SuperLU_MT|SuperLU_CUDA):message(SuperLU_CUDA) { 
+CONFIG(SuperLU_CUDA, SuperLU|SuperLU_MT|SuperLU_CUDA):message(SuperLU_CUDA) {
 
 QMAKE_CXXFLAGS += -DdaeSuperLU_CUDA
 TARGET = cdaeSuperLU_CUDA_LASolver

@@ -4,11 +4,11 @@
 #include "nodes_array.h"
 #include "xmlfunctions.h"
 #include <typeinfo>
-using namespace dae;
-using namespace dae::xml;
+using namespace daetools;
+using namespace daetools::xml;
 using namespace boost;
 
-namespace dae
+namespace daetools
 {
 namespace core
 {

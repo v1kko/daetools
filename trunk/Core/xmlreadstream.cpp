@@ -4,7 +4,7 @@
 
 #include "helpers.h"
 
-namespace dae 
+namespace daetools 
 {
 namespace xml
 {

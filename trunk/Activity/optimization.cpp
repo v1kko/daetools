@@ -3,7 +3,7 @@
 #include <stdio.h>
 #include <time.h>
 
-namespace dae
+namespace daetools
 {
 namespace activity
 {
@@ -60,7 +60,7 @@ void daeOptimization::Initialize(daeSimulation_t*   pSimulation,
 
 	m_Initialization = 0;
 	m_Optimization   = 0;
-	double start = dae::GetTimeInSeconds();
+	double start = daetools::GetTimeInSeconds();
 
 	m_pSimulation		 = pSimulation;
 	m_pNLPSolver	     = pNLPSolver;
@@ -75,7 +75,7 @@ void daeOptimization::Initialize(daeSimulation_t*   pSimulation,
 
 	m_bIsInitialized = true;
 	
-	double end = dae::GetTimeInSeconds();
+	double end = daetools::GetTimeInSeconds();
 	m_Initialization = end - start;
 }
 
@@ -88,7 +88,7 @@ void daeOptimization::Run(void)
 		throw e;
 	}
 	
-	m_Optimization = dae::GetTimeInSeconds();
+	m_Optimization = daetools::GetTimeInSeconds();
 	
 	if(!m_pSimulation)
 		daeDeclareAndThrowException(exInvalidPointer);
@@ -103,7 +103,7 @@ void daeOptimization::Run(void)
 	
 	m_pNLPSolver->Solve();
 	
-	m_Optimization = dae::GetTimeInSeconds() - m_Optimization;
+	m_Optimization = daetools::GetTimeInSeconds() - m_Optimization;
 
 	m_pLog->Message(string(" "), 0);
 	m_pLog->Message(string("The optimization finished."), 0);

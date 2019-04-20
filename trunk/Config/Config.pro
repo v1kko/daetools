@@ -2,7 +2,7 @@ include(../dae.pri)
 QT -= core
 QT -= gui
 
-TARGET = cdaeConfig-py$${PYTHON_MAJOR}$${PYTHON_MINOR}
+TARGET = cdaeConfig #-py$${PYTHON_MAJOR}$${PYTHON_MINOR}
 TEMPLATE = lib
 CONFIG += shared plugin
 
@@ -10,7 +10,7 @@ win32::QMAKE_CXXFLAGS += -DCONFIG_EXPORTS
 
 INCLUDEPATH += $${BOOSTDIR}
 
-LIBS +=	$${BOOST_LIBS}
+LIBS += $${STD_FILESYSTEM}
 
 SOURCES += config.cpp \
     stdafx.cpp \

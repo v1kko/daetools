@@ -33,7 +33,6 @@ SOURCES +=  action.cpp \
             equation.cpp \
             event_port.cpp \
             external_function.cpp \
-            event_handling.cpp \
             finite_element_model.cpp \
             global_functions.cpp \
             if.cpp \
@@ -91,13 +90,13 @@ HEADERS +=  xmlfunctions.h \
             adouble.h \
             activity.h \
             base_logging.h \
+            logs.h \
             inlines_varparam_array.h \
             nodes_array.h \
             tcpiplog.h \
             optimization.h \
             export.h \
             units_io.h \
-            event_handling.h \
             simplify_node.h \
             thermo_package.h \
             call_stats.h \

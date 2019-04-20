@@ -50,7 +50,7 @@ DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 #include <float.h>
 #include <stack>
 
-namespace dae
+namespace daetools
 {
 namespace core
 {
@@ -71,9 +71,9 @@ class daeDomain;
 class daeModel;
 class daeExecutionContext;
 
-typedef boost::shared_ptr<adNode>      adNodePtr;
-typedef boost::shared_ptr<adNodeArray> adNodeArrayPtr;
-typedef boost::shared_ptr<condNode>    condNodePtr;
+typedef std::shared_ptr<adNode>      adNodePtr;
+typedef std::shared_ptr<adNodeArray> adNodeArrayPtr;
+typedef std::shared_ptr<condNode>    condNodePtr;
 
 class DAE_CORE_API daeCondition : public io::daeSerializable,
                                   public daeExportable_t

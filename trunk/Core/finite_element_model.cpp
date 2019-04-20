@@ -1,8 +1,9 @@
 #include "coreimpl.h"
 #include "nodes.h"
+using namespace daetools::core;
 #include "../variable_types.h"
 
-namespace dae
+namespace daetools
 {
 namespace core
 {
@@ -324,7 +325,7 @@ void daeFiniteElementEquation::CreateEquationExecutionInfos(daeModel* pModel, st
     EC.m_pEquationExecutionInfo		= NULL;
     EC.m_eEquationCalculationMode	= eGatherInfo;
 
-    boost::shared_ptr<daeDataProxy_t> pDataProxy = pModel->GetDataProxy();
+    std::shared_ptr<daeDataProxy_t> pDataProxy = pModel->GetDataProxy();
     daeModel* pTopLevelModel = dynamic_cast<daeModel*>(pDataProxy->GetTopLevelModel());
     pTopLevelModel->PropagateGlobalExecutionContext(&EC);
 

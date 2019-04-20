@@ -2,7 +2,7 @@
 #define DAE_FMI_H
 
 #include "include/fmi2Functions.h"
-#include "../dae.h"
+#include "../daetools-core.h"
 #include "../simulation_loader/simulation_loader.h"
 #include "../simulation_loader/simulation_loader_c.h"
 

@@ -22,7 +22,7 @@
 #include <boost/python/reference_existing_object.hpp>
 #include <boost/python/suite/indexing/vector_indexing_suite.hpp>
 #include <boost/python/suite/indexing/map_indexing_suite.hpp>
-#include "../dae_develop.h"
+#include "../daetools-pymod.h"
 #include "../Core/base_logging.h"
 #define WIN32_LEAN_AND_MEAN		// Exclude rarely-used stuff from Windows headers
 #include "../Core/tcpiplog.h"
@@ -1430,15 +1430,15 @@ public:
             this->daeModel::InitializeModel(jsonInit);
     }
 
-    boost::shared_ptr<daeAllowThreads_t> CreateAllowThreads()
+    std::shared_ptr<daeAllowThreads_t> CreateAllowThreads()
     {
-        boost::shared_ptr<daeAllowThreads_t> allowThreads(new pyAllowThreads(false));
+        std::shared_ptr<daeAllowThreads_t> allowThreads(new pyAllowThreads(false));
         return allowThreads;
     }
 
-    boost::shared_ptr<daeGILState_t> CreateGILState()
+    std::shared_ptr<daeGILState_t> CreateGILState()
     {
-        boost::shared_ptr<daeGILState_t> GIL(new pyGILState(false));
+        std::shared_ptr<daeGILState_t> GIL(new pyGILState(false));
         return GIL;
     }
 };
@@ -1495,9 +1495,9 @@ boost::python::dict daeModel_dictEventPortConnections(daeModel& self);
 
 boost::python::list daeModel_GetComputeStack(daeModel& self);
 
-using dae::tpp::daeThermoPhysicalPropertyPackage_t;
-using dae::tpp::daeeThermoPackagePhase;
-using dae::tpp::daeeThermoPackageBasis;
+using daetools::tpp::daeThermoPhysicalPropertyPackage_t;
+using daetools::tpp::daeeThermoPackagePhase;
+using daetools::tpp::daeeThermoPackageBasis;
 
 void CapeOpen_LoadPackage(daeThermoPhysicalPropertyPackage& self,
                           const std::string& strPackageManager,
@@ -1505,14 +1505,14 @@ void CapeOpen_LoadPackage(daeThermoPhysicalPropertyPackage& self,
                           boost::python::list lCompoundIDs,
                           boost::python::list lCompoundCASNumbers,
                           boost::python::dict dAvailablePhases,
-                          daeeThermoPackageBasis defaultBasis = dae::tpp::eMole,
+                          daeeThermoPackageBasis defaultBasis = daetools::tpp::eMole,
                           boost::python::dict dOptions = boost::python::dict());
 
 void CoolProp_LoadPackage(daeThermoPhysicalPropertyPackage& self,
                           boost::python::list lCompoundIDs,
                           boost::python::list lCompoundCASNumbers,
                           boost::python::dict dAvailablePhases,
-                          daeeThermoPackageBasis defaultBasis = dae::tpp::eMole,
+                          daeeThermoPackageBasis defaultBasis = daetools::tpp::eMole,
                           boost::python::dict dOptions = boost::python::dict());
 
 adouble GetCompoundConstant(daeThermoPhysicalPropertyPackage& self,
@@ -1535,7 +1535,7 @@ adouble CalcSinglePhaseScalarProperty(daeThermoPhysicalPropertyPackage& self,
                                       boost::python::object T,
                                       boost::python::object x,
                                       const std::string& phase,
-                                      daeeThermoPackageBasis basis = dae::tpp::eMole);
+                                      daeeThermoPackageBasis basis = daetools::tpp::eMole);
 
 adouble_array CalcSinglePhaseVectorProperty(daeThermoPhysicalPropertyPackage& self,
                                             const std::string& property,
@@ -1543,7 +1543,7 @@ adouble_array CalcSinglePhaseVectorProperty(daeThermoPhysicalPropertyPackage& se
                                             boost::python::object T,
                                             boost::python::object x,
                                             const std::string& phase,
-                                            daeeThermoPackageBasis basis = dae::tpp::eMole);
+                                            daeeThermoPackageBasis basis = daetools::tpp::eMole);
 
 adouble CalcTwoPhaseScalarProperty(daeThermoPhysicalPropertyPackage& self,
                                    const std::string& property,
@@ -1555,7 +1555,7 @@ adouble CalcTwoPhaseScalarProperty(daeThermoPhysicalPropertyPackage& self,
                                    boost::python::object T2,
                                    boost::python::object x2,
                                    const std::string& phase2,
-                                   daeeThermoPackageBasis basis = dae::tpp::eMole);
+                                   daeeThermoPackageBasis basis = daetools::tpp::eMole);
 
 adouble_array CalcTwoPhaseVectorProperty(daeThermoPhysicalPropertyPackage& self,
                                          const std::string& property,
@@ -1589,7 +1589,7 @@ double _CalcSinglePhaseScalarProperty(daeThermoPhysicalPropertyPackage& self,
                                       double T,
                                       boost::python::list x,
                                       const std::string& phase,
-                                      daeeThermoPackageBasis basis = dae::tpp::eMole);
+                                      daeeThermoPackageBasis basis = daetools::tpp::eMole);
 
 boost::python::list _CalcSinglePhaseVectorProperty(daeThermoPhysicalPropertyPackage& self,
                                                    const std::string& property,
@@ -1597,7 +1597,7 @@ boost::python::list _CalcSinglePhaseVectorProperty(daeThermoPhysicalPropertyPack
                                                    double T,
                                                    boost::python::list x,
                                                    const std::string& phase,
-                                                   daeeThermoPackageBasis basis = dae::tpp::eMole);
+                                                   daeeThermoPackageBasis basis = daetools::tpp::eMole);
 
 double _CalcTwoPhaseScalarProperty(daeThermoPhysicalPropertyPackage& self,
                                    const std::string& property,
@@ -1609,7 +1609,7 @@ double _CalcTwoPhaseScalarProperty(daeThermoPhysicalPropertyPackage& self,
                                    double T2,
                                    boost::python::list x2,
                                    const std::string& phase2,
-                                   daeeThermoPackageBasis basis = dae::tpp::eMole);
+                                   daeeThermoPackageBasis basis = daetools::tpp::eMole);
 
 boost::python::list _CalcTwoPhaseVectorProperty(daeThermoPhysicalPropertyPackage& self,
                                                 const std::string& property,
@@ -1621,7 +1621,7 @@ boost::python::list _CalcTwoPhaseVectorProperty(daeThermoPhysicalPropertyPackage
                                                 double T2,
                                                 boost::python::list x2,
                                                 const std::string& phase2,
-                                                daeeThermoPackageBasis basis = dae::tpp::eMole);
+                                                daeeThermoPackageBasis basis = daetools::tpp::eMole);
 
 
 class daeArrayWrapper : public daeArray<real_t>,
@@ -1819,17 +1819,17 @@ public:
         return this->get_override("RowIterator")(row);
     }
 
-    dae::daeMatrix<real_t>* SystemMatrix() const
+    daetools::daeMatrix<real_t>* SystemMatrix() const
     {
         return this->get_override("SystemMatrix")();
     }
 
-    dae::daeMatrix<real_t>* SystemMatrix_dt() const
+    daetools::daeMatrix<real_t>* SystemMatrix_dt() const
     {
         return this->get_override("SystemMatrix_dt")();
     }
 
-    dae::daeArray<real_t>* SystemRHS() const
+    daetools::daeArray<real_t>* SystemRHS() const
     {
         return this->get_override("SystemRHS")();
     }

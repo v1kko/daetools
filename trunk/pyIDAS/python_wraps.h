@@ -11,7 +11,7 @@
 #include <boost/smart_ptr.hpp>
 #include <boost/python/suite/indexing/vector_indexing_suite.hpp>
 #include <boost/python/suite/indexing/map_indexing_suite.hpp>
-#include "../dae_develop.h"
+#include "../daetools-pymod.h"
 #include "../IDAS_DAESolver/ida_solver.h"
 
 namespace daepython

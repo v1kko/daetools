@@ -43,6 +43,7 @@ LIBS += $${DEALII_LIBS} \
         $${BOOST_LIBS} \
         $${BLAS_LAPACK_LIBS} \
         $${RT}
+unix::LIBS += -lstdc++fs
 
 SOURCES += stdafx.cpp \
            dllmain.cpp \

@@ -9,7 +9,7 @@ using namespace std;
 extern "C" void openblas_set_num_threads(int);
 #endif
 
-namespace dae
+namespace daetools
 {
 namespace nlpsolver
 {

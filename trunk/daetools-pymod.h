@@ -1,5 +1,5 @@
-#ifndef DAE_DEVELOP_INCLUDE_H
-#define DAE_DEVELOP_INCLUDE_H
+#ifndef DAETOOLS_PYMOD_INCLUDE_H
+#define DAETOOLS_PYMOD_INCLUDE_H
 
 #if !defined(__MINGW32__) && (defined(_WIN32) || defined(WIN32) || defined(WIN64) || defined(_WIN64))
 
@@ -16,22 +16,22 @@
 #include "config.h"
 #include "Core/definitions.h"
 #include "Core/xmlfile.h"
-using namespace dae::xml;
+using namespace daetools::xml;
 #include "Core/coreimpl.h"
-using namespace dae::core;
+using namespace daetools::core;
 #include "Activity/base_activities.h"
 #include "Activity/simulation.h"
-using namespace dae::activity;
+using namespace daetools::activity;
 #include "DataReporting/datareporters.h"
 #include "DataReporting/base_data_reporters_receivers.h"
-using namespace dae::datareporting;
+using namespace daetools::datareporting;
 #include "Core/helpers.h"
-using namespace dae;
+using namespace daetools;
 #include "IDAS_DAESolver/base_solvers.h"
 #include "IDAS_DAESolver/ida_solver.h"
-using namespace dae::solver;
+using namespace daetools::solver;
 #include "Core/base_logging.h"
-using namespace dae::logging;
+using namespace daetools::logging;
 //#include "Core/macros.h"
 #include "Core/class_factory.h"
 

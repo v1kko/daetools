@@ -3,7 +3,7 @@
 #include <boost/python.hpp>
 #include "python_wraps.h"
 using namespace boost::python;
-using namespace dae::solver;
+using namespace daetools::solver;
 
 BOOST_PYTHON_MODULE(pyPardiso)
 {

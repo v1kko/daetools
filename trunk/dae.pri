@@ -50,9 +50,9 @@ win64-g++-*::SHARED_LIB_PREFIX      =
 linux-g++::SHARED_LIB_PREFIX        = lib
 macx-g++::SHARED_LIB_PREFIX         = lib
 
-win32-msvc2015::SHARED_LIB_POSTFIX  = 
-win32-g++-*::SHARED_LIB_POSTFIX     = 
-win64-g++-*::SHARED_LIB_POSTFIX     = 
+win32-msvc2015::SHARED_LIB_POSTFIX  =
+win32-g++-*::SHARED_LIB_POSTFIX     =
+win64-g++-*::SHARED_LIB_POSTFIX     =
 linux-g++::SHARED_LIB_POSTFIX       =
 macx-g++::SHARED_LIB_POSTFIX        =
 
@@ -226,9 +226,11 @@ win32-msvc2015::QMAKE_CXXFLAGS += /openmp
 
 unix::QMAKE_LFLAGS += -fopenmp
 
-win32-msvc2015::QMAKE_CXXFLAGS += -D_CRT_SECURE_NO_WARNINGS -DNOMINMAX
-win32-msvc2015::QMAKE_CXXFLAGS += -DBOOST_ALL_NO_LIB=1
+win32-msvc2015::QMAKE_CXXFLAGS += /D_CRT_SECURE_NO_WARNINGS /DNOMINMAX
+win32-msvc2015::QMAKE_CXXFLAGS += /DBOOST_ALL_NO_LIB=1
 win32-msvc2015::QMAKE_CXXFLAGS += /bigobj
+# Resolve the problem with non-existing std::_snprintf in msvc++:
+win32-msvc2015::QMAKE_CXXFLAGS += /DHAVE_SNPRINTF
 
 win32-g++-*::QMAKE_LFLAGS += -mwindows
 win64-g++-*::QMAKE_LFLAGS += -mwindows
@@ -810,9 +812,15 @@ unix::OPEN_CS_LIBS           = -L$${OPEN_CS_LIB_DIR} -lOpenCS_Evaluators
 win32-msvc2015::OPEN_CS_LIBS = -L$${OPEN_CS_LIB_DIR} OpenCS_Evaluators.lib
 
 #####################################################################################
+#                            std experimental libraries
+#####################################################################################
+unix::STD_FILESYSTEM           = -lstdc++fs
+win32-msvc2015::STD_FILESYSTEM =
+
+#####################################################################################
 #                                  DAE Tools
 #####################################################################################
-win32-msvc2015::DAE_CONFIG_LIB                  = cdaeConfig-py$${PYTHON_MAJOR}$${PYTHON_MINOR}$${SHARED_LIB_POSTFIX}.lib
+win32-msvc2015::DAE_CONFIG_LIB                  = cdaeConfig.lib
 win32-msvc2015::DAE_CORE_LIB                    = cdaeCore$${SHARED_LIB_POSTFIX}.lib $${OPENMP_LIB}
 win32-msvc2015::DAE_DATAREPORTING_LIB           = cdaeDataReporting$${SHARED_LIB_POSTFIX}.lib
 win32-msvc2015::DAE_ACTIVITY_LIB                = cdaeActivity$${SHARED_LIB_POSTFIX}.lib
@@ -835,7 +843,7 @@ win32-msvc2015::DAE_CAPE_THERMO_PACKAGE_LIB     = cdaeCapeOpenThermoPackage.lib
 win32-msvc2015::DAE_COOLPROP_THERMO_PACKAGE_LIB = cdaeCoolPropThermoPackage$${SHARED_LIB_POSTFIX}.lib
 win32-msvc2015::DAE_EVALUATOR_OPENCL_LIB        = cdaeEvaluator_OpenCL$${SHARED_LIB_POSTFIX}.lib
 
-win32-g++-*::DAE_CONFIG_LIB                  = -lcdaeConfig-py$${PYTHON_MAJOR}$${PYTHON_MINOR}
+win32-g++-*::DAE_CONFIG_LIB                  = -lcdaeConfig
 win32-g++-*::DAE_CORE_LIB                    = -lcdaeCore $${OPENMP_LIB}
 win32-g++-*::DAE_DATAREPORTING_LIB           = -lcdaeDataReporting
 win32-g++-*::DAE_ACTIVITY_LIB                = -lcdaeActivity
@@ -858,7 +866,7 @@ win32-g++-*::DAE_CAPE_THERMO_PACKAGE_LIB     =
 win32-g++-*::DAE_COOLPROP_THERMO_PACKAGE_LIB = -lcdaeCoolPropThermoPackage
 win32-g++-*::DAE_EVALUATOR_OPENCL_LIB        = -lcdaeEvaluator_OpenCL
 
-win64-g++-*::DAE_CONFIG_LIB                  = -lcdaeConfig-py$${PYTHON_MAJOR}$${PYTHON_MINOR}
+win64-g++-*::DAE_CONFIG_LIB                  = -lcdaeConfig
 win64-g++-*::DAE_CORE_LIB                    = -lcdaeCore $${OPENMP_LIB}
 win64-g++-*::DAE_DATAREPORTING_LIB           = -lcdaeDataReporting
 win64-g++-*::DAE_ACTIVITY_LIB                = -lcdaeActivity
@@ -881,7 +889,7 @@ win64-g++-*::DAE_CAPE_THERMO_PACKAGE_LIB     =
 win64-g++-*::DAE_COOLPROP_THERMO_PACKAGE_LIB = -lcdaeCoolPropThermoPackage
 win64-g++-*::DAE_EVALUATOR_OPENCL_LIB        = -lcdaeEvaluator_OpenCL
 
-unix::DAE_CONFIG_LIB                    = -lcdaeConfig-py$${PYTHON_MAJOR}$${PYTHON_MINOR}
+unix::DAE_CONFIG_LIB                    = -lcdaeConfig
 unix::DAE_CORE_LIB                      = -lcdaeCore $${OPENMP_LIB}
 unix::DAE_DATAREPORTING_LIB             = -lcdaeDataReporting
 unix::DAE_ACTIVITY_LIB                  = -lcdaeActivity
@@ -909,38 +917,47 @@ QMAKE_LIBDIR += $${DAE_DEST_DIR} $${BOOSTLIBPATH}
 #######################################################
 #            Settings for installing files
 #######################################################
-DAE_INSTALL_DIR             = ../daetools-dev/$${DAE_SYSTEM}_$${DAE_MACHINE}
-DAE_INSTALL_HEADERS_DIR     = $${DAE_INSTALL_DIR}/include
+DAETOOLS_DEV_DIR            = ../daetools-dev
+DAE_INSTALL_DIR             = $${DAETOOLS_DEV_DIR}/$${DAE_SYSTEM}_$${DAE_MACHINE}
+DAE_INSTALL_HEADERS_DIR     = $${DAETOOLS_DEV_DIR}/include
+DAE_INSTALL_BIN_DIR         = $${DAE_INSTALL_DIR}/bin
 DAE_INSTALL_LIBS_DIR        = $${DAE_INSTALL_DIR}/lib
 DAE_INSTALL_PY_MODULES_DIR  = $${DAE_INSTALL_DIR}/py$${PYTHON_MAJOR}$${PYTHON_MINOR}
 
 # All libraries are in the daetools/solibs/Platform_arch/lib directory:
 #  - lib:  shared libraries
 #  - pyXy: python extension modules
-SOLIBS_DIR   = ../daetools-package/daetools/solibs/$${DAE_SYSTEM}_$${DAE_MACHINE}/lib
-SOLVERS_DIR  = ../daetools-package/daetools/solibs/$${DAE_SYSTEM}_$${DAE_MACHINE}/py$${PYTHON_MAJOR}$${PYTHON_MINOR}
-PYDAE_DIR    = ../daetools-package/daetools/solibs/$${DAE_SYSTEM}_$${DAE_MACHINE}/py$${PYTHON_MAJOR}$${PYTHON_MINOR}
-FMI_DIR      = ../daetools-package/daetools/solibs/$${DAE_SYSTEM}_$${DAE_MACHINE}/lib
+SOLIBS_BIN_DIR = ../daetools-package/daetools/solibs/$${DAE_SYSTEM}_$${DAE_MACHINE}/bin
+SOLIBS_DIR     = ../daetools-package/daetools/solibs/$${DAE_SYSTEM}_$${DAE_MACHINE}/lib
+SOLVERS_DIR    = ../daetools-package/daetools/solibs/$${DAE_SYSTEM}_$${DAE_MACHINE}/py$${PYTHON_MAJOR}$${PYTHON_MINOR}
+PYDAE_DIR      = ../daetools-package/daetools/solibs/$${DAE_SYSTEM}_$${DAE_MACHINE}/py$${PYTHON_MAJOR}$${PYTHON_MINOR}
+FMI_DIR        = ../daetools-package/daetools/solibs/$${DAE_SYSTEM}_$${DAE_MACHINE}/lib
 
 # daetools-package dirs
 dae_create_dirs1.commands = $(MKDIR) -p $${SOLIBS_DIR}
-dae_create_dirs2.commands = $(MKDIR) -p $${SOLVERS_DIR}
+dae_create_dirs2.commands = $(MKDIR) -p $${SOLIBS_BIN_DIR}
+dae_create_dirs3.commands = $(MKDIR) -p $${SOLVERS_DIR}
 
-# daetools-ev dirs
-dae_create_dirs3.commands = $(MKDIR) -p $${DAE_INSTALL_HEADERS_DIR}
-dae_create_dirs4.commands = $(MKDIR) -p $${DAE_INSTALL_LIBS_DIR}
-dae_create_dirs5.commands = $(MKDIR) -p $${DAE_INSTALL_PY_MODULES_DIR}
+# daetools-dev dirs
+dae_create_dirs4.commands = $(MKDIR) -p $${DAE_INSTALL_BIN_DIR}
+dae_create_dirs5.commands = $(MKDIR) -p $${DAE_INSTALL_HEADERS_DIR}
+dae_create_dirs6.commands = $(MKDIR) -p $${DAE_INSTALL_LIBS_DIR}
+dae_create_dirs7.commands = $(MKDIR) -p $${DAE_INSTALL_PY_MODULES_DIR}
 
 QMAKE_EXTRA_TARGETS += dae_create_dirs1 \
                        dae_create_dirs2 \
                        dae_create_dirs3 \
                        dae_create_dirs4 \
-                       dae_create_dirs5
+                       dae_create_dirs5 \
+                       dae_create_dirs6 \
+                       dae_create_dirs7
 PRE_TARGETDEPS += dae_create_dirs1 \
                   dae_create_dirs2 \
                   dae_create_dirs3 \
                   dae_create_dirs4 \
-                  dae_create_dirs5
+                  dae_create_dirs5 \
+                  dae_create_dirs6 \
+                  dae_create_dirs7
 
 #STATIC_LIBS_DIR = ../daetools-package/daetools/usr/local/lib
 #HEADERS_DIR     = ../daetools-package/daetools/usr/local/include

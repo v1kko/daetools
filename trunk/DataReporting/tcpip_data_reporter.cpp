@@ -9,7 +9,7 @@
 #include <boost/process/spawn.hpp>
 using namespace std;
 
-namespace dae
+namespace daetools
 {
 namespace datareporting
 {
@@ -41,14 +41,14 @@ bool daeTCPIPDataReporter::Connect(const string& strConnectString, const string&
     }
     else
     {
-        vector<string> arrAddress = dae::ParseString(strConnectString, ':');
+        vector<string> arrAddress = daetools::ParseString(strConnectString, ':');
         if(arrAddress.size() != 2)
         {
             cout << "Cannot parse the connection string: " << strConnectString << endl;
             return false;
         }
         strIPAddress = arrAddress[0];
-        nPort        = dae::fromString<size_t>(arrAddress[1]);
+        nPort        = daetools::fromString<size_t>(arrAddress[1]);
     }
 
     // Create the TCP/IP socket.
@@ -143,7 +143,7 @@ bool daeTCPIPDataReporter::SendMessage(const string& strMessage)
     boost::system::error_code ec;
 
 // Gather the message data
-    boost::int32_t msgSize = strMessage.size();
+    std::int32_t msgSize = strMessage.size();
 
 // First send the size
     boost::asio::write(*m_ptcpipSocket, boost::asio::buffer(&msgSize, sizeof(msgSize)), boost::asio::transfer_all(), ec);
@@ -161,7 +161,7 @@ bool daeTCPIPDataReporter::SendMessage(const string& strMessage)
         return false;
     }
 
-    return ((boost::int32_t)nSent == msgSize);
+    return ((std::int32_t)nSent == msgSize);
 }
 
 

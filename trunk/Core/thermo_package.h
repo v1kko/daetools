@@ -17,7 +17,7 @@ DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 #include <vector>
 #include <map>
 
-namespace dae
+namespace daetools
 {
 namespace tpp
 {

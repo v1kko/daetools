@@ -33,7 +33,7 @@ DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 #define DAE_CORE_API
 #endif // WIN32
 
-namespace dae
+namespace daetools
 {
 
 #define daeDeclareDynamicClass(Class) typedef Class this_type; \
@@ -289,7 +289,7 @@ class daeEnumTypesCollection
 public:
     daeEnumTypesCollection(void)
     {
-        using namespace dae::core;
+        using namespace daetools::core;
         daeesmapAdd3(esmap_daeDomainType,               eArray, eStructuredGrid, eUnstructuredGrid);
         daeesmapAdd3(esmap_daeeParameterType,           eReal, eInteger, eBool);
         daeesmapAdd3(esmap_daeePortType,                eUnknownPort, eInletPort, eOutletPort);
@@ -310,7 +310,7 @@ public:
     daeEnumStringMap<core::daeeDomainBounds>                esmap_daeeDomainBounds;
 };
 
-static boost::shared_ptr<daeEnumTypesCollection> g_EnumTypesCollection = boost::shared_ptr<daeEnumTypesCollection>(new daeEnumTypesCollection());
+static std::shared_ptr<daeEnumTypesCollection> g_EnumTypesCollection = std::shared_ptr<daeEnumTypesCollection>(new daeEnumTypesCollection());
 
 }
 }

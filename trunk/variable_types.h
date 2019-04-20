@@ -3,16 +3,20 @@
 
 #include "Units/units_pool.h"
 
+namespace daetools
+{
+namespace core
+{
 namespace variable_types
 {
-using units_pool::m;
-using units_pool::kg;
-using units_pool::s;
-using units_pool::mol;
-using units_pool::K;
-using units_pool::J;
-using units_pool::W;
-using units_pool::Pa;
+using units::units_pool::m;
+using units::units_pool::kg;
+using units::units_pool::s;
+using units::units_pool::mol;
+using units::units_pool::K;
+using units::units_pool::J;
+using units::units_pool::W;
+using units::units_pool::Pa;
 
 const daeVariableType length_t                    ("length_t",                     m,              0.0, 1.0e+05,     1.0, 1e-05);
 const daeVariableType area_t                      ("area_t",                       m^2,            0.0, 1.0e+05,     1.0, 1e-05);
@@ -39,9 +43,10 @@ const daeVariableType density_t                   ("density_t",                 
 const daeVariableType specific_heat_conductivity_t("specific_heat_conductivity_t", W/(m*K),        0.0, 1.0e+10,     1.0, 1e-05);
 const daeVariableType dynamic_viscosity_t         ("dynamic_viscosity_t",          Pa*s,           0.0, 1.0e+10, 1.0e-03, 1e-06);
 const daeVariableType diffusivity_t               ("diffusivity_t",                (m^2)/s,        0.0, 1.0e+05, 1.0e-03, 1e-08);
- 
-const daeVariableType amount_adsorbed_t           ("amount_adsorbed_t",            mol/kg,    -1.0e+20, 1.0e+20,     0.0, 1e-05);
- 
-}
 
+const daeVariableType amount_adsorbed_t           ("amount_adsorbed_t",            mol/kg,    -1.0e+20, 1.0e+20,     0.0, 1e-05);
+
+}
+}
+}
 #endif

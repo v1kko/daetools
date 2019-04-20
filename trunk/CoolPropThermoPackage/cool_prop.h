@@ -31,6 +31,6 @@ DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 #define DAE_COOL_PROP_API
 #endif // WIN32
 
-DAE_COOL_PROP_API dae::tpp::daeThermoPhysicalPropertyPackage_t* daeCreateCoolPropPropertyPackage();
+DAE_COOL_PROP_API daetools::tpp::daeThermoPhysicalPropertyPackage_t* daeCreateCoolPropPropertyPackage();
 
 #endif

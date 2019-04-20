@@ -1,17 +1,18 @@
 #ifndef NLPSOLVER_COMMON_H
 #define NLPSOLVER_COMMON_H
 
+#include <cstdlib>
+#include <ctime>
 #include <iostream>
 #include "../Core/optimization.h"
 #include "../Core/helpers.h"
 
 #define BOOST_FILESYSTEM_NO_DEPRECATED
 #define BOOST_FILESYSTEM_VERSION 3
-#include <boost/filesystem.hpp>
-#include <boost/functional/hash.hpp>
-#include <boost/multi_array.hpp>
+#include <experimental/filesystem>
+namespace filesystem = std::experimental::filesystem;
 
-namespace dae
+namespace daetools
 {
 namespace nlpsolver
 {
@@ -64,9 +65,9 @@ public:
         if(initializationFile.empty())
         {
         // Attempt to create a temporary filename
-            boost::filesystem::path file_template = "daetools-%%%%-%%%%-%%%%-%%%%.init";
-            boost::filesystem::path init_file     = boost::filesystem::temp_directory_path();
-            boost::filesystem::path tmp_filename  = boost::filesystem::unique_path(file_template);
+            std::srand(std::time(nullptr));
+            filesystem::path init_file     = filesystem::temp_directory_path();
+            filesystem::path tmp_filename  = "daetools-" + std::to_string(std::rand()) + ".init";
             init_file /= tmp_filename;
 
             m_bInitializationFileProvided = false;

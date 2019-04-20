@@ -16,7 +16,7 @@ DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 #include "trilinos_amesos_la_solver.h"
 #include "../config.h"
 
-namespace dae
+namespace daetools
 {
 namespace solver
 {
@@ -65,11 +65,11 @@ public:
     daeRawDataArray<real_t>                  m_arrValues;
     daeRawDataArray<real_t>                  m_arrTimeDerivatives;
     daeRawDataArray<real_t>                  m_arrResiduals;
-    boost::shared_ptr<Epetra_Map>            m_map;
-    boost::shared_ptr<Epetra_CrsMatrix>      m_matEPETRA;
+    std::shared_ptr<Epetra_Map>            m_map;
+    std::shared_ptr<Epetra_CrsMatrix>      m_matEPETRA;
     Epetra_SerialComm                        m_Comm;
-    boost::shared_ptr<Ifpack_Preconditioner> m_pPreconditionerIfpack;
-    dae::solver::daeEpetraCSRMatrix          m_matJacobian;
+    std::shared_ptr<Ifpack_Preconditioner> m_pPreconditionerIfpack;
+    daetools::solver::daeEpetraCSRMatrix          m_matJacobian;
 };
 
 daePreconditioner_Ifpack::daePreconditioner_Ifpack(const std::string& preconditionerName)

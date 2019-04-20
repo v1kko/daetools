@@ -1,8 +1,8 @@
 #include "stdafx.h"
 #include "io_impl.h"
-using namespace dae::core;
+using namespace daetools::core;
 
-namespace dae
+namespace daetools
 {
 namespace io
 {

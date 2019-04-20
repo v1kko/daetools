@@ -17,6 +17,7 @@ SUBDIRS = Config \
     fmi_ws
 
 HEADERS += config.h \
-           dae_develop.h \
-           variable_types.h \
-           dae.h
+           daetools.h \
+           daetools-pymod.h \
+           daetools-core.h \
+           variable_types.h

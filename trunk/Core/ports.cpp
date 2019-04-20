@@ -1,8 +1,7 @@
 #include "stdafx.h"
 #include "coreimpl.h"
-#include "event_handling.h"
 
-namespace dae
+namespace daetools
 {
 namespace core
 {

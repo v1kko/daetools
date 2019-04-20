@@ -3,7 +3,7 @@
 
 #include "../Core/datareporting.h"
 
-namespace dae
+namespace daetools
 {
 namespace datareporting
 {

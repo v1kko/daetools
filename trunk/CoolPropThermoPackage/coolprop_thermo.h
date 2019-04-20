@@ -15,7 +15,7 @@ DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 
 #include "cool_prop.h"
 #include "../Core/thermo_package.h"
-using namespace dae::tpp;
+using namespace daetools::tpp;
 #include "CoolProp.h"
 #include "AbstractState.h"
 #include "crossplatform_shared_ptr.h"

@@ -3,7 +3,7 @@
 #include "nodes.h"
 #include <limits>
 
-namespace dae
+namespace daetools
 {
 namespace core
 {

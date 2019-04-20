@@ -8,7 +8,7 @@
 #include <omp.h>
 #endif
 
-namespace dae
+namespace daetools
 {
 namespace fe_solver
 {
@@ -39,8 +39,8 @@ void run(const Iterator                           &begin,
         for(Iterator cell_i = begin; cell_i != end; ++cell_i)
             all_iterators.push_back(cell_i);
 
-        std::vector< boost::shared_ptr<CopyData> > copy_data_queue;
-        std::vector< boost::shared_ptr<CopyData> > copy_data_queue_swap;
+        std::vector< std::shared_ptr<CopyData> > copy_data_queue;
+        std::vector< std::shared_ptr<CopyData> > copy_data_queue_swap;
 
         copy_data_queue.reserve(queueSize);
         copy_data_queue_swap.reserve(queueSize);
@@ -65,7 +65,7 @@ void run(const Iterator                           &begin,
                     printf("Thread %d assembling cell %s\n", tid, cell->id().to_string().c_str());
 
                 // Create the scratch and the copy_data objects
-                boost::shared_ptr<CopyData> copy_data(new CopyData(copy_data_s));
+                std::shared_ptr<CopyData> copy_data(new CopyData(copy_data_s));
                 ScratchData scratch(scratch_s);
 
                 // Process the cell
@@ -101,7 +101,7 @@ void run(const Iterator                           &begin,
                             printf("copy_data queue size = %d\n", copy_data_queue_swap.size());
                         for(int k = 0; k < copy_data_queue_swap.size(); k++)
                         {
-                            boost::shared_ptr<CopyData>& cd = copy_data_queue_swap[k];
+                            std::shared_ptr<CopyData>& cd = copy_data_queue_swap[k];
                             (main_object.*copier)(*cd);
                         }
 
@@ -117,7 +117,7 @@ void run(const Iterator                           &begin,
             printf("Number of copy_data objects left in the queue after assembling = %d\n", copy_data_queue.size());
         for(int k = 0; k < copy_data_queue.size(); k++)
         {
-            boost::shared_ptr<CopyData>& cd = copy_data_queue[k];
+            std::shared_ptr<CopyData>& cd = copy_data_queue[k];
             (main_object.*copier)(*cd);
         }
 #else

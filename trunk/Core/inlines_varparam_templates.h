@@ -101,7 +101,7 @@ template<typename TYPE1>
 adouble	daeParameter::operator()(TYPE1 d1)
 {
     Check_Parameter_Funcall(1);
-	daeDomainIndex indexes[1] = {dae::core::CreateDomainIndex(d1)};
+	daeDomainIndex indexes[1] = {daetools::core::CreateDomainIndex(d1)};
 	return this->CreateSetupParameter(indexes, 1);
 }
 
@@ -109,8 +109,8 @@ template<typename TYPE1, typename TYPE2>
 adouble	daeParameter::operator()(TYPE1 d1, TYPE2 d2)
 {
     Check_Parameter_Funcall(2);
-	daeDomainIndex indexes[2] = {dae::core::CreateDomainIndex(d1), 
-					             dae::core::CreateDomainIndex(d2) 
+	daeDomainIndex indexes[2] = {daetools::core::CreateDomainIndex(d1), 
+					             daetools::core::CreateDomainIndex(d2) 
 								};
 	return this->CreateSetupParameter(indexes, 2);
 }
@@ -119,9 +119,9 @@ template<typename TYPE1, typename TYPE2, typename TYPE3>
 adouble	daeParameter::operator()(TYPE1 d1, TYPE2 d2, TYPE3 d3)
 {
     Check_Parameter_Funcall(3);
-	daeDomainIndex indexes[3] = {dae::core::CreateDomainIndex(d1), 
-								 dae::core::CreateDomainIndex(d2), 
-								 dae::core::CreateDomainIndex(d3) 
+	daeDomainIndex indexes[3] = {daetools::core::CreateDomainIndex(d1), 
+								 daetools::core::CreateDomainIndex(d2), 
+								 daetools::core::CreateDomainIndex(d3) 
 								};
 	return this->CreateSetupParameter(indexes, 3);
 }
@@ -130,10 +130,10 @@ template<typename TYPE1, typename TYPE2, typename TYPE3, typename TYPE4>
 adouble	daeParameter::operator()(TYPE1 d1, TYPE2 d2, TYPE3 d3, TYPE4 d4)
 {
     Check_Parameter_Funcall(4);
-	daeDomainIndex indexes[4] = {dae::core::CreateDomainIndex(d1), 
-								 dae::core::CreateDomainIndex(d2), 
-								 dae::core::CreateDomainIndex(d3), 
-								 dae::core::CreateDomainIndex(d4) 
+	daeDomainIndex indexes[4] = {daetools::core::CreateDomainIndex(d1), 
+								 daetools::core::CreateDomainIndex(d2), 
+								 daetools::core::CreateDomainIndex(d3), 
+								 daetools::core::CreateDomainIndex(d4) 
 								};
 	return this->CreateSetupParameter(indexes, 4);
 }
@@ -142,11 +142,11 @@ template<typename TYPE1, typename TYPE2, typename TYPE3, typename TYPE4, typenam
 adouble	daeParameter::operator()(TYPE1 d1, TYPE2 d2, TYPE3 d3, TYPE4 d4, TYPE5 d5)
 {
     Check_Parameter_Funcall(5);
-	daeDomainIndex indexes[5] = {dae::core::CreateDomainIndex(d1), 
-								 dae::core::CreateDomainIndex(d2), 
-								 dae::core::CreateDomainIndex(d3), 
-								 dae::core::CreateDomainIndex(d4), 
-								 dae::core::CreateDomainIndex(d5) 
+	daeDomainIndex indexes[5] = {daetools::core::CreateDomainIndex(d1), 
+								 daetools::core::CreateDomainIndex(d2), 
+								 daetools::core::CreateDomainIndex(d3), 
+								 daetools::core::CreateDomainIndex(d4), 
+								 daetools::core::CreateDomainIndex(d5) 
 								};
 	return this->CreateSetupParameter(indexes, 5);
 }
@@ -155,12 +155,12 @@ template<typename TYPE1, typename TYPE2, typename TYPE3, typename TYPE4, typenam
 adouble	daeParameter::operator()(TYPE1 d1, TYPE2 d2, TYPE3 d3, TYPE4 d4, TYPE5 d5, TYPE6 d6)
 {
     Check_Parameter_Funcall(6);
-	daeDomainIndex indexes[6] = {dae::core::CreateDomainIndex(d1), 
-								 dae::core::CreateDomainIndex(d2), 
-								 dae::core::CreateDomainIndex(d3), 
-								 dae::core::CreateDomainIndex(d4), 
-								 dae::core::CreateDomainIndex(d5), 
-								 dae::core::CreateDomainIndex(d6)
+	daeDomainIndex indexes[6] = {daetools::core::CreateDomainIndex(d1), 
+								 daetools::core::CreateDomainIndex(d2), 
+								 daetools::core::CreateDomainIndex(d3), 
+								 daetools::core::CreateDomainIndex(d4), 
+								 daetools::core::CreateDomainIndex(d5), 
+								 daetools::core::CreateDomainIndex(d6)
 								};
 	return this->CreateSetupParameter(indexes, 6);
 }
@@ -169,13 +169,13 @@ template<typename TYPE1, typename TYPE2, typename TYPE3, typename TYPE4, typenam
 adouble	daeParameter::operator()(TYPE1 d1, TYPE2 d2, TYPE3 d3, TYPE4 d4, TYPE5 d5, TYPE6 d6, TYPE7 d7)
 {
     Check_Parameter_Funcall(7);
-	daeDomainIndex indexes[7] = {dae::core::CreateDomainIndex(d1), 
-								 dae::core::CreateDomainIndex(d2), 
-								 dae::core::CreateDomainIndex(d3), 
-								 dae::core::CreateDomainIndex(d4), 
-								 dae::core::CreateDomainIndex(d5), 
-								 dae::core::CreateDomainIndex(d6), 
-								 dae::core::CreateDomainIndex(d7)
+	daeDomainIndex indexes[7] = {daetools::core::CreateDomainIndex(d1), 
+								 daetools::core::CreateDomainIndex(d2), 
+								 daetools::core::CreateDomainIndex(d3), 
+								 daetools::core::CreateDomainIndex(d4), 
+								 daetools::core::CreateDomainIndex(d5), 
+								 daetools::core::CreateDomainIndex(d6), 
+								 daetools::core::CreateDomainIndex(d7)
 								};
 	return this->CreateSetupParameter(indexes, 7);
 }
@@ -184,14 +184,14 @@ template<typename TYPE1, typename TYPE2, typename TYPE3, typename TYPE4, typenam
 adouble	daeParameter::operator()(TYPE1 d1, TYPE2 d2, TYPE3 d3, TYPE4 d4, TYPE5 d5, TYPE6 d6, TYPE7 d7, TYPE8 d8)
 {
     Check_Parameter_Funcall(8);
-	daeDomainIndex indexes[8] = {dae::core::CreateDomainIndex(d1), 
-								 dae::core::CreateDomainIndex(d2), 
-								 dae::core::CreateDomainIndex(d3), 
-								 dae::core::CreateDomainIndex(d4), 
-								 dae::core::CreateDomainIndex(d5), 
-								 dae::core::CreateDomainIndex(d6), 
-								 dae::core::CreateDomainIndex(d7), 
-								 dae::core::CreateDomainIndex(d8)
+	daeDomainIndex indexes[8] = {daetools::core::CreateDomainIndex(d1), 
+								 daetools::core::CreateDomainIndex(d2), 
+								 daetools::core::CreateDomainIndex(d3), 
+								 daetools::core::CreateDomainIndex(d4), 
+								 daetools::core::CreateDomainIndex(d5), 
+								 daetools::core::CreateDomainIndex(d6), 
+								 daetools::core::CreateDomainIndex(d7), 
+								 daetools::core::CreateDomainIndex(d8)
 								};
 	return this->CreateSetupParameter(indexes, 8);
 }
@@ -209,7 +209,7 @@ template<typename TYPE1>
 adouble	daeVariable::operator()(TYPE1 d1)
 {
     Check_Variable_Funcall(1);
-	daeDomainIndex indexes[1] = {dae::core::CreateDomainIndex(d1)};
+	daeDomainIndex indexes[1] = {daetools::core::CreateDomainIndex(d1)};
 	return this->CreateSetupVariable(indexes, 1);
 }
 
@@ -217,8 +217,8 @@ template<typename TYPE1, typename TYPE2>
 adouble	daeVariable::operator()(TYPE1 d1, TYPE2 d2)
 {
     Check_Variable_Funcall(2);
-	daeDomainIndex indexes[2] = {dae::core::CreateDomainIndex(d1), 
-								 dae::core::CreateDomainIndex(d2) 
+	daeDomainIndex indexes[2] = {daetools::core::CreateDomainIndex(d1), 
+								 daetools::core::CreateDomainIndex(d2) 
 								};
 	return this->CreateSetupVariable(indexes, 2);
 }
@@ -227,9 +227,9 @@ template<typename TYPE1, typename TYPE2, typename TYPE3>
 adouble	daeVariable::operator()(TYPE1 d1, TYPE2 d2, TYPE3 d3)
 {
     Check_Variable_Funcall(3);
-	daeDomainIndex indexes[3] = {dae::core::CreateDomainIndex(d1), 
-								 dae::core::CreateDomainIndex(d2), 
-								 dae::core::CreateDomainIndex(d3) 
+	daeDomainIndex indexes[3] = {daetools::core::CreateDomainIndex(d1), 
+								 daetools::core::CreateDomainIndex(d2), 
+								 daetools::core::CreateDomainIndex(d3) 
 								};
 	return this->CreateSetupVariable(indexes, 3);
 }
@@ -238,10 +238,10 @@ template<typename TYPE1, typename TYPE2, typename TYPE3, typename TYPE4>
 adouble	daeVariable::operator()(TYPE1 d1, TYPE2 d2, TYPE3 d3, TYPE4 d4)
 {
     Check_Variable_Funcall(4);
-	daeDomainIndex indexes[4] = {dae::core::CreateDomainIndex(d1), 
-								 dae::core::CreateDomainIndex(d2), 
-								 dae::core::CreateDomainIndex(d3), 
-								 dae::core::CreateDomainIndex(d4) 
+	daeDomainIndex indexes[4] = {daetools::core::CreateDomainIndex(d1), 
+								 daetools::core::CreateDomainIndex(d2), 
+								 daetools::core::CreateDomainIndex(d3), 
+								 daetools::core::CreateDomainIndex(d4) 
 								};
 	return this->CreateSetupVariable(indexes, 4);
 }
@@ -250,11 +250,11 @@ template<typename TYPE1, typename TYPE2, typename TYPE3, typename TYPE4, typenam
 adouble	daeVariable::operator()(TYPE1 d1, TYPE2 d2, TYPE3 d3, TYPE4 d4, TYPE5 d5)
 {
     Check_Variable_Funcall(5);
-	daeDomainIndex indexes[5] = {dae::core::CreateDomainIndex(d1), 
-								 dae::core::CreateDomainIndex(d2), 
-								 dae::core::CreateDomainIndex(d3), 
-								 dae::core::CreateDomainIndex(d4), 
-								 dae::core::CreateDomainIndex(d5) 
+	daeDomainIndex indexes[5] = {daetools::core::CreateDomainIndex(d1), 
+								 daetools::core::CreateDomainIndex(d2), 
+								 daetools::core::CreateDomainIndex(d3), 
+								 daetools::core::CreateDomainIndex(d4), 
+								 daetools::core::CreateDomainIndex(d5) 
 								};
 	return this->CreateSetupVariable(indexes, 5);
 }
@@ -263,12 +263,12 @@ template<typename TYPE1, typename TYPE2, typename TYPE3, typename TYPE4, typenam
 adouble	daeVariable::operator()(TYPE1 d1, TYPE2 d2, TYPE3 d3, TYPE4 d4, TYPE5 d5, TYPE6 d6)
 {
     Check_Variable_Funcall(6);
-	daeDomainIndex indexes[6] = {dae::core::CreateDomainIndex(d1), 
-								 dae::core::CreateDomainIndex(d2), 
-								 dae::core::CreateDomainIndex(d3), 
-								 dae::core::CreateDomainIndex(d4), 
-								 dae::core::CreateDomainIndex(d5), 
-								 dae::core::CreateDomainIndex(d6)
+	daeDomainIndex indexes[6] = {daetools::core::CreateDomainIndex(d1), 
+								 daetools::core::CreateDomainIndex(d2), 
+								 daetools::core::CreateDomainIndex(d3), 
+								 daetools::core::CreateDomainIndex(d4), 
+								 daetools::core::CreateDomainIndex(d5), 
+								 daetools::core::CreateDomainIndex(d6)
 								};
 	return this->CreateSetupVariable(indexes, 6);
 }
@@ -277,13 +277,13 @@ template<typename TYPE1, typename TYPE2, typename TYPE3, typename TYPE4, typenam
 adouble	daeVariable::operator()(TYPE1 d1, TYPE2 d2, TYPE3 d3, TYPE4 d4, TYPE5 d5, TYPE6 d6, TYPE7 d7)
 {
     Check_Variable_Funcall(7);
-	daeDomainIndex indexes[7] = {dae::core::CreateDomainIndex(d1), 
-								 dae::core::CreateDomainIndex(d2), 
-								 dae::core::CreateDomainIndex(d3), 
-								 dae::core::CreateDomainIndex(d4), 
-								 dae::core::CreateDomainIndex(d5), 
-								 dae::core::CreateDomainIndex(d6), 
-								 dae::core::CreateDomainIndex(d7)
+	daeDomainIndex indexes[7] = {daetools::core::CreateDomainIndex(d1), 
+								 daetools::core::CreateDomainIndex(d2), 
+								 daetools::core::CreateDomainIndex(d3), 
+								 daetools::core::CreateDomainIndex(d4), 
+								 daetools::core::CreateDomainIndex(d5), 
+								 daetools::core::CreateDomainIndex(d6), 
+								 daetools::core::CreateDomainIndex(d7)
 								};
 	return this->CreateSetupVariable(indexes, 7);
 }
@@ -292,14 +292,14 @@ template<typename TYPE1, typename TYPE2, typename TYPE3, typename TYPE4, typenam
 adouble	daeVariable::operator()(TYPE1 d1, TYPE2 d2, TYPE3 d3, TYPE4 d4, TYPE5 d5, TYPE6 d6, TYPE7 d7, TYPE8 d8)
 {
     Check_Variable_Funcall(8);
-	daeDomainIndex indexes[8] = {dae::core::CreateDomainIndex(d1), 
-								 dae::core::CreateDomainIndex(d2), 
-								 dae::core::CreateDomainIndex(d3), 
-								 dae::core::CreateDomainIndex(d4), 
-								 dae::core::CreateDomainIndex(d5), 
-								 dae::core::CreateDomainIndex(d6), 
-								 dae::core::CreateDomainIndex(d7), 
-								 dae::core::CreateDomainIndex(d8)
+	daeDomainIndex indexes[8] = {daetools::core::CreateDomainIndex(d1), 
+								 daetools::core::CreateDomainIndex(d2), 
+								 daetools::core::CreateDomainIndex(d3), 
+								 daetools::core::CreateDomainIndex(d4), 
+								 daetools::core::CreateDomainIndex(d5), 
+								 daetools::core::CreateDomainIndex(d6), 
+								 daetools::core::CreateDomainIndex(d7), 
+								 daetools::core::CreateDomainIndex(d8)
 								};
 	return this->CreateSetupVariable(indexes, 8);
 }
@@ -315,7 +315,7 @@ template<typename TYPE1>
 adouble	daeVariable::dt(TYPE1 d1)
 {
     Check_Variable_dt(1);
-	daeDomainIndex indexes[1] = {dae::core::CreateDomainIndex(d1)};
+	daeDomainIndex indexes[1] = {daetools::core::CreateDomainIndex(d1)};
 	return this->CreateSetupTimeDerivative(indexes, 1);
 }
 
@@ -323,8 +323,8 @@ template<typename TYPE1, typename TYPE2>
 adouble	daeVariable::dt(TYPE1 d1, TYPE2 d2)
 {
     Check_Variable_dt(2);
-	daeDomainIndex indexes[2] = {dae::core::CreateDomainIndex(d1), 
-								 dae::core::CreateDomainIndex(d2) 
+	daeDomainIndex indexes[2] = {daetools::core::CreateDomainIndex(d1), 
+								 daetools::core::CreateDomainIndex(d2) 
 								};
 	return this->CreateSetupTimeDerivative(indexes, 2);
 }
@@ -333,9 +333,9 @@ template<typename TYPE1, typename TYPE2, typename TYPE3>
 adouble	daeVariable::dt(TYPE1 d1, TYPE2 d2, TYPE3 d3)
 {
     Check_Variable_dt(3);
-	daeDomainIndex indexes[3] = {dae::core::CreateDomainIndex(d1), 
-								 dae::core::CreateDomainIndex(d2), 
-								 dae::core::CreateDomainIndex(d3) 
+	daeDomainIndex indexes[3] = {daetools::core::CreateDomainIndex(d1), 
+								 daetools::core::CreateDomainIndex(d2), 
+								 daetools::core::CreateDomainIndex(d3) 
 								};
 	return this->CreateSetupTimeDerivative(indexes, 3);
 }
@@ -344,10 +344,10 @@ template<typename TYPE1, typename TYPE2, typename TYPE3, typename TYPE4>
 adouble	daeVariable::dt(TYPE1 d1, TYPE2 d2, TYPE3 d3, TYPE4 d4)
 {
     Check_Variable_dt(4);
-	daeDomainIndex indexes[4] = {dae::core::CreateDomainIndex(d1), 
-								 dae::core::CreateDomainIndex(d2), 
-								 dae::core::CreateDomainIndex(d3), 
-								 dae::core::CreateDomainIndex(d4) 
+	daeDomainIndex indexes[4] = {daetools::core::CreateDomainIndex(d1), 
+								 daetools::core::CreateDomainIndex(d2), 
+								 daetools::core::CreateDomainIndex(d3), 
+								 daetools::core::CreateDomainIndex(d4) 
 								};
 	return this->CreateSetupTimeDerivative(indexes, 4);
 }
@@ -356,11 +356,11 @@ template<typename TYPE1, typename TYPE2, typename TYPE3, typename TYPE4, typenam
 adouble	daeVariable::dt(TYPE1 d1, TYPE2 d2, TYPE3 d3, TYPE4 d4, TYPE5 d5)
 {
     Check_Variable_dt(5);
-	daeDomainIndex indexes[5] = {dae::core::CreateDomainIndex(d1), 
-								 dae::core::CreateDomainIndex(d2), 
-								 dae::core::CreateDomainIndex(d3), 
-								 dae::core::CreateDomainIndex(d4), 
-								 dae::core::CreateDomainIndex(d5) 
+	daeDomainIndex indexes[5] = {daetools::core::CreateDomainIndex(d1), 
+								 daetools::core::CreateDomainIndex(d2), 
+								 daetools::core::CreateDomainIndex(d3), 
+								 daetools::core::CreateDomainIndex(d4), 
+								 daetools::core::CreateDomainIndex(d5) 
 								};
 	return this->CreateSetupTimeDerivative(indexes, 5);
 }
@@ -369,12 +369,12 @@ template<typename TYPE1, typename TYPE2, typename TYPE3, typename TYPE4, typenam
 adouble	daeVariable::dt(TYPE1 d1, TYPE2 d2, TYPE3 d3, TYPE4 d4, TYPE5 d5, TYPE6 d6)
 {
     Check_Variable_dt(6);
-	daeDomainIndex indexes[6] = {dae::core::CreateDomainIndex(d1), 
-								 dae::core::CreateDomainIndex(d2), 
-								 dae::core::CreateDomainIndex(d3), 
-								 dae::core::CreateDomainIndex(d4), 
-								 dae::core::CreateDomainIndex(d5), 
-								 dae::core::CreateDomainIndex(d6)
+	daeDomainIndex indexes[6] = {daetools::core::CreateDomainIndex(d1), 
+								 daetools::core::CreateDomainIndex(d2), 
+								 daetools::core::CreateDomainIndex(d3), 
+								 daetools::core::CreateDomainIndex(d4), 
+								 daetools::core::CreateDomainIndex(d5), 
+								 daetools::core::CreateDomainIndex(d6)
 								};
 	return this->CreateSetupTimeDerivative(indexes, 6);
 }
@@ -383,13 +383,13 @@ template<typename TYPE1, typename TYPE2, typename TYPE3, typename TYPE4, typenam
 adouble	daeVariable::dt(TYPE1 d1, TYPE2 d2, TYPE3 d3, TYPE4 d4, TYPE5 d5, TYPE6 d6, TYPE7 d7)
 {
     Check_Variable_dt(7);
-	daeDomainIndex indexes[7] = {dae::core::CreateDomainIndex(d1), 
-								 dae::core::CreateDomainIndex(d2), 
-								 dae::core::CreateDomainIndex(d3), 
-								 dae::core::CreateDomainIndex(d4), 
-								 dae::core::CreateDomainIndex(d5), 
-								 dae::core::CreateDomainIndex(d6), 
-								 dae::core::CreateDomainIndex(d7)
+	daeDomainIndex indexes[7] = {daetools::core::CreateDomainIndex(d1), 
+								 daetools::core::CreateDomainIndex(d2), 
+								 daetools::core::CreateDomainIndex(d3), 
+								 daetools::core::CreateDomainIndex(d4), 
+								 daetools::core::CreateDomainIndex(d5), 
+								 daetools::core::CreateDomainIndex(d6), 
+								 daetools::core::CreateDomainIndex(d7)
 								};
 	return this->CreateSetupTimeDerivative(indexes, 7);
 }
@@ -398,14 +398,14 @@ template<typename TYPE1, typename TYPE2, typename TYPE3, typename TYPE4, typenam
 adouble	daeVariable::dt(TYPE1 d1, TYPE2 d2, TYPE3 d3, TYPE4 d4, TYPE5 d5, TYPE6 d6, TYPE7 d7, TYPE8 d8)
 {
     Check_Variable_dt(8);
-	daeDomainIndex indexes[8] = {dae::core::CreateDomainIndex(d1), 
-								 dae::core::CreateDomainIndex(d2), 
-								 dae::core::CreateDomainIndex(d3), 
-								 dae::core::CreateDomainIndex(d4), 
-								 dae::core::CreateDomainIndex(d5), 
-								 dae::core::CreateDomainIndex(d6), 
-								 dae::core::CreateDomainIndex(d7), 
-								 dae::core::CreateDomainIndex(d8)
+	daeDomainIndex indexes[8] = {daetools::core::CreateDomainIndex(d1), 
+								 daetools::core::CreateDomainIndex(d2), 
+								 daetools::core::CreateDomainIndex(d3), 
+								 daetools::core::CreateDomainIndex(d4), 
+								 daetools::core::CreateDomainIndex(d5), 
+								 daetools::core::CreateDomainIndex(d6), 
+								 daetools::core::CreateDomainIndex(d7), 
+								 daetools::core::CreateDomainIndex(d8)
 								};
 	return this->CreateSetupTimeDerivative(indexes, 8);
 }
@@ -415,7 +415,7 @@ template<typename TYPE1>
 adouble	daeVariable::d(const daeDomain_t& rDomain, TYPE1 d1)
 {
     Check_Variable_d(1);
-	daeDomainIndex indexes[1] = {dae::core::CreateDomainIndex(d1)};
+	daeDomainIndex indexes[1] = {daetools::core::CreateDomainIndex(d1)};
     return this->CreateSetupPartialDerivative(1, rDomain, indexes, 1, eCFDM, std::map<std::string, std::string>());
 }
 
@@ -423,8 +423,8 @@ template<typename TYPE1, typename TYPE2>
 adouble	daeVariable::d(const daeDomain_t& rDomain, TYPE1 d1, TYPE2 d2)
 {
     Check_Variable_d(2);
-	daeDomainIndex indexes[2] = {dae::core::CreateDomainIndex(d1), 
-								 dae::core::CreateDomainIndex(d2) 
+	daeDomainIndex indexes[2] = {daetools::core::CreateDomainIndex(d1), 
+								 daetools::core::CreateDomainIndex(d2) 
 								};
     return this->CreateSetupPartialDerivative(1, rDomain, indexes, 2, eCFDM, std::map<std::string, std::string>());
 }
@@ -433,9 +433,9 @@ template<typename TYPE1, typename TYPE2, typename TYPE3>
 adouble	daeVariable::d(const daeDomain_t& rDomain, TYPE1 d1, TYPE2 d2, TYPE3 d3)
 {
     Check_Variable_d(3);
-	daeDomainIndex indexes[3] = {dae::core::CreateDomainIndex(d1), 
-								 dae::core::CreateDomainIndex(d2), 
-								 dae::core::CreateDomainIndex(d3) 
+	daeDomainIndex indexes[3] = {daetools::core::CreateDomainIndex(d1), 
+								 daetools::core::CreateDomainIndex(d2), 
+								 daetools::core::CreateDomainIndex(d3) 
 								};
     return this->CreateSetupPartialDerivative(1, rDomain, indexes, 3, eCFDM, std::map<std::string, std::string>());
 }
@@ -444,10 +444,10 @@ template<typename TYPE1, typename TYPE2, typename TYPE3, typename TYPE4>
 adouble	daeVariable::d(const daeDomain_t& rDomain, TYPE1 d1, TYPE2 d2, TYPE3 d3, TYPE4 d4)
 {
     Check_Variable_d(4);
-	daeDomainIndex indexes[4] = {dae::core::CreateDomainIndex(d1), 
-								 dae::core::CreateDomainIndex(d2), 
-								 dae::core::CreateDomainIndex(d3), 
-								 dae::core::CreateDomainIndex(d4) 
+	daeDomainIndex indexes[4] = {daetools::core::CreateDomainIndex(d1), 
+								 daetools::core::CreateDomainIndex(d2), 
+								 daetools::core::CreateDomainIndex(d3), 
+								 daetools::core::CreateDomainIndex(d4) 
 								};
     return this->CreateSetupPartialDerivative(1, rDomain, indexes, 4, eCFDM, std::map<std::string, std::string>());
 }
@@ -456,11 +456,11 @@ template<typename TYPE1, typename TYPE2, typename TYPE3, typename TYPE4, typenam
 adouble	daeVariable::d(const daeDomain_t& rDomain, TYPE1 d1, TYPE2 d2, TYPE3 d3, TYPE4 d4, TYPE5 d5)
 {
     Check_Variable_d(5);
-	daeDomainIndex indexes[5] = {dae::core::CreateDomainIndex(d1), 
-								 dae::core::CreateDomainIndex(d2), 
-								 dae::core::CreateDomainIndex(d3), 
-								 dae::core::CreateDomainIndex(d4), 
-								 dae::core::CreateDomainIndex(d5) 
+	daeDomainIndex indexes[5] = {daetools::core::CreateDomainIndex(d1), 
+								 daetools::core::CreateDomainIndex(d2), 
+								 daetools::core::CreateDomainIndex(d3), 
+								 daetools::core::CreateDomainIndex(d4), 
+								 daetools::core::CreateDomainIndex(d5) 
 								};
     return this->CreateSetupPartialDerivative(1, rDomain, indexes, 5, eCFDM, std::map<std::string, std::string>());
 }
@@ -469,12 +469,12 @@ template<typename TYPE1, typename TYPE2, typename TYPE3, typename TYPE4, typenam
 adouble	daeVariable::d(const daeDomain_t& rDomain, TYPE1 d1, TYPE2 d2, TYPE3 d3, TYPE4 d4, TYPE5 d5, TYPE6 d6)
 {
     Check_Variable_d(6);
-	daeDomainIndex indexes[6] = {dae::core::CreateDomainIndex(d1), 
-								 dae::core::CreateDomainIndex(d2), 
-								 dae::core::CreateDomainIndex(d3), 
-								 dae::core::CreateDomainIndex(d4), 
-								 dae::core::CreateDomainIndex(d5), 
-								 dae::core::CreateDomainIndex(d6)
+	daeDomainIndex indexes[6] = {daetools::core::CreateDomainIndex(d1), 
+								 daetools::core::CreateDomainIndex(d2), 
+								 daetools::core::CreateDomainIndex(d3), 
+								 daetools::core::CreateDomainIndex(d4), 
+								 daetools::core::CreateDomainIndex(d5), 
+								 daetools::core::CreateDomainIndex(d6)
 								};
     return this->CreateSetupPartialDerivative(1, rDomain, indexes, 6, eCFDM, std::map<std::string, std::string>());
 }
@@ -483,13 +483,13 @@ template<typename TYPE1, typename TYPE2, typename TYPE3, typename TYPE4, typenam
 adouble	daeVariable::d(const daeDomain_t& rDomain, TYPE1 d1, TYPE2 d2, TYPE3 d3, TYPE4 d4, TYPE5 d5, TYPE6 d6, TYPE7 d7)
 {
     Check_Variable_d(7);
-	daeDomainIndex indexes[7] = {dae::core::CreateDomainIndex(d1), 
-								 dae::core::CreateDomainIndex(d2), 
-								 dae::core::CreateDomainIndex(d3), 
-								 dae::core::CreateDomainIndex(d4), 
-								 dae::core::CreateDomainIndex(d5), 
-								 dae::core::CreateDomainIndex(d6), 
-								 dae::core::CreateDomainIndex(d7)
+	daeDomainIndex indexes[7] = {daetools::core::CreateDomainIndex(d1), 
+								 daetools::core::CreateDomainIndex(d2), 
+								 daetools::core::CreateDomainIndex(d3), 
+								 daetools::core::CreateDomainIndex(d4), 
+								 daetools::core::CreateDomainIndex(d5), 
+								 daetools::core::CreateDomainIndex(d6), 
+								 daetools::core::CreateDomainIndex(d7)
 								};
     return this->CreateSetupPartialDerivative(1, rDomain, indexes, 7, eCFDM, std::map<std::string, std::string>());
 }
@@ -498,14 +498,14 @@ template<typename TYPE1, typename TYPE2, typename TYPE3, typename TYPE4, typenam
 adouble	daeVariable::d(const daeDomain_t& rDomain, TYPE1 d1, TYPE2 d2, TYPE3 d3, TYPE4 d4, TYPE5 d5, TYPE6 d6, TYPE7 d7, TYPE8 d8)
 {
     Check_Variable_d(8);
-	daeDomainIndex indexes[8] = {dae::core::CreateDomainIndex(d1), 
-								 dae::core::CreateDomainIndex(d2), 
-								 dae::core::CreateDomainIndex(d3), 
-								 dae::core::CreateDomainIndex(d4), 
-								 dae::core::CreateDomainIndex(d5), 
-								 dae::core::CreateDomainIndex(d6), 
-								 dae::core::CreateDomainIndex(d7), 
-								 dae::core::CreateDomainIndex(d8)
+	daeDomainIndex indexes[8] = {daetools::core::CreateDomainIndex(d1), 
+								 daetools::core::CreateDomainIndex(d2), 
+								 daetools::core::CreateDomainIndex(d3), 
+								 daetools::core::CreateDomainIndex(d4), 
+								 daetools::core::CreateDomainIndex(d5), 
+								 daetools::core::CreateDomainIndex(d6), 
+								 daetools::core::CreateDomainIndex(d7), 
+								 daetools::core::CreateDomainIndex(d8)
 								};
     return this->CreateSetupPartialDerivative(1, rDomain, indexes, 8, eCFDM, std::map<std::string, std::string>());
 }
@@ -515,7 +515,7 @@ template<typename TYPE1>
 adouble	daeVariable::d2(const daeDomain_t& rDomain, TYPE1 d1)
 {
     Check_Variable_d2(1);
-	daeDomainIndex indexes[1] = {dae::core::CreateDomainIndex(d1)};
+	daeDomainIndex indexes[1] = {daetools::core::CreateDomainIndex(d1)};
     return this->CreateSetupPartialDerivative(2, rDomain, indexes, 1, eCFDM, std::map<std::string, std::string>());
 }
 
@@ -523,8 +523,8 @@ template<typename TYPE1, typename TYPE2>
 adouble	daeVariable::d2(const daeDomain_t& rDomain, TYPE1 d1, TYPE2 d2)
 {
     Check_Variable_d2(2);
-	daeDomainIndex indexes[2] = {dae::core::CreateDomainIndex(d1), 
-								 dae::core::CreateDomainIndex(d2) 
+	daeDomainIndex indexes[2] = {daetools::core::CreateDomainIndex(d1), 
+								 daetools::core::CreateDomainIndex(d2) 
 								};
     return this->CreateSetupPartialDerivative(2, rDomain, indexes, 2, eCFDM, std::map<std::string, std::string>());
 }
@@ -533,9 +533,9 @@ template<typename TYPE1, typename TYPE2, typename TYPE3>
 adouble	daeVariable::d2(const daeDomain_t& rDomain, TYPE1 d1, TYPE2 d2, TYPE3 d3)
 {
     Check_Variable_d2(3);
-	daeDomainIndex indexes[3] = {dae::core::CreateDomainIndex(d1), 
-								 dae::core::CreateDomainIndex(d2), 
-								 dae::core::CreateDomainIndex(d3) 
+	daeDomainIndex indexes[3] = {daetools::core::CreateDomainIndex(d1), 
+								 daetools::core::CreateDomainIndex(d2), 
+								 daetools::core::CreateDomainIndex(d3) 
 								};
     return this->CreateSetupPartialDerivative(2, rDomain, indexes, 3, eCFDM, std::map<std::string, std::string>());
 }
@@ -544,10 +544,10 @@ template<typename TYPE1, typename TYPE2, typename TYPE3, typename TYPE4>
 adouble	daeVariable::d2(const daeDomain_t& rDomain, TYPE1 d1, TYPE2 d2, TYPE3 d3, TYPE4 d4)
 {
     Check_Variable_d2(4);
-	daeDomainIndex indexes[4] = {dae::core::CreateDomainIndex(d1), 
-								 dae::core::CreateDomainIndex(d2), 
-								 dae::core::CreateDomainIndex(d3), 
-								 dae::core::CreateDomainIndex(d4) 
+	daeDomainIndex indexes[4] = {daetools::core::CreateDomainIndex(d1), 
+								 daetools::core::CreateDomainIndex(d2), 
+								 daetools::core::CreateDomainIndex(d3), 
+								 daetools::core::CreateDomainIndex(d4) 
 								};
     return this->CreateSetupPartialDerivative(2, rDomain, indexes, 4, eCFDM, std::map<std::string, std::string>());
 }
@@ -556,11 +556,11 @@ template<typename TYPE1, typename TYPE2, typename TYPE3, typename TYPE4, typenam
 adouble	daeVariable::d2(const daeDomain_t& rDomain, TYPE1 d1, TYPE2 d2, TYPE3 d3, TYPE4 d4, TYPE5 d5)
 {
     Check_Variable_d2(5);
-	daeDomainIndex indexes[5] = {dae::core::CreateDomainIndex(d1), 
-								 dae::core::CreateDomainIndex(d2), 
-								 dae::core::CreateDomainIndex(d3), 
-								 dae::core::CreateDomainIndex(d4), 
-								 dae::core::CreateDomainIndex(d5) 
+	daeDomainIndex indexes[5] = {daetools::core::CreateDomainIndex(d1), 
+								 daetools::core::CreateDomainIndex(d2), 
+								 daetools::core::CreateDomainIndex(d3), 
+								 daetools::core::CreateDomainIndex(d4), 
+								 daetools::core::CreateDomainIndex(d5) 
 								};
     return this->CreateSetupPartialDerivative(2, rDomain, indexes, 5, eCFDM, std::map<std::string, std::string>());
 }
@@ -569,12 +569,12 @@ template<typename TYPE1, typename TYPE2, typename TYPE3, typename TYPE4, typenam
 adouble	daeVariable::d2(const daeDomain_t& rDomain, TYPE1 d1, TYPE2 d2, TYPE3 d3, TYPE4 d4, TYPE5 d5, TYPE6 d6)
 {
     Check_Variable_d2(6);
-	daeDomainIndex indexes[6] = {dae::core::CreateDomainIndex(d1), 
-								 dae::core::CreateDomainIndex(d2), 
-								 dae::core::CreateDomainIndex(d3), 
-								 dae::core::CreateDomainIndex(d4), 
-								 dae::core::CreateDomainIndex(d5), 
-								 dae::core::CreateDomainIndex(d6)
+	daeDomainIndex indexes[6] = {daetools::core::CreateDomainIndex(d1), 
+								 daetools::core::CreateDomainIndex(d2), 
+								 daetools::core::CreateDomainIndex(d3), 
+								 daetools::core::CreateDomainIndex(d4), 
+								 daetools::core::CreateDomainIndex(d5), 
+								 daetools::core::CreateDomainIndex(d6)
 								};
     return this->CreateSetupPartialDerivative(2, rDomain, indexes, 6, eCFDM, std::map<std::string, std::string>());
 }
@@ -583,13 +583,13 @@ template<typename TYPE1, typename TYPE2, typename TYPE3, typename TYPE4, typenam
 adouble	daeVariable::d2(const daeDomain_t& rDomain, TYPE1 d1, TYPE2 d2, TYPE3 d3, TYPE4 d4, TYPE5 d5, TYPE6 d6, TYPE7 d7)
 {
     Check_Variable_d2(7);
-	daeDomainIndex indexes[7] = {dae::core::CreateDomainIndex(d1), 
-								 dae::core::CreateDomainIndex(d2), 
-								 dae::core::CreateDomainIndex(d3), 
-								 dae::core::CreateDomainIndex(d4), 
-								 dae::core::CreateDomainIndex(d5), 
-								 dae::core::CreateDomainIndex(d6), 
-								 dae::core::CreateDomainIndex(d7)
+	daeDomainIndex indexes[7] = {daetools::core::CreateDomainIndex(d1), 
+								 daetools::core::CreateDomainIndex(d2), 
+								 daetools::core::CreateDomainIndex(d3), 
+								 daetools::core::CreateDomainIndex(d4), 
+								 daetools::core::CreateDomainIndex(d5), 
+								 daetools::core::CreateDomainIndex(d6), 
+								 daetools::core::CreateDomainIndex(d7)
 								};
     return this->CreateSetupPartialDerivative(2, rDomain, indexes, 7, eCFDM, std::map<std::string, std::string>());
 }
@@ -598,14 +598,14 @@ template<typename TYPE1, typename TYPE2, typename TYPE3, typename TYPE4, typenam
 adouble	daeVariable::d2(const daeDomain_t& rDomain, TYPE1 d1, TYPE2 d2, TYPE3 d3, TYPE4 d4, TYPE5 d5, TYPE6 d6, TYPE7 d7, TYPE8 d8)
 {
     Check_Variable_d2(8);
-	daeDomainIndex indexes[8] = {dae::core::CreateDomainIndex(d1), 
-								 dae::core::CreateDomainIndex(d2), 
-								 dae::core::CreateDomainIndex(d3), 
-								 dae::core::CreateDomainIndex(d4), 
-								 dae::core::CreateDomainIndex(d5), 
-								 dae::core::CreateDomainIndex(d6), 
-								 dae::core::CreateDomainIndex(d7), 
-								 dae::core::CreateDomainIndex(d8)
+	daeDomainIndex indexes[8] = {daetools::core::CreateDomainIndex(d1), 
+								 daetools::core::CreateDomainIndex(d2), 
+								 daetools::core::CreateDomainIndex(d3), 
+								 daetools::core::CreateDomainIndex(d4), 
+								 daetools::core::CreateDomainIndex(d5), 
+								 daetools::core::CreateDomainIndex(d6), 
+								 daetools::core::CreateDomainIndex(d7), 
+								 daetools::core::CreateDomainIndex(d8)
 								};
     return this->CreateSetupPartialDerivative(2, rDomain, indexes, 8, eCFDM, std::map<std::string, std::string>());
 }

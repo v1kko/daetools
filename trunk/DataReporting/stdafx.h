@@ -50,8 +50,5 @@
 #include <memory>
 using namespace std;
 
-#include <boost/asio.hpp>
-using boost::asio::ip::tcp;
-
 #endif
 

@@ -3,7 +3,7 @@ using namespace std;
 #include "base_solvers.h"
 #include "ida_solver.h"
 
-namespace dae 
+namespace daetools 
 {
 namespace solver 
 {

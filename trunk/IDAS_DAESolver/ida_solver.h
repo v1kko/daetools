@@ -30,7 +30,7 @@
 #define DAE_IDAS_API
 #endif // WIN32
 
-namespace dae
+namespace daetools
 {
 namespace solver
 {
@@ -141,8 +141,8 @@ public:
     daeDenseMatrix						m_matSTimeDerivatives;
     daeDenseMatrix						m_matSResiduals;
 
-    boost::shared_ptr<daeIDASolverData>	m_pIDASolverData;
-    boost::shared_ptr<daeBlockOfEquations_t> m_pBlockOfEquations;
+    std::shared_ptr<daeIDASolverData>	m_pIDASolverData;
+    std::shared_ptr<daeBlockOfEquations_t> m_pBlockOfEquations;
     bool								m_bIsModelDynamic;
     bool								m_bCalculateSensitivities;
     std::vector<size_t>					m_narrParametersIndexes;

@@ -4,24 +4,9 @@
 #include "../IDAS_DAESolver/ida_la_solver_interface.h"
 #include "../IDAS_DAESolver/solver_class_factory.h"
 #include "../IDAS_DAESolver/dae_array_matrix.h"
+#include "base_solvers.h"
 
-#if defined(_WIN32) || defined(WIN32) || defined(WIN64) || defined(_WIN64)
-
-#ifdef DAE_DLL_INTERFACE
-#ifdef PARDISO_EXPORTS
-#define DAE_PARDISO_API __declspec(dllexport)
-#else
-#define DAE_PARDISO_API __declspec(dllimport)
-#endif
-#else // DAE_DLL_INTERFACE
-#define DAE_PARDISO_API
-#endif // DAE_DLL_INTERFACE
-
-#else // WIN32
-#define DAE_PARDISO_API
-#endif // WIN32
-
-namespace dae
+namespace daetools
 {
 namespace solver
 {
@@ -34,9 +19,7 @@ extern "C" void pardiso_chkmatrix  (int *, int *, double *, int *, int *, int *)
 extern "C" void pardiso_chkvec     (int *, int *, double *, int *);
 extern "C" void pardiso_printstats (int *, int *, double *, int *, int *, int *, double *, int *);
 
-DAE_PARDISO_API daeLASolver_t* daeCreatePardisoSolver(void);
-
-class DAE_PARDISO_API daePardisoSolver : public dae::solver::daeLASolver_t
+class DAE_PARDISO_API daePardisoSolver : public daetools::solver::daeLASolver_t
 {
 public:
     typedef daeCSRMatrix<real_t, int> daeMKLMatrix;

@@ -18,6 +18,7 @@ LIBS += $${DAE_CORE_LIB} \
         $${DAE_UNITS_LIB} \
         $${DAE_CONFIG_LIB} \
         $${BOOST_LIBS}
+LIBS += $${STD_FILESYSTEM}
 
 HEADERS += stdafx.h \
     simulation.h \

@@ -15,7 +15,7 @@ DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 using namespace cs;
 #include <typeinfo>
 
-namespace dae
+namespace daetools
 {
 namespace core
 {

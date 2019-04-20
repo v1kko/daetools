@@ -2,76 +2,76 @@
 #define DAE_MODEL_EXPORT_H
 
 #include "core.h"
-#include <boost/format.hpp>
+//#include <boost/format.hpp>
 
-namespace dae 
+namespace daetools
 {
-namespace core 
+namespace core
 {
 class daeModel;
 /********************************************************************
-	daeModelExportContext
+    daeModelExportContext
 *********************************************************************/
 class daeModelExportContext
 {
 public:
-	std::string CalculateIndent(size_t nPythonIndentLevel)
-	{
-		std::string strIndent;
-		daeConfig& cfg = daeConfig::GetConfig();
+    std::string CalculateIndent(size_t nPythonIndentLevel)
+    {
+        std::string strIndent;
+        daeConfig& cfg = daeConfig::GetConfig();
         std::string strPythonIndent = cfg.GetString("daetools.core.pythonIndent", "    ");
-		
-		for(size_t i = 0; i < nPythonIndentLevel; i++)
-			strIndent += strPythonIndent;
-		
-		return strIndent;		
-	}
-	
+
+        for(size_t i = 0; i < nPythonIndentLevel; i++)
+            strIndent += strPythonIndent;
+
+        return strIndent;
+    }
+
 public:
-	size_t			m_nPythonIndentLevel;
-	const daeModel*	m_pModel;
-	bool			m_bExportDefinition;
+    size_t			m_nPythonIndentLevel;
+    const daeModel*	m_pModel;
+    bool			m_bExportDefinition;
 };
 
 /********************************************************************
-	daeExportable_t
+    daeExportable_t
 *********************************************************************/
 class daeExportable_t
 {
 public:
-	virtual ~daeExportable_t(void){}
+    virtual ~daeExportable_t(void){}
 
 public:
-	virtual void Export(std::string& strContent, daeeModelLanguage eLanguage, daeModelExportContext& c) const = 0;
+    virtual void Export(std::string& strContent, daeeModelLanguage eLanguage, daeModelExportContext& c) const = 0;
 };
 
 /********************************************************************
-	Export functions
+    Export functions
 *********************************************************************/
 template<class TYPE>
 void ExportObjectArray(const std::vector<TYPE>& ptrarrObjects, std::string& strContent, daeeModelLanguage eLanguage, daeModelExportContext& c)
 {
-	TYPE pObject;
-	
-	for(size_t i = 0; i < ptrarrObjects.size(); i++)
-	{
-		pObject = ptrarrObjects[i];
-		pObject->Export(strContent, eLanguage, c);
-	}
+    TYPE pObject;
+
+    for(size_t i = 0; i < ptrarrObjects.size(); i++)
+    {
+        pObject = ptrarrObjects[i];
+        pObject->Export(strContent, eLanguage, c);
+    }
 }
 
 template<class TYPE>
 void CreateDefinitionObjectArray(const std::vector<TYPE>& ptrarrObjects, std::string& strContent, daeeModelLanguage eLanguage, daeModelExportContext& c)
 {
-	TYPE pObject;
-	
-	for(size_t i = 0; i < ptrarrObjects.size(); i++)
-	{
-		if(i != 0)
-			strContent += "\n";
-		pObject = ptrarrObjects[i];
-		pObject->CreateDefinition(strContent, eLanguage, c);
-	}
+    TYPE pObject;
+
+    for(size_t i = 0; i < ptrarrObjects.size(); i++)
+    {
+        if(i != 0)
+            strContent += "\n";
+        pObject = ptrarrObjects[i];
+        pObject->CreateDefinition(strContent, eLanguage, c);
+    }
 }
 
 }

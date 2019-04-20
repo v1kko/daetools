@@ -6,7 +6,7 @@
 #include <cuda.h>
 #include <cuda_runtime_api.h>
 
-namespace dae
+namespace daetools
 {
 namespace solver
 {

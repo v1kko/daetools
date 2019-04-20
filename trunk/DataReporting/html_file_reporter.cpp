@@ -2,10 +2,10 @@
 #include "datareporters.h"
 #include "../Core/xmlfile.h"
 #include "../Core/helpers.h"
-using namespace dae;
-using namespace dae::xml;
+using namespace daetools;
+using namespace daetools::xml;
 
-namespace dae
+namespace daetools
 {
 namespace datareporting
 {

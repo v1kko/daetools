@@ -13,12 +13,19 @@ DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 #ifndef DAE_CORE_IMPL_H
 #define DAE_CORE_IMPL_H
 
-#include <boost/smart_ptr.hpp>
-#include <boost/lexical_cast.hpp>
-#include <boost/cstdint.hpp>
+//#if __has_include(<variant>)
+//#pragma once message("Using std::variant and tuple")
+//#include <variant>
+//#include <tuple>
+//using std::variant;
+//#else
 #include <boost/variant.hpp>
 #include <boost/tuple/tuple.hpp>
+using boost::variant;
+//#endif
+#include <boost/multi_array.hpp>
 
+#include <cstdint>
 #include "../config.h"
 #include "io_impl.h"
 #include "helpers.h"
@@ -29,13 +36,7 @@ DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 #include "export.h"
 #include "thermo_package.h"
 
-#if defined(DAE_MPI)
-#include <boost/mpi.hpp>
-#include <boost/serialization/string.hpp>
-#include <boost/serialization/utility.hpp>
-#endif
-
-namespace dae
+namespace daetools
 {
 namespace core
 {
@@ -772,7 +773,7 @@ public:
     void Load(const std::string& strFileName)
     {
         double dValue;
-        boost::uint32_t nTotalNumberOfVariables;
+        std::uint32_t nTotalNumberOfVariables;
         size_t counter;
         std::streamoff lRequiredFileSize;
         std::streamoff lFileSize;
@@ -797,7 +798,7 @@ public:
             file.seekg(0, std::ifstream::end);
             lFileSize = file.tellg();
             file.seekg(0);
-            file.read((char*)(&nTotalNumberOfVariables), sizeof(boost::uint32_t));
+            file.read((char*)(&nTotalNumberOfVariables), sizeof(std::uint32_t));
         }
         catch(std::exception& exc)
         {
@@ -807,7 +808,7 @@ public:
             throw e;
         }
 
-        lRequiredFileSize = sizeof(boost::uint32_t) + m_nTotalNumberOfVariables * sizeof(double);
+        lRequiredFileSize = sizeof(std::uint32_t) + m_nTotalNumberOfVariables * sizeof(double);
         if(lFileSize != lRequiredFileSize)
         {
             daeDeclareException(exInvalidCall);
@@ -861,7 +862,7 @@ public:
     {
         double dValue;
         std::ofstream file;
-        boost::uint32_t nTotalNumberOfVariables;
+        std::uint32_t nTotalNumberOfVariables;
 
         if(m_nTotalNumberOfVariables == 0 || m_pdarrValuesReferences.empty())
         {
@@ -880,8 +881,8 @@ public:
         {
             file.open(strFileName.c_str(), std::ios_base::out | std::ios_base::trunc | std::ios_base::binary);
 
-            nTotalNumberOfVariables = static_cast<boost::uint32_t>(m_nTotalNumberOfVariables);
-            file.write((char*)(&nTotalNumberOfVariables), sizeof(boost::uint32_t));
+            nTotalNumberOfVariables = static_cast<std::uint32_t>(m_nTotalNumberOfVariables);
+            file.write((char*)(&nTotalNumberOfVariables), sizeof(std::uint32_t));
 
             for(size_t i = 0; i < m_nTotalNumberOfVariables; i++)
             {
@@ -2686,7 +2687,7 @@ protected:
     daeEventPort* m_pSendEventPort;
 
 // For eReAssignOrReInitializeVariable:
-    boost::shared_ptr<daeVariableWrapper> m_pVariableWrapper;
+    std::shared_ptr<daeVariableWrapper> m_pVariableWrapper;
 
 // Common for eSendEvent and eReAssignOrReInitializeVariable:
     adNodePtr	m_pSetupNode;
@@ -2872,8 +2873,8 @@ public:
     void Export(std::string& strContent, daeeModelLanguage eLanguage, daeModelExportContext& c) const;
 
 protected:
-    boost::shared_ptr<daeRemoteEventReceiver> receiver;
-    boost::shared_ptr<daeRemoteEventSender>   sender;
+    std::shared_ptr<daeRemoteEventReceiver> receiver;
+    std::shared_ptr<daeRemoteEventSender>   sender;
 
     daeEventPort* m_pPortFrom;
     daeEventPort* m_pPortTo;
@@ -2941,7 +2942,7 @@ public:
     virtual bool IsModelDynamic() const;
     virtual daeeModelType GetModelType() const;
 
-    //boost::shared_ptr<daeExternalObject_t> LoadExternalObject(const string& strPath);
+    //std::shared_ptr<daeExternalObject_t> LoadExternalObject(const string& strPath);
 
     virtual void	GetModelInfo(daeModelInfo& mi) const;
 
@@ -2957,11 +2958,11 @@ public:
     virtual void	GetPortArrays(std::vector<daePortArray_t*>& ptrarrPortArrays);
     virtual void	GetModelArrays(std::vector<daeModelArray_t*>& ptrarrModelArrays);
 
-    virtual void	CollectAllDomains(std::map<dae::string, daeDomain_t*>& mapDomains) const;
-    virtual void	CollectAllParameters(std::map<dae::string, daeParameter_t*>& mapParameters) const;
-    virtual void	CollectAllVariables(std::map<dae::string, daeVariable_t*>& mapVariables) const;
-    virtual void	CollectAllSTNs(std::map<dae::string, daeSTN_t*>& mapSTNs) const;
-    virtual void	CollectAllPorts(std::map<dae::string, daePort_t*>& mapPorts) const;
+    virtual void	CollectAllDomains(std::map<std::string, daeDomain_t*>& mapDomains) const;
+    virtual void	CollectAllParameters(std::map<std::string, daeParameter_t*>& mapParameters) const;
+    virtual void	CollectAllVariables(std::map<std::string, daeVariable_t*>& mapVariables) const;
+    virtual void	CollectAllSTNs(std::map<std::string, daeSTN_t*>& mapSTNs) const;
+    virtual void	CollectAllPorts(std::map<std::string, daePort_t*>& mapPorts) const;
 
     virtual void    GetCoSimulationInterface(std::vector<daeParameter_t*>& ptrarrParameters,
                                              std::vector<daeVariable_t*>&  ptrarrInputs,
@@ -3003,8 +3004,8 @@ public:
     virtual size_t	GetTotalNumberOfVariables(void) const;
     virtual size_t	GetTotalNumberOfEquations(void) const;
 
-    virtual boost::shared_ptr<daeAllowThreads_t> CreateAllowThreads();
-    virtual boost::shared_ptr<daeGILState_t>     CreateGILState();
+    virtual std::shared_ptr<daeAllowThreads_t> CreateAllowThreads();
+    virtual std::shared_ptr<daeGILState_t>     CreateGILState();
 
     size_t GetNumberOfSTNs(void) const;
 
@@ -3103,7 +3104,7 @@ public:
     daeEventPort*	FindEventPort(unsigned long nID) const;
     daeVariable*	FindVariable(unsigned long nID) const;
 
-    boost::shared_ptr<daeDataProxy_t> GetDataProxy(void) const;
+    std::shared_ptr<daeDataProxy_t> GetDataProxy(void) const;
 
     void RemoveModel(daeModel* pObject);
     void RemoveEquation(daeEquation* pObject);
@@ -3141,7 +3142,7 @@ protected:
     void		BuildUpSTNsAndEquations(void);
     void		CreatePortConnectionEquations(void);
 
-    void		PropagateDataProxy(boost::shared_ptr<daeDataProxy_t> pDataProxy);
+    void		PropagateDataProxy(std::shared_ptr<daeDataProxy_t> pDataProxy);
     void		PropagateGlobalExecutionContext(daeExecutionContext* pExecutionContext);
 
     size_t		GetVariablesStartingIndex(void) const;
@@ -3160,7 +3161,7 @@ protected:
     bool		DetectObject(string& strShortName, std::vector<size_t>& narrDomains, daeeObjectType& eType, daeObject_t** ppObject);
 
 protected:
-    boost::shared_ptr<daeDataProxy_t>	m_pDataProxy;
+    std::shared_ptr<daeDataProxy_t>	m_pDataProxy;
     size_t								m_nVariablesStartingIndex;
     size_t								m_nTotalNumberOfVariables;
 
@@ -3270,7 +3271,7 @@ protected:
     virtual void InitializeBlockIndexes(const std::map<size_t, size_t>& mapOverallIndex_BlockIndex)                                 = 0;
 
     virtual void CreatePortConnectionEquations(void)                                                        						= 0;
-    virtual void PropagateDataProxy(boost::shared_ptr<daeDataProxy_t> pDataProxy)                               					= 0;
+    virtual void PropagateDataProxy(std::shared_ptr<daeDataProxy_t> pDataProxy)                               					= 0;
     virtual void PropagateGlobalExecutionContext(daeExecutionContext* pExecutionContext)                            				= 0;
     virtual void CollectAllSTNsAsVector(std::vector<daeSTN*>& ptrarrSTNs) const         											= 0;
     virtual void CollectEquationExecutionInfosFromModels(std::vector<daeEquationExecutionInfo*>& ptrarrEquationExecutionInfo) const	= 0;
@@ -3523,7 +3524,7 @@ public:
     daeState*		FindState(long nID);
     daeState*		FindState(const string& strName);
 
-    void CollectAllSTNs(std::map<dae::string, daeSTN_t*>& mapSTNs) const;
+    void CollectAllSTNs(std::map<std::string, daeSTN_t*>& mapSTNs) const;
 
 protected:
     virtual void	AddExpressionsToBlock(daeBlock* pBlock);
@@ -3752,9 +3753,9 @@ public:
 
     virtual daeFiniteElementObjectInfo GetObjectInfo() const = 0;
 
-    virtual dae::daeMatrix<adouble>*                                                    Asystem() const = 0;
-    virtual dae::daeMatrix<adouble>*                                                    Msystem() const = 0;
-    virtual dae::daeArray<adouble>*                                                     Fload()   const = 0;
+    virtual daetools::daeMatrix<adouble>*                                                    Asystem() const = 0;
+    virtual daetools::daeMatrix<adouble>*                                                    Msystem() const = 0;
+    virtual daetools::daeArray<adouble>*                                                     Fload()   const = 0;
     virtual const std::map< unsigned int, std::vector< std::pair<adouble,adouble> > >*  SurfaceIntegrals() const = 0;
     virtual const std::vector< std::pair<adouble,adouble> >*                            VolumeIntegrals()  const = 0;
 };
@@ -3786,9 +3787,9 @@ protected:
     daeDomain                               m_omega;
     daePtrVector<daeDomain*>                m_ptrarrFESubDomains;
     daePtrVector<daeVariable*>              m_ptrarrFEVariables;
-    boost::shared_ptr< daeMatrix<adouble> > m_Aij; // Stiffness matrix
-    boost::shared_ptr< daeMatrix<adouble> > m_Mij; // Mass matrix
-    boost::shared_ptr< daeArray<adouble> >  m_Fi;  // Load vector
+    std::shared_ptr< daeMatrix<adouble> > m_Aij; // Stiffness matrix
+    std::shared_ptr< daeMatrix<adouble> > m_Mij; // Mass matrix
+    std::shared_ptr< daeArray<adouble> >  m_Fi;  // Load vector
 
     friend class daeFiniteElementEquation;
 };
@@ -3988,7 +3989,7 @@ public:
     void	 SetResidual(adouble res);
     adouble	 GetResidual(void) const;
 
-    void Initialize(const std::vector< boost::shared_ptr<daeOptimizationVariable> >& arrOptimizationVariables, daeBlock_t* pBlock);
+    void Initialize(const std::vector< std::shared_ptr<daeOptimizationVariable> >& arrOptimizationVariables, daeBlock_t* pBlock);
 
     void RemoveEquationFromModel(void);
 
@@ -3998,7 +3999,7 @@ protected:
 protected:
     daeModel*						m_pModel;
     daeDAESolver_t*					m_pDAESolver;
-    boost::shared_ptr<daeVariable>	m_pVariable;
+    std::shared_ptr<daeVariable>	m_pVariable;
     daeEquation*					m_pEquation;
     daeEquationExecutionInfo*		m_pEquationExecutionInfo;
     size_t							m_nEquationIndexInBlock;
@@ -4077,12 +4078,12 @@ DAE_CORE_API void			FindDomains(const std::vector<daeDomain*>& ptrarrSource, std
 /*********************************************************************************************
     daeExternalFunction_t
 **********************************************************************************************/
-typedef boost::variant<adouble, adouble_array>						  daeExternalFunctionArgument_t;
-typedef std::map<std::string, daeExternalFunctionArgument_t>		  daeExternalFunctionArgumentMap_t;
-typedef boost::variant<adouble, std::vector<adouble> >				  daeExternalFunctionArgumentValue_t;
-typedef std::map<std::string, daeExternalFunctionArgumentValue_t>	  daeExternalFunctionArgumentValueMap_t;
-typedef boost::variant<adNodePtr, adNodeArrayPtr >	                  daeExternalFunctionNode_t;
-typedef std::map<std::string, daeExternalFunctionNode_t>			  daeExternalFunctionNodeMap_t;
+typedef variant<adouble, adouble_array>                             daeExternalFunctionArgument_t;
+typedef std::map<std::string, daeExternalFunctionArgument_t>		daeExternalFunctionArgumentMap_t;
+typedef variant<adouble, std::vector<adouble> >                     daeExternalFunctionArgumentValue_t;
+typedef std::map<std::string, daeExternalFunctionArgumentValue_t>	daeExternalFunctionArgumentValueMap_t;
+typedef variant<adNodePtr, adNodeArrayPtr >                         daeExternalFunctionNode_t;
+typedef std::map<std::string, daeExternalFunctionNode_t>			daeExternalFunctionNodeMap_t;
 
 class DAE_CORE_API daeExternalFunction_t : public daeObject
 {
@@ -4193,11 +4194,11 @@ protected:
 /*********************************************************************************************
     daeCapeOpenThermoPhysicalPropertyPackage
 **********************************************************************************************/
-using dae::tpp::daeeThermoPackagePropertyType;
-using dae::tpp::daeeThermoPackagePhase;
-using dae::tpp::daeeThermoPackageBasis;
-using dae::tpp::daeThermoPhysicalPropertyPackage_t;
-using dae::tpp::eMole;
+using daetools::tpp::daeeThermoPackagePropertyType;
+using daetools::tpp::daeeThermoPackagePhase;
+using daetools::tpp::daeeThermoPackageBasis;
+using daetools::tpp::daeThermoPhysicalPropertyPackage_t;
+using daetools::tpp::eMole;
 
 class DAE_CORE_API daeThermoPhysicalPropertyPackage : public daeObject
 {
@@ -4239,14 +4240,14 @@ public:
                                           const adouble& T,
                                           const adouble_array& X,
                                           const std::string& phase,
-                                          daeeThermoPackageBasis basis = dae::tpp::eMole);
+                                          daeeThermoPackageBasis basis = daetools::tpp::eMole);
 
     adouble_array CalcSinglePhaseVectorProperty(const std::string& property,
                                                 const adouble& P,
                                                 const adouble& T,
                                                 const adouble_array& X,
                                                 const std::string& phase,
-                                                daeeThermoPackageBasis basis = dae::tpp::eMole);
+                                                daeeThermoPackageBasis basis = daetools::tpp::eMole);
 
     adouble CalcTwoPhaseScalarProperty(const std::string& property,
                                        const adouble& P1,
@@ -4257,7 +4258,7 @@ public:
                                        const adouble& T2,
                                        const adouble_array& X2,
                                        const std::string& phase2,
-                                       daeeThermoPackageBasis basis = dae::tpp::eMole);
+                                       daeeThermoPackageBasis basis = daetools::tpp::eMole);
 
      adouble_array CalcTwoPhaseVectorProperty(const std::string& property,
                                               const adouble& P1,
@@ -4268,9 +4269,9 @@ public:
                                               const adouble& T2,
                                               const adouble_array& X2,
                                               const std::string& phase2,
-                                              daeeThermoPackageBasis basis = dae::tpp::eMole);
+                                              daeeThermoPackageBasis basis = daetools::tpp::eMole);
 
-    unit GetUnits(const std::string& property, daeeThermoPackageBasis basis = dae::tpp::eMole);
+    unit GetUnits(const std::string& property, daeeThermoPackageBasis basis = daetools::tpp::eMole);
 
 public:
     daeThermoPhysicalPropertyPackage_t* m_package;

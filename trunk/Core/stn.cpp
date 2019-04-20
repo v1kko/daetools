@@ -1,7 +1,7 @@
 #include "stdafx.h"
 #include "coreimpl.h"
 
-namespace dae
+namespace daetools
 {
 namespace core
 {
@@ -609,7 +609,7 @@ void daeSTN::BuildExpressions(daeBlock* pBlock)
     EC.m_eEquationCalculationMode	= eCreateFunctionsIFsSTNs;
 
 // I have to set this since Create_adouble called from adSetup nodes needs it
-    boost::shared_ptr<daeDataProxy_t> pDataProxy = m_pModel->GetDataProxy();
+    std::shared_ptr<daeDataProxy_t> pDataProxy = m_pModel->GetDataProxy();
     daeModel* pTopLevelModel = dynamic_cast<daeModel*>(pDataProxy->GetTopLevelModel());
     pTopLevelModel->PropagateGlobalExecutionContext(&EC);
 
@@ -894,7 +894,7 @@ const std::vector<daeState*>& daeSTN::States() const
     return m_ptrarrStates;
 }
 
-void daeSTN::CollectAllSTNs(std::map<dae::string, daeSTN_t*>& mapSTNs) const
+void daeSTN::CollectAllSTNs(std::map<std::string, daeSTN_t*>& mapSTNs) const
 {
     daeSTN* pSTN;
     daeState* pState;

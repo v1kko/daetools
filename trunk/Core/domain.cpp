@@ -4,7 +4,7 @@
 #include "nodes_array.h"
 #include "units_io.h"
 
-namespace dae
+namespace daetools
 {
 namespace core
 {

@@ -5,7 +5,7 @@
 #include "nodes_array.h"
 using namespace boost;
 
-namespace dae
+namespace daetools
 {
 namespace core
 {
@@ -813,7 +813,7 @@ adouble Min(const adouble_array& a)
 
     tmp = a[0];
     for(size_t i = 1; i < a.GetSize(); i++)
-        tmp = dae::core::__min__(tmp, a[i]);
+        tmp = daetools::core::__min__(tmp, a[i]);
     return tmp;
 }
 
@@ -831,7 +831,7 @@ adouble Max(const adouble_array& a)
 
     tmp = a[0];
     for(size_t i = 1; i < a.GetSize(); i++)
-        tmp = dae::core::__max__(tmp, a[i]);
+        tmp = daetools::core::__max__(tmp, a[i]);
     return tmp;
 }
 

@@ -16,8 +16,8 @@
 #include <boost/python/suite/indexing/map_indexing_suite.hpp>
 
 #include "../FE_DealII/dealii_fe_system.h"
-#include "../dae_develop.h"
-using namespace dae::fe_solver;
+#include "../daetools-pymod.h"
+using namespace daetools::fe_solver;
 
 namespace daepython
 {

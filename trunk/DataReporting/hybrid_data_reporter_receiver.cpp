@@ -1,7 +1,7 @@
 #include "stdafx.h"
 #include "datareporters.h"
 
-namespace dae
+namespace daetools
 {
 namespace datareporting
 {

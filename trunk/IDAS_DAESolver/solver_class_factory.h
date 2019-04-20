@@ -19,7 +19,7 @@
 
 #include "../Core/solver.h"
 
-namespace dae
+namespace daetools
 {
 namespace solver
 {

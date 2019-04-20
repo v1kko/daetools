@@ -279,7 +279,7 @@ template class TensorFunction<3,1,adouble>;
 template class TensorFunction<3,2,adouble>;
 template class TensorFunction<3,3,adouble>;
 
-namespace daeMatrixTools
+namespace daetoolsMatrixTools
 {
 namespace
 {
@@ -465,7 +465,7 @@ inline void local_process_mass_matrix(const std::map<types::global_dof_index,Num
 }
 }
 
-namespace daeVectorTools
+namespace daetoolsVectorTools
 {
 // interpolate boundary values in 1D.
 //

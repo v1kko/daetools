@@ -16,7 +16,7 @@ DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 #include "adouble.h"
 #include "nodes.h"
 
-namespace dae
+namespace daetools
 {
 namespace core
 {

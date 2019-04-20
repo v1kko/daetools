@@ -32,7 +32,7 @@ public:
     void logError(const std::string& error);
 
 public:
-    boost::shared_ptr<tcp::socket>  m_ptcpipSocket;
+    std::shared_ptr<tcp::socket>  m_ptcpipSocket;
     boost::asio::io_service         m_ioService;
     std::map<int, fmiObject>        m_FMI_Interface;
 

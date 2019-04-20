@@ -2,17 +2,17 @@
 #include "coreimpl.h"
 #include "nodes.h"
 #include "nodes_array.h"
-using namespace dae;
+using namespace daetools;
 #include "xmlfunctions.h"
 #include "units_io.h"
 #include "../Units/units_pool.h"
 #include "simplify_node.h"
 #include <typeinfo>
 #include <boost/functional/hash.hpp>
-using namespace dae::xml;
+using namespace daetools::xml;
 using namespace boost;
 
-namespace dae
+namespace daetools
 {
 namespace core
 {
@@ -4513,7 +4513,7 @@ adouble adThermoPhysicalPropertyPackageScalarNode::Evaluate(const daeExecutionCo
         daeDeclareAndThrowException(exInvalidPointer);
 
     daeModel* pTopLevelModel = dynamic_cast<daeModel*>(pExecutionContext->m_pDataProxy->GetTopLevelModel());
-    boost::shared_ptr<daeGILState_t> _gil_ = pTopLevelModel->CreateGILState();
+    std::shared_ptr<daeGILState_t> _gil_ = pTopLevelModel->CreateGILState();
 
     adouble tmp;
 
@@ -4566,26 +4566,26 @@ adouble adThermoPhysicalPropertyPackageScalarNode::Evaluate(const daeExecutionCo
     }
 
     double result;
-    if(propertyType == dae::tpp::ePureCompoundConstantProperty)
+    if(propertyType == daetools::tpp::ePureCompoundConstantProperty)
         result = thermoPhysicalPropertyPackage->GetCompoundConstant(property, compound);
 
-    else if(propertyType == dae::tpp::ePureCompoundTDProperty)
+    else if(propertyType == daetools::tpp::ePureCompoundTDProperty)
         result = thermoPhysicalPropertyPackage->GetTDependentProperty(property,
                                                                        T.getValue(),
                                                                        compound);
 
-    else if(propertyType == dae::tpp::ePureCompoundPDProperty)
+    else if(propertyType == daetools::tpp::ePureCompoundPDProperty)
         result = thermoPhysicalPropertyPackage->GetPDependentProperty(property,
                                                                        P.getValue(),
                                                                        compound);
 
-    else if(propertyType == dae::tpp::eSinglePhaseScalarProperty)
+    else if(propertyType == daetools::tpp::eSinglePhaseScalarProperty)
         result = thermoPhysicalPropertyPackage->CalcSinglePhaseScalarProperty(property,
                                                                               P.getValue(), T.getValue(), arrX,
                                                                               phase,
                                                                               basis);
 
-    else if(propertyType == dae::tpp::eTwoPhaseScalarProperty)
+    else if(propertyType == daetools::tpp::eTwoPhaseScalarProperty)
         result = thermoPhysicalPropertyPackage->CalcTwoPhaseScalarProperty(property,
                                                                            P.getValue(), T.getValue(), arrX, phase,
                                                                            P2.getValue(), T2.getValue(), arrX2, phase2,
@@ -4647,16 +4647,16 @@ string adThermoPhysicalPropertyPackageScalarNode::SaveAsLatex(const daeNodeSaveA
     strLatex += " { tpp.";
     strLatex += toString(property);
     strLatex += " \\left( ";
-    if(propertyType == dae::tpp::ePureCompoundConstantProperty)
+    if(propertyType == daetools::tpp::ePureCompoundConstantProperty)
     {
         strLatex += compound;
     }
-    else if(propertyType == dae::tpp::ePureCompoundTDProperty)
+    else if(propertyType == daetools::tpp::ePureCompoundTDProperty)
     {
         strLatex += compound + ", ";
         strLatex += temperature->SaveAsLatex(c) + ", ";
     }
-    else if(propertyType == dae::tpp::ePureCompoundPDProperty)
+    else if(propertyType == daetools::tpp::ePureCompoundPDProperty)
     {
         strLatex += compound + ", ";
         strLatex += pressure->SaveAsLatex(c) + ", ";
@@ -4667,7 +4667,7 @@ string adThermoPhysicalPropertyPackageScalarNode::SaveAsLatex(const daeNodeSaveA
         strLatex += temperature->SaveAsLatex(c) + ", ";
         strLatex += composition->SaveAsLatex(c) + ", ";
         strLatex += phase + ", ";
-        if(propertyType == dae::tpp::eTwoPhaseScalarProperty)
+        if(propertyType == daetools::tpp::eTwoPhaseScalarProperty)
         {
             strLatex += pressure2->SaveAsLatex(c) + ", ";
             strLatex += temperature2->SaveAsLatex(c) + ", ";
@@ -4761,7 +4761,7 @@ adouble_array adThermoPhysicalPropertyPackageArrayNode::Evaluate(const daeExecut
         daeDeclareAndThrowException(exInvalidPointer);
 
     daeModel* pTopLevelModel = dynamic_cast<daeModel*>(pExecutionContext->m_pDataProxy->GetTopLevelModel());
-    boost::shared_ptr<daeGILState_t> _gil_ = pTopLevelModel->CreateGILState();
+    std::shared_ptr<daeGILState_t> _gil_ = pTopLevelModel->CreateGILState();
 
     adouble_array tmp;
 
@@ -4814,7 +4814,7 @@ adouble_array adThermoPhysicalPropertyPackageArrayNode::Evaluate(const daeExecut
     }
 
     std::vector<double> results;
-    if(propertyType == dae::tpp::eSinglePhaseVectorProperty)
+    if(propertyType == daetools::tpp::eSinglePhaseVectorProperty)
     {
         thermoPhysicalPropertyPackage->CalcSinglePhaseVectorProperty(property,
                                                                      P.getValue(), T.getValue(), arrX,
@@ -4822,7 +4822,7 @@ adouble_array adThermoPhysicalPropertyPackageArrayNode::Evaluate(const daeExecut
                                                                      results,
                                                                      basis);
     }
-    else if(propertyType == dae::tpp::eTwoPhaseVectorProperty)
+    else if(propertyType == daetools::tpp::eTwoPhaseVectorProperty)
     {
         thermoPhysicalPropertyPackage->CalcTwoPhaseVectorProperty(property,
                                                                   P.getValue(), T.getValue(), arrX, phase,
@@ -4879,9 +4879,9 @@ string adThermoPhysicalPropertyPackageArrayNode::SaveAsLatex(const daeNodeSaveAs
     string strLatex;
 
 //    strLatex += "{ tpp.";
-//    if(propertyType == dae::tpp::eTwoPhaseScalarProperty)
+//    if(propertyType == daetools::tpp::eTwoPhaseScalarProperty)
 //        strLatex += "TwoPhaseScalarProperty \\left( ";
-//    else if(propertyType == dae::tpp::eTwoPhaseVectorProperty)
+//    else if(propertyType == daetools::tpp::eTwoPhaseVectorProperty)
 //        strLatex += "TwoPhaseVectorProperty \\left( ";
 //    else
 //        strLatex += "UnknownCall \\left( ";
@@ -4894,7 +4894,7 @@ string adThermoPhysicalPropertyPackageArrayNode::SaveAsLatex(const daeNodeSaveAs
     strLatex += temperature->SaveAsLatex(c) + ", ";
     strLatex += composition->SaveAsLatex(c) + ", ";
     strLatex += phase + ", ";
-    if(propertyType == dae::tpp::eTwoPhaseVectorProperty)
+    if(propertyType == daetools::tpp::eTwoPhaseVectorProperty)
     {
         strLatex += pressure2->SaveAsLatex(c) + ", ";
         strLatex += temperature2->SaveAsLatex(c) + ", ";
@@ -4963,7 +4963,7 @@ bool adThermoPhysicalPropertyPackageArrayNode::IsDifferential(void) const
     adFEMatrixItemNode
 **********************************************************************************************/
 /*
-adFEMatrixItemNode::adFEMatrixItemNode(const string& strMatrixName, const dae::daeMatrix<adouble>& matrix, size_t row, size_t column, const unit& units)
+adFEMatrixItemNode::adFEMatrixItemNode(const string& strMatrixName, const daetools::daeMatrix<adouble>& matrix, size_t row, size_t column, const unit& units)
                   : m_strMatrixName(strMatrixName),
                     m_matrix(matrix),
                     m_row(row),
@@ -5087,7 +5087,7 @@ bool adFEMatrixItemNode::IsDifferential(void) const
     adFEVectorItemNode
 **********************************************************************************************/
 /*
-adFEVectorItemNode::adFEVectorItemNode(const string& strVectorName, const dae::daeArray<adouble>& array, size_t row, const unit& units)
+adFEVectorItemNode::adFEVectorItemNode(const string& strVectorName, const daetools::daeArray<adouble>& array, size_t row, const unit& units)
                   : m_strVectorName(strVectorName),
                     m_vector(array),
                     m_row(row),

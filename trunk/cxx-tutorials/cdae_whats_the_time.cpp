@@ -43,7 +43,7 @@ using units_pool::s;
     - UpperBound: float
     - InitialGuess: float
     - AbsoluteTolerance: float
-   Here, a very simple variable type is declared: 
+   Here, a very simple variable type is declared:
 */
 daeVariableType typeTime("typeTime", s, 0, 1E10, 0, 1e-5);
 
@@ -54,12 +54,12 @@ class modWhatsTheTime : public daeModel
 daeDeclareDynamicClass(modWhatsTheTime)
 public:
     daeVariable tau;
-	
+
 /*
     3.1 Declare domains/parameters/variables/ports
         All domains, parameters, variables, ports etc has to be declared as members of
         the new model class (except equations which are handled by the framework), since the base class
-        keeps only their references. 
+        keeps only their references.
         Domains, parameters, variables, ports, etc has to be defined in the constructor
         First, the base class constructor has to be called.
         In this example we declare only one variable: tau.
@@ -75,7 +75,7 @@ public:
         Also if you write the variable name as: Name_1 it will be transformed into Name with the subscript 1.
         In this example we use Greek character 'τ' to name the variable 'tau'.
 */
-    modWhatsTheTime(string strName, daeModel* pParent = NULL, string strDescription = "") 
+    modWhatsTheTime(string strName, daeModel* pParent = NULL, string strDescription = "")
       : daeModel(strName, pParent, strDescription),
         tau("&tau;", typeTime, this, "Time elapsed in the process")
     {
@@ -83,7 +83,7 @@ public:
 
     void DeclareEquations(void)
     {
-/* 
+/*
     3.2 Declare equations and state transition networks
         Here we declare only one equation. Equations are created by the function CreateEquation in daeModel class.
         It accepts two arguments: equation name and description (optional). All naming conventions apply here as well.
@@ -114,7 +114,7 @@ class simWhatsTheTime : public daeSimulation
 {
 public:
     modWhatsTheTime M;
-    
+
 public:
 /*
     4.1 First, the base class constructor has to be called, and then the model for the simulation has to be instantiated.
@@ -159,7 +159,7 @@ public:
 };
 
 int main(int argc, char *argv[])
-{ 
+{
 /*
 5.Create Log, Solver, DataReporter and Simulation object
     Every simulation requires the following four objects:
@@ -168,19 +168,10 @@ int main(int argc, char *argv[])
     - datareporter is used to send the data from the solver to daePlotter
     - simulation object
 */
-    boost::scoped_ptr<daeSimulation_t>      pSimulation(new simWhatsTheTime);  
-    boost::scoped_ptr<daeDataReporter_t>    pDataReporter(daeCreateTCPIPDataReporter());
-    boost::scoped_ptr<daeIDASolver>         pDAESolver(new daeIDASolver());
-    boost::scoped_ptr<daeLog_t>             pLog(daeCreateStdOutLog());
-    
-    if(!pSimulation)
-        daeDeclareAndThrowException(exInvalidPointer); 
-    if(!pDataReporter)
-        daeDeclareAndThrowException(exInvalidPointer); 
-    if(!pDAESolver)
-        daeDeclareAndThrowException(exInvalidPointer); 
-    if(!pLog)
-        daeDeclareAndThrowException(exInvalidPointer); 
+    std::unique_ptr<daeSimulation_t>      pSimulation(new simWhatsTheTime);
+    std::unique_ptr<daeDataReporter_t>    pDataReporter(daeCreateTCPIPDataReporter());
+    std::unique_ptr<daeDAESolver_t>       pDAESolver(daeCreateIDASolver());
+    std::unique_ptr<daeLog_t>             pLog(daeCreateStdOutLog());
 
 /*
 6. Additional settings
@@ -193,7 +184,7 @@ Here some additional information can be entered. The most common are:
     pSimulation->SetTimeHorizon(500);
     pSimulation->SetReportingInterval(10);
     pSimulation->GetModel()->SetReportingOn(true);
-    
+
 /*
 7. Connect the data reporter
     daeTCPIPDataReporter data reporter uses TCP/IP protocol to send the results to the daePlotter.
@@ -206,11 +197,11 @@ Here some additional information can be entered. The most common are:
     struct tm* timeinfo;
     char buffer[80];
     time(&rawtime);
-    timeinfo = localtime(&rawtime);   
+    timeinfo = localtime(&rawtime);
     strftime (buffer, 80, " [%d.%m.%Y %H:%M:%S]", timeinfo);
     string simName = pSimulation->GetModel()->GetName() + buffer;
     if(!pDataReporter->Connect(string(""), simName))
-        daeDeclareAndThrowException(exInvalidCall); 
+        daeDeclareAndThrowException(exInvalidCall);
 
 /*
 8. Run the simulation
@@ -223,13 +214,13 @@ Here some additional information can be entered. The most common are:
         The function SaveRuntimeModelReport creates a runtime sort of the model report (with the equations fully expanded)
 */
     pSimulation->Initialize(pDAESolver.get(), pDataReporter.get(), pLog.get());
-    
+
 /*
     Save the model report and the runtime model report (optional)
 */
     pSimulation->GetModel()->SaveModelReport(pSimulation->GetModel()->GetName() + ".xml");
     pSimulation->GetModel()->SaveRuntimeModelReport(pSimulation->GetModel()->GetName() + "-rt.xml");
-  
+
 /*
     8.2 Solve at time = 0 (initialization)
         The DAE system must be first initialized. The function SolveInitial is used for that purpose.
@@ -246,4 +237,4 @@ Here some additional information can be entered. The most common are:
     8.4 Finally, call the function Finalize to clean-up.
 */
     pSimulation->Finalize();
-} 
+}

@@ -3,7 +3,7 @@
 #include "nodes.h"
 using namespace boost;
 
-namespace dae
+namespace daetools
 {
 namespace core
 {

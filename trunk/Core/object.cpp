@@ -4,7 +4,7 @@
 #include <map>
 #include "xmlfunctions.h"
 
-namespace dae
+namespace daetools
 {
 namespace core
 {
@@ -159,14 +159,14 @@ void daeObject::SetDescription(const string& strDescription)
 string daeObject::GetStrippedName(void) const
 {
     string strStrippedName = m_strShortName;
-    dae::RemoveAllNonAlphaNumericCharacters(strStrippedName);
+    daetools::RemoveAllNonAlphaNumericCharacters(strStrippedName);
     return strStrippedName;
 }
 
 string daeObject::GetStrippedNameRelativeToParentModel(void) const
 {
     string strStrippedName = GetNameRelativeToParentModel();
-    dae::RemoveAllNonAlphaNumericCharacters(strStrippedName);
+    daetools::RemoveAllNonAlphaNumericCharacters(strStrippedName);
     return strStrippedName;
 }
 
@@ -186,7 +186,7 @@ string daeGetRelativeName(const daeObject* parent, const daeObject* child)
 {
     string strParent = (parent ? parent->GetCanonicalName() : string(""));
     string strChild  = (child ? child->GetCanonicalName() : string(""));
-    return dae::core::daeGetRelativeName(strParent, strChild);
+    return daetools::core::daeGetRelativeName(strParent, strChild);
 }
 
 string daeGetRelativeName(const string& strParent, const string& strChild)
@@ -205,7 +205,7 @@ string daeGetRelativeName(const string& strParent, const string& strChild)
 string daeGetStrippedName(const string& strName)
 {
     string strStrippedName = strName;
-    dae::RemoveAllNonAlphaNumericCharacters(strStrippedName);
+    daetools::RemoveAllNonAlphaNumericCharacters(strStrippedName);
     return strStrippedName;
 }
 
@@ -218,8 +218,8 @@ string daeGetStrippedName(const string& strName)
 
 string daeGetStrippedRelativeName(const daeObject* parent, const daeObject* child)
 {
-    string strStrippedName = dae::core::daeGetRelativeName(parent, child);
-    dae::RemoveAllNonAlphaNumericCharacters(strStrippedName);
+    string strStrippedName = daetools::core::daeGetRelativeName(parent, child);
+    daetools::RemoveAllNonAlphaNumericCharacters(strStrippedName);
     return strStrippedName;
 }
 

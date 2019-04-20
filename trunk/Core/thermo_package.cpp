@@ -10,12 +10,12 @@
 #endif
 #include "../CoolPropThermoPackage/cool_prop.h"
 
-using dae::tpp::eMole;
-using dae::tpp::eMass;
-using dae::tpp::eUndefinedBasis;
-using dae::tpp::etppPhaseUnknown;
+using daetools::tpp::eMole;
+using daetools::tpp::eMass;
+using daetools::tpp::eUndefinedBasis;
+using daetools::tpp::etppPhaseUnknown;
 
-namespace dae
+namespace daetools
 {
 namespace core
 {
@@ -112,7 +112,7 @@ adouble daeThermoPhysicalPropertyPackage::GetCompoundConstant(const std::string&
 
     tmp.setGatherInfo(true);
     daeeThermoPackageBasis basis = eUndefinedBasis;
-    adThermoPhysicalPropertyPackageScalarNode* n = new adThermoPhysicalPropertyPackageScalarNode(dae::tpp::ePureCompoundConstantProperty,
+    adThermoPhysicalPropertyPackageScalarNode* n = new adThermoPhysicalPropertyPackageScalarNode(daetools::tpp::ePureCompoundConstantProperty,
                                                                                                  property,
                                                                                                  basis,
                                                                                                  compound,
@@ -147,7 +147,7 @@ adouble daeThermoPhysicalPropertyPackage::GetTDependentProperty(const std::strin
 
     tmp.setGatherInfo(true);
     daeeThermoPackageBasis basis = eUndefinedBasis;
-    adThermoPhysicalPropertyPackageScalarNode* n = new adThermoPhysicalPropertyPackageScalarNode(dae::tpp::ePureCompoundTDProperty,
+    adThermoPhysicalPropertyPackageScalarNode* n = new adThermoPhysicalPropertyPackageScalarNode(daetools::tpp::ePureCompoundTDProperty,
                                                                                                  property,
                                                                                                  basis,
                                                                                                  compound,
@@ -182,7 +182,7 @@ adouble daeThermoPhysicalPropertyPackage::GetPDependentProperty(const std::strin
 
     tmp.setGatherInfo(true);
     daeeThermoPackageBasis basis = eUndefinedBasis;
-    adThermoPhysicalPropertyPackageScalarNode* n = new adThermoPhysicalPropertyPackageScalarNode(dae::tpp::ePureCompoundPDProperty,
+    adThermoPhysicalPropertyPackageScalarNode* n = new adThermoPhysicalPropertyPackageScalarNode(daetools::tpp::ePureCompoundPDProperty,
                                                                                                  property,
                                                                                                  basis,
                                                                                                  compound,
@@ -218,7 +218,7 @@ adouble daeThermoPhysicalPropertyPackage::CalcSinglePhaseScalarProperty(const st
     adouble tmp;
 
     tmp.setGatherInfo(true);
-    adThermoPhysicalPropertyPackageScalarNode* n = new adThermoPhysicalPropertyPackageScalarNode(dae::tpp::eSinglePhaseScalarProperty,
+    adThermoPhysicalPropertyPackageScalarNode* n = new adThermoPhysicalPropertyPackageScalarNode(daetools::tpp::eSinglePhaseScalarProperty,
                                                                                                  property,
                                                                                                  basis,
                                                                                                  std::string(""),
@@ -254,7 +254,7 @@ adouble_array daeThermoPhysicalPropertyPackage::CalcSinglePhaseVectorProperty(co
     adouble_array tmp;
 
     tmp.setGatherInfo(true);
-    adThermoPhysicalPropertyPackageArrayNode* n = new adThermoPhysicalPropertyPackageArrayNode(dae::tpp::eSinglePhaseVectorProperty,
+    adThermoPhysicalPropertyPackageArrayNode* n = new adThermoPhysicalPropertyPackageArrayNode(daetools::tpp::eSinglePhaseVectorProperty,
                                                                                                property,
                                                                                                basis,
                                                                                                GetUnits(property, basis),
@@ -294,7 +294,7 @@ adouble daeThermoPhysicalPropertyPackage::CalcTwoPhaseScalarProperty(const std::
     adouble tmp;
 
     tmp.setGatherInfo(true);
-    adThermoPhysicalPropertyPackageScalarNode* n = new adThermoPhysicalPropertyPackageScalarNode(dae::tpp::eTwoPhaseScalarProperty,
+    adThermoPhysicalPropertyPackageScalarNode* n = new adThermoPhysicalPropertyPackageScalarNode(daetools::tpp::eTwoPhaseScalarProperty,
                                                                                                  property,
                                                                                                  basis,
                                                                                                  std::string(""),
@@ -334,7 +334,7 @@ adouble_array daeThermoPhysicalPropertyPackage::CalcTwoPhaseVectorProperty(const
     adouble_array tmp;
 
     tmp.setGatherInfo(true);
-    adThermoPhysicalPropertyPackageArrayNode* n = new adThermoPhysicalPropertyPackageArrayNode(dae::tpp::eTwoPhaseVectorProperty,
+    adThermoPhysicalPropertyPackageArrayNode* n = new adThermoPhysicalPropertyPackageArrayNode(daetools::tpp::eTwoPhaseVectorProperty,
                                                                                                property,
                                                                                                basis,
                                                                                                GetUnits(property, basis),

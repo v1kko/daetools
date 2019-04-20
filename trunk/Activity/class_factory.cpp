@@ -2,7 +2,7 @@
 #include "simulation.h"
 #include "../Core/macros.h"
 
-namespace dae 
+namespace daetools 
 {
 namespace activity 
 {

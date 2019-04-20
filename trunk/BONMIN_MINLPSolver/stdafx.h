@@ -47,7 +47,7 @@
 using namespace std;
 
 #include "../Core/xmlfile.h"
-using namespace dae::xml;
+using namespace daetools::xml;
 
 #include <math.h>
 
