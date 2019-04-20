@@ -14,7 +14,9 @@
 #include "../Core/nodes.h"
 #include <typeinfo>
 
+using namespace daetools::core;
 using namespace dealii;
+
 /*********************************************************
  * deal.II related classes and typedefs
  *********************************************************/

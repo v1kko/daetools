@@ -20,6 +20,7 @@ namespace daetools
 namespace fe_solver
 {
 using namespace dealii;
+using namespace daetools::core;
 
 template<int dim>
 adouble getValueFromNumber(const feRuntimeNumber<dim>& fe_number)
@@ -1337,15 +1338,15 @@ void dealiiFiniteElementSystem<dim>::assemble_one_cell(const typename DoFHandler
     // and local_process_mass_matrix() functions.
     {
         // Apply Dirichlet boundary conditions on the stiffness matrix and rhs
-        daeMatrixTools::local_apply_boundary_values(boundary_values_map_adouble,
-                                                    local_dof_indices,
-                                                    cell_matrix,
-                                                    cell_rhs);
+        daetoolsMatrixTools::local_apply_boundary_values(boundary_values_map_adouble,
+                                                         local_dof_indices,
+                                                         cell_matrix,
+                                                         cell_rhs);
 
         // Modify the local mass matrix for those nodes that have Dirichlet boundary conditions set
-        daeMatrixTools::local_process_mass_matrix(boundary_values_map_adouble,
-                                                  local_dof_indices,
-                                                  cell_matrix_dt);
+        daetoolsMatrixTools::local_process_mass_matrix(boundary_values_map_adouble,
+                                                       local_dof_indices,
+                                                       cell_matrix_dt);
     }
 
 /*
@@ -1449,11 +1450,11 @@ void dealiiFiniteElementSystem<dim>::assemble_system()
                 if(m_bPrintInfo)
                     std::cout << "Interpolate DirichletBC at id: " << id << " for variable " << variableName << std::endl;
 
-                daeVectorTools::interpolate_boundary_values (dof_handler,
-                                                             id,
-                                                             fun,
-                                                             boundary_values_map_adouble,
-                                                             iter->second);
+                daetoolsVectorTools::interpolate_boundary_values(dof_handler,
+                                                                 id,
+                                                                 fun,
+                                                                 boundary_values_map_adouble,
+                                                                 iter->second);
                 /*
                 if(m_bPrintInfo)
                 {
