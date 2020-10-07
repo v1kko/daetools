@@ -26,4 +26,4 @@ jobs:
       - name: Upload Artifacts
         uses: actions/upload-artifact@v2
         with:
-          path: daetools_p38.tar.gz
+          path: daetools_py38.tar.gz
