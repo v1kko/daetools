@@ -1,6 +1,6 @@
 FROM ubuntu:20.04
 
-RUN apt-get update
+RUN apt-get update > /dev/null
 RUN apt-get install --yes subversion git > /dev/null
 RUN apt-get install --yes lsb-release > /dev/null
 
