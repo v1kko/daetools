@@ -1,0 +1,64 @@
+FROM ubuntu:20.04
+
+RUN apt-get update
+RUN apt-get install --yes subversion git 2> /dev/null
+RUN apt-get install --yes lsb-release 2> /dev/null
+
+#Install dependencies, manually (from update_dependencies_linux.sh)
+RUN apt-get install --yes apt-utils 2> /dev/null
+RUN DEBIAN_FRONTEND=noninteractive apt-get install --yes tzdata keyboard-configuration 2> /dev/null
+RUN apt-get install --yes  qtbase5-dev qtcreator autotools-dev automake make pkg-config autoconf gcc g++ gfortran binutils cmake patch wget subversion fakeroot libfreetype6-dev swig python-dev libpng-dev libxext-dev libbz2-dev 2> /dev/null
+
+RUN wget http://nl.archive.ubuntu.com/ubuntu/pool/universe/g/gcc-6/libgfortran3_6.5.0-2ubuntu1~18.04_amd64.deb  2> /dev/null
+RUN wget http://nl.archive.ubuntu.com/ubuntu/pool/universe/g/gcc-6/gcc-6-base_6.5.0-2ubuntu1~18.04_amd64.deb 2> /dev/null
+RUN dpkg -i gcc-6-base_6.5.0-2ubuntu1~18.04_amd64.deb libgfortran3_6.5.0-2ubuntu1~18.04_amd64.deb 2> /dev/null
+
+RUN apt-get upgrade --yes 2> /dev/null
+RUN apt-get remove --yes --purge python2.7 2> /dev/null
+RUN apt-get autoremove --yes 2> /dev/null
+
+RUN apt-get install --reinstall --yes python3.8 python3-pip 2> /dev/null
+RUN ln -s /usr/bin/python3.8 /usr/bin/python
+RUN pip3 install PyQt5==5.11.3 h5py pyqt5-tools numpy scipy matplotlib tk xlwt lxml pandas 2> /dev/null
+
+RUN mkdir -p daetools/trunk
+COPY ./ daetools/trunk
+
+RUN cd daetools/trunk && sh compile_libraries.sh boost 2> /dev/null
+RUN cd daetools/trunk && sh compile_libraries.sh ref_blas_lapack 2> /dev/null
+RUN cd daetools/trunk && sh compile_libraries.sh umfpack  2> /dev/null
+RUN cd daetools/trunk && sh compile_libraries.sh idas  2> /dev/null
+RUN cd daetools/trunk && sh compile_libraries.sh superlu  2> /dev/null
+RUN cd daetools/trunk && sh compile_libraries.sh superlu_mt  2> /dev/null
+RUN cd daetools/trunk && sh compile_libraries.sh ipopt  2> /dev/null
+RUN cd daetools/trunk && sh compile_libraries.sh bonmin  2> /dev/null
+RUN cd daetools/trunk && sh compile_libraries.sh nlopt 2> /dev/null
+RUN cd daetools/trunk && sh compile_libraries.sh coolprop  2> /dev/null
+RUN cd daetools/trunk && sh compile_libraries.sh trilinos  2> /dev/null
+RUN cd daetools/trunk && sh compile_libraries.sh deal.ii 2> /dev/null
+
+#Dummy link opencs
+RUN cd daetools/trunk/OpenCS/ && mkdir -p build/include && cd build/include && ln -s ../../OpenCS
+
+#Bugfixing newer compilers
+RUN echo "QMAKE_CXXFLAGS += -fpermissive" >> daetools/trunk/pyUnits/pyUnits.pro
+RUN echo "QMAKE_CXXFLAGS += -fpermissive" >> daetools/trunk/Core/Core.pro
+RUN echo "QMAKE_CXXFLAGS += -fpermissive" >> daetools/trunk/pyCore/pyCore.pro
+RUN echo "QMAKE_CXXFLAGS += -fpermissive" >> daetools/trunk/pyActivity/pyActivity.pro
+RUN echo "QMAKE_CXXFLAGS += -fpermissive" >> daetools/trunk/pyIDAS/pyIDAS.pro
+RUN echo "QMAKE_CXXFLAGS += -fpermissive" >> daetools/trunk/pyDataReporting/pyDataReporting.pro
+RUN echo "QMAKE_CXXFLAGS += -fpermissive" >> daetools/trunk/Activity/Activity.pro
+
+RUN cd daetools/trunk && sh compile.sh units 2> /dev/null
+RUN cd daetools/trunk && sh compile.sh cool_prop 2> /dev/null
+RUN cd daetools/trunk && sh compile.sh config 2> /dev/null
+RUN cd daetools/trunk && sh compile.sh core 2> /dev/null
+
+RUN cd daetools/trunk && sh compile.sh idas 2> /dev/null
+RUN cd daetools/trunk && sh compile.sh data_reporting 2> /dev/null
+
+RUN cd daetools/trunk && sh compile.sh activity 2> /dev/null
+RUN cd daetools/trunk && sh compile.sh superlu 2> /dev/null
+
+RUN cd daetools/trunk/daetools-package && sed -i 's/%s\/\*.so/%s\/\*.so\*/g' ./setup.py
+RUN cd daetools/trunk/daetools-package && sed -i '/python_requires/d' ./setup.py
