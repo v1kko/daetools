@@ -14,7 +14,7 @@ jobs:
           fetch-depth: 1
       - name: Build
         run: |
-        docker build -f ./dockerfiles/daetools_py38.docker -t daetools_py38 ./
+          docker build -f ./dockerfiles/daetools_py38.docker -t daetools_py38 ./
       - name: Extract Artifacts
         run: |
           rm -rf daetools
