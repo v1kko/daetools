@@ -24,18 +24,18 @@ RUN pip3 install PyQt5==5.11.3 h5py pyqt5-tools numpy scipy matplotlib tk xlwt l
 RUN mkdir -p daetools/trunk
 COPY ./ daetools/trunk
 
-RUN cd daetools/trunk && sh compile_libraries.sh boost > /dev/null
-RUN cd daetools/trunk && sh compile_libraries.sh ref_blas_lapack > /dev/null
-RUN cd daetools/trunk && sh compile_libraries.sh umfpack  > /dev/null
-RUN cd daetools/trunk && sh compile_libraries.sh idas  > /dev/null
-RUN cd daetools/trunk && sh compile_libraries.sh superlu  > /dev/null
-RUN cd daetools/trunk && sh compile_libraries.sh superlu_mt  > /dev/null
-RUN cd daetools/trunk && sh compile_libraries.sh ipopt  > /dev/null
-RUN cd daetools/trunk && sh compile_libraries.sh bonmin  > /dev/null
-RUN cd daetools/trunk && sh compile_libraries.sh nlopt > /dev/null
-RUN cd daetools/trunk && sh compile_libraries.sh coolprop  > /dev/null
-RUN cd daetools/trunk && sh compile_libraries.sh trilinos  > /dev/null
-RUN cd daetools/trunk && sh compile_libraries.sh deal.ii > /dev/null
+RUN cd daetools/trunk && sh compile_libraries.sh boost > /dev/null 2> /dev/null
+RUN cd daetools/trunk && sh compile_libraries.sh ref_blas_lapack > /dev/null 2> /dev/null
+RUN cd daetools/trunk && sh compile_libraries.sh umfpack  > /dev/null 2> /dev/null
+RUN cd daetools/trunk && sh compile_libraries.sh idas  > /dev/null 2> /dev/null
+RUN cd daetools/trunk && sh compile_libraries.sh superlu  > /dev/null 2> /dev/null
+RUN cd daetools/trunk && sh compile_libraries.sh superlu_mt  > /dev/null 2> /dev/null
+RUN cd daetools/trunk && sh compile_libraries.sh ipopt  > /dev/null 2> /dev/null
+RUN cd daetools/trunk && sh compile_libraries.sh bonmin  > /dev/null 2> /dev/null
+RUN cd daetools/trunk && sh compile_libraries.sh nlopt > /dev/null 2> /dev/null
+RUN cd daetools/trunk && sh compile_libraries.sh coolprop  > /dev/null 2> /dev/null
+RUN cd daetools/trunk && sh compile_libraries.sh trilinos  > /dev/null 2> /dev/null
+RUN cd daetools/trunk && sh compile_libraries.sh deal.ii > /dev/null 2> /dev/null
 
 #Dummy link opencs
 RUN cd daetools/trunk/OpenCS/ && mkdir -p build/include && cd build/include && ln -s ../../OpenCS
