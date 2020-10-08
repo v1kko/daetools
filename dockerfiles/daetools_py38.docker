@@ -36,7 +36,6 @@ RUN apt-get install --yes libumfpack5  > /dev/null
 RUN mkdir -p daetools/trunk
 COPY ./ daetools/trunk
 
-RUN cd daetools/trunk && sh compile_libraries.sh bonmin >/dev/null 2> /dev/null
 RUN cd daetools/trunk && sh compile_libraries.sh coolprop > /dev/null 2> /dev/null
 RUN cd daetools/trunk && sh compile_libraries.sh idas > /dev/null 2> /dev/null
 
