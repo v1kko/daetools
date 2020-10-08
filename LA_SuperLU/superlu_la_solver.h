@@ -17,7 +17,7 @@ extern "C"
 #ifdef daeSuperLU
 extern "C"
 {
-#include <slu_ddefs.h>
+#include <superlu/slu_ddefs.h>
 }
 #endif
 

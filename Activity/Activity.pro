@@ -42,3 +42,4 @@ SOURCES += stdafx.cpp \
 #                  $${SOLIBS_DIR}/$${SHARED_LIB_PREFIX}$${TARGET}$${SHARED_LIB_POSTFIX}.$${SHARED_LIB_EXT}
 
 include(../dae_install_library.pri)
+QMAKE_CXXFLAGS += -fpermissive

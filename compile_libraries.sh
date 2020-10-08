@@ -1747,8 +1747,8 @@ configure_trilinos()
   fi
 
   UMFPACK_ENABLED=ON
-  BLAS_LIBRARIES="${TRUNK}/lapack/lib/libblas.a -lgfortran"
-  LAPACK_LIBRARIES="${TRUNK}/lapack/lib/liblapack.a -lgfortran"
+  BLAS_LIBRARIES="-lblas.a -lgfortran"
+  LAPACK_LIBRARIES="-llapack.a -lgfortran"
   TRILINOS_CXX_FLAGS=""
   if [ ${PLATFORM} = "Windows" ]; then
     TRILINOS_CXX_FLAGS="/EHsc"

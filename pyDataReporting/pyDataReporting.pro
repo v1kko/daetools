@@ -36,3 +36,4 @@ HEADERS += stdafx.h \
 #                  $${PYDAE_DIR}/$${TARGET}.$${PYTHON_EXTENSION_MODULE_EXT}
 
 include(../dae_install_py_module.pri)
+QMAKE_CXXFLAGS += -fpermissive

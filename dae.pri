@@ -393,10 +393,10 @@ win64-g++-*::BOOST_LIBS                 = -L$${BOOSTLIBPATH} -l$${BOOST_SYSTEM_L
                                                              $${RT}
 
 unix::BOOSTLIBPATH               = $${BOOSTDIR}/stage/lib
-unix::BOOST_PYTHON_LIB_NAME      = boost_python$${BOOST_PYTHON_SUFFIX}-daetools
-unix::BOOST_SYSTEM_LIB_NAME      = boost_system-daetools
-unix::BOOST_THREAD_LIB_NAME      = boost_thread-daetools
-unix::BOOST_FILESYSTEM_LIB_NAME  = boost_filesystem-daetools
+unix::BOOST_PYTHON_LIB_NAME      = boost_python$${BOOST_PYTHON_SUFFIX}
+unix::BOOST_SYSTEM_LIB_NAME      = boost_system
+unix::BOOST_THREAD_LIB_NAME      = boost_thread
+unix::BOOST_FILESYSTEM_LIB_NAME  = boost_filesystem
 unix::BOOST_PYTHON_LIB           = -L$${BOOSTLIBPATH} -l$${BOOST_PYTHON_LIB_NAME} \
                                    -L$${PYTHON_LIB_DIR} $${PYTHON_LIB}
 unix::BOOST_LIBS                 = -L$${BOOSTLIBPATH} -l$${BOOST_SYSTEM_LIB_NAME} \
@@ -431,7 +431,7 @@ win64-g++-*::BLAS_LAPACK_LIBS    =  $${BLAS_LAPACK_LIBDIR}/liblapack.a $${BLAS_L
 # 1. OpenBLAS dynamically linked:
 #linux-g++::BLAS_LAPACK_LIBS = -L$${BLAS_LAPACK_LIBDIR} -lopenblas_daetools -lm
 # 2. daetools compiled reference BLAS and Lapack statically linked:
-linux-g++::BLAS_LAPACK_LIBS = $${BLAS_LAPACK_LIBDIR}/liblapack.a $${BLAS_LAPACK_LIBDIR}/libblas.a -l:libgfortran.so.3 -lm
+linux-g++::BLAS_LAPACK_LIBS = -llapack -lblas -l:libgfortran.so.3 -lm
 macx-g++::BLAS_LAPACK_LIBS  = $${BLAS_LAPACK_LIBDIR}/liblapack.a $${BLAS_LAPACK_LIBDIR}/libblas.a -lgfortran -lm
 
 
