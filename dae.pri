@@ -392,12 +392,11 @@ win64-g++-*::BOOST_LIBS                 = -L$${BOOSTLIBPATH} -l$${BOOST_SYSTEM_L
                                                              $${PTHREADS_LIB} \
                                                              $${RT}
 
-unix::BOOSTLIBPATH               = $${BOOSTDIR}/stage/lib
 unix::BOOST_PYTHON_LIB_NAME      = boost_python$${BOOST_PYTHON_SUFFIX}
 unix::BOOST_SYSTEM_LIB_NAME      = boost_system
 unix::BOOST_THREAD_LIB_NAME      = boost_thread
 unix::BOOST_FILESYSTEM_LIB_NAME  = boost_filesystem
-unix::BOOST_PYTHON_LIB           = -L$${BOOSTLIBPATH} -l$${BOOST_PYTHON_LIB_NAME} \
+unix::BOOST_PYTHON_LIB           = -l$${BOOST_PYTHON_LIB_NAME} \
                                    -L$${PYTHON_LIB_DIR} $${PYTHON_LIB}
 unix::BOOST_LIBS                 = -L$${BOOSTLIBPATH} -l$${BOOST_SYSTEM_LIB_NAME} \
                                                       -l$${BOOST_THREAD_LIB_NAME} \
@@ -431,7 +430,7 @@ win64-g++-*::BLAS_LAPACK_LIBS    =  $${BLAS_LAPACK_LIBDIR}/liblapack.a $${BLAS_L
 # 1. OpenBLAS dynamically linked:
 #linux-g++::BLAS_LAPACK_LIBS = -L$${BLAS_LAPACK_LIBDIR} -lopenblas_daetools -lm
 # 2. daetools compiled reference BLAS and Lapack statically linked:
-linux-g++::BLAS_LAPACK_LIBS = -lliblapack.a -llibblas.a -l:libgfortran.so.3 -lm
+linux-g++::BLAS_LAPACK_LIBS = -llapack -lblas -l:libgfortran.so.3 -lm
 macx-g++::BLAS_LAPACK_LIBS  = $${BLAS_LAPACK_LIBDIR}/liblapack.a $${BLAS_LAPACK_LIBDIR}/libblas.a -lgfortran -lm
 
 
@@ -442,7 +441,7 @@ macx-g++::BLAS_LAPACK_LIBS  = $${BLAS_LAPACK_LIBDIR}/liblapack.a $${BLAS_LAPACK_
 #             --enable-examples --enable-static=yes --enable-shared=no --with-pic
 #             --enable-lapack CFLAGS=-O3
 #####################################################################################
-SUNDIALS         = ../idas/
+SUNDIALS         = ../idas/build
 SUNDIALS_INCLUDE = $${SUNDIALS}/include
 SUNDIALS_LIBDIR  = $${SUNDIALS}/lib
 
@@ -452,8 +451,8 @@ win32-g++-*::SUNDIALS_LIBS = $${SUNDIALS_LIBDIR}/libsundials_idas.a \
                              $${SUNDIALS_LIBDIR}/libsundials_nvecserial.a
 win64-g++-*::SUNDIALS_LIBS = $${SUNDIALS_LIBDIR}/libsundials_idas.a \
                              $${SUNDIALS_LIBDIR}/libsundials_nvecserial.a
-unix::SUNDIALS_LIBS  = -l:libsundials_idas.a \
-                       -l:libsundials_nvecserial.a
+unix::SUNDIALS_LIBS  = $${SUNDIALS_LIBDIR}/libsundials_idas.a \
+                       $${SUNDIALS_LIBDIR}/libsundials_nvecserial.a
 
 
 #####################################################################################

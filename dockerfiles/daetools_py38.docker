@@ -8,7 +8,7 @@ RUN apt-get install --yes lsb-release > /dev/null
 #Install dependencies, manually (from update_dependencies_linux.sh)
 RUN apt-get install --yes apt-utils > /dev/null
 RUN DEBIAN_FRONTEND=noninteractive apt-get install --yes --no-install-recommends \
-qtbase5-dev autotools-dev automake make pkg-config autoconf gcc g++ gfortran \
+qt5-qmake autotools-dev automake make pkg-config autoconf gcc g++ gfortran \
 binutils cmake patch wget fakeroot libfreetype6-dev swig libpng-dev \
 libxext-dev libbz2-dev unzip > /dev/null
 
@@ -20,30 +20,29 @@ RUN apt-get install --yes python3.8 python3-pip > /dev/null
 RUN ln -s /usr/bin/python3.8 /usr/bin/python
 RUN pip3 install PyQt5==5.11.3 h5py numpy scipy matplotlib tk xlwt lxml pandas > /dev/null
 
-RUN apt-get install --yes libdeal.ii-dev > /dev/null
-RUN apt-get install --yes libboost-system-dev  > /dev/null
-RUN apt-get install --yes libboost-filesystem-dev  > /dev/null
-RUN apt-get install --yes libboost-thread-dev  > /dev/null
-RUN apt-get install --yes libboost-python-dev  > /dev/null
-RUN apt-get install --yes liblapack-dev  > /dev/null
-RUN apt-get install --yes libblas-dev  > /dev/null
-RUN apt-get install --yes trilinos-dev  > /dev/null
-RUN apt-get install --yes libsuperlu-dev  > /dev/null
-RUN apt-get install --yes libnlopt-dev  > /dev/null
-RUN apt-get install --yes libsundials-dev  > /dev/null
-RUN apt-get install --yes libumfpack5  > /dev/null
+RUN apt-get install --yes libboost-system-dev \
+ libboost-filesystem-dev \
+ libboost-thread-dev \
+ libboost-python-dev \
+ liblapack-dev \
+ libblas-dev \
+ trilinos-dev \ 
+ libsuperlu-dev \
+ libnlopt-dev \
+ libsundials-dev \
+ libumfpack5 > /dev/null
 
 RUN mkdir -p daetools/trunk
 COPY ./ daetools/trunk
 
-RUN cd daetools/trunk && sh compile_libraries.sh coolprop > /dev/null 2> /dev/null
 RUN cd daetools/trunk && sh compile_libraries.sh idas > /dev/null 2> /dev/null
 
 #Dummy link opencs
 RUN cd daetools/trunk/OpenCS/ && mkdir -p build/include && cd build/include && ln -s ../../OpenCS
 
+env QT_SELECT=qt5
 RUN cd daetools/trunk && sh compile.sh units > /dev/null
-RUN cd daetools/trunk && sh compile.sh cool_prop > /dev/null
+#RUN cd daetools/trunk && sh compile.sh cool_prop > /dev/null
 RUN cd daetools/trunk && sh compile.sh config > /dev/null
 RUN cd daetools/trunk && sh compile.sh core > /dev/null
 

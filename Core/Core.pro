@@ -14,8 +14,6 @@ win32::QMAKE_CXXFLAGS += -DMODEL_EXPORTS
 LIBS +=	$${DAE_UNITS_LIB} \
         $${DAE_CONFIG_LIB} \
         $${DAE_CAPE_THERMO_PACKAGE_LIB} \
-        $${DAE_COOLPROP_THERMO_PACKAGE_LIB} \
-        $${COOLPROP_LIBS} \
         $${BOOST_LIBS}
 
 SOURCES +=  action.cpp \
