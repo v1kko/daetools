@@ -431,7 +431,7 @@ win64-g++-*::BLAS_LAPACK_LIBS    =  $${BLAS_LAPACK_LIBDIR}/liblapack.a $${BLAS_L
 # 1. OpenBLAS dynamically linked:
 #linux-g++::BLAS_LAPACK_LIBS = -L$${BLAS_LAPACK_LIBDIR} -lopenblas_daetools -lm
 # 2. daetools compiled reference BLAS and Lapack statically linked:
-linux-g++::BLAS_LAPACK_LIBS = -llapack -lblas -l:libgfortran.so.3 -lm
+linux-g++::BLAS_LAPACK_LIBS = -lliblapack.a -llibblas.a -l:libgfortran.so.3 -lm
 macx-g++::BLAS_LAPACK_LIBS  = $${BLAS_LAPACK_LIBDIR}/liblapack.a $${BLAS_LAPACK_LIBDIR}/libblas.a -lgfortran -lm
 
 
@@ -442,7 +442,7 @@ macx-g++::BLAS_LAPACK_LIBS  = $${BLAS_LAPACK_LIBDIR}/liblapack.a $${BLAS_LAPACK_
 #             --enable-examples --enable-static=yes --enable-shared=no --with-pic
 #             --enable-lapack CFLAGS=-O3
 #####################################################################################
-SUNDIALS         = ../idas/build
+SUNDIALS         = ../idas/
 SUNDIALS_INCLUDE = $${SUNDIALS}/include
 SUNDIALS_LIBDIR  = $${SUNDIALS}/lib
 
@@ -452,8 +452,8 @@ win32-g++-*::SUNDIALS_LIBS = $${SUNDIALS_LIBDIR}/libsundials_idas.a \
                              $${SUNDIALS_LIBDIR}/libsundials_nvecserial.a
 win64-g++-*::SUNDIALS_LIBS = $${SUNDIALS_LIBDIR}/libsundials_idas.a \
                              $${SUNDIALS_LIBDIR}/libsundials_nvecserial.a
-unix::SUNDIALS_LIBS  = $${SUNDIALS_LIBDIR}/libsundials_idas.a \
-                       $${SUNDIALS_LIBDIR}/libsundials_nvecserial.a
+unix::SUNDIALS_LIBS  = -l:libsundials_idas.a \
+                       -l:libsundials_nvecserial.a
 
 
 #####################################################################################
