@@ -23,12 +23,9 @@ jobs:
           password: ${{ secrets.CR_PAT }}
 
       - name: Build lib and push
-        uses: docker/build-push-action@v2
-        with:
-          push: true
-          context: ./
-          tags: v1kko/daetools-libs
-          file: ./dockerfiles/daetools_libs.docker
+        run: |
+          docker build -f ./dockerfiles/daetools_libs.docker -t v1kko/daetools-libs .
+          docker push v1kko/daetools-libs
 
   build_py38:
     runs-on: ubuntu-20.04
