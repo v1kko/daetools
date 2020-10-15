@@ -24,8 +24,8 @@ jobs:
 
       - name: Build lib and push
         run: |
-          docker build -f ./dockerfiles/daetools-libs.docker -t v1kko/daetools-libs .
-          docker push v1kko/daetools-libs
+          docker build -f ./dockerfiles/daetools-libs.docker -t ghcr.io/v1kko/daetools-libs .
+          docker push ghcr.io/v1kko/daetools-libs
 
   build_py38:
     runs-on: ubuntu-20.04
