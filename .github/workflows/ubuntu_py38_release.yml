@@ -26,8 +26,9 @@ jobs:
         uses: docker/build-push-action@v2
         with:
           push: true
+          context: ./
           tags: v1kko/daetools-libs
-          file: dockerfiles/daetools_libs.docker
+          file: ./dockerfiles/daetools_libs.docker
 
   build_py38:
     runs-on: ubuntu-20.04
