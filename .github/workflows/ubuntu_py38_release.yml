@@ -24,7 +24,7 @@ jobs:
 
       - name: Build lib and push
         run: |
-          docker build -f ./dockerfiles/daetools_libs.docker -t v1kko/daetools-libs .
+          docker build -f ./dockerfiles/daetools-libs.docker -t v1kko/daetools-libs .
           docker push v1kko/daetools-libs
 
   build_py38:
