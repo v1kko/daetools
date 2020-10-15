@@ -1,4 +1,4 @@
-name: create_release
+name: create_ubuntu_amd64_release
 
 on:
   workflow_dispatch
@@ -24,13 +24,23 @@ jobs:
         run: |
           docker build -f ./dockerfiles/daetools-libs.docker -t ghcr.io/v1kko/daetools-libs .
           docker push ghcr.io/v1kko/daetools-libs
-
+      - name: Cache daetools-package
+        uses: actions/cache@v2
+        env:
+          cache-name: cache-daetools-package
+        with:
+          path: ./daetools-package
+          key: daetools-package
   build_py38:
     runs-on: ubuntu-20.04
     needs: build
 
     steps:
-        
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 1
+  
       - name: Build py38
         run: |
           docker build -f ./dockerfiles/daetools_python_bindings.docker \
@@ -42,12 +52,17 @@ jobs:
           mkdir -p daetools
           docker run -v `pwd`/daetools-package:/out daetools_py38 rsync -a
           /daetools/trunk/daetools-package/  /out/
-
+   
   build_py39:
     runs-on: ubuntu-20.04
     needs: build
 
     steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 1
+
       - name: Build py38
         run: |
           docker build -f ./dockerfiles/daetools_python_bindings.docker \
@@ -63,6 +78,11 @@ jobs:
     runs-on: ubuntu-20.04
     needs: [build_py39, build_py38]
     steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 1
+
       - name: Upload Artifacts
         uses: actions/upload-artifact@v2
         with:
