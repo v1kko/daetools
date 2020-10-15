@@ -350,8 +350,8 @@ export DAE_CROSS_COMPILER_PREFIX
 DAE_UMFPACK_INSTALL_DIR="${TRUNK}/umfpack/build"
 export DAE_UMFPACK_INSTALL_DIR
 
-vBOOST=1.70.0
-vBOOST_=1_70_0
+vBOOST=1.74.0
+vBOOST_=1_74_0
 vBONMIN=1.8.6
 vBONMIN_WIN="1.8.6-msvc++-2015"
 vLAPACK=3.4.1
@@ -638,8 +638,8 @@ compile_boost()
       echo "    : <toolset>gcc"                     >> ${BOOST_USER_CONFIG}
       echo "    ;"                                  >> ${BOOST_USER_CONFIG}
 
-      ./bjam --build-dir=./build --debug-building --buildid=${BOOST_BUILD_ID} --layout=system \
-             --with-date_time --with-system --with-filesystem --with-regex --with-serialization --with-thread --with-python \
+      ./tools/build/src/engine/bjam --build-dir=./build --debug-building --buildid=${BOOST_BUILD_ID} --layout=system \
+             --with-python \
              variant=release link=shared threading=multi runtime-link=shared ${BOOST_MACOSX_FLAGS}
 
       LIBBOOST_PYTHON_SUF="${PYTHON_MAJOR}${PYTHON_MINOR}"
@@ -650,14 +650,8 @@ compile_boost()
       fi  
       # Copy to daetools-package
       cp -fa stage/lib/libboost_python${LIBBOOST_PYTHON_SUF}-${BOOST_BUILD_ID}*${BOOST_PYTHON_BUILD_ID}  ${SOLIBS_DIR}
-      cp -fa stage/lib/libboost_system-${BOOST_BUILD_ID}*${BOOST_PYTHON_BUILD_ID}                        ${SOLIBS_DIR}
-      cp -fa stage/lib/libboost_thread-${BOOST_BUILD_ID}*${BOOST_PYTHON_BUILD_ID}                        ${SOLIBS_DIR}
-      cp -fa stage/lib/libboost_filesystem-${BOOST_BUILD_ID}*${BOOST_PYTHON_BUILD_ID}                    ${SOLIBS_DIR}
       # Copy to daetools-dev
       cp -fa stage/lib/libboost_python${LIBBOOST_PYTHON_SUF}-${BOOST_BUILD_ID}*${BOOST_PYTHON_BUILD_ID}  ${DAE_DEV_LIB_DIR}
-      cp -fa stage/lib/libboost_system-${BOOST_BUILD_ID}*${BOOST_PYTHON_BUILD_ID}                        ${DAE_DEV_LIB_DIR}
-      cp -fa stage/lib/libboost_thread-${BOOST_BUILD_ID}*${BOOST_PYTHON_BUILD_ID}                        ${DAE_DEV_LIB_DIR}
-      cp -fa stage/lib/libboost_filesystem-${BOOST_BUILD_ID}*${BOOST_PYTHON_BUILD_ID}                    ${DAE_DEV_LIB_DIR}
     fi
 
   fi

@@ -12,19 +12,53 @@ jobs:
         uses: actions/checkout@v2
         with:
           fetch-depth: 1
-      - name: Build
+
+      - name: Build lib and push
+        uses: docker/build-push-action@v2
+        with:
+          push: true
+          tags: v1kko/daetools-libs
+          file: dockerfiles/daetools_libs.docker
+
+  build_py38:
+    runs-on: ubuntu-20.04
+    needs: build
+
+    steps:
+        
+      - name: Build py38
         run: |
-          docker build -f ./dockerfiles/daetools_py38.docker -t daetools_py38 ./
+        docker build -f dockerfiles/daetools_python_bindings.docker \
+          --build-arg PY_VERSION=3.8 -t daetools_py38 .
+
       - name: Extract Artifacts
         run: |
           rm -rf daetools
           mkdir -p daetools
-          docker run -v `pwd`/daetools:/out daetools_py38 cp -r /daetools/trunk/daetools-package  /out
-      - name: Package Artifacts
+          docker run -v `pwd`/daetools-package:/out daetools_py38 rsync -a
+          /daetools/trunk/daetools-package/  /out/
+
+  build_py39:
+    runs-on: ubuntu-20.04
+    needs: build
+
+    steps:
+      - name: Build py38
         run: |
-          tar -czf daetools_py38.tar.gz daetools
+        docker build -f dockerfiles/daetools_python_bindings.docker \
+          --build-arg PY_VERSION=3.9 -t daetools_py39 .
+
+      - name: Extract Artifacts
+        run: |
+          rm -rf daetools
+          mkdir -p daetools
+          docker run -v `pwd`/daetools-package:/out daetools_py39 rsync -a
+          /daetools/trunk/daetools-package/  /out/
+  publish_artifact:
+    runs-on: ubuntu-20.04
+    needs: [build_py39, build_py38]
       - name: Upload Artifacts
         uses: actions/upload-artifact@v2
         with:
-          path: daetools_py38.tar.gz
-          name: daetools_py38.tar.gz
+          path: daetools-package
+          name: daetools-package

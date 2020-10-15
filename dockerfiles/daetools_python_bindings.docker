@@ -1,20 +1,19 @@
-FROM vikko00/daetools-dependencies
+FROM v1kko/daetools-libs
+ARG PY_VERSION
+RUN echo "python version: $PY_VERSION"
 
 RUN apt-get update > /dev/null
 RUN apt-get upgrade --yes > /dev/null
 
-RUN apt-get install --yes python3.8 python3-pip > /dev/null
-RUN ln -s /usr/bin/python3.8 /usr/bin/python
+RUN apt-get install --yes python${PY_VERSION}-dev
+RUN apt-get install --yes python3-distutils python3-setuptools 
 
-RUN mkdir -p daetools/trunk
-COPY ./ daetools/trunk
-
-RUN cd daetools/trunk && sh compile_libraries.sh idas > /dev/null 2> /dev/null
-
-#Dummy link opencs
-RUN cd daetools/trunk/OpenCS/ && mkdir -p build/include && cd build/include && ln -s ../../OpenCS
+RUN ln -sf /usr/bin/python$PY_VERSION /usr/bin/python
 
 env QT_SELECT=qt5
+
+RUN cd daetools/trunk && sh compile_libraries.sh --build boost > /dev/null 2> /dev/null
+
 RUN cd daetools/trunk && sh compile.sh units > /dev/null
 RUN cd daetools/trunk && sh compile.sh config > /dev/null
 RUN cd daetools/trunk && sh compile.sh core > /dev/null
@@ -24,4 +23,3 @@ RUN cd daetools/trunk && sh compile.sh data_reporting > /dev/null
 
 RUN cd daetools/trunk && sh compile.sh activity > /dev/null
 RUN cd daetools/trunk && sh compile.sh superlu > /dev/null
-

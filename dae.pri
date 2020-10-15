@@ -392,7 +392,8 @@ win64-g++-*::BOOST_LIBS                 = -L$${BOOSTLIBPATH} -l$${BOOST_SYSTEM_L
                                                              $${PTHREADS_LIB} \
                                                              $${RT}
 
-unix::BOOST_PYTHON_LIB_NAME      = boost_python$${BOOST_PYTHON_SUFFIX}
+unix::BOOSTLIBPATH               = $${BOOSTDIR}/stage/lib
+unix::BOOST_PYTHON_LIB_NAME      = boost_python$${BOOST_PYTHON_SUFFIX}-daetools
 unix::BOOST_SYSTEM_LIB_NAME      = boost_system
 unix::BOOST_THREAD_LIB_NAME      = boost_thread
 unix::BOOST_FILESYSTEM_LIB_NAME  = boost_filesystem
