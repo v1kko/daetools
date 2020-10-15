@@ -28,7 +28,7 @@ jobs:
         
       - name: Build py38
         run: |
-        docker build -f dockerfiles/daetools_python_bindings.docker \
+          docker build -f dockerfiles/daetools_python_bindings.docker \
           --build-arg PY_VERSION=3.8 -t daetools_py38 .
 
       - name: Extract Artifacts
@@ -45,7 +45,7 @@ jobs:
     steps:
       - name: Build py38
         run: |
-        docker build -f dockerfiles/daetools_python_bindings.docker \
+          docker build -f dockerfiles/daetools_python_bindings.docker \
           --build-arg PY_VERSION=3.9 -t daetools_py39 .
 
       - name: Extract Artifacts
@@ -57,6 +57,7 @@ jobs:
   publish_artifact:
     runs-on: ubuntu-20.04
     needs: [build_py39, build_py38]
+    steps:
       - name: Upload Artifacts
         uses: actions/upload-artifact@v2
         with:
