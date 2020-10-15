@@ -1,4 +1,4 @@
-FROM v1kko/daetools-libs
+FROM ghrc.io/v1kko/daetools-libs
 ARG PY_VERSION
 RUN echo "python version: $PY_VERSION"
 
