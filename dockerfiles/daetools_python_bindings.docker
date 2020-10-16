@@ -14,7 +14,7 @@ env QT_SELECT=qt5
 
 RUN cd daetools/trunk && sh compile_libraries.sh --build boost > /dev/null 2> /dev/null
 
-RUN cd daetools/trunk && sh compile.sh coolprop > /dev/null
+RUN cd daetools/trunk && sh compile.sh cool_prop > /dev/null
 RUN cd daetools/trunk && sh compile.sh units > /dev/null
 RUN cd daetools/trunk && sh compile.sh config > /dev/null
 RUN cd daetools/trunk && sh compile.sh core > /dev/null
