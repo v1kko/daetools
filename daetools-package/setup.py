@@ -18,9 +18,6 @@ Installation instructions
 - GNU/Linux, macOS, Windows (.tar.gz):
   python setup.py install
 
-- Windows (.exe) [unused now]:
-  python setup.py bdist_wininst --user-access-control force --install-script daetools_win_install.py --title "DAE Tools 1.8.0" --bitmap wininst.bmp
-
 Create the source dist (.tar.gz):
   python setup.py sdist --formats=gztar
   
@@ -37,7 +34,6 @@ daetools_version = '1.9.1'
 python_major = str(sys.version_info[0])
 python_minor = str(sys.version_info[1])
 
-# System := {'Linux', 'Windows', 'Darwin'}
 daetools_system   = str(platform.system())
 
 # Machine := {'i386', ..., 'i686', 'x86_64'}
@@ -165,7 +161,7 @@ deal_II          = 'deal_II-daetools'
 sim_loader       = 'cdaeSimulationLoader-py{0}{1}'.format(python_major, python_minor)
 fmu_so           = 'cdaeFMU_CS-py{0}{1}'.format(python_major, python_minor)
 mingw_dlls   = ['libgcc', 'libstdc++', 'libquadmath', 'libwinpthread', 'libgfortran', 'libssp']
-mac_gcc_libs = [] #['libgcc', 'libstdc++', 'libquadmath', 'libgfortran', 'libgomp']
+mac_gcc_libs = [] 
 shared_libs  = []
 
 if platform.system() == 'Linux':
@@ -330,6 +326,7 @@ setup(name = 'daetools',
                       'Programming Language :: Python :: 3.5',
                       'Programming Language :: Python :: 3.6',
                       'Programming Language :: Python :: 3.7'
+                      'Programming Language :: Python :: 3.8'
                      ],
         keywords = 'modeling simulation optimization sensitivity_analysis parameter_estimation',
         

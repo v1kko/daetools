@@ -10,6 +10,7 @@ RUN ln -s /usr/bin/python3.8 /usr/bin/python
 RUN mkdir -p daetools/trunk
 COPY ./ daetools/trunk
 
+RUN cd daetools/trunk && sh compile_libraries.sh coolprop > /dev/null 2> /dev/null
 RUN cd daetools/trunk && sh compile_libraries.sh idas > /dev/null 2> /dev/null
 RUN cd daetools/trunk && sh compile_libraries.sh --configure boost > /dev/null 2> /dev/null
 

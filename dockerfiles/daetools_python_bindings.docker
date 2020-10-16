@@ -5,8 +5,8 @@ RUN echo "python version: $PY_VERSION"
 RUN apt-get update > /dev/null
 RUN apt-get upgrade --yes > /dev/null
 
-RUN apt-get install --yes python${PY_VERSION}-dev
-RUN apt-get install --yes python3-distutils python3-setuptools 
+RUN apt-get install --yes python${PY_VERSION}-dev > /dev/null 2> /dev/null
+RUN apt-get install --yes python3-distutils python3-setuptools > /dev/null 2> /dev/null 
 
 RUN ln -sf /usr/bin/python$PY_VERSION /usr/bin/python
 
@@ -14,6 +14,7 @@ env QT_SELECT=qt5
 
 RUN cd daetools/trunk && sh compile_libraries.sh --build boost > /dev/null 2> /dev/null
 
+RUN cd daetools/trunk && sh compile.sh coolprop > /dev/null
 RUN cd daetools/trunk && sh compile.sh units > /dev/null
 RUN cd daetools/trunk && sh compile.sh config > /dev/null
 RUN cd daetools/trunk && sh compile.sh core > /dev/null
@@ -23,3 +24,4 @@ RUN cd daetools/trunk && sh compile.sh data_reporting > /dev/null
 
 RUN cd daetools/trunk && sh compile.sh activity > /dev/null
 RUN cd daetools/trunk && sh compile.sh superlu > /dev/null
+

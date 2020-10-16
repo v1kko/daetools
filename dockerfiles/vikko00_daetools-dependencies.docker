@@ -19,7 +19,6 @@ RUN wget http://nl.archive.ubuntu.com/ubuntu/pool/universe/g/gcc-6/libgfortran3_
 RUN apt-get install --yes libboost-system-dev \
  libboost-filesystem-dev \
  libboost-thread-dev \
- libboost-python-dev \
  liblapack-dev \
  libblas-dev \
  libsuperlu-dev > /dev/null
