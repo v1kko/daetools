@@ -32,7 +32,7 @@ jobs:
 
       - name: Extract Artifacts
         run: |
-          docker run -v `pwd`/daetools-package:/out daetools_py38 rsync -a
+          docker run -v `pwd`/daetools-package:/out daetools_py38 rsync -a \
           /daetools/trunk/daetools-package/  /out/
 
       - name: Build py39
@@ -42,7 +42,7 @@ jobs:
 
       - name: Extract Artifacts
         run: |
-          docker run -v `pwd`/daetools-package:/out daetools_py39 rsync -a
+          docker run -v `pwd`/daetools-package:/out daetools_py39 rsync -a \
           /daetools/trunk/daetools-package/  /out/
 
       - name: Upload Artifacts
