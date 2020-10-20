@@ -13,15 +13,16 @@ jobs:
         with:
           fetch-depth: 1
 
-      - name: Login to GitHub Container Registry
-        uses: docker/login-action@v1
-        with:
-          registry: ghcr.io
-          username: ${{ github.repository_owner }}
-          password: ${{ secrets.CR_PAT }}
+#- name: Login to GitHub Container Registry
+#        uses: docker/login-action@v1
+#        with:
+#          registry: ghcr.io
+#          username: ${{ github.repository_owner }}
+#          password: ${{ secrets.CR_PAT }}
 
-      - name: Build lib and push
+      - name: Build lib
         run: |
+          docker build -f ./dockerfiles/daetools-dependencies.docker -t daetools-dependencies .
           docker build -f ./dockerfiles/daetools-libs.docker -t daetools-libs .
           #docker push ghcr.io/v1kko/daetools-libs
 

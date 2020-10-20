@@ -1,4 +1,4 @@
-FROM vikko00/daetools-dependencies
+FROM daetools-dependencies
 
 RUN apt-get update > /dev/null
 RUN apt-get upgrade --yes > /dev/null
