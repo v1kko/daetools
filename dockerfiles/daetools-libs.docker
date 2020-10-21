@@ -4,17 +4,17 @@ RUN apt-get update > /dev/null
 RUN apt-get upgrade --yes > /dev/null
 RUN apt-get install --yes rsync > /dev/null
 
-RUN apt-get install --yes python3.8 > /dev/null
+RUN apt-get install --yes python3.8 python3-distutils > /dev/null
 RUN ln -s /usr/bin/python3.8 /usr/bin/python
 
 RUN mkdir -p daetools/trunk
 COPY ./ daetools/trunk
 
-RUN cd daetools/trunk && sh compile_libraries.sh coolprop > /dev/null 2> /dev/null
+RUN cd daetools/trunk && sh compile_libraries.sh coolprop
 RUN cd daetools/trunk && sh compile_libraries.sh idas > /dev/null 2> /dev/null
 RUN cd daetools/trunk && sh compile_libraries.sh --configure boost > /dev/null 2> /dev/null
 
 #Dummy link opencs
 RUN cd daetools/trunk/OpenCS/ && mkdir -p build/include && cd build/include && ln -s ../../OpenCS
 
-RUN apt-get remove --yes --purge python3.8 && apt-get autoremove --yes > /dev/null
+RUN apt-get remove --yes --purge python3.8 python3-distutils && apt-get autoremove --yes > /dev/null
