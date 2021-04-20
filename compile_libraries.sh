@@ -175,11 +175,11 @@ if [[ "${PLATFORM}" == *"MSYS_"* ]]; then
   fi
 fi
 
-if [ ${PLATFORM} = "Darwin" ]; then
+#if [ ${PLATFORM} = "Darwin" ]; then
   args=
-else
-  args=`getopt -a -o "h" -l "help,with-python-binary:,with-python-version:,cross-compile-python-root:,configure,build,clean:,host:" -n "compile_libraries" -- $*`
-fi
+#else
+#args=`getopt -a -o "h" -l "help,with-python-binary:,with-python-version:,cross-compile-python-root:,configure,build,clean:,host:" -n "compile_libraries" -- $*`
+#fi
 # daetools specific compiler flags
 DAE_COMPILER_FLAGS="-fPIC"
 BOOST_MACOSX_FLAGS=

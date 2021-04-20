@@ -17,6 +17,8 @@ DAE_TOOLS_BUILD = 1
 # DAE Tools version (major, minor, build)
 VERSION = $${DAE_TOOLS_MAJOR}.$${DAE_TOOLS_MINOR}.$${DAE_TOOLS_BUILD}
 
+
+QMAKE_CXXFLAGS = $$(CXXFLAGS)
 QMAKE_CXXFLAGS += -DDAE_MAJOR=$${DAE_TOOLS_MAJOR}
 QMAKE_CXXFLAGS += -DDAE_MINOR=$${DAE_TOOLS_MINOR}
 QMAKE_CXXFLAGS += -DDAE_BUILD=$${DAE_TOOLS_BUILD}
@@ -29,8 +31,9 @@ win32::CONFIG += skip_target_version_ext
 
 # Build only for x86_64 for MAC OS-X
 macx-g++::CONFIG    += x86_64
-macx-g++::QMAKE_CC   = /usr/local/bin/gcc
-macx-g++::QMAKE_CXX  = /usr/local/bin/g++
+QMAKE_CC   = $$(CC)
+QMAKE_CXX  = $$(CXX)
+QMAKE_LINK = $$(CXX)
 
 win32-msvc2015::STATIC_LIB_EXT  = lib
 win32-g++-*::STATIC_LIB_EXT     = a
@@ -215,8 +218,6 @@ CONFIG += rtti
 #QMAKE_CXXFLAGS += -g
 
 # c++11
-unix::QMAKE_CXXFLAGS  += -std=c++11
-unix::QMAKE_LFLAGS    += -std=c++11
 win32::QMAKE_CXXFLAGS += /std:c++14
 win32::QMAKE_LFLAGS   +=
 
@@ -355,7 +356,7 @@ BOOST_PYTHON_SUFFIX = $${PYTHON_MAJOR}$${PYTHON_MINOR}
 BOOSTDIR = ../boost
 
 win32-msvc2015::BOOSTLIBPATH              = $${BOOSTDIR}/stage/lib
-win32-msvc2015::BOOST_PYTHON_LIB_NAME     = boost_python$${BOOST_PYTHON_SUFFIX}-daetools
+win32-msvc2015::BOOST_PYTHON_LIB_NAME     = boost_python$${BOOST_PYTHON_SUFFIX}
 win32-msvc2015::BOOST_SYSTEM_LIB_NAME     = boost_system-daetools
 win32-msvc2015::BOOST_THREAD_LIB_NAME     = boost_thread-daetools
 win32-msvc2015::BOOST_FILESYSTEM_LIB_NAME = boost_filesystem-daetools
@@ -365,7 +366,7 @@ win32-msvc2015::BOOST_LIBS                = $${BOOST_SYSTEM_LIB_NAME}.lib \
                                             $${BOOST_FILESYSTEM_LIB_NAME}.lib
 
 win32-g++-*::BOOSTLIBPATH               = $${BOOSTDIR}/stage/lib
-win32-g++-*::BOOST_PYTHON_LIB_NAME      = boost_python$${BOOST_PYTHON_SUFFIX}-daetools
+win32-g++-*::BOOST_PYTHON_LIB_NAME      = boost_python$${BOOST_PYTHON_SUFFIX}
 win32-g++-*::BOOST_SYSTEM_LIB_NAME      = boost_system-daetools
 win32-g++-*::BOOST_THREAD_LIB_NAME      = boost_thread_win32-daetools
 win32-g++-*::BOOST_FILESYSTEM_LIB_NAME  = boost_filesystem-daetools
@@ -379,7 +380,7 @@ win32-g++-*::BOOST_LIBS                 = -L$${BOOSTLIBPATH} -l$${BOOST_SYSTEM_L
                                                              $${RT}
 
 win64-g++-*::BOOSTLIBPATH               = $${BOOSTDIR}/stage/lib
-win64-g++-*::BOOST_PYTHON_LIB_NAME      = boost_python$${BOOST_PYTHON_SUFFIX}-daetools
+win64-g++-*::BOOST_PYTHON_LIB_NAME      = boost_python$${BOOST_PYTHON_SUFFIX}
 win64-g++-*::BOOST_SYSTEM_LIB_NAME      = boost_system-daetools
 win64-g++-*::BOOST_THREAD_LIB_NAME      = boost_thread_win32-daetools
 win64-g++-*::BOOST_FILESYSTEM_LIB_NAME  = boost_filesystem-daetools
@@ -392,8 +393,8 @@ win64-g++-*::BOOST_LIBS                 = -L$${BOOSTLIBPATH} -l$${BOOST_SYSTEM_L
                                                              $${PTHREADS_LIB} \
                                                              $${RT}
 
-unix::BOOSTLIBPATH               = $${BOOSTDIR}/stage/lib
-unix::BOOST_PYTHON_LIB_NAME      = boost_python$${BOOST_PYTHON_SUFFIX}-daetools
+unix::BOOSTLIBPATH               = ${LD_RUN_PATH}
+unix::BOOST_PYTHON_LIB_NAME      = boost_python$${BOOST_PYTHON_SUFFIX}
 unix::BOOST_SYSTEM_LIB_NAME      = boost_system
 unix::BOOST_THREAD_LIB_NAME      = boost_thread
 unix::BOOST_FILESYSTEM_LIB_NAME  = boost_filesystem
@@ -689,8 +690,6 @@ contains(ARCH, x86) {
     linux-g++::INTEL_MKL_LIBS = -L$${MKLPATH}/lib/ia32 -L$${MKLPATH}/mkl/lib/ia32 \
                                 -lmkl_rt \
                                 -ldl -lpthread -lm
-    linux-g++::QMAKE_LFLAGS   += -m32
-    linux-g++::QMAKE_CXXFLAGS += -m32
 
     macx-g++::INTEL_MKL_LIBS = -L$${MKLPATH}/lib/ia32 -L$${MKLPATH}/mkl/lib/ia32 \
                                -lmkl_rt \
@@ -706,8 +705,6 @@ contains(ARCH, x86_64) {
     linux-g++::INTEL_MKL_LIBS = -L$${MKLPATH}/mkl/lib/intel64 \
                                 -lmkl_rt \
                                 -ldl -lpthread -lm
-    linux-g++::QMAKE_LFLAGS   += -m64
-    linux-g++::QMAKE_CXXFLAGS += -m64
 
     macx-g++::INTEL_MKL_LIBS = -L$${MKLPATH}/lib/intel64 -L$${MKLPATH}/mkl/lib/intel64 \
                                -lmkl_rt \
@@ -746,14 +743,13 @@ win64-g++-*::DEALII_LIBS    = -ldeal_II-daetools
 #####################################################################################
 #                        CoolProp thermo package
 #####################################################################################
-COOLPROP_DIR      = ../coolprop
+COOLPROP_DIR      = ${SP_DIR}/CoolProp
 
-COOLPROP_INCLUDE = $${COOLPROP_DIR}/include \
-                   $${COOLPROP_DIR}/externals/cppformat
-COOLPROP_LIB_DIR = $${COOLPROP_DIR}/build/static_library
+COOLPROP_INCLUDE = $${COOLPROP_DIR}/include 
+COOLPROP_LIB_DIR = $${COOLPROP_DIR}
 
 win32-msvc2015::COOLPROP_LIBS = $${COOLPROP_LIB_DIR}/Windows/CoolProp.lib
-unix::COOLPROP_LIBS           = -L$${COOLPROP_LIB_DIR}/Linux   -lCoolProp
+unix::COOLPROP_LIBS           = -L$${COOLPROP_LIB_DIR} -l:$$system(ls $${COOLPROP_LIB_DIR} | grep CoolProp.*.so)
 win32-g++-*::COOLPROP_LIBS    = -L$${COOLPROP_LIB_DIR}/Windows -lCoolProp
 win64-g++-*::COOLPROP_LIBS    = -L$${COOLPROP_LIB_DIR}/Windows -lCoolProp
 macx-g++::COOLPROP_LIBS       = -L$${COOLPROP_LIB_DIR}/Darwin  -lCoolProp

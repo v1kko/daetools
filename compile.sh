@@ -1,6 +1,7 @@
 #!/bin/bash
 
 set -e
+set -x
 
 usage()
 {
@@ -234,7 +235,7 @@ if [ ${PLATFORM} = "Darwin" ]; then
   
 elif [ ${PLATFORM} = "Linux" ]; then
   Ncpu=`cat /proc/cpuinfo | grep processor | wc -l`
-  QMAKE="/usr/bin/qmake"
+  QMAKE="qmake"
   QMAKE_SPEC=linux-g++
   
 elif [ ${PLATFORM} = "Windows" ]; then
@@ -261,11 +262,11 @@ if [ ! -d release ]; then
     mkdir release
 fi
 
-if [ ${PLATFORM} = "Darwin" ]; then
-  args= 
-else
-  args=`getopt -a -o "h" -l "help,with-python-binary:,with-python-version:,host:" -n "compile" -- $*`
-fi
+#if [ ${PLATFORM} = "Darwin" ]; then
+args= 
+#else
+#  args=`getopt -a -o "h" -l "help,with-python-binary:,with-python-version:,host:" -n "compile" -- $*`
+#fi
 
 # Process options
 for i; do
