@@ -1337,9 +1337,6 @@ configure_idas()
   echo ""
   echo "[*] Setting-up idas..."
   echo ""
-  if [ ! -e idas-${vIDAS}.tar.gz ]; then
-    $WGET ${IDAS_HTTP}/idas-${vIDAS}.tar.gz
-  fi
   tar -xzf idas-${vIDAS}.tar.gz
   mv idas-${vIDAS} idas
   cd idas

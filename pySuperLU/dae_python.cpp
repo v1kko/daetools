@@ -123,7 +123,7 @@ BOOST_PYTHON_MODULE(pySuperLU_MT)
 #ifdef daeSuperLU
     enum_<rowperm_t>("rowperm_t")
         .value("NOROWPERM",	NOROWPERM)
-        .value("LargeDiag",	LargeDiag)
+        .value("LargeDiag",	LargeDiag_AWPM)
         .value("MY_PERMR",	MY_PERMR)
         .export_values()
     ;

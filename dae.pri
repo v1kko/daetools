@@ -432,7 +432,7 @@ win64-g++-*::BLAS_LAPACK_LIBS    =  $${BLAS_LAPACK_LIBDIR}/liblapack.a $${BLAS_L
 # 1. OpenBLAS dynamically linked:
 #linux-g++::BLAS_LAPACK_LIBS = -L$${BLAS_LAPACK_LIBDIR} -lopenblas_daetools -lm
 # 2. daetools compiled reference BLAS and Lapack statically linked:
-linux-g++::BLAS_LAPACK_LIBS = -llapack -lblas -l:libgfortran.so.3 -lm
+linux-g++::BLAS_LAPACK_LIBS = -llapack -lblas -l:libgfortran.so.5 -lm
 macx-g++::BLAS_LAPACK_LIBS  = $${BLAS_LAPACK_LIBDIR}/liblapack.a $${BLAS_LAPACK_LIBDIR}/libblas.a -lgfortran -lm
 
 
@@ -749,7 +749,7 @@ COOLPROP_INCLUDE = $${COOLPROP_DIR}/include
 COOLPROP_LIB_DIR = $${COOLPROP_DIR}
 
 win32-msvc2015::COOLPROP_LIBS = $${COOLPROP_LIB_DIR}/Windows/CoolProp.lib
-unix::COOLPROP_LIBS           = -L$${COOLPROP_LIB_DIR} -l:$$system(ls $${COOLPROP_LIB_DIR} | grep CoolProp.*.so)
+unix::COOLPROP_LIBS           = $${COOLPROP_LIB_DIR}/$$system(ls $${COOLPROP_LIB_DIR} | grep CoolProp.*.so)
 win32-g++-*::COOLPROP_LIBS    = -L$${COOLPROP_LIB_DIR}/Windows -lCoolProp
 win64-g++-*::COOLPROP_LIBS    = -L$${COOLPROP_LIB_DIR}/Windows -lCoolProp
 macx-g++::COOLPROP_LIBS       = -L$${COOLPROP_LIB_DIR}/Darwin  -lCoolProp
