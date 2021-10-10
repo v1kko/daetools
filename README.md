@@ -1,4 +1,20 @@
-                              DAE Tools Project
+Install
+-------
+Daetools is now available through a custom channel `conda.lipsum.eu` (self maintained)
+```
+conda create -n daetools -c https://conda.lipsum.eu -c conda-forge daetools python=3.9
+```       
+
+Before running the tutorials the plotter must be started separately due to a bug:
+```
+daeplotter &
+python tutorialX.py
+```
+
+Old Readme
+----------
+                             
+                             DAE Tools Project
 
 Copyright: Dragan Nikolic, 2010
 E-mail: dnikolic@daetools.com
