@@ -182,6 +182,8 @@ crossCompile{
 
 }
 
+linux-g++::SHARED_LIB_POSTFIX       = $${PYTHON_MAJOR}$${PYTHON_MINOR}
+
 # RPATH for python extension modules
 # win32-msvc2015::SOLIBS_RPATH =
 # win32-g++-*::SOLIBS_RPATH    = -Wl,-rpath,\'\$$ORIGIN/../../solibs/$${DAE_SYSTEM}_$${DAE_MACHINE}\'
@@ -885,28 +887,28 @@ win64-g++-*::DAE_CAPE_THERMO_PACKAGE_LIB     =
 win64-g++-*::DAE_COOLPROP_THERMO_PACKAGE_LIB = -lcdaeCoolPropThermoPackage
 win64-g++-*::DAE_EVALUATOR_OPENCL_LIB        = -lcdaeEvaluator_OpenCL
 
-unix::DAE_CONFIG_LIB                    = -lcdaeConfig
-unix::DAE_CORE_LIB                      = -lcdaeCore $${OPENMP_LIB}
-unix::DAE_DATAREPORTING_LIB             = -lcdaeDataReporting
-unix::DAE_ACTIVITY_LIB                  = -lcdaeActivity
-unix::DAE_IDAS_SOLVER_LIB               = -lcdaeIDAS_DAESolver
-unix::DAE_UNITS_LIB                     = -lcdaeUnits
-unix::DAE_SUPERLU_SOLVER_LIB            = -lcdaeSuperLU_LASolver
-unix::DAE_SUPERLU_MT_SOLVER_LIB         = -lcdaeSuperLU_MT_LASolver
-unix::DAE_SUPERLU_CUDA_SOLVER_LIB       = -lcdaeSuperLU_CUDA_LASolver
-unix::DAE_BONMIN_SOLVER_LIB             = -lcdaeBONMIN_MINLPSolver
-unix::DAE_IPOPT_SOLVER_LIB              = -lcdaeIPOPT_NLPSolver
-unix::DAE_NLOPT_SOLVER_LIB              = -lcdaeNLOPT_NLPSolver
-unix::DAE_TRILINOS_SOLVER_LIB           = -lcdaeTrilinos_LASolver
-unix::DAE_INTEL_PARDISO_SOLVER_LIB      = -lcdaeIntelPardiso_LASolver
-unix::DAE_PARDISO_SOLVER_LIB            = -lcdaePardiso_LASolver
-unix::DAE_DEALII_SOLVER_LIB             = -lcdaeDealII_FESolver
+unix::DAE_CONFIG_LIB                    = -lcdaeConfig$${SHARED_LIB_POSTFIX}
+unix::DAE_CORE_LIB                      = -lcdaeCore$${SHARED_LIB_POSTFIX} $${OPENMP_LIB}
+unix::DAE_DATAREPORTING_LIB             = -lcdaeDataReporting$${SHARED_LIB_POSTFIX}
+unix::DAE_ACTIVITY_LIB                  = -lcdaeActivity$${SHARED_LIB_POSTFIX}
+unix::DAE_IDAS_SOLVER_LIB               = -lcdaeIDAS_DAESolver$${SHARED_LIB_POSTFIX}
+unix::DAE_UNITS_LIB                     = -lcdaeUnits$${SHARED_LIB_POSTFIX}
+unix::DAE_SUPERLU_SOLVER_LIB            = -lcdaeSuperLU_LASolver$${SHARED_LIB_POSTFIX}
+unix::DAE_SUPERLU_MT_SOLVER_LIB         = -lcdaeSuperLU_MT_LASolver$${SHARED_LIB_POSTFIX}
+unix::DAE_SUPERLU_CUDA_SOLVER_LIB       = -lcdaeSuperLU_CUDA_LASolver$${SHARED_LIB_POSTFIX}
+unix::DAE_BONMIN_SOLVER_LIB             = -lcdaeBONMIN_MINLPSolver$${SHARED_LIB_POSTFIX}
+unix::DAE_IPOPT_SOLVER_LIB              = -lcdaeIPOPT_NLPSolver$${SHARED_LIB_POSTFIX}
+unix::DAE_NLOPT_SOLVER_LIB              = -lcdaeNLOPT_NLPSolver$${SHARED_LIB_POSTFIX}
+unix::DAE_TRILINOS_SOLVER_LIB           = -lcdaeTrilinos_LASolver$${SHARED_LIB_POSTFIX}
+unix::DAE_INTEL_PARDISO_SOLVER_LIB      = -lcdaeIntelPardiso_LASolver$${SHARED_LIB_POSTFIX}
+unix::DAE_PARDISO_SOLVER_LIB            = -lcdaePardiso_LASolver$${SHARED_LIB_POSTFIX}
+unix::DAE_DEALII_SOLVER_LIB             = -lcdaeDealII_FESolver$${SHARED_LIB_POSTFIX}
 unix::DAE_SIMULATION_LOADER_LIB         = -lcdaeSimulationLoader-py$${PYTHON_MAJOR}$${PYTHON_MINOR}
 unix::DAE_DAETOOLS_FMI_CS_LIB           = -lcdaeFMU_CS-py$${PYTHON_MAJOR}$${PYTHON_MINOR}
-unix::DAE_DAETOOLS_FMI_CS_WS_LIB        = -lcdaeFMU_CS_WS
+unix::DAE_DAETOOLS_FMI_CS_WS_LIB        = -lcdaeFMU_CS_WS$${SHARED_LIB_POSTFIX}
 unix::DAE_CAPE_THERMO_PACKAGE_LIB       =
-unix::DAE_COOLPROP_THERMO_PACKAGE_LIB   = -lcdaeCoolPropThermoPackage
-unix::DAE_EVALUATOR_OPENCL_LIB          = -lcdaeEvaluator_OpenCL
+unix::DAE_COOLPROP_THERMO_PACKAGE_LIB   = -lcdaeCoolPropThermoPackage$${SHARED_LIB_POSTFIX}
+unix::DAE_EVALUATOR_OPENCL_LIB          = -lcdaeEvaluator_OpenCL$${SHARED_LIB_POSTFIX}
 
 QMAKE_LIBDIR += $${DAE_DEST_DIR} $${BOOSTLIBPATH}
 

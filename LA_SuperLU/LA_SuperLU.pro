@@ -62,7 +62,7 @@ HEADERS +=  stdafx.h \
 CONFIG(SuperLU, SuperLU|SuperLU_MT|SuperLU_CUDA):message(SuperLU) {
 
 QMAKE_CXXFLAGS += -DdaeSuperLU
-TARGET = cdaeSuperLU_LASolver
+TARGET = cdaeSuperLU_LASolver$${SHARED_LIB_POSTFIX}
 INCLUDEPATH += $${SUPERLU_INCLUDE}
 LIBS += $${DAE_CONFIG_LIB} \
         $${SUPERLU_LIBS} \

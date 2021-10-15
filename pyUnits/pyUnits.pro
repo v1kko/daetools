@@ -31,7 +31,7 @@ HEADERS += stdafx.h \
 #                Install files
 #######################################################
 #QMAKE_POST_LINK = $${COPY_FILE} \
-#                  $${DAE_DEST_DIR}/$${SHARED_LIB_PREFIX}$${TARGET}$${SHARED_LIB_POSTFIX}.$${SHARED_LIB_EXT} \
+#                  $${DAE_DEST_DIR}/$${SHARED_LIB_PREFIX}$${TARGET}.$${SHARED_LIB_EXT} \
 #                  $${PYDAE_DIR}/$${TARGET}.$${PYTHON_EXTENSION_MODULE_EXT}
 
 include(../dae_install_py_module.pri)

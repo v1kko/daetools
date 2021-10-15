@@ -1,7 +1,7 @@
 include(../dae.pri)
 QT -= core \
     gui
-TARGET = cdaeIDAS_DAESolver
+TARGET = cdaeIDAS_DAESolver$${SHARED_LIB_POSTFIX}
 TEMPLATE = lib
 CONFIG += shared plugin
 

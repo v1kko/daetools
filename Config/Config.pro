@@ -2,7 +2,7 @@ include(../dae.pri)
 QT -= core
 QT -= gui
 
-TARGET = cdaeConfig #-py$${PYTHON_MAJOR}$${PYTHON_MINOR}
+TARGET = cdaeConfig$${SHARED_LIB_POSTFIX}
 TEMPLATE = lib
 CONFIG += shared plugin
 

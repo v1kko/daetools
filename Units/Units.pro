@@ -1,7 +1,7 @@
 include(../dae.pri)
 QT -= core gui
 
-TARGET = cdaeUnits
+TARGET = cdaeUnits$${SHARED_LIB_POSTFIX}
 TEMPLATE = lib
 CONFIG += shared plugin
 
@@ -30,7 +30,7 @@ HEADERS += units.h \
 #                Install files
 #######################################################
 QMAKE_POST_LINK = $${COPY_FILE} \
-                  $${DAE_DEST_DIR}/$${SHARED_LIB_PREFIX}$${TARGET}$${SHARED_LIB_POSTFIX}.$${SHARED_LIB_EXT} \
-                  $${SOLIBS_DIR}/$${SHARED_LIB_PREFIX}$${TARGET}$${SHARED_LIB_POSTFIX}.$${SHARED_LIB_EXT}
+                  $${DAE_DEST_DIR}/$${SHARED_LIB_PREFIX}$${TARGET}.$${SHARED_LIB_EXT} \
+                  $${SOLIBS_DIR}/$${SHARED_LIB_PREFIX}$${TARGET}.$${SHARED_LIB_EXT}
 
 include(../dae_install_library.pri)

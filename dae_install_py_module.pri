@@ -15,7 +15,7 @@
 #  - pyModule.dll into pyModule.pyd
 #  - libpyModule.dylib into pyModule.so
 QMAKE_POST_LINK = $${MOVE_FILE} \
-                  $${DAE_DEST_DIR}/$${SHARED_LIB_PREFIX}$${TARGET}$${SHARED_LIB_POSTFIX}.$${SHARED_LIB_EXT} \
+                  $${DAE_DEST_DIR}/$${SHARED_LIB_PREFIX}$${TARGET}.$${SHARED_LIB_EXT} \
                   $${DAE_DEST_DIR}/$${TARGET}.$${PYTHON_EXTENSION_MODULE_EXT}
 
 #dae_rename_module.commands = $${MOVE_FILE} \

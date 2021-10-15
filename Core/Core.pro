@@ -1,6 +1,6 @@
 include(../dae.pri)
 QT -= core gui
-TARGET = cdaeCore
+TARGET = cdaeCore$${SHARED_LIB_POSTFIX}
 TEMPLATE = lib
 CONFIG += shared plugin
 
