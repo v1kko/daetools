@@ -1,6 +1,5 @@
 include(../dae.pri)
-QT -= core
-QT -= gui
+QT -= core gui
 
 TARGET = cdaeConfig$${SHARED_LIB_POSTFIX}
 TEMPLATE = lib
@@ -22,9 +21,9 @@ HEADERS += ../config.h \
 #######################################################
 #                Install files
 #######################################################
-#QMAKE_POST_LINK = $${COPY_FILE} \
-#                  $${DAE_DEST_DIR}/$${SHARED_LIB_PREFIX}$${TARGET}$${SHARED_LIB_POSTFIX}.$${SHARED_LIB_EXT} \
-#                  $${SOLIBS_DIR}/$${SHARED_LIB_PREFIX}$${TARGET}$${SHARED_LIB_POSTFIX}.$${SHARED_LIB_EXT}
+QMAKE_POST_LINK = $${COPY_FILE} \
+                  $${DAE_DEST_DIR}/$${SHARED_LIB_PREFIX}$${TARGET}.$${SHARED_LIB_EXT} \
+                  $${SOLIBS_DIR}/$${SHARED_LIB_PREFIX}$${TARGET}.$${SHARED_LIB_EXT}
 
 # Install headers and libs into daetools-dev
 include(../dae_install_library.pri)
