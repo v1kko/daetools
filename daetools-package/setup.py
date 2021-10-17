@@ -28,7 +28,7 @@ Create wheel:
 import os, sys, platform, shutil, pprint, re
 from setuptools import setup, Distribution
 
-daetools_version = '1.9.1'
+daetools_version = '1.9.2'
 
 # Python version
 python_major = str(sys.version_info[0])
