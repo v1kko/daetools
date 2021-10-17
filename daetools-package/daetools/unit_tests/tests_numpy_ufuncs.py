@@ -138,16 +138,10 @@ class modTutorial(daeModel):
             eq.Residual = self.t9() + Sum(Abs(du))
 
         eq = self.CreateEquation("test_10")
-        if self.useNumpy:
-            eq.Residual = self.t10() + numpy.sum(numpy.ceil(u))
-        else:
-            eq.Residual = self.t10() + Sum(Ceil(du))
+        eq.Residual = self.t10() + Sum(Ceil(du))
 
         eq = self.CreateEquation("test_11")
-        if self.useNumpy:
-            eq.Residual = self.t11() + numpy.sum(numpy.floor(u))
-        else:
-            eq.Residual = self.t11() + Sum(Floor(du))
+        eq.Residual = self.t11() + Sum(Floor(du))
 
         eq = self.CreateEquation("test_12")
         if self.useNumpy:

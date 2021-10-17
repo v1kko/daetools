@@ -12,6 +12,7 @@ You should have received a copy of the GNU General Public License along with the
 DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 ********************************************************************************"""
 import os
+import sys
 daetools_root = os.path.abspath('../../')
 if not daetools_root in sys.path:
     sys.path.insert(0, daetools_root)
