@@ -1,3 +1,5 @@
+#include <cfloat>
+
 #ifndef DAE_SOLVERS_STD_AFX_H
 #define DAE_SOLVERS_STD_AFX_H
 
