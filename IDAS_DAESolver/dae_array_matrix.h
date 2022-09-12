@@ -1,6 +1,7 @@
 #ifndef DAE_ARRAY_MATRIX_H
 #define DAE_ARRAY_MATRIX_H
 
+#include <cfloat>
 #include <stdio.h>
 #include <typeinfo>
 #include <iostream>
