@@ -1,3 +1,9 @@
+OLD VERSION
+-----------
+
+The maintainer started publishing updates again, please use daetools from daetools.sourceforge.io!
+
+
 Install
 -------
 Daetools is now available through a custom channel `conda.lipsum.eu` (self maintained)
